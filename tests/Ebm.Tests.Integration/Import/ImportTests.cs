@@ -15,8 +15,8 @@ namespace Ebm.Tests.Integration.Import;
 public sealed class ImportTests : IAsyncLifetime
 {
     private const string Countries = "code,name\nITA,Italy\n";
-    private const string PlayerHeader =
-        "id,firstName,lastName,dateOfBirth,nationality,heightCm,weightKg,position,shooting,insideScoring,passing,ballHandling,rebounding,defense,athleticism,basketballIq\n";
+    private static readonly string PlayerHeader =
+        $"id,firstName,lastName,dateOfBirth,nationality,heightCm,weightKg,position,{string.Join(',', PlayerCatalog.Attributes.Select(PlayerCatalog.FieldName))}\n";
 
     private static readonly string DataFolder = typeof(ImportTests).Assembly
         .GetCustomAttributes<AssemblyMetadataAttribute>().Single(a => a.Key == "RepositoryDataPath").Value!;
@@ -59,7 +59,10 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.True(report.Committed);
         var player = Assert.Single(await ListAsync<Player, PlayerId>());
         Assert.Equal(Position.SmallForward, player.Position);
-        Assert.Equal(65, player.Attributes.Shooting);
+        Assert.Equal(65, player.Attributes.CloseShot);
+        Assert.Equal(205, player.WingspanCm);
+        Assert.Equal(PositionSet.Of(Position.ShootingGuard), player.SecondaryPositions);
+        Assert.Equal(PlayerTendencies.Suggest(player.Attributes).ToDictionary(), player.Tendencies.ToDictionary());
     }
 
     [Fact]
@@ -82,7 +85,7 @@ public sealed class ImportTests : IAsyncLifetime
         await Importer.ImportAsync([SampleFile], new ImportOptions());
         var player = (await ListAsync<Player, PlayerId>())[0];
         var file = await WriteAsync("players.csv", PlayerHeader +
-            $"{player.Id},{player.FirstName},{player.LastName},{player.DateOfBirth:yyyy-MM-dd},ITA,{player.HeightCm},{player.WeightKg},C,99,99,99,99,99,99,99,99\n");
+            $"{player.Id},{player.FirstName},{player.LastName},{player.DateOfBirth:yyyy-MM-dd},ITA,{player.HeightCm},{player.WeightKg},C{R(99)}\n");
 
         var report = await Importer.ImportAsync([file], new ImportOptions(ImportMode.AddOrUpdate));
 
@@ -90,7 +93,7 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.True(report.Committed);
         var updated = await _db.ReadAsync(s => s.Repo<Player, PlayerId>().FindAsync(player.Id));
         Assert.Equal(Position.Center, updated!.Position);
-        Assert.Equal(99, updated.Attributes.BasketballIq);
+        Assert.Equal(99, updated.Attributes.WorkRate);
         Assert.Equal(24, await CountAsync<Player, PlayerId>());
     }
 
@@ -99,10 +102,10 @@ public sealed class ImportTests : IAsyncLifetime
     {
         var countries = await WriteAsync("countries.csv", Countries);
         var players = await WriteAsync("players.csv", PlayerHeader +
-            ",Valid,Player,2000-01-01,ITA,200,95,SF,50,50,50,50,50,50,50,50\n" +
-            ",Too,Tall,2000-01-01,ITA,300,95,SF,50,50,50,50,50,50,50,50\n" +
-            ",Bad,Date,01/02/2000,ITA,200,95,SF,50,50,50,50,50,50,50,50\n" +
-            ",No,Country,2000-01-01,XYZ,200,95,Wing,50,50,50,50,50,50,50,500\n" +
+            $",Valid,Player,2000-01-01,ITA,200,95,SF{R()}\n" +
+            $",Too,Tall,2000-01-01,ITA,300,95,SF{R()}\n" +
+            $",Bad,Date,01/02/2000,ITA,200,95,SF{R()}\n" +
+            $",No,Country,2000-01-01,XYZ,200,95,Wing{R()[..^2]}500\n" +
             ",Short,Row,2000-01-01\n");
 
         var report = await Importer.ImportAsync([countries, players], new ImportOptions());
@@ -115,10 +118,32 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Contains(rejected[1].Messages, m => m.Contains("'dateOfBirth' must be a date in the form YYYY-MM-DD", StringComparison.Ordinal));
         Assert.Contains(rejected[2].Messages, m => m.Contains("unknown country code 'XYZ'", StringComparison.Ordinal));
         Assert.Contains(rejected[2].Messages, m => m.Contains("'position' must be one of", StringComparison.Ordinal));
-        Assert.Contains("'basketballIq' must be between 1 and 100 (got '500').", rejected[2].Messages);
-        Assert.Contains(rejected[3].Messages, m => m.Contains("header has 16 columns", StringComparison.Ordinal));
+        Assert.Contains("'workRate' must be between 1 and 100 (got '500').", rejected[2].Messages);
+        Assert.Contains(rejected[3].Messages, m => m.Contains("header has 35 columns", StringComparison.Ordinal));
         Assert.Equal("players.csv:3", rejected[0].Location);
         Assert.Single(await ListAsync<Player, PlayerId>());
+    }
+
+    [Fact]
+    public async Task Optional_player_fields_are_read_and_validated()
+    {
+        var countries = await WriteAsync("countries.csv", Countries);
+        var header = PlayerHeader.TrimEnd('\n') + ",wingspanCm,secondaryPositions,potential,fitness,injuryStatus,injuryReturnDate,postUp\n";
+        var players = await WriteAsync("players.csv", header +
+            $",Full,Profile,2000-01-01,ITA,205,100,PF{R()},214,C|SF,88,77,Injured,2026-12-01,12\n" +
+            $",Bad,Values,2000-01-01,ITA,205,100,PF{R()},250,PF;XX,88,77,Injured,,0\n");
+
+        var report = await Importer.ImportAsync([countries, players], new ImportOptions());
+
+        var player = Assert.Single(await ListAsync<Player, PlayerId>());
+        Assert.Equal((214, 88, 77), (player.WingspanCm, player.Potential, player.Fitness));
+        Assert.Equal([Position.SmallForward, Position.Center], player.SecondaryPositions.Positions);
+        Assert.Equal((InjuryStatus.Injured, (DateOnly?)new DateOnly(2026, 12, 1)), (player.InjuryStatus, player.InjuryReturnDate));
+        Assert.Equal(12, player.Tendencies.PostUp);
+        Assert.Equal(50, player.Tendencies.Isolation); // not given: suggested from the attributes
+        var messages = report.Records.Single(r => r.Outcome == ImportOutcome.Rejected).Messages;
+        Assert.Contains(messages, m => m.Contains("'secondaryPositions' contains 'XX'", StringComparison.Ordinal));
+        Assert.Contains("'postUp' must be between 1 and 100 (got '0').", messages);
     }
 
     [Fact]
@@ -128,9 +153,9 @@ public sealed class ImportTests : IAsyncLifetime
         var existing = (await ListAsync<Player, PlayerId>())[0];
         var existingClub = (await ListAsync<Club, ClubId>())[0];
         var players = await WriteAsync("players.csv", PlayerHeader +
-            $",{existing.FirstName.ToUpperInvariant()},{existing.LastName},{existing.DateOfBirth:yyyy-MM-dd},ITA,200,95,SF,50,50,50,50,50,50,50,50\n" +
-            ",New,Twin,2001-01-01,ITA,200,95,SF,50,50,50,50,50,50,50,50\n" +
-            ",New,Twin,2001-01-01,ITA,201,96,PF,50,50,50,50,50,50,50,50\n");
+            $",{existing.FirstName.ToUpperInvariant()},{existing.LastName},{existing.DateOfBirth:yyyy-MM-dd},ITA,200,95,SF{R()}\n" +
+            $",New,Twin,2001-01-01,ITA,200,95,SF{R()}\n" +
+            $",New,Twin,2001-01-01,ITA,201,96,PF{R()}\n");
         var clubs = await WriteAsync("clubs.csv", $"name,shortName,country\n{existingClub.Name},XXX,ITA\n");
 
         var report = await Importer.ImportAsync([players, clubs], new ImportOptions(ImportMode.AddOrUpdate));
@@ -260,6 +285,9 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Contains("closed", rejected[1].Messages[0], StringComparison.Ordinal);
         Assert.Contains("seasonId", rejected[2].Messages[0], StringComparison.Ordinal);
     }
+
+    /// <summary>Every attribute column of a player row at <paramref name="value"/>, each preceded by a comma.</summary>
+    private static string R(int value = 50) => string.Concat(PlayerCatalog.Attributes.Select(_ => $",{value}"));
 
     private async Task<string> WriteAsync(string name, string content)
     {

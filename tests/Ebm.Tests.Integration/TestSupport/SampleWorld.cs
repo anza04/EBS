@@ -69,7 +69,7 @@ public sealed class SampleWorld
         Arena = new Arena(ArenaId.New(), "Mock Arena", "Milan", Italy.Id, 12_000);
         HomeClub = new Club(ClubId.New(), "Mock Milano", "MIL", Italy.Id, Arena.Id, 1936);
         AwayClub = new Club(ClubId.New(), "Mock Bologna", "BOL", Italy.Id);
-        Player = new Player(PlayerId.New(), "Mario", "Mock", new DateOnly(2000, 5, 10), Italy.Id, 201, 98, Position.SmallForward, new PlayerAttributes(70, 60, 55, 65, 50, 62, 75, 68));
+        Player = new Player(PlayerId.New(), "Mario", "Mock", new DateOnly(2000, 5, 10), Italy.Id, 201, 98, Position.SmallForward, PlayerAttributes.Uniform(65).With(PlayerAttribute.ThreePoint, 72));
         Coach = new StaffMember(StaffMemberId.New(), "Carlo", "Mock", new DateOnly(1970, 1, 15), Italy.Id, StaffRole.HeadCoach);
         PlayerSpell = new PlayerClubHistoryEntry(PlayerClubHistoryEntryId.New(), Player.Id, HomeClub.Id, SeasonStart);
         Fixture = new Fixture(FixtureId.New(), Championship.Id, Season.Id, 1, SeasonStart.AddDays(30), HomeClub.Id, AwayClub.Id);

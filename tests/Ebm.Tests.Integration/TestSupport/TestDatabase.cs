@@ -14,11 +14,17 @@ public sealed class TestDatabase : IAsyncDisposable
     private readonly TempDataRoot _root = new();
     private readonly ServiceProvider _provider;
 
-    private TestDatabase()
+    private TestDatabase(TimeProvider? time)
     {
         DatabasePath = Path.Combine(_root.Path, "databases", "test.db");
         ImportLogDirectory = Path.Combine(_root.Path, "logs", "imports");
-        _provider = new ServiceCollection()
+        var services = new ServiceCollection();
+        if (time is not null)
+        {
+            services.AddSingleton(time);
+        }
+
+        _provider = services
             .AddLogging()
             .AddGameServices()
             .AddPersistence(DatabasePath)
@@ -40,9 +46,10 @@ public sealed class TestDatabase : IAsyncDisposable
 
     public DatabaseInitializer Initializer => _provider.GetRequiredService<DatabaseInitializer>();
 
-    public static async Task<TestDatabase> CreateAsync()
+    /// <param name="time">Clock for the game services; the system clock when omitted.</param>
+    public static async Task<TestDatabase> CreateAsync(TimeProvider? time = null)
     {
-        var database = new TestDatabase();
+        var database = new TestDatabase(time);
         database.SchemaVersion = await database.Initializer.InitializeAsync();
         return database;
     }

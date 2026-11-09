@@ -1,3 +1,4 @@
+using Ebm.Domain.Players;
 using Ebm.Services.Import;
 
 namespace Ebm.DataImport.Sources;
@@ -27,9 +28,9 @@ internal static class ImportFields
         new(
             ImportRecordKind.Player,
             "players",
-            ["firstName", "lastName", "dateOfBirth", "nationality", "heightCm", "weightKg", "position",
-             "shooting", "insideScoring", "passing", "ballHandling", "rebounding", "defense", "athleticism", "basketballIq"],
-            ["id"]),
+            ["firstName", "lastName", "dateOfBirth", "nationality", "heightCm", "weightKg", "position", .. PlayerCatalog.Attributes.Select(PlayerCatalog.FieldName)],
+            ["id", "wingspanCm", "secondaryPositions", "experience", "reputation", "potential", "fitness", "morale", "injuryStatus", "injuryReturnDate",
+             .. PlayerCatalog.Tendencies.Select(PlayerCatalog.FieldName)]),
         new(ImportRecordKind.Contract, "contracts", ["clubId", "playerId", "startDate", "endDate", "annualSalary"], ["id"]),
     ];
 

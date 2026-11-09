@@ -1,12 +1,13 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109124652_FixtureStages`** (Step 04).
+Schema version: **`20261109125814_PlayerModel`** (Step 05).
 
 | Migration | Step | Change |
 |---|---|---|
 | `20261109114155_InitialSchema` | 02 | 17 tables |
 | `20261109124652_FixtureStages` | 04 | `Fixtures.Stage` and `Fixtures.GameNumber` with defaults, so existing fixtures stay regular-season games. Add-column only, so the upgrade runs in one transaction (a check constraint would force a table rebuild on SQLite; the domain enforces the range) |
+| `20261109125814_PlayerModel` | 05 | Players: profile and condition columns (with defaults). `PlayerAttributes` replaced by the 27-attribute table (old table renamed, new one created and filled from the old ratings, old one dropped) and new `PlayerTendencies`. Hand-written `Up` so nothing is rebuilt and the upgrade stays in one transaction; mapping in `docs/PLAYER_MODEL.md` §7 |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -17,7 +18,7 @@ enforces the same rules again so data written by other routes (imports, editors,
 | Rule | Detail |
 |---|---|
 | Primary keys | Every table has an `Id` column holding a GUID stored as TEXT. In code each entity has its own ID type (`PlayerId`, `ClubId`, …), so IDs of different entities cannot be mixed up. IDs are assigned by the application, never by the database (`CreateVersion7` for new records; imported records keep the ID from the data file). This makes player and club IDs permanent across databases, imports and save games. |
-| Foreign keys | Always enforced (`Foreign Keys=True` in the connection string). Every foreign key is `ON DELETE RESTRICT`, so a record that anything refers to cannot be deleted and history is never removed as a side effect. The only cascade: `PlayerAttributes` is deleted with its player (a player can only be deleted if nothing else refers to it). |
+| Foreign keys | Always enforced (`Foreign Keys=True` in the connection string). Every foreign key is `ON DELETE RESTRICT`, so a record that anything refers to cannot be deleted and history is never removed as a side effect. The only cascades: `PlayerAttributes` and `PlayerTendencies` are deleted with their player (a player can only be deleted if nothing else refers to it). |
 | Enums | Stored as their name (TEXT), e.g. `SmallForward`, so the data stays readable and stable when enum members are reordered. |
 | Dates | In-game dates are `DateOnly`, stored as TEXT `yyyy-MM-dd`. |
 | Money | Whole euros, `INTEGER` (`long`). No floating point. |
@@ -31,7 +32,7 @@ Country ─┬─< League ─< Division ─< Competition (DivisionId, optional)
          ├─< Competition (CountryId, optional; null = international)
          ├─< Arena ─< Club (HomeArenaId, optional)
          ├─< Club
-         ├─< Player (NationalityId) ── PlayerAttributes (1:1)
+         ├─< Player (NationalityId) ── PlayerAttributes, PlayerTendencies (1:1)
          └─< StaffMember (NationalityId)
 
 Season ─┬─< CompetitionParticipant >─ Competition, Club      (club entered in a competition for a season)
@@ -124,14 +125,31 @@ A club's entry in a competition for a season. This is how a club takes part in s
 | HeightCm | int | 150–250 |
 | WeightKg | int | 50–200 |
 | Position | text | `PointGuard`, `ShootingGuard`, `SmallForward`, `PowerForward`, `Center` |
+| WingspanCm | int | Height ± 30 (domain) |
+| SecondaryPositions | text(100) | Comma-separated position names, default `''`; never the primary position (domain) |
+| Experience / Reputation / Potential | int | 1–100 (domain); defaults 1 / 1 / 50 |
+| Fitness / Morale | int | 0–100 / 1–100 (domain); defaults 100 / 50 |
+| InjuryStatus | text(16) | `Healthy` (default), `DayToDay`, `Injured` |
+| InjuryReturnDate | date? | Required when `Injured`, null when `Healthy` (domain) |
+
+Step 05 columns are checked by the domain only: adding check constraints to an existing table would force a rebuild
+(decision 21).
 
 ### PlayerAttributes
-1:1 with Players, always loaded with the player (EF owned type). This is the initial attribute set; Step 05 finalises the catalogue.
+1:1 with Players, always loaded with the player (EF owned type). Catalogue and meaning: `docs/PLAYER_MODEL.md`.
 
 | Column | Type | Rules |
 |---|---|---|
 | PlayerId | id | PK and FK Players (cascade) |
-| Shooting, InsideScoring, Passing, BallHandling, Rebounding, Defense, Athleticism, BasketballIq | int | Each 1–100 |
+| CloseShot, MidRange, ThreePoint, FreeThrow, Layup, Dunk, PostMoves, Passing, CourtVision, BallHandling, DecisionMaking, PerimeterDefense, InteriorDefense, Steal, Block, DefensivePositioning, OffensiveRebound, DefensiveRebound, Speed, Strength, Vertical, Agility, Stamina, Concentration, Leadership, Consistency, WorkRate | int | Each 1–100 (`CK_PlayerAttributes_Range`) |
+
+### PlayerTendencies
+1:1 with Players, always loaded with the player (EF owned type).
+
+| Column | Type | Rules |
+|---|---|---|
+| PlayerId | id | PK and FK Players (cascade) |
+| ThreePointShot, MidRangeShot, DriveToBasket, PostUp, PassFirst, Isolation, CrashOffensiveGlass, DefensiveGambling | int | Each 1–100 (`CK_PlayerTendencies_Range`) |
 
 ### Staff
 | Column | Type | Rules |

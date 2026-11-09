@@ -3,6 +3,33 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.5.0] — 2026-11-09 — Step 05: Player model and attributes
+
+### Added
+- Complete player model: wingspan, secondary positions, experience, reputation, potential, fitness, morale and
+  injury status (with expected return date), all validated by the domain. Current club and contract come from the
+  club history and contracts. Documented in `docs/PLAYER_MODEL.md`.
+- 27 attributes in 7 categories (shooting, finishing, playmaking, defense, rebounding, physical, mental), 1–100,
+  with a catalogue (`PlayerAttribute`, `PlayerCatalog`) for groups, display names and import field names.
+- Player tendencies (8 values, `PlayerTendencies`), suggested from the attributes when not given.
+- Rating system (`Ebm.Domain.Players.Ratings`): category ratings, position ratings (weighted attributes plus a
+  reach adjustment from height and wingspan), familiarity, overall (primary position), potential rating, best
+  position and position suitability (Ideal/Good/Adequate/Poor). Tunable through `RatingModel`.
+- `IPlayerProfileService`: player profile (age, club, contract, evaluation) and multi-player comparison.
+- Screens: *Player profile* and *Compare players* tabs; the player editor edits every field, attributes by category
+  and tendencies (*Suggest from attributes*).
+- Import of the new player fields (optional ones default; missing tendencies are suggested).
+- Tests: model rules, catalogue, tendencies, rating formulas, persistence of every field, Step 04 database upgrade
+  (attribute mapping), profile and comparison, import of optional fields, player page, off-screen render of the
+  three player screens (set `EBM_SCREENSHOT_DIR` to save PNGs).
+
+### Changed
+- `PlayerAttributes`: the 8 initial ratings are replaced by the 27 attributes. Migration `PlayerModel` converts
+  existing players (mapping in `docs/PLAYER_MODEL.md` §7) and adds the new columns and the `PlayerTendencies` table
+  in one transaction.
+- Player import columns: the 27 attribute columns replace `shooting`, `insideScoring`, …; sample dataset and
+  templates converted. `PlayerDraft` carries every player field.
+
 ## [0.4.0] — 2026-11-09 — Step 04: Countries, leagues and competitions
 
 ### Added

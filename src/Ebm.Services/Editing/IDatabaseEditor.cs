@@ -39,7 +39,7 @@ public sealed record EditorSnapshot(
     IReadOnlyList<Player> Players,
     IReadOnlyList<Contract> PlayerContracts);
 
-/// <summary>Values of a player to create (<paramref name="Id"/> is <c>null</c>) or update.</summary>
+/// <summary>Values of a player to create (<paramref name="Id"/> is <c>null</c>) or update. Ranges: docs/PLAYER_MODEL.md.</summary>
 public sealed record PlayerDraft(
     PlayerId? Id,
     string FirstName,
@@ -48,8 +48,18 @@ public sealed record PlayerDraft(
     CountryId NationalityId,
     int HeightCm,
     int WeightKg,
+    int WingspanCm,
     Position Position,
-    PlayerAttributes Attributes);
+    PositionSet SecondaryPositions,
+    int Experience,
+    int Reputation,
+    int Potential,
+    int Fitness,
+    int Morale,
+    InjuryStatus InjuryStatus,
+    DateOnly? InjuryReturnDate,
+    PlayerAttributes Attributes,
+    PlayerTendencies Tendencies);
 
 /// <summary>Values of a club to create (<paramref name="Id"/> is <c>null</c>) or update.</summary>
 public sealed record ClubDraft(ClubId? Id, string Name, string ShortName, CountryId CountryId, ArenaId? HomeArenaId, int? FoundedYear);

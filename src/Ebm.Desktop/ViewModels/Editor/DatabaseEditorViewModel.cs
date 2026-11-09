@@ -1,11 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.Startup;
+using Ebm.Desktop.ViewModels.Players;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
+using Ebm.Services.Players;
 
 namespace Ebm.Desktop.ViewModels.Editor;
 
-/// <summary>The database editor: one page per record type plus the import page, all fed from one snapshot.</summary>
+/// <summary>The database editor: one page per record type, the import page and the player profile and comparison screens.</summary>
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
     private readonly IDatabaseEditor _editor;
@@ -13,7 +15,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     [ObservableProperty]
     private string _counts = string.Empty;
 
-    public DatabaseEditorViewModel(IDatabaseEditor editor, IDataImportService importer, IFilePicker filePicker)
+    public DatabaseEditorViewModel(IDatabaseEditor editor, IDataImportService importer, IFilePicker filePicker, IPlayerProfileService profiles)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -25,6 +27,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Leagues = new LeaguesPageViewModel(editor, Lookups, ReloadAsync);
         Competitions = new CompetitionsPageViewModel(editor, Lookups, ReloadAsync);
         Import = new ImportViewModel(importer, filePicker, ReloadAsync);
+        Profile = new PlayerProfileViewModel(profiles, Lookups);
+        Comparison = new PlayerComparisonViewModel(profiles, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -41,6 +45,10 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public ImportViewModel Import { get; }
 
+    public PlayerProfileViewModel Profile { get; }
+
+    public PlayerComparisonViewModel Comparison { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -51,6 +59,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Contracts.Refresh(snapshot);
         Leagues.Refresh(snapshot);
         Competitions.Refresh(snapshot);
+        await Profile.RefreshAsync();
+        await Comparison.RefreshAsync();
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";
     }

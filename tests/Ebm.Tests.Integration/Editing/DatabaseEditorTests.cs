@@ -6,6 +6,7 @@ using Ebm.Domain.Players;
 using Ebm.Services.Data;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
+using Ebm.Services.Players;
 using Ebm.Tests.Integration.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +38,34 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
         Assert.Equal(210, player.HeightCm);
         Assert.Equal(90, player.Attributes.Passing);
         Assert.Equal(2, snapshot.Players.Count);
+        Assert.Equal((215, 40, 30, 75), (player.WingspanCm, player.Experience, player.Reputation, player.Potential));
+        Assert.Equal([Position.PowerForward], player.SecondaryPositions.Positions);
+        Assert.Equal((90, 55, InjuryStatus.Healthy), (player.Fitness, player.Morale, player.InjuryStatus));
+        Assert.Equal(90, player.Tendencies.PostUp);
+    }
+
+    [Fact]
+    public async Task Player_page_saves_profile_condition_and_tendencies()
+    {
+        var page = new PlayersPageViewModel(Editor, new EditorLookups(), () => Task.CompletedTask);
+        page.StartNewCommand.Execute(null);
+        (page.FirstName, page.LastName, page.DateOfBirth, page.NationalityId) = ("Page", "Player", new DateTime(2002, 2, 2), _world.Italy.Id);
+        (page.HeightCm, page.WeightKg, page.Position) = ("198", "92", Position.SmallForward);
+        page.SecondaryPositions[(int)Position.ShootingGuard].IsChecked = true;
+        page.SecondaryPositions[(int)Position.SmallForward].IsChecked = true; // the primary position is ignored
+        (page.InjuryStatus, page.InjuryReturnDate) = (InjuryStatus.Injured, new DateTime(2026, 12, 24));
+        page.Ratings[(int)PlayerAttribute.ThreePoint].Value = "88";
+        page.SuggestTendenciesCommand.Execute(null);
+
+        await page.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(page.IsError, page.Message);
+        var player = (await Editor.LoadAsync()).Players.Single(p => p.LastName == "Player");
+        Assert.Equal(198, player.WingspanCm); // blank wingspan defaults to the height
+        Assert.Equal([Position.ShootingGuard], player.SecondaryPositions.Positions);
+        Assert.Equal(new DateOnly(2026, 12, 24), player.InjuryReturnDate);
+        Assert.Equal(PlayerTendencies.Suggest(player.Attributes).ToDictionary(), player.Tendencies.ToDictionary());
+        Assert.Equal(79, player.Tendencies.ThreePointShot); // (3·88 + 50) / 4 = 78.5
     }
 
     [Fact]
@@ -88,7 +117,7 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
     public async Task Editor_view_model_shows_imported_data_and_reports_errors_on_the_page()
     {
         var picker = new FixedFilePicker([Path.Combine(_db.TempFolder, "missing.json")]);
-        var vm = new DatabaseEditorViewModel(Editor, _db.Services.GetRequiredService<IDataImportService>(), picker);
+        var vm = new DatabaseEditorViewModel(Editor, _db.Services.GetRequiredService<IDataImportService>(), picker, _db.Services.GetRequiredService<IPlayerProfileService>());
         await vm.ReloadAsync();
 
         Assert.Single(vm.Players.Items);
@@ -112,8 +141,8 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
     }
 
     private PlayerDraft Draft(PlayerId? id, string first, string last, DateOnly? dob = null, int height = 200, int rating = 60) =>
-        new(id, first, last, dob ?? new DateOnly(2001, 1, 1), _world.Italy.Id, height, 95, Position.Center,
-            new PlayerAttributes(rating, rating, rating, rating, rating, rating, rating, rating));
+        new(id, first, last, dob ?? new DateOnly(2001, 1, 1), _world.Italy.Id, height, 95, height + 5, Position.Center, PositionSet.Of(Position.PowerForward),
+            40, 30, 75, 90, 55, InjuryStatus.Healthy, null, PlayerAttributes.Uniform(rating), PlayerTendencies.Suggest(PlayerAttributes.Uniform(rating)));
 
     private sealed class FixedFilePicker(IReadOnlyList<string> files) : IFilePicker
     {

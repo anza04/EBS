@@ -115,21 +115,13 @@ internal sealed class ImportSession
                 target.CompetitionId == p.CompetitionId && target.SeasonId == p.SeasonId && target.ClubId == p.ClubId,
                 "The competition, season and club of an entry cannot be changed. Import it as a new entry."),
             identifyByKey: true),
-        ImportRecordKind.Player => Apply(record, _players, (f, id) =>
-            new Player(
-                id,
-                f.Text("firstName"),
-                f.Text("lastName"),
-                f.Date("dateOfBirth"),
-                CountryRef(f, "nationality"),
-                f.Int("heightCm"),
-                f.Int("weightKg"),
-                f.Enum("position", PositionAliases),
-                Attributes(f)),
-            (target, p) =>
+        ImportRecordKind.Player => Apply(record, _players, BuildPlayer, (target, p) =>
             {
                 target.UpdateDetails(p.FirstName, p.LastName, p.DateOfBirth, p.NationalityId, p.HeightCm, p.WeightKg, p.Position);
                 target.UpdateAttributes(p.Attributes);
+                target.UpdateProfile(p.WingspanCm, p.SecondaryPositions, p.Experience, p.Reputation, p.Potential);
+                target.UpdateCondition(p.Fitness, p.Morale, p.InjuryStatus, p.InjuryReturnDate);
+                target.UpdateTendencies(p.Tendencies);
             }),
         ImportRecordKind.Contract => Apply(record, _contracts, (f, id) =>
             Contract.ForPlayer(id, Ref(f, "clubId", _clubs, "club"), Ref(f, "playerId", _players, "player"), f.Date("startDate"), f.Date("endDate"), f.Long("annualSalary")),
@@ -162,26 +154,65 @@ internal sealed class ImportSession
         }
     }
 
-    private static PlayerAttributes Attributes(FieldReader f) => new(
-        Rating(f, "shooting"),
-        Rating(f, "insideScoring"),
-        Rating(f, "passing"),
-        Rating(f, "ballHandling"),
-        Rating(f, "rebounding"),
-        Rating(f, "defense"),
-        Rating(f, "athleticism"),
-        Rating(f, "basketballIq"));
-
-    // Ratings are range-checked here, so every invalid rating is reported together with the other field errors.
-    private static int Rating(FieldReader f, string name)
+    // Optional fields take the defaults of a new player (docs/IMPORT_FORMATS.md); missing tendencies are suggested from the attributes.
+    private Player BuildPlayer(FieldReader f, PlayerId id)
     {
-        var value = f.OptionalInt(name, required: true);
-        if (value is < PlayerAttributes.MinRating or > PlayerAttributes.MaxRating)
+        // Every field is read before the domain rules run, so all field errors of the record are reported together.
+        var (firstName, lastName, dateOfBirth, nationality) = (f.Text("firstName"), f.Text("lastName"), f.Date("dateOfBirth"), CountryRef(f, "nationality"));
+        var (heightCm, weightKg, position) = (f.Int("heightCm"), f.Int("weightKg"), f.Enum("position", PositionAliases));
+        var attributes = PlayerCatalog.Attributes.ToDictionary(a => a, a => Rating(f, PlayerCatalog.FieldName(a), required: true) ?? Player.MinRating);
+        var wingspanCm = f.OptionalInt("wingspanCm") ?? heightCm;
+        var secondary = SecondaryPositions(f);
+        var experience = Rating(f, "experience") ?? Player.DefaultExperience;
+        var reputation = Rating(f, "reputation") ?? Player.DefaultReputation;
+        var potential = Rating(f, "potential") ?? Player.DefaultPotential;
+        var fitness = f.OptionalInt("fitness") ?? Player.DefaultFitness;
+        var morale = Rating(f, "morale") ?? Player.DefaultMorale;
+        var injury = f.Optional("injuryStatus") is null ? InjuryStatus.Healthy : f.Enum<InjuryStatus>("injuryStatus");
+        var injuryReturnDate = f.OptionalDate("injuryReturnDate");
+        var tendencies = PlayerCatalog.Tendencies.ToDictionary(t => t, t => Rating(f, PlayerCatalog.FieldName(t)));
+
+        var player = new Player(id, firstName, lastName, dateOfBirth, nationality, heightCm, weightKg, position, new PlayerAttributes(attributes));
+        player.UpdateProfile(wingspanCm, secondary, experience, reputation, potential);
+        player.UpdateCondition(fitness, morale, injury, injuryReturnDate);
+        player.UpdateTendencies(new PlayerTendencies(tendencies.ToDictionary(t => t.Key, t => t.Value ?? PlayerTendencies.Suggest(player.Attributes, t.Key))));
+        return player;
+    }
+
+    /// <summary>Position codes or names separated by spaces, commas, semicolons or '|' (<c>SG|SF</c>).</summary>
+    private static PositionSet SecondaryPositions(FieldReader f)
+    {
+        var positions = new List<Position>();
+        foreach (var part in (f.Optional("secondaryPositions") ?? string.Empty).Split([' ', ',', ';', '|'], StringSplitOptions.RemoveEmptyEntries))
         {
-            f.Errors.Add($"'{name}' must be between {PlayerAttributes.MinRating} and {PlayerAttributes.MaxRating} (got '{value}').");
+            if (PositionAliases.TryGetValue(part, out var alias))
+            {
+                positions.Add(alias);
+            }
+            else if (!part.All(char.IsAsciiDigit) && Enum.TryParse<Position>(part, ignoreCase: true, out var position) && Enum.IsDefined(position))
+            {
+                positions.Add(position);
+            }
+            else
+            {
+                f.Errors.Add($"'secondaryPositions' contains '{part}', which is not a position ({string.Join(", ", PositionAliases.Keys)} or a position name).");
+            }
         }
 
-        return value ?? PlayerAttributes.MinRating;
+        return PositionSet.Of(positions);
+    }
+
+    // Ratings are range-checked here, so every invalid rating is reported together with the other field errors.
+    private static int? Rating(FieldReader f, string name, bool required = false)
+    {
+        var value = f.OptionalInt(name, required);
+        if (value is < Player.MinRating or > Player.MaxRating)
+        {
+            f.Errors.Add($"'{name}' must be between {Player.MinRating} and {Player.MaxRating} (got '{value}').");
+            return Player.MinRating;
+        }
+
+        return value ?? (required ? Player.MinRating : null);
     }
 
     private static string RawLabel(RawRecord record)

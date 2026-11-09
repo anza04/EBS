@@ -42,16 +42,25 @@ internal sealed class DatabaseEditor : IDatabaseEditor
         ArgumentNullException.ThrowIfNull(draft);
         return SaveAsync<Player, PlayerId>(
             draft.Id,
-            () => new Player(PlayerId.New(), draft.FirstName, draft.LastName, draft.DateOfBirth, draft.NationalityId, draft.HeightCm, draft.WeightKg, draft.Position, draft.Attributes),
+            () => Apply(new Player(PlayerId.New(), draft.FirstName, draft.LastName, draft.DateOfBirth, draft.NationalityId, draft.HeightCm, draft.WeightKg, draft.Position, draft.Attributes), draft),
             p =>
             {
                 p.UpdateDetails(draft.FirstName, draft.LastName, draft.DateOfBirth, draft.NationalityId, draft.HeightCm, draft.WeightKg, draft.Position);
                 p.UpdateAttributes(draft.Attributes);
+                Apply(p, draft);
             },
             DuplicateKeys.Of,
             p => $"A player named {p.FullName} born {p.DateOfBirth.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)} already exists.",
             "player",
             cancellationToken);
+    }
+
+    private static Player Apply(Player player, PlayerDraft draft)
+    {
+        player.UpdateProfile(draft.WingspanCm, draft.SecondaryPositions, draft.Experience, draft.Reputation, draft.Potential);
+        player.UpdateCondition(draft.Fitness, draft.Morale, draft.InjuryStatus, draft.InjuryReturnDate);
+        player.UpdateTendencies(draft.Tendencies);
+        return player;
     }
 
     public Task<ClubId> SaveClubAsync(ClubDraft draft, CancellationToken cancellationToken = default)

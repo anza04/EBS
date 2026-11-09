@@ -387,18 +387,43 @@ namespace Ebm.Persistence.Migrations
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Experience")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Fitness")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
+
                     b.Property<int>("HeightCm")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly?>("InjuryReturnDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("InjuryStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Healthy");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Morale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(50);
 
                     b.Property<Guid>("NationalityId")
                         .HasColumnType("TEXT");
@@ -408,8 +433,30 @@ namespace Ebm.Persistence.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Potential")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(50);
+
+                    b.Property<int>("Reputation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("SecondaryPositions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("");
+
                     b.Property<int>("WeightKg")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("WingspanCm")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.HasKey("Id");
 
@@ -798,35 +845,132 @@ namespace Ebm.Persistence.Migrations
                             b1.Property<Guid>("PlayerId")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Athleticism")
+                            b1.Property<int>("Agility")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<int>("BallHandling")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("BasketballIq")
+                            b1.Property<int>("Block")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("Defense")
+                            b1.Property<int>("CloseShot")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("InsideScoring")
+                            b1.Property<int>("Concentration")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Consistency")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("CourtVision")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DecisionMaking")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DefensivePositioning")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DefensiveRebound")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Dunk")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("FreeThrow")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("InteriorDefense")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Layup")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Leadership")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("MidRange")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("OffensiveRebound")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<int>("Passing")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("Rebounding")
+                            b1.Property<int>("PerimeterDefense")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("Shooting")
+                            b1.Property<int>("PostMoves")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Speed")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Stamina")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Steal")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Strength")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("ThreePoint")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Vertical")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("WorkRate")
                                 .HasColumnType("INTEGER");
 
                             b1.HasKey("PlayerId");
 
                             b1.ToTable("PlayerAttributes", null, t =>
                                 {
-                                    t.HasCheckConstraint("CK_PlayerAttributes_Range", "Shooting BETWEEN 1 AND 100 AND InsideScoring BETWEEN 1 AND 100 AND Passing BETWEEN 1 AND 100 AND BallHandling BETWEEN 1 AND 100 AND Rebounding BETWEEN 1 AND 100 AND Defense BETWEEN 1 AND 100 AND Athleticism BETWEEN 1 AND 100 AND BasketballIq BETWEEN 1 AND 100");
+                                    t.HasCheckConstraint("CK_PlayerAttributes_Range", "CloseShot BETWEEN 1 AND 100 AND MidRange BETWEEN 1 AND 100 AND ThreePoint BETWEEN 1 AND 100 AND FreeThrow BETWEEN 1 AND 100 AND Layup BETWEEN 1 AND 100 AND Dunk BETWEEN 1 AND 100 AND PostMoves BETWEEN 1 AND 100 AND Passing BETWEEN 1 AND 100 AND CourtVision BETWEEN 1 AND 100 AND BallHandling BETWEEN 1 AND 100 AND DecisionMaking BETWEEN 1 AND 100 AND PerimeterDefense BETWEEN 1 AND 100 AND InteriorDefense BETWEEN 1 AND 100 AND Steal BETWEEN 1 AND 100 AND Block BETWEEN 1 AND 100 AND DefensivePositioning BETWEEN 1 AND 100 AND OffensiveRebound BETWEEN 1 AND 100 AND DefensiveRebound BETWEEN 1 AND 100 AND Speed BETWEEN 1 AND 100 AND Strength BETWEEN 1 AND 100 AND Vertical BETWEEN 1 AND 100 AND Agility BETWEEN 1 AND 100 AND Stamina BETWEEN 1 AND 100 AND Concentration BETWEEN 1 AND 100 AND Leadership BETWEEN 1 AND 100 AND Consistency BETWEEN 1 AND 100 AND WorkRate BETWEEN 1 AND 100");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerId");
+                        });
+
+                    b.OwnsOne("Ebm.Domain.Players.PlayerTendencies", "Tendencies", b1 =>
+                        {
+                            b1.Property<Guid>("PlayerId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("CrashOffensiveGlass")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DefensiveGambling")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DriveToBasket")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Isolation")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("MidRangeShot")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("PassFirst")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("PostUp")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("ThreePointShot")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("PlayerId");
+
+                            b1.ToTable("PlayerTendencies", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_PlayerTendencies_Range", "ThreePointShot BETWEEN 1 AND 100 AND MidRangeShot BETWEEN 1 AND 100 AND DriveToBasket BETWEEN 1 AND 100 AND PostUp BETWEEN 1 AND 100 AND PassFirst BETWEEN 1 AND 100 AND Isolation BETWEEN 1 AND 100 AND CrashOffensiveGlass BETWEEN 1 AND 100 AND DefensiveGambling BETWEEN 1 AND 100");
                                 });
 
                             b1.WithOwner()
@@ -834,6 +978,9 @@ namespace Ebm.Persistence.Migrations
                         });
 
                     b.Navigation("Attributes")
+                        .IsRequired();
+
+                    b.Navigation("Tendencies")
                         .IsRequired();
                 });
 

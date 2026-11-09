@@ -23,8 +23,8 @@ public sealed class RepositoryTests
         Assert.Equal("Mario Mock", player.FullName);
         Assert.Equal(world.Italy.Id, player.NationalityId);
         Assert.Equal(Position.SmallForward, player.Position);
-        Assert.Equal(70, player.Attributes.Shooting);
-        Assert.Equal(68, player.Attributes.BasketballIq);
+        Assert.Equal(72, player.Attributes.ThreePoint);
+        Assert.Equal(65, player.Attributes.WorkRate);
     }
 
     [Fact]

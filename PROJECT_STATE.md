@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 04 — Countries, leagues and competitions (2026-11-09)
+STEP 05 — Player model and attributes (2026-11-09)
 
 ## Next step
-STEP 05 — Player model and attributes
+STEP 06 — Club and roster management
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (228/228: 170 unit, 58 integration)
-- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, clubs, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService` (no game screens yet).
+- Tests: PASS (266/266: 198 unit, 68 integration)
+- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, player profile, player comparison, clubs, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -41,12 +41,13 @@ STEP 05 — Player model and attributes
 - [x] Database and entity model (Step 02)
 - [x] Data import and database editor (Step 03)
 - [x] Competition configuration, fixture generator, standings, playoffs, promotion/relegation (Step 04)
-- [ ] Player model and attributes (Step 05) … see docs/ROADMAP.md
+- [x] Player model: 27 attributes, tendencies, ratings, position suitability, profile and comparison screens (Step 05)
+- [ ] Club and roster management (Step 06) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261109124652_FixtureStages`
-- Latest migration: `20261109124652_FixtureStages` (adds `Fixtures.Stage`, `Fixtures.GameNumber`; 17 tables)
-- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
+- Current schema version: `20261109125814_PlayerModel`
+- Latest migration: `20261109125814_PlayerModel` (player profile/condition columns, 27-attribute `PlayerAttributes`, new `PlayerTendencies`; 18 tables)
+- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 24 players with full Step 05 profiles) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
 1. Layered architecture with inward-only dependencies (Domain ← Services ← Persistence/DataImport ← Hosting ← Desktop). Enforced by architecture tests.
@@ -69,18 +70,21 @@ STEP 05 — Player model and attributes
 18. The competition engine is pure, stateless domain code (`Ebm.Domain.Competitions.Rules` / `.Engine`); `ICompetitionService` orchestrates it over the repositories. Rules are validated by `CompetitionRules.Parse` on every save/import (unknown properties refused).
 19. Standings rankings are always calculated from match results; `LeagueStandings` stores the totals, updated by `RecordResultAsync`.
 20. Playoff fixtures are created on demand (`AdvanceAsync`), one game per series at a time, so no unneeded games exist. Fixtures carry `Stage` and `GameNumber`.
-21. Migrations must stay transactional on SQLite: prefer add-column changes; avoid operations that force a table rebuild (e.g. adding check constraints) on existing tables.
+21. Migrations must stay transactional on SQLite: prefer add-column changes; avoid operations that force a table rebuild (e.g. adding check constraints) on existing tables. To restructure a table, rename it, create the new one, copy with SQL and drop the old one (hand-written `Up`, as in `PlayerModel`).
+22. Player ratings are calculated, never stored: pure formulas in `Ebm.Domain.Players.Ratings` over `RatingModel.Default`. Overall = effective rating at the primary position; decisions should use category/position ratings and tendencies too (`PlayerEvaluation`).
+23. Attributes and tendencies are fixed catalogues (`PlayerAttribute`, `PlayerTendency` enums); their order is the storage order. Import field names are the camel-case enum names.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
-- The player attribute set is an initial one (8 ratings, 1–100). Step 05 finalises it.
+- Experience, reputation, potential, fitness, morale and injury are stored and edited but not yet changed by the game (Steps 12, 21, 22). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
+- Player import files in the old 8-rating format are no longer accepted.
 - Only league competitions can be scheduled; cups/knockout formats come in Step 17. No relegation playoffs, groups or reseeding (see `docs/COMPETITION_FORMATS.md` §2).
 - Season outcome (promoted/relegated) is calculated but not applied to next season's entries; Step 12 does that.
 - No UI for competitions yet (schedule, table, playoffs); Step 11 adds presentation.
 - Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7).
-- The editor screens were verified by the smoke-test launch and view-model tests; no interactive screenshot review has been done yet (Steps 03–04).
+- Player screens are verified by an off-screen render test (screenshots reviewed in Step 05); the other editor tabs only by the smoke-test launch and view-model tests.
 
 ## Current dependencies
 | Package | Version | Used by |
@@ -102,7 +106,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_04_LOG.md
+logs/STEP_05_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

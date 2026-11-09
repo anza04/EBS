@@ -20,27 +20,43 @@ internal sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(x => x.FirstName).HasMaxLength(Player.NameMaxLength).IsRequired();
         builder.Property(x => x.LastName).HasMaxLength(Player.NameMaxLength).IsRequired();
         builder.Property(x => x.Position).HasConversion<string>().HasMaxLength(32);
+        builder.Property(x => x.SecondaryPositions)
+            .HasConversion(v => v.ToString(), v => PositionSet.Parse(v))
+            .HasMaxLength(100)
+            .HasDefaultValue(PositionSet.Empty);
+        builder.Property(x => x.InjuryStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(InjuryStatus.Healthy);
+
+        // Columns added in Step 05 have defaults so existing rows upgrade in place; their ranges are checked by the
+        // domain only (a check constraint would force SQLite to rebuild the Players table, decision 21).
+        builder.Property(x => x.WingspanCm).HasDefaultValue(0);
+        builder.Property(x => x.Experience).HasDefaultValue(Player.DefaultExperience);
+        builder.Property(x => x.Reputation).HasDefaultValue(Player.DefaultReputation);
+        builder.Property(x => x.Potential).HasDefaultValue(Player.DefaultPotential);
+        builder.Property(x => x.Fitness).HasDefaultValue(Player.DefaultFitness);
+        builder.Property(x => x.Morale).HasDefaultValue(Player.DefaultMorale);
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.NationalityId);
         builder.HasIndex(x => new { x.LastName, x.FirstName });
 
-        // Attributes live in their own table (1:1, keyed by PlayerId) and always load with the player.
+        // Attributes and tendencies live in their own tables (1:1, keyed by PlayerId) and always load with the player.
         builder.OwnsOne(x => x.Attributes, attributes =>
         {
-            attributes.ToTable("PlayerAttributes", t => t.HasCheckConstraint(
-                "CK_PlayerAttributes_Range",
-                string.Join(" AND ", RatingColumns.Select(c => $"{c} BETWEEN {PlayerAttributes.MinRating} AND {PlayerAttributes.MaxRating}"))));
+            attributes.ToTable("PlayerAttributes", t => t.HasCheckConstraint("CK_PlayerAttributes_Range", RangeCheck(PlayerCatalog.Attributes)));
             attributes.WithOwner().HasForeignKey("PlayerId");
             attributes.HasKey("PlayerId");
         });
         builder.Navigation(x => x.Attributes).IsRequired();
+        builder.OwnsOne(x => x.Tendencies, tendencies =>
+        {
+            tendencies.ToTable("PlayerTendencies", t => t.HasCheckConstraint("CK_PlayerTendencies_Range", RangeCheck(PlayerCatalog.Tendencies)));
+            tendencies.WithOwner().HasForeignKey("PlayerId");
+            tendencies.HasKey("PlayerId");
+        });
+        builder.Navigation(x => x.Tendencies).IsRequired();
     }
 
-    private static readonly string[] RatingColumns =
-    [
-        nameof(PlayerAttributes.Shooting), nameof(PlayerAttributes.InsideScoring), nameof(PlayerAttributes.Passing),
-        nameof(PlayerAttributes.BallHandling), nameof(PlayerAttributes.Rebounding), nameof(PlayerAttributes.Defense),
-        nameof(PlayerAttributes.Athleticism), nameof(PlayerAttributes.BasketballIq),
-    ];
+    private static string RangeCheck<TKey>(IEnumerable<TKey> columns)
+        where TKey : struct, Enum =>
+        string.Join(" AND ", columns.Select(c => $"{c} BETWEEN {RatingSet<TKey>.MinRating} AND {RatingSet<TKey>.MaxRating}"));
 }
 
 internal sealed class PlayerClubHistoryEntryConfiguration : IEntityTypeConfiguration<PlayerClubHistoryEntry>

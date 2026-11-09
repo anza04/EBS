@@ -1,3 +1,4 @@
+using Ebm.Domain.Players;
 using Ebm.Hosting;
 using Ebm.Persistence;
 using Ebm.Tests.Integration.TestSupport;
@@ -14,7 +15,7 @@ public sealed class DatabaseInitializerTests
     [
         "Arenas", "Clubs", "CompetitionParticipants", "Competitions", "Contracts", "Countries", "Divisions",
         "Fixtures", "LeagueStandings", "Leagues", "Matches", "PlayerAttributes", "PlayerClubHistory",
-        "PlayerMatchStatistics", "Players", "Seasons", "Staff",
+        "PlayerMatchStatistics", "PlayerTendencies", "Players", "Seasons", "Staff",
     ];
 
     [Fact]
@@ -67,8 +68,45 @@ public sealed class DatabaseInitializerTests
 
         var version = await db.Initializer.InitializeAsync();
 
-        Assert.EndsWith("_FixtureStages", version, StringComparison.Ordinal);
+        Assert.EndsWith("_PlayerModel", version, StringComparison.Ordinal);
         Assert.Equal(["RegularSeason|1"], await db.QueryStringsAsync("SELECT Stage || '|' || GameNumber FROM Fixtures"));
+    }
+
+    [Fact]
+    public async Task Step_04_players_upgrade_to_the_full_player_model()
+    {
+        await using var db = await TestDatabase.CreateAsync();
+        await db.ReadAsync(async s =>
+        {
+            await s.Services.GetRequiredService<EbmDbContext>().Database.MigrateAsync("20261109124652_FixtureStages");
+            return 0;
+        });
+        const string id = "22222222-2222-2222-2222-222222222222";
+        await db.ExecuteSqlAsync($"""
+            INSERT INTO Countries (Id, Code, Name) VALUES ('33333333-3333-3333-3333-333333333333', 'ITA', 'Italy');
+            INSERT INTO Players (Id, FirstName, LastName, DateOfBirth, NationalityId, HeightCm, WeightKg, Position)
+            VALUES ('{id}', 'Old', 'Save', '1999-04-01', '33333333-3333-3333-3333-333333333333', 204, 100, 'PowerForward');
+            INSERT INTO PlayerAttributes (PlayerId, Shooting, InsideScoring, Passing, BallHandling, Rebounding, Defense, Athleticism, BasketballIq)
+            VALUES ('{id}', 60, 81, 40, 35, 90, 70, 75, 66);
+            """);
+
+        Assert.EndsWith("_PlayerModel", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        var player = await db.ReadAsync(s => s.Repo<Player, PlayerId>().FindAsync(PlayerId.From(Guid.Parse(id))));
+
+        Assert.NotNull(player);
+        Assert.Equal((204, 1, 1, 64), (player.WingspanCm, player.Experience, player.Reputation, player.Potential)); // potential = old mean 64.6
+        Assert.Equal((100, 50, InjuryStatus.Healthy), (player.Fitness, player.Morale, player.InjuryStatus));
+        Assert.True(player.SecondaryPositions.IsEmpty);
+        var a = player.Attributes;
+        Assert.Equal((70, 60, 60, 60), (a.CloseShot, a.MidRange, a.ThreePoint, a.FreeThrow));
+        Assert.Equal((81, 78, 81), (a.Layup, a.Dunk, a.PostMoves));
+        Assert.Equal((40, 53, 35, 66), (a.Passing, a.CourtVision, a.BallHandling, a.DecisionMaking));
+        Assert.Equal((70, 70, 70, 80, 68), (a.PerimeterDefense, a.InteriorDefense, a.Steal, a.Block, a.DefensivePositioning));
+        Assert.Equal((90, 90), (a.OffensiveRebound, a.DefensiveRebound));
+        Assert.Equal((75, 82, 75, 75, 75), (a.Speed, a.Strength, a.Vertical, a.Agility, a.Stamina));
+        Assert.Equal((66, 66, 66, 66), (a.Concentration, a.Leadership, a.Consistency, a.WorkRate));
+        Assert.Equal(PlayerTendencies.Suggest(a).ToDictionary(), player.Tendencies.ToDictionary());
+        Assert.Empty(await db.QueryStringsAsync("SELECT name FROM sqlite_master WHERE name LIKE 'PlayerAttributes_%'"));
     }
 
     [Fact]

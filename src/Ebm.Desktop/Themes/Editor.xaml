@@ -53,6 +53,25 @@
     </StackPanel>
   </ControlTemplate>
 
+  <!-- A list of RatingField in three columns. -->
+  <DataTemplate x:Key="Editor.RatingFields">
+    <ItemsControl ItemsSource="{Binding}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="3" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Text="{Binding Label}" Style="{StaticResource Form.Label}" />
+            <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </DataTemplate>
+
   <DataTemplate DataType="{x:Type ed:PlayersPageViewModel}">
     <Grid Margin="16">
       <Grid.ColumnDefinitions>
@@ -66,6 +85,7 @@
           <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="110" />
           <DataGridTextColumn Header="Born" Binding="{Binding DateOfBirth}" Width="90" />
           <DataGridTextColumn Header="Height" Binding="{Binding HeightCm}" Width="60" />
+          <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="70" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -90,26 +110,74 @@
                 <TextBox Text="{Binding WeightKg, UpdateSourceTrigger=PropertyChanged}" />
               </StackPanel>
               <StackPanel>
-                <TextBlock Text="Position" Style="{StaticResource Form.Label}" />
-                <ComboBox ItemsSource="{Binding Lookups.Positions}" SelectedItem="{Binding Position}" />
+                <TextBlock Text="Wingspan (cm)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding WingspanCm, UpdateSourceTrigger=PropertyChanged}" />
               </StackPanel>
             </UniformGrid>
-            <TextBlock Text="Attributes (1–100)" Style="{StaticResource Text.Title}" Margin="0,18,0,0" />
-            <ItemsControl ItemsSource="{Binding Ratings}">
+            <TextBlock Text="Position" Style="{StaticResource Form.Label}" />
+            <ComboBox ItemsSource="{Binding Lookups.Positions}" SelectedItem="{Binding Position}" />
+            <TextBlock Text="Secondary positions" Style="{StaticResource Form.Label}" />
+            <ItemsControl ItemsSource="{Binding SecondaryPositions}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                  <UniformGrid Columns="2" />
+                  <WrapPanel />
                 </ItemsPanelTemplate>
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <StackPanel Margin="0,0,8,0">
-                    <TextBlock Text="{Binding Label}" Style="{StaticResource Form.Label}" />
-                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                  <CheckBox Content="{Binding Position}" IsChecked="{Binding IsChecked}" Margin="0,0,12,4" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <UniformGrid Columns="3">
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Experience (1–100)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding Experience, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Reputation (1–100)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding Reputation, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Potential (1–100)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding Potential, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+            </UniformGrid>
+            <TextBlock Text="Condition" Style="{StaticResource Text.Title}" Margin="0,18,0,0" />
+            <UniformGrid Columns="2">
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Fitness (0–100)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding Fitness, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Morale (1–100)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding Morale, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Injury status" Style="{StaticResource Form.Label}" />
+                <ComboBox ItemsSource="{Binding InjuryStatuses}" SelectedItem="{Binding InjuryStatus}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Expected return" Style="{StaticResource Form.Label}" />
+                <DatePicker SelectedDate="{Binding InjuryReturnDate}" />
+              </StackPanel>
+            </UniformGrid>
+            <TextBlock Text="Attributes (1–100)" Style="{StaticResource Text.Title}" Margin="0,18,0,0" />
+            <ItemsControl ItemsSource="{Binding AttributeGroups}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Label}" FontWeight="SemiBold" Margin="0,12,0,0" />
+                    <ContentControl Content="{Binding Fields}" ContentTemplate="{StaticResource Editor.RatingFields}" />
                   </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <DockPanel Margin="0,18,0,0">
+              <Button DockPanel.Dock="Right" Content="Suggest from attributes" Command="{Binding SuggestTendenciesCommand}" Style="{StaticResource Button.Secondary}" Padding="8,2" />
+              <TextBlock Text="Tendencies (1–100)" Style="{StaticResource Text.Title}" />
+            </DockPanel>
+            <ContentControl Content="{Binding Tendencies}" ContentTemplate="{StaticResource Editor.RatingFields}" />
             <ContentControl Template="{StaticResource Editor.Actions}" />
           </StackPanel>
         </ScrollViewer>

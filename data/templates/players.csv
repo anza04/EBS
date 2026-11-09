@@ -1,2 +1,2 @@
-id,firstName,lastName,dateOfBirth,nationality,heightCm,weightKg,position,shooting,insideScoring,passing,ballHandling,rebounding,defense,athleticism,basketballIq
-0198a000-0000-7000-8000-000000000006,Example,Player,2001-03-15,ITA,198,95,SF,65,58,55,60,50,62,70,61
+id,firstName,lastName,dateOfBirth,nationality,heightCm,weightKg,position,wingspanCm,secondaryPositions,experience,reputation,potential,morale,closeShot,midRange,threePoint,freeThrow,layup,dunk,postMoves,passing,courtVision,ballHandling,decisionMaking,perimeterDefense,interiorDefense,steal,block,defensivePositioning,offensiveRebound,defensiveRebound,speed,strength,vertical,agility,stamina,concentration,leadership,consistency,workRate
+0198a000-0000-7000-8000-000000000006,Example,Player,2001-03-15,ITA,198,95,SF,205,SG,51,51,68,68,65,62,65,67,61,68,59,57,58,59,60,67,61,63,57,59,54,51,74,57,73,70,70,65,57,57,59

@@ -3,9 +3,9 @@
 Offline, single-player basketball management game for Windows, covering the top two domestic
 divisions of European countries.
 
-**Status:** Step 04 (countries, leagues and competitions) complete. The application creates and migrates the game
-database, imports data and edits it; the competition engine (schedules, standings, playoffs, promotion and
-relegation) runs as a service, with no game screens yet.
+**Status:** Step 05 (player model and attributes) complete. The application creates and migrates the game
+database, imports data and edits it, and shows player profiles and comparisons (27 attributes, tendencies, position
+ratings); the competition engine (schedules, standings, playoffs, promotion and relegation) runs as a service.
 See [PROJECT_STATE.md](PROJECT_STATE.md) for the current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan.
 
 ## Requirements
@@ -36,6 +36,7 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Entities, fields, relationships, constraints, migrations |
 | [docs/IMPORT_FORMATS.md](docs/IMPORT_FORMATS.md) | CSV/JSON import formats, validation rules, database editor |
 | [docs/COMPETITION_FORMATS.md](docs/COMPETITION_FORMATS.md) | Competition rules schema, supported formats, adding a league |
+| [docs/PLAYER_MODEL.md](docs/PLAYER_MODEL.md) | Player fields, attributes, tendencies, rating and position formulas |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |
 | [logs/](logs/) | Detailed log of each development step |

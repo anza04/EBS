@@ -53,6 +53,10 @@ internal sealed class FieldReader
         Parse(name, true, $"a date in the form YYYY-MM-DD", v =>
             DateOnly.TryParseExact(v, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var r) ? r : (DateOnly?)null) ?? default;
 
+    public DateOnly? OptionalDate(string name) =>
+        Parse(name, false, $"a date in the form YYYY-MM-DD", v =>
+            DateOnly.TryParseExact(v, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var r) ? r : (DateOnly?)null);
+
     public Guid? OptionalGuid(string name, bool required = false) =>
         Parse(name, required, "an ID (GUID, e.g. 0198c2d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d)", v =>
             Guid.TryParse(v, out var r) && r != Guid.Empty ? r : (Guid?)null);

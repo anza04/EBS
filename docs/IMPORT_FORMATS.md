@@ -64,7 +64,13 @@ Both folders are copied next to the executable (`data\…`) and the import file 
 | | `nationality`* | `NationalityId` | Country code |
 | | `heightCm`*, `weightKg`* | | 150–250, 50–200 |
 | | `position`* | `Position` | `PointGuard`, `ShootingGuard`, `SmallForward`, `PowerForward`, `Center` or `PG`, `SG`, `SF`, `PF`, `C` |
-| | `shooting`*, `insideScoring`*, `passing`*, `ballHandling`*, `rebounding`*, `defense`*, `athleticism`*, `basketballIq`* | `PlayerAttributes` | 1–100 each |
+| | `closeShot`*, `midRange`*, `threePoint`*, `freeThrow`*, `layup`*, `dunk`*, `postMoves`*, `passing`*, `courtVision`*, `ballHandling`*, `decisionMaking`*, `perimeterDefense`*, `interiorDefense`*, `steal`*, `block`*, `defensivePositioning`*, `offensiveRebound`*, `defensiveRebound`*, `speed`*, `strength`*, `vertical`*, `agility`*, `stamina`*, `concentration`*, `leadership`*, `consistency`*, `workRate`* | `PlayerAttributes` | 1–100 each (definitions: `docs/PLAYER_MODEL.md`) |
+| | `wingspanCm` | `WingspanCm` | Height ± 30; default the height |
+| | `secondaryPositions` | `SecondaryPositions` | Codes or names separated by `\|`, `;`, `,` or spaces (`SG\|SF`; in CSV avoid `,` unless quoted); must not include `position`; default none |
+| | `experience`, `reputation`, `potential` | | 1–100; defaults 1, 1, 50 |
+| | `fitness`, `morale` | | 0–100 and 1–100; defaults 100, 50 |
+| | `injuryStatus`, `injuryReturnDate` | | `Healthy` (default), `DayToDay`, `Injured`; return date required when `Injured`, not allowed when `Healthy` |
+| | `threePointShot`, `midRangeShot`, `driveToBasket`, `postUp`, `passFirst`, `isolation`, `crashOffensiveGlass`, `defensiveGambling` | `PlayerTendencies` | 1–100; each missing one is suggested from the attributes |
 | `contracts` | `id` | `Contract.Id` | Player contracts only |
 | | `clubId`*, `playerId`* | | Club and player IDs; cannot change on update |
 | | `startDate`*, `endDate`* | | End after start |
@@ -130,10 +136,12 @@ A summary line also goes to the application log.
 
 ## 6. Database editor
 
-The main window shows the editor (tabs *Players*, *Clubs*, *Contracts*, *Leagues and competitions*, *Import*).
+The main window shows the editor (tabs *Players*, *Player profile*, *Compare players*, *Clubs*, *Contracts*, *Leagues and competitions*, *Import*).
 Select a row to edit it, or *New* for a blank form; *Save* runs the same domain validation and duplicate rules as
 the import and shows the result under the form. Each save is its own unit of work (`IDatabaseEditor`).
-Players include the eight attribute ratings. Contracts: club and player are fixed once created.
+Players include profile, condition, the 27 attributes and the tendencies (*Suggest from attributes* fills them from the
+attributes); a blank wingspan means "same as height". *Player profile* and *Compare players* are read-only views
+(`IPlayerProfileService`). Contracts: club and player are fixed once created.
 
 ## 7. Known data limitations
 
@@ -144,7 +152,10 @@ Players include the eight attribute ratings. Contracts: club and player are fixe
   league competition per club and season) and refused once the competition season has a schedule.
   The minimum number of clubs is checked when the schedule is generated, not at import. The editor does not edit countries,
   arenas or divisions (they come from imports).
-* Updates replace every field of the record; partial updates (only some columns) are not supported.
+* Updates replace every field of the record; partial updates (only some columns) are not supported. Optional player
+  fields left out of an update take their defaults (fitness 100, healthy, suggested tendencies, …).
+* Player files in the Step 03/04 format (8 ratings: `shooting`, `insideScoring`, …) are no longer accepted; use the
+  27 attribute columns (templates in `data/templates`).
 * Records are never deleted by an import or by the editor.
 * Duplicate checks and imports load all records of a type into memory; fine for one country's data
   (thousands of records), to be revisited for the full European database (Step 16).
