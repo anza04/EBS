@@ -3,6 +3,45 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.8.0] — 2026-11-09 — Step 08: Transfers and free agents
+
+### Added
+- `Transfers` table and `Transfer` entity (`Ebm.Domain.Transfers`): the movement history of every player — free-agent
+  signings, transfers, release-clause buy-outs, loans (with end date and return date) and loan returns. Never deleted.
+- Contract statuses `OnLoan` (the contract keeps running while a loan club pays the player) and `Transferred` (ended
+  early by a transfer); `Contract.Transfer`, `SendOnLoan`, `ReturnFromLoan`. Wage bills and salary commitments skip
+  contracts of players out on loan.
+- `TransferNegotiator`: deterministic market value (market salary × 2.5 × age, potential and remaining-contract
+  factors), asking fee (starter and rotation premiums, discounts for clubs in debt or over budget), fee answers
+  (accepted / counter-offer / rejected; a release clause cannot be refused) and loan answers (no starters or rotation
+  players; 10% of the value per year).
+- `ClubRecruiter`: the simple AI rules — surplus to sell (squad size, foreign limit, wage budget), needs (two players
+  per position, squad up to the matchday squad + 1), and signings within the cash, the wage budget and the
+  registration limits, preferring free agents. `SquadRules.Strictest` combines a club's competition rules.
+- `ITransferService`: player search with filters priced for the searching club, valuations, fee / loan / contract
+  negotiation, `BuyAsync` (fee between balances, old contract transferred, new contract, squad move, history),
+  `LoanAsync` (parent contract on loan, loan contract at the borrower, fee), `RecallAsync`, club and player transfer
+  history, `ProcessTransferDatesAsync` (loan returns, then contract dates; run at startup) and
+  `RunAiTransferWindowAsync` (AI clubs sell to each other, sign free agents, buy, and release surplus nobody buys;
+  managed clubs are left alone).
+- Financial and roster limits: a fee never takes a balance below zero; first-team size, foreign-player and minimum-age
+  limits of the club and its competitions block a move; the wage budget warns the user and binds AI clubs.
+- Screen *Transfer market*: search and filters, player card with value and asking fee, fee and contract negotiation
+  with counter-offers, buy, pay the release clause, sign a free agent, loan form, loans out (with recall) and in,
+  the club's transfer history and the AI transfer window report. Documented in `docs/TRANSFERS.md`.
+- Free-agent signings through `IContractService.SignAsync` are recorded in the transfer history.
+- Tests: transfer and loan rules, negotiator, recruiter, strictest squad rules (unit); transfer service (purchase,
+  refusals and limits, release clause, loan and automatic return, starter refusal and recall, search and pricing,
+  free-agent history, AI window with free agents, AI sales and releases, startup processing), schema, render of the
+  market screen with a purchase and an AI window (integration).
+
+### Changed
+- Migration `Transfers` (create-table only). Schema version `20261109204206_Transfers`; 20 tables.
+- Startup applies `ITransferService.ProcessTransferDatesAsync` (loan returns first, then contract dates) instead of
+  calling the contract service directly.
+- `DatabaseEditorViewModel` takes `ITransferService`; contract status texts use display names ("On loan").
+- Club profile wage bill and `SalaryCommitments` ignore `OnLoan` contracts.
+
 ## [0.7.0] — 2026-11-09 — Step 07: Contracts and player availability
 
 ### Added

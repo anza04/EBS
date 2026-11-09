@@ -23,11 +23,14 @@ public sealed record SalaryCommitments(
     /// <summary>Salary owed in the first 12 months.</summary>
     public long NextTwelveMonths => Periods.Count > 0 ? Periods[0].Salary : 0;
 
-    /// <summary>Totals a club's commitments from its contracts; contracts that no longer run after <paramref name="date"/> are ignored.</summary>
+    /// <summary>
+    /// Totals a club's commitments from its contracts; contracts that no longer run after <paramref name="date"/> are
+    /// ignored, and so are contracts of players out on loan (the loan club pays them, docs/TRANSFERS.md §4).
+    /// </summary>
     public static SalaryCommitments Calculate(IEnumerable<Contract> contracts, DateOnly date)
     {
         ArgumentNullException.ThrowIfNull(contracts);
-        var open = contracts.Where(c => c.IsRunningOn(date) || c.IsUpcomingOn(date)).ToList();
+        var open = contracts.Where(c => c.Status != ContractStatus.OnLoan && (c.IsRunningOn(date) || c.IsUpcomingOn(date))).ToList();
         var running = open.Where(c => c.IsRunningOn(date)).ToList();
         var periods = new List<CommitmentPeriod>();
         if (open.Count > 0)

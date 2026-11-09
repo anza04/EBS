@@ -16,9 +16,9 @@ One `Contracts` row per contract between a club and a player (or a staff member)
 | `PaymentFrequency` | `Monthly` (default), `Quarterly`, `Annually` |
 | `SigningBonus` | 0–100,000,000, paid by the club when the contract is signed |
 | `PerformanceBonuses` | At most one amount per condition: `PerGamePlayed`, `ReachPlayoffs`, `LeagueTitle`, `CupTitle`, `Promotion`, `AvoidRelegation`; 1–100,000,000 each. Stored as `ReachPlayoffs:20000;LeagueTitle:50000` |
-| `ReleaseClause` | Optional, 1–1,000,000,000: the buy-out fee for other clubs (used by transfers, Step 08) |
+| `ReleaseClause` | Optional, 1–1,000,000,000: the fee another club can pay to buy the player out; the club cannot refuse it (docs/TRANSFERS.md §2) |
 | `ClubOptionUntil`, `PlayerOptionUntil` | Optional: the date the club / the player may extend the contract to. After `EndDate`, at most 3 years later |
-| `Status` | `Active`, `Expired`, `Terminated`, `Renewed` (§2) |
+| `Status` | `Active`, `Expired`, `Terminated`, `Renewed`, `OnLoan`, `Transferred` (§2) |
 | `TerminationDate` | First day the contract no longer runs after an early end; `null` otherwise |
 | `TerminationCompensation` | Settlement paid to the player on termination |
 
@@ -33,11 +33,21 @@ methods below, never through the editor or an import.
                                    │
                                    ▼
    upcoming ──(start date)──► Active, running ──(end date passes, ProcessContractDatesAsync)──► Expired
-                                   │   │   │
-            option taken up ───────┘   │   └── renewal (RenewAsync) ──► Renewed  + new Active contract
-            (EndDate moves)            │
-                                       └── termination (TerminateAsync) ──► Terminated
+                                   │   │   │   │
+            option taken up ───────┘   │   │   └── renewal (RenewAsync) ──► Renewed  + new Active contract
+            (EndDate moves)            │   │
+                                       │   └── termination (TerminateAsync) ──► Terminated
+                                       │
+                                       ├── transfer (ITransferService.BuyAsync) ──► Transferred  + new Active contract elsewhere
+                                       │
+                                       └── loan (LoanAsync) ──► OnLoan ──(loan ends or recall)──► Active again
 ```
+
+* **`OnLoan`** (docs/TRANSFERS.md §4): the contract keeps running (the player stays bound to the club) while the
+  player plays for a loan club under a loan contract. It cannot be renewed or terminated until he returns; the wage
+  bill and the salary commitments skip it, because the loan club pays him meanwhile.
+* **`Transferred`** (docs/TRANSFERS.md §3): ended early on the transfer date, no compensation; the player signed
+  with his new club the same day.
 
 * **Running on a date** = `StartDate ≤ date ≤ EndDate` and (no `TerminationDate` or `date < TerminationDate`).
   `Contract.RunningOn(date)` is the same rule as a query the repositories translate; every service uses it (wage
@@ -51,13 +61,15 @@ methods below, never through the editor or an import.
 
 1. The player must be **free for the whole offered period**: no running or upcoming contract that overlaps it. A
    player under contract can sign a contract that starts after his current one ends (a pre-contract); a contract
-   with his own club is refused with "Renew it instead". Buying a player out of a running contract is Step 08.
+   with his own club is refused with "Renew it instead". A player under contract is bought out through the transfer
+   market (docs/TRANSFERS.md §3).
 2. The start date cannot be before today.
 3. The player must **accept** the terms (§4); a counter-offer or rejection is refused with the player's message.
 4. The club pays the signing bonus now (`Club.ChangeBalance`).
 5. If the contract runs today, the player joins the club today (his open club spell ends, a new one starts, his
    roster spot moves) in the chosen role: bench (default), inactive or youth. A pre-contract moves him on its
    start date (§5).
+6. The signing is recorded in the transfer history as a `FreeAgentSigning` (docs/TRANSFERS.md §1).
 
 The database editor and the importer can still create any contract directly (no negotiation, no payments, no
 club move): they are data tools.
@@ -128,8 +140,10 @@ Applies the calendar up to today; idempotent. Run at application start and, from
   | `RunningContracts`, `UpcomingContracts` | Counts |
 
   Each period is rounded separately, so the periods can differ from `RemainingSalary` by a euro or two.
-* **Wage budget left** = `Club.WageBudget − WageBill` (negative = over budget). It is reported, not enforced: the
-  board and AI clubs respect financial limits from Step 08 (transfers) and Step 27 (finances).
+* Contracts with status `OnLoan` are skipped: the loan club pays the player while he is away (docs/TRANSFERS.md §4).
+* **Wage budget left** = `Club.WageBudget − WageBill` (negative = over budget). For the user's club it is reported,
+  not enforced (a transfer that exceeds it is completed with a warning); AI clubs never exceed it when recruiting
+  (docs/TRANSFERS.md §5). Finances (Step 27) decide whether the board enforces it.
 
 ## 4. Negotiation (`ContractNegotiator`)
 
@@ -183,8 +197,9 @@ salary; the counter-offer is always acceptable. Below 75% → **rejected**.
 A player is a **free agent** when he has no running and no upcoming contract
 (`IContractService.GetFreeAgentsAsync`, `PlayerContracts.IsFreeAgent`). He may still belong to a club through an
 open club spell without a contract (data entered that way, or the squad screen's *Add a player*): any club can sign
-him, which ends that spell. The free-agent list (best overall first) feeds the *Sign a free agent* form; search and
-filters come with the transfer market (Step 08).
+him, which ends that spell. The free-agent list (best overall first) feeds the *Sign a free agent* form; the
+*Transfer market* screen searches and filters every player, free agents included, and signs them too
+(docs/TRANSFERS.md §7).
 
 ## 7. Screens
 
@@ -199,10 +214,10 @@ filters come with the transfer market (Step 08).
 
 ## 8. For later steps
 
-* Transfers (Step 08): buy-outs pay the `ReleaseClause` or a negotiated fee, then terminate the old contract
-  (a new `TerminationKind`) and sign the new one; reuse `ContractNegotiator` for player acceptance and AI clubs.
-  Loans need a contract link to the parent club.
-* Calendar (Step 12): call `ProcessContractDatesAsync` every day; prompt for option decisions and renewals before
-  contracts expire; book salary instalments (`SalaryCalculator.PaymentSchedule`).
+* Transfers and loans are Step 08: see `docs/TRANSFERS.md` (the transfer ends the old contract as `Transferred`;
+  a loan keeps the parent contract `OnLoan` and adds a loan contract linked through the `Transfers` row).
+* Calendar (Step 12): call `ITransferService.ProcessTransferDatesAsync` every day (it returns loans, then applies
+  contract dates); prompt for option decisions and renewals before contracts expire; book salary instalments
+  (`SalaryCalculator.PaymentSchedule`).
 * Season review (Steps 12, 27): pay performance bonuses from `PerformanceBonuses`; enforce the wage budget.
 * Staff contracts use the same entity; staff management comes later.

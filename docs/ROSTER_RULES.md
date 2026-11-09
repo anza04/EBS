@@ -15,7 +15,9 @@ squad; starting and rotation roles are chosen in the squad. Contracts are not to
 "Contract: none"). Since Step 07 the game moves players through contracts: signing (`IContractService.SignAsync`)
 joins the club, termination and expiry leave it (`docs/CONTRACTS.md` §2). Both use the same `ClubMembership` rules.
 A contract counts only while it runs (`Contract.RunningOn`): a terminated or expired contract no longer makes a
-player a club member.
+player a club member. Transfers and loans (Step 08, `docs/TRANSFERS.md`) move players through the same rules: a
+transfer closes the spell at the selling club and opens one at the buyer; a loan opens a spell at the loan club
+(the loan contract makes him a member there) and the return opens a new spell at the parent club.
 
 ## 2. Roles
 

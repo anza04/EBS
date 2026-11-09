@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109194813_Contracts`** (Step 07).
+Schema version: **`20261109204206_Transfers`** (Step 08).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -10,6 +10,7 @@ Schema version: **`20261109194813_Contracts`** (Step 07).
 | `20261109125814_PlayerModel` | 05 | Players: profile and condition columns (with defaults). `PlayerAttributes` replaced by the 27-attribute table (old table renamed, new one created and filled from the old ratings, old one dropped) and new `PlayerTendencies`. Hand-written `Up` so nothing is rebuilt and the upgrade stays in one transaction; mapping in `docs/PLAYER_MODEL.md` §7 |
 | `20261109171322_ClubsAndRosters` | 06 | Clubs: `City`, `Reputation`, `Balance`, `WageBudget`, `BoardExpectation` (add-column with defaults; `City` copied from the home arena). New `RosterSpots` table |
 | `20261109194813_Contracts` | 07 | Contracts: `PaymentFrequency`, `SigningBonus`, `PerformanceBonuses`, `ReleaseClause`, `ClubOptionUntil`, `PlayerOptionUntil`, `Status`, `TerminationDate`, `TerminationCompensation` (add-column with defaults; existing contracts become `Active` with monthly pay and no extras). Index `ClubId` replaced by (`ClubId`, `EndDate`) |
+| `20261109204206_Transfers` | 08 | New `Transfers` table (create-table only, so the upgrade runs in one transaction). No existing table changes; `Contracts.Status` gains the values `OnLoan` and `Transferred` (text column, no schema change) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -44,7 +45,8 @@ Season ─┬─< CompetitionParticipant >─ Competition, Club      (club enter
 
 Club ─┬─< Contract >─ Player | StaffMember (exactly one)
       ├─< PlayerClubHistory >─ Player
-      └─< RosterSpot >─ Player (unique: one squad role per player)
+      ├─< RosterSpot >─ Player (unique: one squad role per player)
+      └─< Transfer (FromClubId, optional / ToClubId) >─ Player, Contract (ContractId, ParentContractId; optional)
 ```
 
 `─<` means one-to-many. All relationships are by ID only (the domain has no navigation properties), so entities stay small and loading is explicit.
@@ -185,7 +187,7 @@ Step 05 columns are checked by the domain only: adding check constraints to an e
 | PerformanceBonuses | text(200) | `Condition:amount;…`, default empty |
 | ReleaseClause | int? | Euros; null = none |
 | ClubOptionUntil / PlayerOptionUntil | date? | Option end dates; after `EndDate`, at most 3 years |
-| Status | text(16) | `Active` (default), `Expired`, `Terminated`, `Renewed` |
+| Status | text(16) | `Active` (default), `Expired`, `Terminated`, `Renewed`, `OnLoan` (Step 08), `Transferred` (Step 08) |
 | TerminationDate | date? | First day not under contract after an early end |
 | TerminationCompensation | int | Settlement paid on termination, default 0 |
 
@@ -204,8 +206,29 @@ One row per spell of a player at a club.
 | EndDate | date? | Null while current; `EndDate >= StartDate` |
 
 **At most one current spell per player:** a unique index on `PlayerId` filtered by `EndDate IS NULL`
-(`IX_PlayerClubHistory_PlayerId_Current`). A move is recorded by closing the current spell and opening a new one.
-Overlap checks between closed spells and loans are added with transfers (Step 08).
+(`IX_PlayerClubHistory_PlayerId_Current`). A move is recorded by closing the current spell and opening a new one
+(`ClubMembership`). A loan opens a spell at the loan club and, on return, a new spell at the parent club; the
+`Transfers` table records which spells were loans.
+
+### Transfers
+One row per player movement: free-agent signing, transfer, loan, loan return (rules in `docs/TRANSFERS.md` §1).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerId | id | FK Players. Index (`PlayerId, Date`) |
+| FromClubId | id? | FK Clubs; null = free agent. Index (`FromClubId, Date`). `FromClubId <> ToClubId` |
+| ToClubId | id | FK Clubs. Index (`ToClubId, Date`) |
+| Kind | text(20) | `FreeAgentSigning`, `Transfer`, `ReleaseClause`, `Loan`, `LoanReturn`. Index (`Kind, ReturnedOn`) |
+| Date | date | Day the player joined `ToClubId` |
+| Fee | int | Euros, `>= 0` |
+| ContractId | id? | FK Contracts: the contract signed with `ToClubId` (the loan contract for a loan) |
+| ParentContractId | id? | FK Contracts: for loans and returns, the contract with the parent club |
+| LoanEndDate | date? | Set if and only if `Kind = 'Loan'`; `> Date` (check constraint) |
+| ReturnedOn | date? | Loans only, `> Date` (check constraint); null while the loan is open |
+
+Transfers are never deleted (restrict-on-delete on every FK), so a player, club or contract with transfer history
+cannot be removed.
 
 ### RosterSpots
 A player's role in his current club's squad: current state, not history (rules in `docs/ROSTER_RULES.md`).

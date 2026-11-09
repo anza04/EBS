@@ -25,6 +25,15 @@ public enum ContractStatus
 
     /// <summary>Replaced by a renewal with the same club. If the renewal started early, it ended on the renewal's start date.</summary>
     Renewed,
+
+    /// <summary>
+    /// Running, but the player is out on loan (docs/TRANSFERS.md §4): the loan club pays him through a loan contract and
+    /// the contract goes back to <see cref="Active"/> when he returns.
+    /// </summary>
+    OnLoan,
+
+    /// <summary>Ended early because the player was transferred to another club; see <see cref="Contract.TerminationDate"/>.</summary>
+    Transferred,
 }
 
 /// <summary>Who decides whether an option year is taken up.</summary>
@@ -34,7 +43,7 @@ public enum OptionHolder
     Player,
 }
 
-/// <summary>How a contract is ended early.</summary>
+/// <summary>How a contract is ended early by its own club. Transfers end contracts through <see cref="Contract.Transfer"/>.</summary>
 public enum TerminationKind
 {
     /// <summary>The club releases the player and pays the remaining salary in full.</summary>

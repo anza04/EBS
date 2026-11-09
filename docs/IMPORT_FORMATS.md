@@ -148,7 +148,7 @@ A summary line also goes to the application log.
 
 ## 6. Database editor
 
-The main window shows the editor (tabs *Players*, *Player profile*, *Compare players*, *Clubs*, *Club profile*, *Squad*, *Club contracts*, *Contracts (editor)*, *Leagues and competitions*, *Import*).
+The main window shows the editor (tabs *Players*, *Player profile*, *Compare players*, *Clubs*, *Club profile*, *Squad*, *Club contracts*, *Transfer market*, *Contracts (editor)*, *Leagues and competitions*, *Import*).
 Select a row to edit it, or *New* for a blank form; *Save* runs the same domain validation and duplicate rules as
 the import and shows the result under the form. Each save is its own unit of work (`IDatabaseEditor`).
 Players include profile, condition, the 27 attributes and the tendencies (*Suggest from attributes* fills them from the

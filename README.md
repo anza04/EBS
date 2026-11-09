@@ -3,11 +3,13 @@
 Offline, single-player basketball management game for Windows, covering the top two domestic
 divisions of European countries.
 
-**Status:** Step 07 (contracts and player availability) complete. The application creates and migrates the game
+**Status:** Step 08 (transfers and free agents) complete. The application creates and migrates the game
 database, imports data and edits it, shows player profiles and comparisons (27 attributes, tendencies, position
-ratings), club profiles and squads (starting five, rotation, roster validation and competition registration), and
+ratings), club profiles and squads (starting five, rotation, roster validation and competition registration),
 manages contracts (signing free agents with a simple negotiation, renewals, terminations, options, expiry, salary
-commitments); the competition engine (schedules, standings, playoffs, promotion and relegation) runs as a service.
+commitments) and runs a transfer market (player search, valuations, fee negotiation, transfers, release clauses,
+loans and recalls, transfer history, and AI clubs that sell surplus, sign free agents and buy within their budgets);
+the competition engine (schedules, standings, playoffs, promotion and relegation) runs as a service.
 See [PROJECT_STATE.md](PROJECT_STATE.md) for the current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan.
 
 ## Requirements
@@ -41,6 +43,7 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/PLAYER_MODEL.md](docs/PLAYER_MODEL.md) | Player fields, attributes, tendencies, rating and position formulas |
 | [docs/ROSTER_RULES.md](docs/ROSTER_RULES.md) | Club profile, squad roles, roster validation, competition registration |
 | [docs/CONTRACTS.md](docs/CONTRACTS.md) | Contract lifecycle, salary calculations, negotiation, transaction rules |
+| [docs/TRANSFERS.md](docs/TRANSFERS.md) | Transfer lifecycle, valuations and fee negotiation, loans, AI recruitment |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |
 | [logs/](logs/) | Detailed log of each development step |

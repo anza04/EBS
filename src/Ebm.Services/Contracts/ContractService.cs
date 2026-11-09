@@ -5,6 +5,7 @@ using Ebm.Domain.Countries;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
+using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Data;
 using Microsoft.Extensions.DependencyInjection;
@@ -157,12 +158,14 @@ internal sealed class ContractService : IContractService
         var contract = Contract.ForPlayer(ContractId.New(), clubId, playerId, terms);
         data.Contracts.Add(contract);
         club.ChangeBalance(-terms.SigningBonus);
-        if (contract.IsRunningOn(data.Today)
-            && (await ClubMembership.CurrentClubsAsync(scope.ServiceProvider, data.Today, cancellationToken).ConfigureAwait(false)).GetValueOrDefault(playerId) != clubId)
+        var current = (await ClubMembership.CurrentClubsAsync(scope.ServiceProvider, data.Today, cancellationToken).ConfigureAwait(false)).TryGetValue(playerId, out var at) ? at : (ClubId?)null;
+        if (contract.IsRunningOn(data.Today) && current != clubId)
         {
             await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, clubId, data.Today, joinAs, cancellationToken).ConfigureAwait(false);
         }
 
+        // The signing is part of the transfer history (docs/TRANSFERS.md §1).
+        data.Repo<Transfer, TransferId>().Add(Transfer.Signing(TransferId.New(), playerId, current == clubId ? null : current, clubId, terms.StartDate, contract.Id));
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return contract.Id;
     }
@@ -192,7 +195,7 @@ internal sealed class ContractService : IContractService
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
         if (contract.StatusOn(data.Today) != ContractStatus.Active)
         {
-            throw new DomainValidationException($"The contract is {contract.StatusOn(data.Today).ToString().ToLowerInvariant()}; only an active contract can be terminated.");
+            throw new DomainValidationException($"The contract is {StatusName(contract.StatusOn(data.Today))}; only an active contract can be terminated.");
         }
 
         var remaining = SalaryCalculator.RemainingSalary(contract, data.Today);
@@ -352,7 +355,7 @@ internal sealed class ContractService : IContractService
         if (contract.StatusOn(today) != ContractStatus.Active)
         {
             throw new DomainValidationException(
-                $"The contract is {contract.StatusOn(today).ToString().ToLowerInvariant()}; only an active contract can be renewed. Offer a new contract instead.");
+                $"The contract is {StatusName(contract.StatusOn(today))}; only an active contract can be renewed. Offer a new contract instead.");
         }
 
         if (terms.StartDate < today)
@@ -366,6 +369,8 @@ internal sealed class ContractService : IContractService
                 $"A renewal must start after {contract.StartDate:yyyy-MM-dd} and no later than {contract.EndDate.AddDays(1):yyyy-MM-dd}, the day after the current contract ends.");
         }
     }
+
+    private static string StatusName(ContractStatus status) => PlayerCatalog.DisplayName(status).ToLowerInvariant();
 
     private static void RequireAcceptance(NegotiationResponse response)
     {

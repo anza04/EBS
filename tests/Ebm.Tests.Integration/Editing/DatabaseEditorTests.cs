@@ -117,7 +117,14 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
     public async Task Editor_view_model_shows_imported_data_and_reports_errors_on_the_page()
     {
         var picker = new FixedFilePicker([Path.Combine(_db.TempFolder, "missing.json")]);
-        var vm = new DatabaseEditorViewModel(Editor, _db.Services.GetRequiredService<IDataImportService>(), picker, _db.Services.GetRequiredService<IPlayerProfileService>(), _db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(), _db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>());
+        var vm = new DatabaseEditorViewModel(
+            Editor,
+            _db.Services.GetRequiredService<IDataImportService>(),
+            picker,
+            _db.Services.GetRequiredService<IPlayerProfileService>(),
+            _db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
+            _db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
+            _db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>());
         await vm.ReloadAsync();
 
         Assert.Single(vm.Players.Items);

@@ -3,7 +3,7 @@ using System.Windows;
 using Ebm.Desktop.Startup;
 using Ebm.Hosting;
 using Ebm.Hosting.ErrorHandling;
-using Ebm.Services.Contracts;
+using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -51,13 +51,15 @@ public partial class App : Application
             paths.DataRoot,
             launch.SmokeTest);
 
-        // Contracts that ran out or started since the last session take effect before any screen loads (docs/CONTRACTS.md §5).
-        var changes = services.GetRequiredService<IContractService>().ProcessContractDatesAsync().GetAwaiter().GetResult();
+        // Loans that ended and contracts that ran out or started since the last session take effect before any screen
+        // loads (docs/TRANSFERS.md §4, docs/CONTRACTS.md §5).
+        var changes = services.GetRequiredService<ITransferService>().ProcessTransferDatesAsync().GetAwaiter().GetResult();
         _logger.LogInformation(
-            "Contract dates applied: {Expired} expired, {Started} started, {FreeAgents} new free agents",
-            changes.Expired,
-            changes.Started,
-            changes.NewFreeAgents.Count);
+            "Transfer and contract dates applied: {Loans} loans returned, {Expired} contracts expired, {Started} started, {FreeAgents} new free agents",
+            changes.LoansReturned,
+            changes.Contracts.Expired,
+            changes.Contracts.Started,
+            changes.Contracts.NewFreeAgents.Count);
 
         var window = services.GetRequiredService<MainWindow>();
         if (launch.SmokeTest)

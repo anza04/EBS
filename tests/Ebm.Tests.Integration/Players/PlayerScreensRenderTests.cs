@@ -32,7 +32,8 @@ public sealed class PlayerScreensRenderTests
             new NoFiles(),
             db.Services.GetRequiredService<IPlayerProfileService>(),
             db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
-            db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>());
+            db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
+            db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>());
         await editor.ReloadAsync();
         var players = editor.Lookups.Players;
         editor.Players.SelectedItem = editor.Players.Items[0];
@@ -96,16 +97,42 @@ public sealed class PlayerScreensRenderTests
         await editor.Profile.RefreshAsync();
         Assert.Single(editor.Profile.ContractHistory);
 
+        // Transfer market: search, pick a player of another club, ask his club, pay the asking fee and buy him.
+        var market = editor.TransferMarket;
+        market.ClubId = club;
+        await market.RefreshAsync();
+        Assert.Single(market.History); // the free agent signed above
+        Assert.Equal(3, market.Results.Count(r => r.Market.Status == Ebm.Services.Transfers.MarketStatus.FreeAgent));
+        market.Filter = Ebm.Services.Transfers.MarketFilter.UnderContract;
+        market.MinOverall = "60";
+        await market.SearchCommand.ExecuteAsync(null);
+        Assert.NotEmpty(market.Results);
+        Assert.All(market.Results, r => Assert.NotEqual("Aurora Milano", r.Club));
+        market.SelectedPlayer = market.Results.First(r => r.Market.ReleaseClause is null);
+        Assert.NotEmpty(market.PlayerDetails);
+        await market.AskClubCommand.ExecuteAsync(null);
+        Assert.Contains("accepts", market.Negotiation, StringComparison.Ordinal);
+        await market.AskPlayerCommand.ExecuteAsync(null);
+        Assert.NotNull(market.Negotiation);
+        market.OfferEnd = new DateTime(2028, 6, 30);
+        await market.BuyCommand.ExecuteAsync(null);
+        Assert.False(market.IsError, market.Message);
+        Assert.Equal(2, market.History.Count);
+        Assert.Equal(14, editor.ClubContracts.Current.Count);
+        await market.RunAiWindowCommand.ExecuteAsync(null);
+        Assert.False(market.IsError, market.Message);
+        Assert.NotEmpty(market.AiReport);
+
         var sizes = RunOnSta(() =>
         {
             // Like App.xaml: the themes are application resources, so each dictionary can use the previous ones.
             var resources = (System.Windows.Application.Current ?? new System.Windows.Application()).Resources;
-            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts" })
+            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts", "Transfers" })
             {
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Ebm.Desktop;component/Themes/{name}.xaml") });
             }
 
-            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("contracts-editor", editor.Contracts) }
+            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("transfer-market", editor.TransferMarket), ("contracts-editor", editor.Contracts) }
                 .Select(screen => Render(screen.Item1, screen.Item2))
                 .ToList();
         });

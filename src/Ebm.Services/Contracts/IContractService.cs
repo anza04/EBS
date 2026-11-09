@@ -77,8 +77,8 @@ public sealed record ContractLine(
 
     public bool IsUpcoming => Contract.IsUpcomingOn(Date);
 
-    /// <summary>"Running", "Starts yyyy-MM-dd", "Expired", "Terminated" or "Renewed".</summary>
-    public string StatusText => IsUpcoming ? $"Starts {Contract.StartDate:yyyy-MM-dd}" : IsRunning && Status == ContractStatus.Active ? "Running" : Status.ToString();
+    /// <summary>"Running", "Starts yyyy-MM-dd", "On loan", "Expired", "Terminated", "Transferred" or "Renewed".</summary>
+    public string StatusText => IsUpcoming ? $"Starts {Contract.StartDate:yyyy-MM-dd}" : IsRunning && Status == ContractStatus.Active ? "Running" : PlayerCatalog.DisplayName(Status);
 }
 
 /// <param name="Current">Running and upcoming contracts.</param>

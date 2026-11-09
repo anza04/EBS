@@ -1,10 +1,12 @@
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Players.Ratings;
+using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Players;
+using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,6 +34,9 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IClubService, ClubService>();
         services.TryAddSingleton(ContractNegotiator.Default);
         services.TryAddSingleton<IContractService, ContractService>();
+        services.TryAddSingleton(TransferNegotiator.Default);
+        services.TryAddSingleton(ClubRecruiter.Default);
+        services.TryAddSingleton<ITransferService, TransferService>();
 
         return services;
     }

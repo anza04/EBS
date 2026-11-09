@@ -295,7 +295,7 @@ public sealed class ContractServiceTests : IAsyncLifetime
             VALUES ('66666666-6666-6666-6666-666666666666', '44444444-4444-4444-4444-444444444444', '55555555-5555-5555-5555-555555555555', '2025-07-01', '2027-06-30', 90000);
             """);
 
-        Assert.EndsWith("_Contracts", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        Assert.EndsWith("_Transfers", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
         var c = Assert.Single(await db.ReadAsync(s => s.Repo<Contract, ContractId>().ListAsync()));
         Assert.Equal((ContractStatus.Active, PaymentFrequency.Monthly, 0L, true), (c.Status, c.PaymentFrequency, c.SigningBonus, c.PerformanceBonuses.IsEmpty));
         Assert.Equal(((long?)null, (DateOnly?)null, (DateOnly?)null, 0L), (c.ReleaseClause, c.ClubOptionUntil, c.TerminationDate, c.TerminationCompensation));

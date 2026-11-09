@@ -44,7 +44,7 @@ internal sealed class ClubService : IClubService
         var arena = club.HomeArenaId is { } arenaId ? await data.Repo<Arena, ArenaId>().FindAsync(arenaId, cancellationToken).ConfigureAwait(false) : null;
         var country = await data.Repo<Country, CountryId>().FindAsync(club.CountryId, cancellationToken).ConfigureAwait(false);
         var wageBill = (await data.RunningContractsAsync(cancellationToken).ConfigureAwait(false))
-            .Where(c => c.ClubId == clubId)
+            .Where(c => c.ClubId == clubId && c.Status != ContractStatus.OnLoan) // the loan club pays a loaned player (docs/TRANSFERS.md §4)
             .Sum(c => c.AnnualSalary);
         var (season, competitions) = await data.CurrentCompetitionsAsync(clubId, cancellationToken).ConfigureAwait(false);
         return new ClubProfile(roster, country?.Name ?? string.Empty, club.City ?? arena?.City, arena, season, competitions, wageBill);

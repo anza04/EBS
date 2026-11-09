@@ -3,6 +3,7 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Players;
 using Ebm.Domain.Staff;
+using Ebm.Domain.Transfers;
 
 namespace Ebm.Domain.Contracts;
 
@@ -193,6 +194,58 @@ public sealed class Contract : Entity<ContractId>
         Status = ContractStatus.Renewed;
     }
 
+    /// <summary>
+    /// Ends the contract from <paramref name="transferDate"/> because the player moves to another club (docs/TRANSFERS.md §3).
+    /// The player is paid nothing: his new club pays him from that day.
+    /// </summary>
+    public void Transfer(DateOnly transferDate)
+    {
+        RequireActive("transferred");
+        if (transferDate > EndDate)
+        {
+            throw new DomainValidationException($"The contract already ran out on {EndDate:yyyy-MM-dd}.");
+        }
+
+        TerminationDate = transferDate < StartDate ? StartDate : transferDate;
+        Status = ContractStatus.Transferred;
+    }
+
+    /// <summary>
+    /// The player goes out on loan from <paramref name="today"/> to <paramref name="until"/> (his last day at the loan
+    /// club, no later than the end date). The contract keeps running; the loan club pays him meanwhile (docs/TRANSFERS.md §4).
+    /// </summary>
+    public void SendOnLoan(DateOnly today, DateOnly until)
+    {
+        RequireActive("loaned out");
+        if (!IsRunningOn(today))
+        {
+            throw new DomainValidationException($"Only a running contract can be loaned out; this one runs from {StartDate:yyyy-MM-dd} to {EffectiveEndDate:yyyy-MM-dd}.");
+        }
+
+        if (until <= today || until > EndDate)
+        {
+            throw new DomainValidationException($"A loan must end after today and no later than the contract's end ({EndDate:yyyy-MM-dd}).");
+        }
+
+        if (until > today.AddYears(Loan.MaxYears))
+        {
+            throw new DomainValidationException($"A loan lasts at most {Loan.MaxYears} years.");
+        }
+
+        Status = ContractStatus.OnLoan;
+    }
+
+    /// <summary>The player is back from his loan: the contract is active again.</summary>
+    public void ReturnFromLoan()
+    {
+        if (Status != ContractStatus.OnLoan)
+        {
+            throw new DomainValidationException("The player is not on loan under this contract.");
+        }
+
+        Status = ContractStatus.Active;
+    }
+
     /// <summary>Records that the contract ran out; <paramref name="today"/> must be after the end date.</summary>
     public void Expire(DateOnly today)
     {
@@ -260,6 +313,11 @@ public sealed class Contract : Entity<ContractId>
 
     private void RequireActive(string action)
     {
+        if (Status == ContractStatus.OnLoan)
+        {
+            throw new DomainValidationException($"The player is out on loan; the contract cannot be {action} until he returns.");
+        }
+
         if (Status != ContractStatus.Active)
         {
             throw new DomainValidationException($"The contract is {Status.ToString().ToLowerInvariant()} and cannot be {action}.");

@@ -11,6 +11,7 @@
         <ResourceDictionary Source="Themes/Players.xaml" />
         <ResourceDictionary Source="Themes/Clubs.xaml" />
         <ResourceDictionary Source="Themes/Contracts.xaml" />
+        <ResourceDictionary Source="Themes/Transfers.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

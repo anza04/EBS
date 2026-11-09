@@ -717,6 +717,69 @@ namespace Ebm.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Transfers.Transfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Fee")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("FromClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("LoanEndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ParentContractId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("ReturnedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ToClubId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.HasIndex("ParentContractId");
+
+                    b.HasIndex("FromClubId", "Date");
+
+                    b.HasIndex("Kind", "ReturnedOn");
+
+                    b.HasIndex("PlayerId", "Date");
+
+                    b.HasIndex("ToClubId", "Date");
+
+                    b.ToTable("Transfers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Transfers_Clubs", "FromClubId IS NULL OR FromClubId <> ToClubId");
+
+                            t.HasCheckConstraint("CK_Transfers_Fee", "Fee >= 0");
+
+                            t.HasCheckConstraint("CK_Transfers_Loan", "(Kind = 'Loan') = (LoanEndDate IS NOT NULL) AND (LoanEndDate IS NULL OR LoanEndDate > Date)");
+
+                            t.HasCheckConstraint("CK_Transfers_Return", "ReturnedOn IS NULL OR (Kind = 'Loan' AND ReturnedOn > Date)");
+                        });
+                });
+
             modelBuilder.Entity("Ebm.Domain.Clubs.Arena", b =>
                 {
                     b.HasOne("Ebm.Domain.Countries.Country", null)
@@ -1147,6 +1210,36 @@ namespace Ebm.Persistence.Migrations
                     b.HasOne("Ebm.Domain.Seasons.Season", null)
                         .WithMany()
                         .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Transfers.Transfer", b =>
+                {
+                    b.HasOne("Ebm.Domain.Contracts.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("FromClubId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Contracts.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("ParentContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ToClubId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

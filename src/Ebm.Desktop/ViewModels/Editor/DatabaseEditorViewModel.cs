@@ -3,17 +3,19 @@ using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Players;
+using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Players;
+using Ebm.Services.Transfers;
 
 namespace Ebm.Desktop.ViewModels.Editor;
 
 /// <summary>
 /// The database editor: one page per record type, the import page, the player profile and comparison screens, the
-/// club profile and squad screens and the club contracts screen.
+/// club profile and squad screens, the club contracts screen and the transfer market.
 /// </summary>
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
@@ -22,7 +24,14 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     [ObservableProperty]
     private string _counts = string.Empty;
 
-    public DatabaseEditorViewModel(IDatabaseEditor editor, IDataImportService importer, IFilePicker filePicker, IPlayerProfileService profiles, IClubService clubs, IContractService contracts)
+    public DatabaseEditorViewModel(
+        IDatabaseEditor editor,
+        IDataImportService importer,
+        IFilePicker filePicker,
+        IPlayerProfileService profiles,
+        IClubService clubs,
+        IContractService contracts,
+        ITransferService transfers)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -39,6 +48,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ClubProfile = new ClubProfileViewModel(clubs, Lookups);
         Squad = new SquadViewModel(clubs, Lookups, ReloadAsync);
         ClubContracts = new ClubContractsViewModel(contracts, Lookups, ReloadAsync);
+        TransferMarket = new TransferMarketViewModel(transfers, contracts, Lookups, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -65,6 +75,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public ClubContractsViewModel ClubContracts { get; }
 
+    public TransferMarketViewModel TransferMarket { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -80,6 +92,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         await ClubProfile.RefreshAsync();
         await Squad.RefreshAsync();
         await ClubContracts.RefreshAsync();
+        await TransferMarket.RefreshAsync();
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";
     }
