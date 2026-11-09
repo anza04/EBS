@@ -9,6 +9,7 @@
         <ResourceDictionary Source="Themes/Shell.xaml" />
         <ResourceDictionary Source="Themes/Editor.xaml" />
         <ResourceDictionary Source="Themes/Players.xaml" />
+        <ResourceDictionary Source="Themes/Clubs.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

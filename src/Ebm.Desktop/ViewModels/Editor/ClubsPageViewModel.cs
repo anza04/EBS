@@ -24,6 +24,21 @@ public sealed partial class ClubsPageViewModel : EditorPageViewModel<Club>
     [ObservableProperty]
     private string _foundedYear = string.Empty;
 
+    [ObservableProperty]
+    private string _city = string.Empty;
+
+    [ObservableProperty]
+    private string _reputation = string.Empty;
+
+    [ObservableProperty]
+    private string _balance = string.Empty;
+
+    [ObservableProperty]
+    private string _wageBudget = string.Empty;
+
+    [ObservableProperty]
+    private BoardExpectation _boardExpectation = Club.DefaultBoardExpectation;
+
     public ClubsPageViewModel(IDatabaseEditor editor, EditorLookups lookups, Func<Task> reload)
         : base(editor, lookups, reload)
     {
@@ -40,11 +55,19 @@ public sealed partial class ClubsPageViewModel : EditorPageViewModel<Club>
         CountryId = item.CountryId;
         HomeArenaId = item.HomeArenaId;
         FoundedYear = item.FoundedYear?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+        City = item.City ?? string.Empty;
+        Reputation = item.Reputation.ToString(CultureInfo.CurrentCulture);
+        Balance = item.Balance.ToString(CultureInfo.CurrentCulture);
+        WageBudget = item.WageBudget.ToString(CultureInfo.CurrentCulture);
+        BoardExpectation = item.BoardExpectation;
     }
 
     protected override void ClearForm()
     {
-        Name = ShortName = FoundedYear = string.Empty;
+        Name = ShortName = FoundedYear = City = string.Empty;
+        Reputation = Club.DefaultReputation.ToString(CultureInfo.CurrentCulture);
+        Balance = WageBudget = "0";
+        BoardExpectation = Club.DefaultBoardExpectation;
         CountryId = null;
         HomeArenaId = null;
     }
@@ -57,7 +80,12 @@ public sealed partial class ClubsPageViewModel : EditorPageViewModel<Club>
             ShortName,
             Required(CountryId, "country"),
             HomeArenaId,
-            ParseOptionalInt(FoundedYear, "Founded year"));
+            ParseOptionalInt(FoundedYear, "Founded year"),
+            City,
+            ParseInt(Reputation, "Reputation"),
+            ParseLong(Balance, "Balance"),
+            ParseLong(WageBudget, "Wage budget"),
+            BoardExpectation);
         return (await Editor.SaveClubAsync(draft)).Value;
     }
 }

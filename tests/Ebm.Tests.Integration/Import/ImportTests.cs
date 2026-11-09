@@ -39,10 +39,10 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Empty(report.Problems);
         Assert.Equal(0, report.Rejected);
         Assert.True(report.Committed);
-        Assert.Equal(5 + 8 + 14 + 1 + 2 + 3 + 1 + 14 + 24 + 24, report.Added);
-        Assert.Equal(24, await CountAsync<Player, PlayerId>());
+        Assert.Equal(5 + 8 + 14 + 1 + 2 + 3 + 1 + 14 + 33 + 33, report.Added);
+        Assert.Equal(33, await CountAsync<Player, PlayerId>());
         Assert.Equal(14, await CountAsync<Club, ClubId>());
-        Assert.Equal(24, await CountAsync<Contract, ContractId>());
+        Assert.Equal(33, await CountAsync<Contract, ContractId>());
         Assert.True(File.Exists(report.LogFile));
         Assert.Contains("Added", await File.ReadAllTextAsync(report.LogFile!), StringComparison.Ordinal);
     }
@@ -76,7 +76,7 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.All(report.Records, r => Assert.Equal(ImportOutcome.Rejected, r.Outcome));
         Assert.Contains("already exists", report.Records.First(r => r.Kind == ImportRecordKind.Player).Messages[0], StringComparison.Ordinal);
         Assert.False(report.Committed);
-        Assert.Equal(24, await CountAsync<Player, PlayerId>());
+        Assert.Equal(33, await CountAsync<Player, PlayerId>());
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class ImportTests : IAsyncLifetime
         var updated = await _db.ReadAsync(s => s.Repo<Player, PlayerId>().FindAsync(player.Id));
         Assert.Equal(Position.Center, updated!.Position);
         Assert.Equal(99, updated.Attributes.WorkRate);
-        Assert.Equal(24, await CountAsync<Player, PlayerId>());
+        Assert.Equal(33, await CountAsync<Player, PlayerId>());
     }
 
     [Fact]
@@ -147,6 +147,30 @@ public sealed class ImportTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Optional_club_fields_are_read_and_validated()
+    {
+        var countries = await WriteAsync("countries.csv", Countries);
+        var clubs = await WriteAsync("clubs.csv",
+            "name,shortName,country,city,reputation,balance,wageBudget,boardExpectation\n" +
+            "Full Club,FUL,ITA,Turin,72,-1500000,6000000,ReachPlayoffs\n" +
+            "Plain Club,PLA,ITA,,,,,\n" +
+            "Bad Club,BAD,ITA,,0,x,-5,Champions\n");
+
+        var report = await Importer.ImportAsync([countries, clubs], new ImportOptions());
+
+        var stored = (await ListAsync<Club, ClubId>()).ToDictionary(c => c.ShortName);
+        Assert.Equal(2, stored.Count);
+        var full = stored["FUL"];
+        Assert.Equal(("Turin", 72, -1_500_000L, 6_000_000L, BoardExpectation.ReachPlayoffs), (full.City, full.Reputation, full.Balance, full.WageBudget, full.BoardExpectation));
+        var plain = stored["PLA"];
+        Assert.Equal(((string?)null, Club.DefaultReputation, 0L, Club.DefaultBoardExpectation), (plain.City, plain.Reputation, plain.WageBudget, plain.BoardExpectation));
+        var messages = report.Records.Single(r => r.Outcome == ImportOutcome.Rejected).Messages;
+        Assert.Contains("'reputation' must be between 1 and 100 (got '0').", messages);
+        Assert.Contains(messages, m => m.Contains("'balance' must be a whole number", StringComparison.Ordinal));
+        Assert.Contains(messages, m => m.Contains("'boardExpectation' must be one of", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task Duplicate_players_and_clubs_are_detected_in_the_database_and_within_the_import()
     {
         await Importer.ImportAsync([SampleFile], new ImportOptions());
@@ -166,7 +190,7 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Contains(existing.Id.ToString(), results["players.csv:2"].Messages[0], StringComparison.Ordinal);
         Assert.Equal(ImportOutcome.Added, results["players.csv:3"].Outcome);
         Assert.Contains("earlier in this import", results["players.csv:4"].Messages[0], StringComparison.Ordinal);
-        Assert.Equal(25, await CountAsync<Player, PlayerId>());
+        Assert.Equal(34, await CountAsync<Player, PlayerId>());
     }
 
     [Fact]
@@ -217,7 +241,7 @@ public sealed class ImportTests : IAsyncLifetime
         var file = await WriteAsync("countries.csv", "code,name\nITA,Italy\nXX,Broken\n");
         var allOrNothing = await Importer.ImportAsync([file], new ImportOptions(AllOrNothing: true));
 
-        Assert.Equal(96, dryRun.Added);
+        Assert.Equal(114, dryRun.Added);
         Assert.False(dryRun.Committed);
         Assert.Equal(1, allOrNothing.Added);
         Assert.False(allOrNothing.Committed);

@@ -1,13 +1,14 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109125814_PlayerModel`** (Step 05).
+Schema version: **`20261109171322_ClubsAndRosters`** (Step 06).
 
 | Migration | Step | Change |
 |---|---|---|
 | `20261109114155_InitialSchema` | 02 | 17 tables |
 | `20261109124652_FixtureStages` | 04 | `Fixtures.Stage` and `Fixtures.GameNumber` with defaults, so existing fixtures stay regular-season games. Add-column only, so the upgrade runs in one transaction (a check constraint would force a table rebuild on SQLite; the domain enforces the range) |
 | `20261109125814_PlayerModel` | 05 | Players: profile and condition columns (with defaults). `PlayerAttributes` replaced by the 27-attribute table (old table renamed, new one created and filled from the old ratings, old one dropped) and new `PlayerTendencies`. Hand-written `Up` so nothing is rebuilt and the upgrade stays in one transaction; mapping in `docs/PLAYER_MODEL.md` §7 |
+| `20261109171322_ClubsAndRosters` | 06 | Clubs: `City`, `Reputation`, `Balance`, `WageBudget`, `BoardExpectation` (add-column with defaults; `City` copied from the home arena). New `RosterSpots` table |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -41,7 +42,8 @@ Season ─┬─< CompetitionParticipant >─ Competition, Club      (club enter
                  └── Match (1:1) ─< PlayerMatchStatistics >─ Player, Club (club represented)
 
 Club ─┬─< Contract >─ Player | StaffMember (exactly one)
-      └─< PlayerClubHistory >─ Player
+      ├─< PlayerClubHistory >─ Player
+      └─< RosterSpot >─ Player (unique: one squad role per player)
 ```
 
 `─<` means one-to-many. All relationships are by ID only (the domain has no navigation properties), so entities stay small and loading is explicit.
@@ -114,6 +116,14 @@ A club's entry in a competition for a season. This is how a club takes part in s
 | CountryId | id | FK Countries |
 | HomeArenaId | id? | FK Arenas; arenas can be shared |
 | FoundedYear | int? | 1850–2100 |
+| City | text(100)? | Null = show the home arena's city |
+| Reputation | int | 1–100, default 50 |
+| Balance | int | Euros, ±10,000,000,000, default 0 |
+| WageBudget | int | Euros a year, 0–1,000,000,000, default 0 |
+| BoardExpectation | text(32) | `WinTitle`, `ReachPlayoffs`, `MidTable` (default), `AvoidRelegation`, `WinPromotion` |
+
+Step 06 columns are range-checked by the domain only (decision 21). `BoardExpectation` has an EF sentinel of `-1`,
+so `WinTitle` (the enum's CLR default) is always written instead of being replaced by the column default.
 
 ### Players
 | Column | Type | Rules |
@@ -185,6 +195,21 @@ One row per spell of a player at a club.
 **At most one current spell per player:** a unique index on `PlayerId` filtered by `EndDate IS NULL`
 (`IX_PlayerClubHistory_PlayerId_Current`). A move is recorded by closing the current spell and opening a new one.
 Overlap checks between closed spells and loans are added with transfers (Step 08).
+
+### RosterSpots
+A player's role in his current club's squad: current state, not history (rules in `docs/ROSTER_RULES.md`).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerId | id | FK Players, **unique** (one spot per player) |
+| ClubId | id | FK Clubs, indexed |
+| Role | text(16) | `Starter`, `Rotation`, `Bench`, `Inactive`, `Youth` |
+| LineupPosition | text(32)? | Set if and only if `Role = 'Starter'` (check constraint) |
+| RotationOrder | int? | Set if and only if `Role = 'Rotation'`, ≥ 1 (check constraint) |
+
+A club player without a row is on the bench. Rows of players who left the club are moved or dropped when the squad
+is saved.
 
 ### Fixtures
 | Column | Type | Rules |

@@ -36,6 +36,8 @@ public sealed partial class EditorLookups : ObservableObject
 
     public IReadOnlyList<Position> Positions { get; } = Enum.GetValues<Position>();
 
+    public IReadOnlyList<BoardExpectation> BoardExpectations { get; } = Enum.GetValues<BoardExpectation>();
+
     public IReadOnlyList<CompetitionType> CompetitionTypes { get; } = Enum.GetValues<CompetitionType>();
 
     public string CountryName(CountryId? id) => Countries.FirstOrDefault(c => c.Id == id)?.Name ?? string.Empty;

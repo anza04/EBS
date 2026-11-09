@@ -1,3 +1,4 @@
+using Ebm.Domain.Clubs;
 using Ebm.Domain.Players;
 using Ebm.Hosting;
 using Ebm.Persistence;
@@ -11,11 +12,13 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
+    private const string LatestMigration = "_ClubsAndRosters";
+
     private static readonly string[] ExpectedTables =
     [
         "Arenas", "Clubs", "CompetitionParticipants", "Competitions", "Contracts", "Countries", "Divisions",
         "Fixtures", "LeagueStandings", "Leagues", "Matches", "PlayerAttributes", "PlayerClubHistory",
-        "PlayerMatchStatistics", "PlayerTendencies", "Players", "Seasons", "Staff",
+        "PlayerMatchStatistics", "PlayerTendencies", "Players", "RosterSpots", "Seasons", "Staff",
     ];
 
     [Fact]
@@ -68,7 +71,7 @@ public sealed class DatabaseInitializerTests
 
         var version = await db.Initializer.InitializeAsync();
 
-        Assert.EndsWith("_PlayerModel", version, StringComparison.Ordinal);
+        Assert.EndsWith(LatestMigration, version, StringComparison.Ordinal);
         Assert.Equal(["RegularSeason|1"], await db.QueryStringsAsync("SELECT Stage || '|' || GameNumber FROM Fixtures"));
     }
 
@@ -90,7 +93,7 @@ public sealed class DatabaseInitializerTests
             VALUES ('{id}', 60, 81, 40, 35, 90, 70, 75, 66);
             """);
 
-        Assert.EndsWith("_PlayerModel", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        Assert.EndsWith(LatestMigration, await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
         var player = await db.ReadAsync(s => s.Repo<Player, PlayerId>().FindAsync(PlayerId.From(Guid.Parse(id))));
 
         Assert.NotNull(player);
@@ -107,6 +110,32 @@ public sealed class DatabaseInitializerTests
         Assert.Equal((66, 66, 66, 66), (a.Concentration, a.Leadership, a.Consistency, a.WorkRate));
         Assert.Equal(PlayerTendencies.Suggest(a).ToDictionary(), player.Tendencies.ToDictionary());
         Assert.Empty(await db.QueryStringsAsync("SELECT name FROM sqlite_master WHERE name LIKE 'PlayerAttributes_%'"));
+    }
+
+    [Fact]
+    public async Task Step_05_clubs_upgrade_with_defaults_and_the_arena_city()
+    {
+        await using var db = await TestDatabase.CreateAsync();
+        await db.ReadAsync(async s =>
+        {
+            await s.Services.GetRequiredService<EbmDbContext>().Database.MigrateAsync("20261109125814_PlayerModel");
+            return 0;
+        });
+        const string withArena = "44444444-4444-4444-4444-444444444444", withoutArena = "55555555-5555-5555-5555-555555555555";
+        await db.ExecuteSqlAsync($"""
+            INSERT INTO Countries (Id, Code, Name) VALUES ('33333333-3333-3333-3333-333333333333', 'ITA', 'Italy');
+            INSERT INTO Arenas (Id, Name, City, CountryId, Capacity) VALUES ('66666666-6666-6666-6666-666666666666', 'Old Arena', 'Varese', '33333333-3333-3333-3333-333333333333', 5000);
+            INSERT INTO Clubs (Id, Name, ShortName, CountryId, HomeArenaId) VALUES
+              ('{withArena}', 'Old Varese', 'VAR', '33333333-3333-3333-3333-333333333333', '66666666-6666-6666-6666-666666666666'),
+              ('{withoutArena}', 'Old Roma', 'ROM', '33333333-3333-3333-3333-333333333333', NULL);
+            """);
+
+        Assert.EndsWith(LatestMigration, await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        var clubs = await db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync());
+
+        var varese = clubs.Single(c => c.Id.Value == Guid.Parse(withArena));
+        Assert.Equal(("Varese", Club.DefaultReputation, 0L, 0L, Club.DefaultBoardExpectation), (varese.City, varese.Reputation, varese.Balance, varese.WageBudget, varese.BoardExpectation));
+        Assert.Null(clubs.Single(c => c.Id.Value == Guid.Parse(withoutArena)).City);
     }
 
     [Fact]

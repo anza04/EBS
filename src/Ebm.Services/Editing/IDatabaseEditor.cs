@@ -61,8 +61,19 @@ public sealed record PlayerDraft(
     PlayerAttributes Attributes,
     PlayerTendencies Tendencies);
 
-/// <summary>Values of a club to create (<paramref name="Id"/> is <c>null</c>) or update.</summary>
-public sealed record ClubDraft(ClubId? Id, string Name, string ShortName, CountryId CountryId, ArenaId? HomeArenaId, int? FoundedYear);
+/// <summary>Values of a club to create (<paramref name="Id"/> is <c>null</c>) or update. Balance and budget are in whole euros.</summary>
+public sealed record ClubDraft(
+    ClubId? Id,
+    string Name,
+    string ShortName,
+    CountryId CountryId,
+    ArenaId? HomeArenaId,
+    int? FoundedYear,
+    string? City = null,
+    int Reputation = Club.DefaultReputation,
+    long Balance = 0,
+    long WageBudget = 0,
+    BoardExpectation BoardExpectation = Club.DefaultBoardExpectation);
 
 /// <summary>Values of a player contract to create (<paramref name="Id"/> is <c>null</c>) or update. Club and player are fixed once created.</summary>
 public sealed record ContractDraft(ContractId? Id, ClubId ClubId, PlayerId PlayerId, DateOnly StartDate, DateOnly EndDate, long AnnualSalary);

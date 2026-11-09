@@ -3,6 +3,36 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] — 2026-11-09 — Step 06: Club and roster management
+
+### Added
+- Club profile fields: city (defaults to the home arena's city), reputation, balance, wage budget and board
+  expectation; edited in the *Clubs* tab and importable (optional columns with defaults).
+- Squad roles (`Ebm.Domain.Rosters`): starter (with lineup position), rotation (with order), bench, inactive and
+  youth, stored one per player in the new `RosterSpots` table; club players without a stored role are on the bench.
+- Roster validation (`RosterValidator`): starting five complete with distinct positions, injured starters, squad
+  size, matchday squad size, foreign/domestic limits, minimum age (errors) and doubtful starters, injured reserves,
+  unfamiliar lineup positions, short rotation, missing contracts (warnings).
+- Data-driven squad rules (`SquadRules`): club defaults plus per-competition registration rules in the rules JSON
+  (`registration.squad`), checked for every competition the club plays this season.
+- `IClubService`: club profile (country, arena, current season and competitions, wage bill vs budget), squad,
+  save of all roles (rotation order from list order), and player assignment to a club (closes/opens club spells,
+  moves the squad role).
+- Screens: *Club profile* and *Squad* (role/lineup/rotation editing with live validation, starting-five panel,
+  add a player to the squad). Documented in `docs/ROSTER_RULES.md`.
+- Sample dataset: club profiles for every club and 9 more players, so Aurora Milano has a complete 12-player squad.
+- Tests: roster rules and validator, club profile rules, competition squad rules, club service (complete roster,
+  rotation order, invalid configurations, injured starter, registration limits, assignment), club import, Step 05
+  database upgrade, database constraints, squad screen save and render.
+
+### Changed
+- Migration `ClubsAndRosters` (add-column only on `Clubs`, plus the new table); existing clubs keep their data.
+- `ClubDraft` gains the profile fields (optional parameters); `DatabaseEditorViewModel` takes `IClubService`.
+
+### Fixed
+- `BoardExpectation.WinTitle` (enum value 0) would have been replaced by the column default on insert; the EF
+  sentinel is now `-1`.
+
 ## [0.5.0] — 2026-11-09 — Step 05: Player model and attributes
 
 ### Added

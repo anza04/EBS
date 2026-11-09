@@ -196,6 +196,8 @@
           <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
           <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
           <DataGridTextColumn Header="Founded" Binding="{Binding FoundedYear}" Width="70" />
+          <DataGridTextColumn Header="Reputation" Binding="{Binding Reputation}" Width="80" />
+          <DataGridTextColumn Header="Wage budget (€)" Binding="{Binding WageBudget, StringFormat=N0}" Width="120" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -211,6 +213,27 @@
           <ComboBox ItemsSource="{Binding Lookups.OptionalArenas}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding HomeArenaId}" />
           <TextBlock Text="Founded year (optional)" Style="{StaticResource Form.Label}" />
           <TextBox Text="{Binding FoundedYear, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="City (optional, default: arena city)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock Text="Reputation (1–100)" Style="{StaticResource Form.Label}" />
+              <TextBox Text="{Binding Reputation, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Text="Balance (€)" Style="{StaticResource Form.Label}" />
+              <TextBox Text="{Binding Balance, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+              <TextBlock Text="Board expectation" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding Lookups.BoardExpectations}" SelectedItem="{Binding BoardExpectation}" />
+              <TextBlock Text="Wage budget (€ a year)" Style="{StaticResource Form.Label}" />
+              <TextBox Text="{Binding WageBudget, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+          </Grid>
           <ContentControl Template="{StaticResource Editor.Actions}" />
         </StackPanel>
       </Border>

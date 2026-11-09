@@ -23,7 +23,12 @@
       "shortName": "EXB",
       "country": "ITA",
       "homeArenaId": "0198a000-0000-7000-8000-000000000001",
-      "foundedYear": 1950
+      "foundedYear": 1950,
+      "city": "Example City",
+      "reputation": 60,
+      "balance": 1500000,
+      "wageBudget": 4000000,
+      "boardExpectation": "MidTable"
     }
   ],
   "leagues": [

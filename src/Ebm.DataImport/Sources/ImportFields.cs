@@ -19,7 +19,7 @@ internal static class ImportFields
     [
         new(ImportRecordKind.Country, "countries", ["code", "name"], ["id"]),
         new(ImportRecordKind.Arena, "arenas", ["name", "city", "country", "capacity"], ["id"]),
-        new(ImportRecordKind.Club, "clubs", ["name", "shortName", "country"], ["id", "homeArenaId", "foundedYear"]),
+        new(ImportRecordKind.Club, "clubs", ["name", "shortName", "country"], ["id", "homeArenaId", "foundedYear", "city", "reputation", "balance", "wageBudget", "boardExpectation"]),
         new(ImportRecordKind.League, "leagues", ["name", "shortName"], ["id", "country"]),
         new(ImportRecordKind.Division, "divisions", ["leagueId", "name", "level"], ["id"]),
         new(ImportRecordKind.Competition, "competitions", ["name", "shortName", "type"], ["id", "country", "divisionId", "rules"]),

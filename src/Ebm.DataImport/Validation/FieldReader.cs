@@ -49,6 +49,14 @@ internal sealed class FieldReader
     public long Long(string name) =>
         Parse(name, true, "a whole number", v => long.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : (long?)null) ?? 0;
 
+    public long? OptionalLong(string name) =>
+        Parse(name, false, "a whole number", v => long.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : (long?)null);
+
+    /// <summary>Reads an optional enum value; <paramref name="fallback"/> when the field is empty.</summary>
+    public TEnum OptionalEnum<TEnum>(string name, TEnum fallback)
+        where TEnum : struct, Enum =>
+        Optional(name) is null ? fallback : Enum<TEnum>(name);
+
     public DateOnly Date(string name) =>
         Parse(name, true, $"a date in the form YYYY-MM-DD", v =>
             DateOnly.TryParseExact(v, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var r) ? r : (DateOnly?)null) ?? default;

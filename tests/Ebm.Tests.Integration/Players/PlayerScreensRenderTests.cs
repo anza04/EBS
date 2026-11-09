@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Editor;
+using Ebm.Domain.Rosters;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Players;
@@ -14,13 +15,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Ebm.Tests.Integration.Players;
 
 /// <summary>
-/// Renders the player screens off-screen with the real themes, so missing resources or broken templates fail here.
+/// Renders the player and club screens off-screen with the real themes, so missing resources or broken templates fail here.
 /// Set EBM_SCREENSHOT_DIR to also save the renders as PNG files for visual review.
 /// </summary>
 public sealed class PlayerScreensRenderTests
 {
     [Fact]
-    public async Task Player_editor_profile_and_comparison_render_with_the_application_themes()
+    public async Task Player_and_club_screens_render_with_the_application_themes()
     {
         await using var db = await TestDatabase.CreateAsync(new FixedTimeProvider(new DateOnly(2026, 11, 9)));
         await db.Services.GetRequiredService<IDataImportService>()
@@ -29,7 +30,8 @@ public sealed class PlayerScreensRenderTests
             db.Services.GetRequiredService<IDatabaseEditor>(),
             db.Services.GetRequiredService<IDataImportService>(),
             new NoFiles(),
-            db.Services.GetRequiredService<IPlayerProfileService>());
+            db.Services.GetRequiredService<IPlayerProfileService>(),
+            db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>());
         await editor.ReloadAsync();
         var players = editor.Lookups.Players;
         editor.Players.SelectedItem = editor.Players.Items[0];
@@ -37,17 +39,41 @@ public sealed class PlayerScreensRenderTests
         await editor.Profile.RefreshAsync();
         (editor.Comparison.PlayerA, editor.Comparison.PlayerB) = (players[0].Id, players[1].Id);
         await editor.Comparison.RefreshAsync();
+        var club = editor.Lookups.Clubs.Single(c => c.Name == "Aurora Milano").Id; // the sample club with a full squad
+        (editor.ClubProfile.ClubId, editor.Squad.ClubId) = (club, club);
+        await editor.ClubProfile.RefreshAsync();
+        await editor.Squad.RefreshAsync();
+
+        // Build a lineup through the squad screen: a starter per position, five in the rotation, the rest on the bench.
+        var rows = editor.Squad.Rows.ToList();
+        foreach (var position in Enum.GetValues<Ebm.Domain.Players.Position>())
+        {
+            rows.First(r => r.Role != RosterRole.Starter && r.Player.Player.Position == position).Role = RosterRole.Starter;
+        }
+
+        foreach (var (row, i) in rows.Where(r => r.Role != RosterRole.Starter).Select((r, i) => (r, i)))
+        {
+            row.Role = i < 5 ? RosterRole.Rotation : RosterRole.Bench;
+            row.RotationOrder = i < 5 ? $"{5 - i}" : string.Empty;
+        }
+
+        Assert.True(editor.Squad.IsValid, string.Join(" | ", editor.Squad.Issues.Select(i => i.Message)));
+        await editor.Squad.SaveCommand.ExecuteAsync(null);
+        Assert.Equal("Saved. The roster is valid.", editor.Squad.Message);
+        var rotation = rows.Where(r => r.Role == RosterRole.Rotation).OrderBy(r => int.Parse(r.RotationOrder, System.Globalization.CultureInfo.InvariantCulture)).Select(r => r.Name);
+        Assert.Equal(rotation, editor.Squad.Rows.Where(r => r.Role == RosterRole.Rotation).Select(r => r.Name)); // reloaded in rotation order
+        await editor.ClubProfile.RefreshAsync();
 
         var sizes = RunOnSta(() =>
         {
             // Like App.xaml: the themes are application resources, so each dictionary can use the previous ones.
             var resources = (System.Windows.Application.Current ?? new System.Windows.Application()).Resources;
-            foreach (var name in new[] { "Shell", "Editor", "Players" })
+            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs" })
             {
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Ebm.Desktop;component/Themes/{name}.xaml") });
             }
 
-            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison) }
+            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad) }
                 .Select(screen => Render(screen.Item1, screen.Item2))
                 .ToList();
         });
@@ -55,6 +81,9 @@ public sealed class PlayerScreensRenderTests
         Assert.All(sizes, s => Assert.True(s > 0, "A screen rendered no content."));
         Assert.Equal(27, editor.Players.Ratings.Count);
         Assert.NotEmpty(editor.Comparison.Rows);
+        Assert.NotEmpty(editor.ClubProfile.Details);
+        Assert.NotEmpty(editor.Squad.Rows);
+        Assert.Equal(5, editor.Squad.Lineup.Count);
     }
 
     private static int Render(string name, object viewModel)

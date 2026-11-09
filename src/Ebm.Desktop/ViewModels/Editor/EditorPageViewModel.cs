@@ -85,6 +85,11 @@ public abstract partial class EditorPageViewModel<TItem> : ObservableObject
             : throw new DomainValidationException($"{field} must be a whole number.");
     }
 
+    protected static long ParseLong(string? text, string field) =>
+        long.TryParse(text?.Trim(), NumberStyles.Integer | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out var value)
+            ? value
+            : throw new DomainValidationException($"{field} must be a whole number of euros.");
+
     protected static DateOnly RequiredDate(DateTime? value, string field) =>
         value is { } date ? DateOnly.FromDateTime(date) : throw new DomainValidationException($"{field} is required.");
 

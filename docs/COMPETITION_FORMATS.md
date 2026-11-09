@@ -46,6 +46,7 @@ Property names are case-insensitive; enum values are text.
 | `registration.minTeams` | 2 | 2–40; checked when the schedule is generated |
 | `registration.maxTeams` | 20 | `minTeams`–40; checked at every registration |
 | `registration.sameCountry` | `true` | Clubs must be from the competition's country (ignored for international competitions) |
+| `registration.squad` | club defaults | Player registration limits: `minPlayers`, `maxPlayers`, `matchdayPlayers`, `recommendedRotation`, `maxForeignPlayers`, `minDomesticPlayers`, `minAge` (`docs/ROSTER_RULES.md` §4) |
 | `regularSeason.legs` | 2 | 1–4 |
 | `regularSeason.daysBetweenRounds` | 7 | 1–30 |
 | `tieBreakers` | `["HeadToHeadWins","HeadToHeadPointDifference","PointDifference","PointsFor"]` | Distinct values from §4 |

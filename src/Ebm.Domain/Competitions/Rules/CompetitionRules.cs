@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ebm.Domain.Common;
+using Ebm.Domain.Rosters;
 
 namespace Ebm.Domain.Competitions.Rules;
 
@@ -94,7 +95,9 @@ public sealed record CompetitionRules
         Require(PointsForWin > PointsForLoss, "pointsForWin must be greater than pointsForLoss");
         Require(Registration is not null && RegularSeason is not null && Promotion is not null && Relegation is not null && TieBreakers is not null,
             "registration, regularSeason, tieBreakers, promotion and relegation cannot be null");
-        Guard.Range(Registration!.MinTeams, 2, RegistrationRules.TeamLimit, "Rules: registration.minTeams");
+        Require(Registration!.Squad is not null, "registration.squad cannot be null");
+        Registration.Squad!.Validate("Rules: registration.squad");
+        Guard.Range(Registration.MinTeams, 2, RegistrationRules.TeamLimit, "Rules: registration.minTeams");
         Guard.Range(Registration.MaxTeams, Registration.MinTeams, RegistrationRules.TeamLimit, "Rules: registration.maxTeams");
         Guard.Range(RegularSeason!.Legs, 1, RegularSeasonRules.MaxLegs, "Rules: regularSeason.legs");
         Guard.Range(RegularSeason.DaysBetweenRounds, 1, 30, "Rules: regularSeason.daysBetweenRounds");
@@ -145,6 +148,9 @@ public sealed record RegistrationRules
 
     /// <summary>Clubs must come from the competition's country (ignored for international competitions).</summary>
     public bool SameCountry { get; init; } = true;
+
+    /// <summary>Player registration limits of each club's squad (docs/ROSTER_RULES.md).</summary>
+    public SquadRules Squad { get; init; } = SquadRules.Default;
 }
 
 public sealed record RegularSeasonRules

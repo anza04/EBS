@@ -1,0 +1,146 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:cl="clr-namespace:Ebm.Desktop.ViewModels.Clubs">
+  <!-- Club profile and squad screens. Uses the tokens from Shell.xaml, the styles from Editor.xaml and Players.Lines from Players.xaml. -->
+
+  <DataTemplate DataType="{x:Type cl:ClubProfileViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+        <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" Margin="20,0,0,0" />
+      </StackPanel>
+      <UniformGrid Columns="2" VerticalAlignment="Top">
+        <Border Style="{StaticResource Card}" Padding="16" Margin="0,0,12,12">
+          <StackPanel>
+            <TextBlock Text="Details" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+            <ContentControl Content="{Binding Details}" ContentTemplate="{StaticResource Players.Lines}" />
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Card}" Padding="16" Margin="0,0,0,12">
+          <StackPanel>
+            <TextBlock Text="Finances" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+            <ContentControl Content="{Binding Finances}" ContentTemplate="{StaticResource Players.Lines}" />
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Card}" Padding="16" Margin="0,0,12,0">
+          <StackPanel>
+            <TextBlock Text="Current competitions" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+            <ContentControl Content="{Binding Competitions}" ContentTemplate="{StaticResource Players.Lines}" />
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Card}" Padding="16">
+          <StackPanel>
+            <TextBlock Text="Squad" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+            <ContentControl Content="{Binding Squad}" ContentTemplate="{StaticResource Players.Lines}" />
+          </StackPanel>
+        </Border>
+      </UniformGrid>
+    </DockPanel>
+  </DataTemplate>
+
+  <Style x:Key="Clubs.IssueRow" TargetType="DataGridRow">
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsError}" Value="True">
+        <Setter Property="Foreground" Value="{StaticResource Brush.Error}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <DataTemplate DataType="{x:Type cl:SquadViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+        <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+        <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="20,0,0,0" />
+      </StackPanel>
+      <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
+        <Button Content="Save squad" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0" />
+        <Button Content="Discard changes" Command="{Binding RevertCommand}" Style="{StaticResource Button.Secondary}" />
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Status}" Margin="16,0,0,0" VerticalAlignment="Center" />
+      </StackPanel>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="380" />
+        </Grid.ColumnDefinitions>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <DataGrid ItemsSource="{Binding Rows}" Style="{StaticResource Editor.Grid}" RowHeight="30">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="140" />
+              <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="100" />
+              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
+              <DataGridTextColumn Header="Nationality" Binding="{Binding Nationality}" Width="120" />
+              <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="40" />
+              <DataGridTextColumn Header="Availability" Binding="{Binding Availability}" Width="85" />
+              <DataGridTextColumn Header="Contract" Binding="{Binding Contract}" Width="60" />
+              <DataGridTemplateColumn Header="Role" Width="100">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <ComboBox ItemsSource="{Binding DataContext.Roles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                              SelectedItem="{Binding Role, UpdateSourceTrigger=PropertyChanged}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Header="Starts at" Width="120">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <ComboBox ItemsSource="{Binding DataContext.Lookups.Positions, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                              SelectedItem="{Binding LineupPosition, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsStarter}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Header="Rotation #" Width="75">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBox Text="{Binding RotationOrder, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsRotation}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+          <DataGrid Grid.Row="2" ItemsSource="{Binding Issues}" Style="{StaticResource Editor.Grid}" RowStyle="{StaticResource Clubs.IssueRow}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="70" />
+              <DataGridTextColumn Header="Applies to" Binding="{Binding Scope}" Width="130" />
+              <DataGridTextColumn Header="Problem" Binding="{Binding Message}" Width="*" MinWidth="420" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+          <Border Style="{StaticResource Card}" Padding="16">
+            <StackPanel>
+              <TextBlock Text="Starting five" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+              <DataGrid ItemsSource="{Binding Lineup}" Style="{StaticResource Editor.Grid}">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="95" />
+                  <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
+                  <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="48" />
+                  <DataGridTextColumn Header="Fit" Binding="{Binding Familiarity}" Width="68" />
+                </DataGrid.Columns>
+              </DataGrid>
+              <TextBlock Text="Rating = effective rating at the lineup position. Rotation players come in by rotation number."
+                         Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+            <StackPanel>
+              <TextBlock Text="Add a player to the squad" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+              <TextBlock Text="Moves the player to this club from today (contracts are unchanged)." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
+              <TextBlock Text="Player" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding Lookups.Players}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding PlayerToAdd}" />
+              <TextBlock Text="Joins as" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding JoinRoles}" SelectedItem="{Binding RoleToAdd}" />
+              <Button Content="Add to squad" Command="{Binding AddPlayerCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,12,0,0" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

@@ -53,6 +53,22 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("Balance")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L);
+
+                    b.Property<string>("BoardExpectation")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("MidTable");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("CountryId")
                         .HasColumnType("TEXT");
 
@@ -67,10 +83,20 @@ namespace Ebm.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Reputation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(50);
+
                     b.Property<string>("ShortName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("WageBudget")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L);
 
                     b.HasKey("Id");
 
@@ -503,6 +529,44 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("PlayerClubHistory", null, t =>
                         {
                             t.HasCheckConstraint("CK_PlayerClubHistory_Dates", "EndDate IS NULL OR EndDate >= StartDate");
+                        });
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Rosters.RosterSpot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LineupPosition")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RotationOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("RosterSpots", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RosterSpots_LineupPosition", "(Role = 'Starter') = (LineupPosition IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_RosterSpots_RotationOrder", "(Role = 'Rotation') = (RotationOrder IS NOT NULL) AND (RotationOrder IS NULL OR RotationOrder >= 1)");
                         });
                 });
 
@@ -985,6 +1049,21 @@ namespace Ebm.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Ebm.Domain.Players.PlayerClubHistoryEntry", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Rosters.RosterSpot", b =>
                 {
                     b.HasOne("Ebm.Domain.Clubs.Club", null)
                         .WithMany()

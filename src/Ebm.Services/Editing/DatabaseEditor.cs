@@ -68,12 +68,22 @@ internal sealed class DatabaseEditor : IDatabaseEditor
         ArgumentNullException.ThrowIfNull(draft);
         return SaveAsync<Club, ClubId>(
             draft.Id,
-            () => new Club(ClubId.New(), draft.Name, draft.ShortName, draft.CountryId, draft.HomeArenaId, draft.FoundedYear),
-            c => c.UpdateDetails(draft.Name, draft.ShortName, draft.CountryId, draft.HomeArenaId, draft.FoundedYear),
+            () => Apply(new Club(ClubId.New(), draft.Name, draft.ShortName, draft.CountryId, draft.HomeArenaId, draft.FoundedYear), draft),
+            c =>
+            {
+                c.UpdateDetails(draft.Name, draft.ShortName, draft.CountryId, draft.HomeArenaId, draft.FoundedYear);
+                Apply(c, draft);
+            },
             DuplicateKeys.Of,
             c => $"A club named {c.Name} already exists in this country.",
             "club",
             cancellationToken);
+    }
+
+    private static Club Apply(Club club, ClubDraft draft)
+    {
+        club.UpdateProfile(draft.City, draft.Reputation, draft.Balance, draft.WageBudget, draft.BoardExpectation);
+        return club;
     }
 
     public Task<ContractId> SaveContractAsync(ContractDraft draft, CancellationToken cancellationToken = default)

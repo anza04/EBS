@@ -39,6 +39,8 @@
       <TabItem Header="Player profile" Content="{Binding Profile}" />
       <TabItem Header="Compare players" Content="{Binding Comparison}" />
       <TabItem Header="Clubs" Content="{Binding Clubs}" />
+      <TabItem Header="Club profile" Content="{Binding ClubProfile}" />
+      <TabItem Header="Squad" Content="{Binding Squad}" />
       <TabItem Header="Contracts" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">
         <Grid Margin="16">

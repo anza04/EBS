@@ -71,9 +71,11 @@ internal sealed class ImportSession
         ImportRecordKind.Arena => Apply(record, _arenas, (f, id) =>
             new Arena(id, f.Text("name"), f.Text("city"), CountryRef(f, "country"), f.Int("capacity")),
             (target, a) => target.UpdateDetails(a.Name, a.City, a.CountryId, a.Capacity)),
-        ImportRecordKind.Club => Apply(record, _clubs, (f, id) =>
-            new Club(id, f.Text("name"), f.Text("shortName"), CountryRef(f, "country"), OptionalRef(f, "homeArenaId", _arenas, "arena"), f.OptionalInt("foundedYear")),
-            (target, c) => target.UpdateDetails(c.Name, c.ShortName, c.CountryId, c.HomeArenaId, c.FoundedYear)),
+        ImportRecordKind.Club => Apply(record, _clubs, BuildClub, (target, c) =>
+            {
+                target.UpdateDetails(c.Name, c.ShortName, c.CountryId, c.HomeArenaId, c.FoundedYear);
+                target.UpdateProfile(c.City, c.Reputation, c.Balance, c.WageBudget, c.BoardExpectation);
+            }),
         ImportRecordKind.League => Apply(record, _leagues, (f, id) =>
             new League(id, f.Text("name"), f.Text("shortName"), OptionalCountryRef(f, "country")),
             (target, l) => target.UpdateDetails(l.Name, l.ShortName, l.CountryId)),
@@ -152,6 +154,20 @@ internal sealed class ImportSession
         {
             throw new DomainValidationException(message);
         }
+    }
+
+    // Optional club fields take the defaults of a new club; read before the domain rules run, like players.
+    private Club BuildClub(FieldReader f, ClubId id)
+    {
+        var (name, shortName, country) = (f.Text("name"), f.Text("shortName"), CountryRef(f, "country"));
+        var (arena, founded, city) = (OptionalRef(f, "homeArenaId", _arenas, "arena"), f.OptionalInt("foundedYear"), f.Optional("city"));
+        var reputation = Rating(f, "reputation") ?? Club.DefaultReputation;
+        var (balance, wageBudget) = (f.OptionalLong("balance") ?? 0, f.OptionalLong("wageBudget") ?? 0);
+        var expectation = f.OptionalEnum("boardExpectation", Club.DefaultBoardExpectation);
+
+        var club = new Club(id, name, shortName, country, arena, founded);
+        club.UpdateProfile(city, reputation, balance, wageBudget, expectation);
+        return club;
     }
 
     // Optional fields take the defaults of a new player (docs/IMPORT_FORMATS.md); missing tendencies are suggested from the attributes.

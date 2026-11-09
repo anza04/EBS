@@ -1,4 +1,5 @@
 using Ebm.Domain.Players.Ratings;
+using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Editing;
 using Ebm.Services.Players;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ICompetitionService, CompetitionService>();
         services.TryAddSingleton(PlayerRatingCalculator.Default);
         services.TryAddSingleton<IPlayerProfileService, PlayerProfileService>();
+        services.TryAddSingleton<IClubService, ClubService>();
 
         return services;
     }

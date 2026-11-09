@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 05 — Player model and attributes (2026-11-09)
+STEP 06 — Club and roster management (2026-11-09)
 
 ## Next step
-STEP 06 — Club and roster management
+STEP 07 — Contracts and player availability
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (266/266: 198 unit, 68 integration)
-- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, player profile, player comparison, clubs, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`.
+- Tests: PASS (287/287: 208 unit, 79 integration)
+- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -31,7 +31,7 @@ STEP 06 — Club and roster management
 
 ## Implemented modules
 - [x] Solution structure and build configuration
-- [x] Domain layer (`Ebm.Domain`): 17 entities with strongly typed IDs and validation
+- [x] Domain layer (`Ebm.Domain`): 18 entities with strongly typed IDs and validation
 - [x] Services layer (`Ebm.Services`): `TimeProvider`, data access ports (`IRepository<,>`, `IUnitOfWork`)
 - [x] Persistence layer (`Ebm.Persistence`): EF Core/SQLite context, mappings, migrations, repositories, startup initialiser
 - [x] Data import layer (`Ebm.DataImport`): CSV/JSON import, validation, duplicate detection, import logs
@@ -42,12 +42,13 @@ STEP 06 — Club and roster management
 - [x] Data import and database editor (Step 03)
 - [x] Competition configuration, fixture generator, standings, playoffs, promotion/relegation (Step 04)
 - [x] Player model: 27 attributes, tendencies, ratings, position suitability, profile and comparison screens (Step 05)
-- [ ] Club and roster management (Step 06) … see docs/ROADMAP.md
+- [x] Club profile, squad roles, starting five, rotation, roster validation, competition registration (Step 06)
+- [ ] Contracts and player availability (Step 07) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261109125814_PlayerModel`
-- Latest migration: `20261109125814_PlayerModel` (player profile/condition columns, 27-attribute `PlayerAttributes`, new `PlayerTendencies`; 18 tables)
-- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 24 players with full Step 05 profiles) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
+- Current schema version: `20261109171322_ClubsAndRosters`
+- Latest migration: `20261109171322_ClubsAndRosters` (club city, reputation, balance, wage budget, board expectation; new `RosterSpots`; 19 tables)
+- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 33 players with full Step 05 profiles; club profiles; Aurora Milano has a complete 12-player squad) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
 1. Layered architecture with inward-only dependencies (Domain ← Services ← Persistence/DataImport ← Hosting ← Desktop). Enforced by architecture tests.
@@ -73,8 +74,11 @@ STEP 06 — Club and roster management
 21. Migrations must stay transactional on SQLite: prefer add-column changes; avoid operations that force a table rebuild (e.g. adding check constraints) on existing tables. To restructure a table, rename it, create the new one, copy with SQL and drop the old one (hand-written `Up`, as in `PlayerModel`).
 22. Player ratings are calculated, never stored: pure formulas in `Ebm.Domain.Players.Ratings` over `RatingModel.Default`. Overall = effective rating at the primary position; decisions should use category/position ratings and tendencies too (`PlayerEvaluation`).
 23. Attributes and tendencies are fixed catalogues (`PlayerAttribute`, `PlayerTendency` enums); their order is the storage order. Import field names are the camel-case enum names.
+24. A player's current club = open club spell, else latest running contract. Squad roles live in `RosterSpots` (one per player, current state, not history); no row = bench. Moves go through `IClubService.AssignPlayerAsync`.
+25. Roster rules are a pure validator (`RosterValidator`) over `SquadRules`: club defaults in code, competition registration limits in the rules JSON (`registration.squad`). Invalid rosters can be saved; validation reports errors and warnings instead of blocking, so squads can be rearranged in steps.
+26. An enum column with `HasDefaultValue` needs an EF sentinel outside the enum (`HasSentinel((T)(-1))`) unless the default is the enum's value 0; otherwise value 0 is replaced by the column default.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
@@ -83,8 +87,9 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Only league competitions can be scheduled; cups/knockout formats come in Step 17. No relegation playoffs, groups or reseeding (see `docs/COMPETITION_FORMATS.md` §2).
 - Season outcome (promoted/relegated) is calculated but not applied to next season's entries; Step 12 does that.
 - No UI for competitions yet (schedule, table, playoffs); Step 11 adds presentation.
-- Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7).
-- Player screens are verified by an off-screen render test (screenshots reviewed in Step 05); the other editor tabs only by the smoke-test launch and view-model tests.
+- Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7); squad roles are set in the game.
+- Assigning a player to a club does not touch contracts (Step 07); the old contract stays until termination exists. Board expectations and finances are stored but not used by any game system yet (Steps 12, 27).
+- Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
 
 ## Current dependencies
 | Package | Version | Used by |
@@ -106,7 +111,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_05_LOG.md
+logs/STEP_06_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

@@ -34,6 +34,17 @@ internal sealed class ClubConfiguration : IEntityTypeConfiguration<Club>
         builder.ToTable("Clubs");
         builder.Property(x => x.Name).HasMaxLength(Club.NameMaxLength).IsRequired();
         builder.Property(x => x.ShortName).HasMaxLength(Club.ShortNameMaxLength).IsRequired();
+
+        // Columns added in Step 06 have defaults so existing rows upgrade in place; ranges are checked by the domain
+        // only (a check constraint would force SQLite to rebuild the Clubs table, decision 21).
+        builder.Property(x => x.City).HasMaxLength(Club.CityMaxLength);
+        builder.Property(x => x.Reputation).HasDefaultValue(Club.DefaultReputation);
+        builder.Property(x => x.Balance).HasDefaultValue(0L);
+        builder.Property(x => x.WageBudget).HasDefaultValue(0L);
+        // The sentinel is a value the domain never allows, so EF always writes the expectation; with the CLR default
+        // (WinTitle) as sentinel, WinTitle would be replaced by the column default.
+        builder.Property(x => x.BoardExpectation).HasConversion<string>().HasMaxLength(32)
+            .HasDefaultValue(Club.DefaultBoardExpectation).HasSentinel((BoardExpectation)(-1));
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.CountryId);
         builder.HasOne<Arena>().WithMany().HasForeignKey(x => x.HomeArenaId);
     }
