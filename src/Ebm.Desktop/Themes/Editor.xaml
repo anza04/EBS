@@ -1,0 +1,304 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ed="clr-namespace:Ebm.Desktop.ViewModels.Editor">
+  <!-- Database editor: form styles and one data template per editor page. Uses the tokens from Shell.xaml. -->
+  <SolidColorBrush x:Key="Brush.Error" Color="#B42318" />
+  <SolidColorBrush x:Key="Brush.Success" Color="#1E7B34" />
+
+  <Style x:Key="Form.Label" TargetType="TextBlock" BasedOn="{StaticResource Text.Label}">
+    <Setter Property="Margin" Value="0,10,0,3" />
+  </Style>
+  <Style x:Key="Form.Panel" TargetType="Border" BasedOn="{StaticResource Card}">
+    <Setter Property="Padding" Value="20" />
+    <Setter Property="Margin" Value="12,0,0,0" />
+  </Style>
+  <Style TargetType="TextBox">
+    <Setter Property="Padding" Value="4,3" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style TargetType="ComboBox">
+    <Setter Property="Padding" Value="6,3" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style x:Key="Editor.Grid" TargetType="DataGrid">
+    <Setter Property="AutoGenerateColumns" Value="False" />
+    <Setter Property="IsReadOnly" Value="True" />
+    <Setter Property="SelectionMode" Value="Single" />
+    <Setter Property="HeadersVisibility" Value="Column" />
+    <Setter Property="GridLinesVisibility" Value="Horizontal" />
+    <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Background" Value="{StaticResource Brush.Surface}" />
+    <Setter Property="RowHeight" Value="26" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style x:Key="Text.Status" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+    <Setter Property="Margin" Value="0,10,0,0" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Success}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsError}" Value="True">
+        <Setter Property="Foreground" Value="{StaticResource Brush.Error}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- New/Save buttons and the result message, shared by every page (DataContext: the page view model). -->
+  <ControlTemplate x:Key="Editor.Actions" TargetType="ContentControl">
+    <StackPanel Margin="0,18,0,0">
+      <StackPanel Orientation="Horizontal">
+        <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0" IsDefault="True" />
+        <Button Content="New" Command="{Binding StartNewCommand}" Style="{StaticResource Button.Secondary}" />
+      </StackPanel>
+      <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Status}" />
+    </StackPanel>
+  </ControlTemplate>
+
+  <DataTemplate DataType="{x:Type ed:PlayersPageViewModel}">
+    <Grid Margin="16">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="440" />
+      </Grid.ColumnDefinitions>
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Last name" Binding="{Binding LastName}" Width="*" />
+          <DataGridTextColumn Header="First name" Binding="{Binding FirstName}" Width="*" />
+          <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="110" />
+          <DataGridTextColumn Header="Born" Binding="{Binding DateOfBirth}" Width="90" />
+          <DataGridTextColumn Header="Height" Binding="{Binding HeightCm}" Width="60" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel>
+            <TextBlock Text="Player" Style="{StaticResource Text.Heading}" />
+            <TextBlock Text="First name" Style="{StaticResource Form.Label}" />
+            <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Last name" Style="{StaticResource Form.Label}" />
+            <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Date of birth" Style="{StaticResource Form.Label}" />
+            <DatePicker SelectedDate="{Binding DateOfBirth}" />
+            <TextBlock Text="Nationality" Style="{StaticResource Form.Label}" />
+            <ComboBox ItemsSource="{Binding Lookups.Countries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding NationalityId}" />
+            <UniformGrid Columns="3">
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Height (cm)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding HeightCm, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Weight (kg)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding WeightKg, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Position" Style="{StaticResource Form.Label}" />
+                <ComboBox ItemsSource="{Binding Lookups.Positions}" SelectedItem="{Binding Position}" />
+              </StackPanel>
+            </UniformGrid>
+            <TextBlock Text="Attributes (1–100)" Style="{StaticResource Text.Title}" Margin="0,18,0,0" />
+            <ItemsControl ItemsSource="{Binding Ratings}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Columns="2" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Margin="0,0,8,0">
+                    <TextBlock Text="{Binding Label}" Style="{StaticResource Form.Label}" />
+                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ContentControl Template="{StaticResource Editor.Actions}" />
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type ed:ClubsPageViewModel}">
+    <Grid Margin="16">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="440" />
+      </Grid.ColumnDefinitions>
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
+          <DataGridTextColumn Header="Founded" Binding="{Binding FoundedYear}" Width="70" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
+        <StackPanel>
+          <TextBlock Text="Club" Style="{StaticResource Text.Heading}" />
+          <TextBlock Text="Name" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Short name" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding ShortName, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Country" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.Countries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding CountryId}" />
+          <TextBlock Text="Home arena" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.OptionalArenas}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding HomeArenaId}" />
+          <TextBlock Text="Founded year (optional)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding FoundedYear, UpdateSourceTrigger=PropertyChanged}" />
+          <ContentControl Template="{StaticResource Editor.Actions}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type ed:ContractsPageViewModel}">
+    <Grid Margin="16">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="440" />
+      </Grid.ColumnDefinitions>
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
+          <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
+          <DataGridTextColumn Header="Start" Binding="{Binding Contract.StartDate}" Width="90" />
+          <DataGridTextColumn Header="End" Binding="{Binding Contract.EndDate}" Width="90" />
+          <DataGridTextColumn Header="Salary (€)" Binding="{Binding Contract.AnnualSalary, StringFormat=N0}" Width="100" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
+        <StackPanel>
+          <TextBlock Text="Player contract" Style="{StaticResource Text.Heading}" />
+          <TextBlock Text="Player" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.Players}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding PlayerId}" IsEnabled="{Binding IsNew}" />
+          <TextBlock Text="Club" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" IsEnabled="{Binding IsNew}" />
+          <TextBlock Text="Start date" Style="{StaticResource Form.Label}" />
+          <DatePicker SelectedDate="{Binding StartDate}" />
+          <TextBlock Text="End date" Style="{StaticResource Form.Label}" />
+          <DatePicker SelectedDate="{Binding EndDate}" />
+          <TextBlock Text="Annual salary (€)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding AnnualSalary, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Club and player are fixed once a contract exists; a new deal is a new contract." Style="{StaticResource Text.Muted}" Margin="0,10,0,0" />
+          <ContentControl Template="{StaticResource Editor.Actions}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type ed:LeaguesPageViewModel}">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="440" />
+      </Grid.ColumnDefinitions>
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="League" Binding="{Binding Name}" Width="*" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
+        <StackPanel>
+          <TextBlock Text="League" Style="{StaticResource Text.Heading}" />
+          <TextBlock Text="Name" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Short name" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding ShortName, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Country (none for international)" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.OptionalCountries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding CountryId}" />
+          <ContentControl Template="{StaticResource Editor.Actions}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type ed:CompetitionsPageViewModel}">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="440" />
+      </Grid.ColumnDefinitions>
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Competition" Binding="{Binding Name}" Width="*" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="90" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
+        <StackPanel>
+          <TextBlock Text="Competition" Style="{StaticResource Text.Heading}" />
+          <UniformGrid Columns="2">
+            <StackPanel Margin="0,0,8,0">
+              <TextBlock Text="Name" Style="{StaticResource Form.Label}" />
+              <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="Short name" Style="{StaticResource Form.Label}" />
+              <TextBox Text="{Binding ShortName, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,8,0">
+              <TextBlock Text="Type" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding Lookups.CompetitionTypes}" SelectedItem="{Binding Type}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="Country" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding Lookups.OptionalCountries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding CountryId}" />
+            </StackPanel>
+          </UniformGrid>
+          <TextBlock Text="Division (league championships only)" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Lookups.OptionalDivisions}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding DivisionId}" />
+          <TextBlock Text="Rules (JSON object)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding RulesJson, UpdateSourceTrigger=PropertyChanged}" FontFamily="{StaticResource Font.Mono}"
+                   AcceptsReturn="True" TextWrapping="Wrap" Height="70" VerticalScrollBarVisibility="Auto" />
+          <ContentControl Template="{StaticResource Editor.Actions}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type ed:ImportViewModel}">
+    <DockPanel Margin="16">
+      <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="20">
+        <StackPanel>
+          <TextBlock Text="Import a dataset" Style="{StaticResource Text.Heading}" />
+          <TextBlock Style="{StaticResource Text.Muted}" Margin="0,4,0,12"
+                     Text="CSV files are named after their record type (players.csv, clubs.csv, …); JSON files hold several sections. Templates are in the data\templates folder next to the game." />
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Choose files…" Command="{Binding ChooseFilesCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,12,0" />
+            <ItemsControl ItemsSource="{Binding Files}" VerticalAlignment="Center">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" Style="{StaticResource Text.Mono}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+          <WrapPanel Margin="0,14,0,0">
+            <CheckBox Content="Update existing records (explicit update; otherwise existing records are rejected)" IsChecked="{Binding UpdateExisting}" Margin="0,0,20,6" />
+            <CheckBox Content="Validate only (save nothing)" IsChecked="{Binding DryRun}" Margin="0,0,20,6" />
+            <CheckBox Content="All or nothing" IsChecked="{Binding AllOrNothing}" Margin="0,0,20,6" />
+          </WrapPanel>
+          <Button Content="Import" Command="{Binding ImportCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+          <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Margin="0,12,0,0" />
+          <TextBlock Text="{Binding LogFile, StringFormat=Log: {0}}" Style="{StaticResource Text.Mono}" Margin="0,4,0,0" />
+          <ItemsControl ItemsSource="{Binding Problems}" Margin="0,6,0,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Error}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      <DataGrid ItemsSource="{Binding Results}" Style="{StaticResource Editor.Grid}" Margin="0,12,0,0">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="80" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="90" />
+          <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="200" />
+          <DataGridTextColumn Header="Record" Binding="{Binding Label}" Width="180" />
+          <DataGridTextColumn Header="Messages" Binding="{Binding Messages}" Width="*" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

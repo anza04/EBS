@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ebm.DataImport/Ebm.DataImport.csproj" />
+    <Project Path="src/Ebm.Desktop/Ebm.Desktop.csproj" />
+    <Project Path="src/Ebm.Domain/Ebm.Domain.csproj" />
+    <Project Path="src/Ebm.Hosting/Ebm.Hosting.csproj" />
+    <Project Path="src/Ebm.Persistence/Ebm.Persistence.csproj" />
+    <Project Path="src/Ebm.Services/Ebm.Services.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ebm.Tests.Integration/Ebm.Tests.Integration.csproj" />
+    <Project Path="tests/Ebm.Tests.Unit/Ebm.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

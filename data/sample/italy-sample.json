@@ -1,0 +1,833 @@
+{
+  "format": "ebm-dataset",
+  "version": 1,
+  "countries": [
+    {
+      "code": "ITA",
+      "name": "Italy"
+    },
+    {
+      "code": "USA",
+      "name": "United States"
+    },
+    {
+      "code": "SRB",
+      "name": "Serbia"
+    },
+    {
+      "code": "ESP",
+      "name": "Spain"
+    },
+    {
+      "code": "FRA",
+      "name": "France"
+    }
+  ],
+  "arenas": [
+    {
+      "id": "fff367a4-004c-5521-8840-b016ad4ab857",
+      "name": "PalaAurora",
+      "city": "Milan",
+      "country": "ITA",
+      "capacity": 12500
+    },
+    {
+      "id": "bcb4918d-eee0-5346-9626-916e400e8564",
+      "name": "Arena Fortezza",
+      "city": "Bologna",
+      "country": "ITA",
+      "capacity": 9000
+    },
+    {
+      "id": "ca6f3812-3eae-5a1b-849d-87645ae8eece",
+      "name": "PalaLeoni",
+      "city": "Rome",
+      "country": "ITA",
+      "capacity": 11000
+    },
+    {
+      "id": "a737e5ad-41f6-5d18-8677-7acad595d96e",
+      "name": "PalaVesuvio",
+      "city": "Naples",
+      "country": "ITA",
+      "capacity": 7500
+    },
+    {
+      "id": "e03d4a3f-7176-5aab-80ba-7a7f017e8549",
+      "name": "Arena Laguna",
+      "city": "Venice",
+      "country": "ITA",
+      "capacity": 4500
+    },
+    {
+      "id": "a94c5685-c991-54ca-864b-1786e68f3dec",
+      "name": "PalaMole",
+      "city": "Turin",
+      "country": "ITA",
+      "capacity": 6000
+    },
+    {
+      "id": "550774b6-44f9-55dc-8d0f-3fb239c819ca",
+      "name": "PalaEtna",
+      "city": "Catania",
+      "country": "ITA",
+      "capacity": 3500
+    },
+    {
+      "id": "f5f179e1-8742-5b74-9ac7-887d74cd838b",
+      "name": "Arena Dolomiti",
+      "city": "Trento",
+      "country": "ITA",
+      "capacity": 4200
+    }
+  ],
+  "clubs": [
+    {
+      "id": "3d0e0217-57cc-5f9f-91b3-d0c52a5e446d",
+      "name": "Aurora Milano",
+      "shortName": "AUR",
+      "country": "ITA",
+      "homeArenaId": "fff367a4-004c-5521-8840-b016ad4ab857",
+      "foundedYear": 1936
+    },
+    {
+      "id": "87160b5b-5ce0-585a-a521-6d51e21a390e",
+      "name": "Fortezza Bologna",
+      "shortName": "FOR",
+      "country": "ITA",
+      "homeArenaId": "bcb4918d-eee0-5346-9626-916e400e8564",
+      "foundedYear": 1946
+    },
+    {
+      "id": "60a4695c-50a8-5f74-9794-4e254d669c3a",
+      "name": "Leoni Roma",
+      "shortName": "LEO",
+      "country": "ITA",
+      "homeArenaId": "ca6f3812-3eae-5a1b-849d-87645ae8eece",
+      "foundedYear": 1960
+    },
+    {
+      "id": "ab016e54-1cd0-5dcd-8e30-92a35c42916d",
+      "name": "Vesuvio Napoli",
+      "shortName": "VES",
+      "country": "ITA",
+      "homeArenaId": "a737e5ad-41f6-5d18-8677-7acad595d96e",
+      "foundedYear": 1978
+    },
+    {
+      "id": "2abdc667-e89f-57bf-bba2-21d6ca7090c8",
+      "name": "Laguna Venezia",
+      "shortName": "LAG",
+      "country": "ITA",
+      "homeArenaId": "e03d4a3f-7176-5aab-80ba-7a7f017e8549",
+      "foundedYear": 1925
+    },
+    {
+      "id": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f",
+      "name": "Mole Torino",
+      "shortName": "MOL",
+      "country": "ITA",
+      "homeArenaId": "a94c5685-c991-54ca-864b-1786e68f3dec",
+      "foundedYear": 1955
+    },
+    {
+      "id": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a",
+      "name": "Etna Catania",
+      "shortName": "ETN",
+      "country": "ITA",
+      "homeArenaId": "550774b6-44f9-55dc-8d0f-3fb239c819ca",
+      "foundedYear": 1983
+    },
+    {
+      "id": "290c2c80-639e-51d4-b6c1-749cd4dc2108",
+      "name": "Dolomiti Trento",
+      "shortName": "DOL",
+      "country": "ITA",
+      "homeArenaId": "f5f179e1-8742-5b74-9ac7-887d74cd838b",
+      "foundedYear": 1995
+    }
+  ],
+  "leagues": [
+    {
+      "id": "0c6ab5e4-49f6-5779-9385-f6f52be61377",
+      "name": "Italian Basketball League",
+      "shortName": "IBL",
+      "country": "ITA"
+    }
+  ],
+  "divisions": [
+    {
+      "id": "f4d2332d-cc3a-538c-96c4-df30e49f6a1b",
+      "leagueId": "0c6ab5e4-49f6-5779-9385-f6f52be61377",
+      "name": "Serie A",
+      "level": 1
+    },
+    {
+      "id": "0d28ebbd-9462-5579-b209-e445b385d255",
+      "leagueId": "0c6ab5e4-49f6-5779-9385-f6f52be61377",
+      "name": "Serie A2",
+      "level": 2
+    }
+  ],
+  "competitions": [
+    {
+      "id": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "name": "Serie A",
+      "shortName": "SA",
+      "type": "League",
+      "country": "ITA",
+      "divisionId": "f4d2332d-cc3a-538c-96c4-df30e49f6a1b",
+      "rules": {
+        "pointsForWin": 2,
+        "pointsForLoss": 0
+      }
+    },
+    {
+      "id": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "name": "Serie A2",
+      "shortName": "SA2",
+      "type": "League",
+      "country": "ITA",
+      "divisionId": "0d28ebbd-9462-5579-b209-e445b385d255",
+      "rules": {
+        "pointsForWin": 2,
+        "pointsForLoss": 0
+      }
+    },
+    {
+      "id": "3ed49271-72b0-5ac8-a0f3-817574bc0c53",
+      "name": "Italian Cup",
+      "shortName": "CUP",
+      "type": "Cup",
+      "country": "ITA"
+    }
+  ],
+  "players": [
+    {
+      "id": "b3003eff-65ec-501f-b43f-63d1d5cf6c7f",
+      "firstName": "Matteo",
+      "lastName": "Fontana",
+      "dateOfBirth": "2000-09-21",
+      "nationality": "ITA",
+      "heightCm": 182,
+      "weightKg": 82,
+      "position": "PointGuard",
+      "shooting": 67,
+      "insideScoring": 67,
+      "passing": 65,
+      "ballHandling": 61,
+      "rebounding": 73,
+      "defense": 66,
+      "athleticism": 65,
+      "basketballIq": 74
+    },
+    {
+      "id": "59200e95-d90c-582f-a02c-0847e45b80c1",
+      "firstName": "Riccardo",
+      "lastName": "Lombardi",
+      "dateOfBirth": "1992-10-03",
+      "nationality": "ITA",
+      "heightCm": 198,
+      "weightKg": 97,
+      "position": "SmallForward",
+      "shooting": 74,
+      "insideScoring": 51,
+      "passing": 62,
+      "ballHandling": 48,
+      "rebounding": 74,
+      "defense": 69,
+      "athleticism": 63,
+      "basketballIq": 69
+    },
+    {
+      "id": "26064ea7-9b93-55d1-87aa-3d1ee389b3c8",
+      "firstName": "Lorenzo",
+      "lastName": "Moretti",
+      "dateOfBirth": "1997-06-26",
+      "nationality": "ITA",
+      "heightCm": 213,
+      "weightKg": 115,
+      "position": "Center",
+      "shooting": 68,
+      "insideScoring": 50,
+      "passing": 71,
+      "ballHandling": 58,
+      "rebounding": 50,
+      "defense": 65,
+      "athleticism": 65,
+      "basketballIq": 57
+    },
+    {
+      "id": "24b74720-7c67-5938-9569-be098c9d4dce",
+      "firstName": "Davide",
+      "lastName": "Barbieri",
+      "dateOfBirth": "1992-12-12",
+      "nationality": "ITA",
+      "heightCm": 194,
+      "weightKg": 92,
+      "position": "ShootingGuard",
+      "shooting": 61,
+      "insideScoring": 50,
+      "passing": 60,
+      "ballHandling": 66,
+      "rebounding": 65,
+      "defense": 63,
+      "athleticism": 75,
+      "basketballIq": 51
+    },
+    {
+      "id": "9dac59ab-26b8-5a05-b462-83410d7aeeac",
+      "firstName": "Filippo",
+      "lastName": "Mancini",
+      "dateOfBirth": "2006-09-09",
+      "nationality": "ITA",
+      "heightCm": 208,
+      "weightKg": 110,
+      "position": "PowerForward",
+      "shooting": 63,
+      "insideScoring": 64,
+      "passing": 64,
+      "ballHandling": 73,
+      "rebounding": 48,
+      "defense": 66,
+      "athleticism": 55,
+      "basketballIq": 72
+    },
+    {
+      "id": "3135d6ae-9e02-5258-9aea-64c8970c5be6",
+      "firstName": "Matteo",
+      "lastName": "Rizzo",
+      "dateOfBirth": "1999-03-16",
+      "nationality": "ITA",
+      "heightCm": 184,
+      "weightKg": 80,
+      "position": "PointGuard",
+      "shooting": 68,
+      "insideScoring": 70,
+      "passing": 62,
+      "ballHandling": 69,
+      "rebounding": 63,
+      "defense": 70,
+      "athleticism": 65,
+      "basketballIq": 56
+    },
+    {
+      "id": "e232aa96-482c-5e48-be32-15b227a4ad39",
+      "firstName": "Tyler",
+      "lastName": "Serra",
+      "dateOfBirth": "2004-07-14",
+      "nationality": "USA",
+      "heightCm": 200,
+      "weightKg": 97,
+      "position": "SmallForward",
+      "shooting": 74,
+      "insideScoring": 56,
+      "passing": 48,
+      "ballHandling": 49,
+      "rebounding": 52,
+      "defense": 68,
+      "athleticism": 67,
+      "basketballIq": 62
+    },
+    {
+      "id": "40295535-5956-5433-a186-83b710f8704b",
+      "firstName": "Hugo",
+      "lastName": "Rinaldi",
+      "dateOfBirth": "1996-12-16",
+      "nationality": "FRA",
+      "heightCm": 214,
+      "weightKg": 115,
+      "position": "Center",
+      "shooting": 72,
+      "insideScoring": 74,
+      "passing": 63,
+      "ballHandling": 73,
+      "rebounding": 61,
+      "defense": 65,
+      "athleticism": 69,
+      "basketballIq": 49
+    },
+    {
+      "id": "6e515ebe-c876-5035-b4b5-ef1049d131d8",
+      "firstName": "Riccardo",
+      "lastName": "Conti",
+      "dateOfBirth": "1999-12-23",
+      "nationality": "ITA",
+      "heightCm": 197,
+      "weightKg": 89,
+      "position": "ShootingGuard",
+      "shooting": 62,
+      "insideScoring": 53,
+      "passing": 61,
+      "ballHandling": 74,
+      "rebounding": 71,
+      "defense": 63,
+      "athleticism": 50,
+      "basketballIq": 68
+    },
+    {
+      "id": "9b9ed14c-ae03-524e-8d34-70d5db42a871",
+      "firstName": "Hugo",
+      "lastName": "Conti",
+      "dateOfBirth": "1995-12-28",
+      "nationality": "FRA",
+      "heightCm": 208,
+      "weightKg": 103,
+      "position": "PowerForward",
+      "shooting": 62,
+      "insideScoring": 48,
+      "passing": 50,
+      "ballHandling": 48,
+      "rebounding": 62,
+      "defense": 66,
+      "athleticism": 65,
+      "basketballIq": 74
+    },
+    {
+      "id": "c8554acb-5c7a-5a06-a8b9-249eedd804d3",
+      "firstName": "Stefan",
+      "lastName": "Conti",
+      "dateOfBirth": "2001-01-25",
+      "nationality": "SRB",
+      "heightCm": 189,
+      "weightKg": 83,
+      "position": "PointGuard",
+      "shooting": 69,
+      "insideScoring": 72,
+      "passing": 68,
+      "ballHandling": 59,
+      "rebounding": 52,
+      "defense": 48,
+      "athleticism": 58,
+      "basketballIq": 69
+    },
+    {
+      "id": "0e33d62e-223d-5f7c-a7b3-0b57efc41a8f",
+      "firstName": "Filippo",
+      "lastName": "Marino",
+      "dateOfBirth": "2000-04-16",
+      "nationality": "ITA",
+      "heightCm": 199,
+      "weightKg": 102,
+      "position": "SmallForward",
+      "shooting": 70,
+      "insideScoring": 64,
+      "passing": 57,
+      "ballHandling": 50,
+      "rebounding": 61,
+      "defense": 69,
+      "athleticism": 53,
+      "basketballIq": 52
+    },
+    {
+      "id": "4f6591d1-a899-5829-8a99-41a23b25824f",
+      "firstName": "Paolo",
+      "lastName": "Mancini",
+      "dateOfBirth": "2004-03-17",
+      "nationality": "ITA",
+      "heightCm": 210,
+      "weightKg": 113,
+      "position": "Center",
+      "shooting": 38,
+      "insideScoring": 41,
+      "passing": 50,
+      "ballHandling": 40,
+      "rebounding": 39,
+      "defense": 64,
+      "athleticism": 49,
+      "basketballIq": 58
+    },
+    {
+      "id": "342a2794-6daa-56de-8e6b-1fb34e83ea94",
+      "firstName": "Marco",
+      "lastName": "Serra",
+      "dateOfBirth": "1997-11-10",
+      "nationality": "ITA",
+      "heightCm": 196,
+      "weightKg": 90,
+      "position": "ShootingGuard",
+      "shooting": 41,
+      "insideScoring": 53,
+      "passing": 52,
+      "ballHandling": 56,
+      "rebounding": 57,
+      "defense": 63,
+      "athleticism": 43,
+      "basketballIq": 42
+    },
+    {
+      "id": "81625f7c-8374-5cd0-a5c6-aec534e8b261",
+      "firstName": "Nikola",
+      "lastName": "Rizzo",
+      "dateOfBirth": "2001-06-15",
+      "nationality": "SRB",
+      "heightCm": 205,
+      "weightKg": 111,
+      "position": "PowerForward",
+      "shooting": 60,
+      "insideScoring": 40,
+      "passing": 55,
+      "ballHandling": 50,
+      "rebounding": 39,
+      "defense": 44,
+      "athleticism": 58,
+      "basketballIq": 43
+    },
+    {
+      "id": "04bcdc0d-e5e0-56a6-9758-f7a713c4398b",
+      "firstName": "Luca",
+      "lastName": "Villa",
+      "dateOfBirth": "2005-11-07",
+      "nationality": "ITA",
+      "heightCm": 188,
+      "weightKg": 89,
+      "position": "PointGuard",
+      "shooting": 38,
+      "insideScoring": 42,
+      "passing": 58,
+      "ballHandling": 54,
+      "rebounding": 44,
+      "defense": 63,
+      "athleticism": 54,
+      "basketballIq": 42
+    },
+    {
+      "id": "6d0d31a8-5c16-5df4-ab52-32c8b4ca40e7",
+      "firstName": "Paolo",
+      "lastName": "Rizzo",
+      "dateOfBirth": "2005-02-13",
+      "nationality": "ITA",
+      "heightCm": 201,
+      "weightKg": 95,
+      "position": "SmallForward",
+      "shooting": 49,
+      "insideScoring": 43,
+      "passing": 46,
+      "ballHandling": 52,
+      "rebounding": 53,
+      "defense": 62,
+      "athleticism": 64,
+      "basketballIq": 51
+    },
+    {
+      "id": "cf90018b-fc06-5ce2-aa91-a919dbe33350",
+      "firstName": "Simone",
+      "lastName": "Fontana",
+      "dateOfBirth": "2000-08-15",
+      "nationality": "ITA",
+      "heightCm": 208,
+      "weightKg": 115,
+      "position": "Center",
+      "shooting": 63,
+      "insideScoring": 54,
+      "passing": 63,
+      "ballHandling": 46,
+      "rebounding": 64,
+      "defense": 41,
+      "athleticism": 65,
+      "basketballIq": 44
+    },
+    {
+      "id": "cacb4c7f-d334-5f8e-b88a-ceef0bcd1547",
+      "firstName": "Andrea",
+      "lastName": "Villa",
+      "dateOfBirth": "2002-06-14",
+      "nationality": "ITA",
+      "heightCm": 197,
+      "weightKg": 95,
+      "position": "ShootingGuard",
+      "shooting": 43,
+      "insideScoring": 38,
+      "passing": 49,
+      "ballHandling": 65,
+      "rebounding": 43,
+      "defense": 49,
+      "athleticism": 55,
+      "basketballIq": 59
+    },
+    {
+      "id": "07caf733-d76a-5371-b651-6fb077be9d49",
+      "firstName": "Nikola",
+      "lastName": "Conti",
+      "dateOfBirth": "2001-12-09",
+      "nationality": "SRB",
+      "heightCm": 210,
+      "weightKg": 110,
+      "position": "PowerForward",
+      "shooting": 61,
+      "insideScoring": 44,
+      "passing": 56,
+      "ballHandling": 47,
+      "rebounding": 56,
+      "defense": 46,
+      "athleticism": 59,
+      "basketballIq": 55
+    },
+    {
+      "id": "a84cafac-35b1-5324-b53f-9d04fdf7c619",
+      "firstName": "James",
+      "lastName": "Conti",
+      "dateOfBirth": "1998-03-04",
+      "nationality": "USA",
+      "heightCm": 181,
+      "weightKg": 84,
+      "position": "PointGuard",
+      "shooting": 61,
+      "insideScoring": 63,
+      "passing": 43,
+      "ballHandling": 58,
+      "rebounding": 58,
+      "defense": 41,
+      "athleticism": 54,
+      "basketballIq": 48
+    },
+    {
+      "id": "ffb333ed-b51f-5785-8507-ed0ba353f97e",
+      "firstName": "Tyler",
+      "lastName": "Fontana",
+      "dateOfBirth": "1994-05-09",
+      "nationality": "USA",
+      "heightCm": 198,
+      "weightKg": 93,
+      "position": "SmallForward",
+      "shooting": 51,
+      "insideScoring": 65,
+      "passing": 62,
+      "ballHandling": 46,
+      "rebounding": 51,
+      "defense": 38,
+      "athleticism": 39,
+      "basketballIq": 41
+    },
+    {
+      "id": "e225618c-4adf-5ada-a6f3-2ef9f2c9ad4a",
+      "firstName": "Tyler",
+      "lastName": "Conti",
+      "dateOfBirth": "1993-11-18",
+      "nationality": "USA",
+      "heightCm": 212,
+      "weightKg": 112,
+      "position": "Center",
+      "shooting": 62,
+      "insideScoring": 52,
+      "passing": 57,
+      "ballHandling": 58,
+      "rebounding": 58,
+      "defense": 60,
+      "athleticism": 57,
+      "basketballIq": 39
+    },
+    {
+      "id": "aec94fb5-06b7-5822-ba5c-a89282dfd8db",
+      "firstName": "Nikola",
+      "lastName": "Villa",
+      "dateOfBirth": "1998-11-04",
+      "nationality": "SRB",
+      "heightCm": 194,
+      "weightKg": 93,
+      "position": "ShootingGuard",
+      "shooting": 59,
+      "insideScoring": 46,
+      "passing": 50,
+      "ballHandling": 47,
+      "rebounding": 64,
+      "defense": 49,
+      "athleticism": 39,
+      "basketballIq": 61
+    }
+  ],
+  "contracts": [
+    {
+      "id": "a5434aa4-a6b1-52eb-9963-5107b841fdf7",
+      "clubId": "3d0e0217-57cc-5f9f-91b3-d0c52a5e446d",
+      "playerId": "b3003eff-65ec-501f-b43f-63d1d5cf6c7f",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 700000
+    },
+    {
+      "id": "ad0ebba8-a9de-5a8b-81de-8761eccd9bba",
+      "clubId": "3d0e0217-57cc-5f9f-91b3-d0c52a5e446d",
+      "playerId": "59200e95-d90c-582f-a02c-0847e45b80c1",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 340000
+    },
+    {
+      "id": "ee1b10ec-4b6c-54df-8d2f-1b30b788a061",
+      "clubId": "3d0e0217-57cc-5f9f-91b3-d0c52a5e446d",
+      "playerId": "26064ea7-9b93-55d1-87aa-3d1ee389b3c8",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 660000
+    },
+    {
+      "id": "b611dcd9-1db7-5e50-a031-7a3d7cfdcfbe",
+      "clubId": "87160b5b-5ce0-585a-a521-6d51e21a390e",
+      "playerId": "24b74720-7c67-5938-9569-be098c9d4dce",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 720000
+    },
+    {
+      "id": "e24b12c1-264e-5e69-b8a6-fec1d1a0dae0",
+      "clubId": "87160b5b-5ce0-585a-a521-6d51e21a390e",
+      "playerId": "9dac59ab-26b8-5a05-b462-83410d7aeeac",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 140000
+    },
+    {
+      "id": "ea48ff67-5183-55f6-8607-c01f363d6071",
+      "clubId": "87160b5b-5ce0-585a-a521-6d51e21a390e",
+      "playerId": "3135d6ae-9e02-5258-9aea-64c8970c5be6",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 580000
+    },
+    {
+      "id": "b277584f-9db9-55f9-a4c2-e914b2c63bd1",
+      "clubId": "60a4695c-50a8-5f74-9794-4e254d669c3a",
+      "playerId": "e232aa96-482c-5e48-be32-15b227a4ad39",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 700000
+    },
+    {
+      "id": "daf12f76-eb6c-542e-85d1-655adf8671ff",
+      "clubId": "60a4695c-50a8-5f74-9794-4e254d669c3a",
+      "playerId": "40295535-5956-5433-a186-83b710f8704b",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 480000
+    },
+    {
+      "id": "6d33e853-1388-50cb-a38a-88cefc7348aa",
+      "clubId": "60a4695c-50a8-5f74-9794-4e254d669c3a",
+      "playerId": "6e515ebe-c876-5035-b4b5-ef1049d131d8",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 700000
+    },
+    {
+      "id": "dc56dd5c-4846-5635-be49-316eac4d8ef1",
+      "clubId": "ab016e54-1cd0-5dcd-8e30-92a35c42916d",
+      "playerId": "9b9ed14c-ae03-524e-8d34-70d5db42a871",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 320000
+    },
+    {
+      "id": "8a67e1ee-6c8e-5d23-847f-2e833d261ac7",
+      "clubId": "ab016e54-1cd0-5dcd-8e30-92a35c42916d",
+      "playerId": "c8554acb-5c7a-5a06-a8b9-249eedd804d3",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 800000
+    },
+    {
+      "id": "5b9a3a85-3fe4-5d3f-9c11-44444071af3a",
+      "clubId": "ab016e54-1cd0-5dcd-8e30-92a35c42916d",
+      "playerId": "0e33d62e-223d-5f7c-a7b3-0b57efc41a8f",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 460000
+    },
+    {
+      "id": "57d26e0d-baeb-5555-a4cd-3cf1e18f2d1c",
+      "clubId": "2abdc667-e89f-57bf-bba2-21d6ca7090c8",
+      "playerId": "4f6591d1-a899-5829-8a99-41a23b25824f",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 50000
+    },
+    {
+      "id": "aa775741-f29c-58fd-8f6a-70741dc0a598",
+      "clubId": "2abdc667-e89f-57bf-bba2-21d6ca7090c8",
+      "playerId": "342a2794-6daa-56de-8e6b-1fb34e83ea94",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 370000
+    },
+    {
+      "id": "7e7bb23e-e4ce-514e-99cb-339f99fde2db",
+      "clubId": "2abdc667-e89f-57bf-bba2-21d6ca7090c8",
+      "playerId": "81625f7c-8374-5cd0-a5c6-aec534e8b261",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 380000
+    },
+    {
+      "id": "3f6c5012-44de-513c-83e5-00ea89721f95",
+      "clubId": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f",
+      "playerId": "04bcdc0d-e5e0-56a6-9758-f7a713c4398b",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 150000
+    },
+    {
+      "id": "cc99357c-1d74-59be-84e2-40f07c286753",
+      "clubId": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f",
+      "playerId": "6d0d31a8-5c16-5df4-ab52-32c8b4ca40e7",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 330000
+    },
+    {
+      "id": "590869ea-bab9-541b-aff6-aa6baad02e0a",
+      "clubId": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f",
+      "playerId": "cf90018b-fc06-5ce2-aa91-a919dbe33350",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 40000
+    },
+    {
+      "id": "72b90579-a19c-5bf4-85db-67c51b5d0867",
+      "clubId": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a",
+      "playerId": "cacb4c7f-d334-5f8e-b88a-ceef0bcd1547",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 380000
+    },
+    {
+      "id": "362287e4-e7eb-5a6f-ba62-411fa24975cf",
+      "clubId": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a",
+      "playerId": "07caf733-d76a-5371-b651-6fb077be9d49",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 100000
+    },
+    {
+      "id": "fc432e7c-f761-54ea-bd9d-28e206569cdc",
+      "clubId": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a",
+      "playerId": "a84cafac-35b1-5324-b53f-9d04fdf7c619",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 80000
+    },
+    {
+      "id": "127889a3-b729-551b-8e0c-ac0adf9ac596",
+      "clubId": "290c2c80-639e-51d4-b6c1-749cd4dc2108",
+      "playerId": "ffb333ed-b51f-5785-8507-ed0ba353f97e",
+      "startDate": "2026-07-01",
+      "endDate": "2027-06-30",
+      "annualSalary": 50000
+    },
+    {
+      "id": "e2d60e33-3c22-51f5-a889-3d857f3098dd",
+      "clubId": "290c2c80-639e-51d4-b6c1-749cd4dc2108",
+      "playerId": "e225618c-4adf-5ada-a6f3-2ef9f2c9ad4a",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 240000
+    },
+    {
+      "id": "67f463a0-8e47-5e78-bdb8-31eb3110b782",
+      "clubId": "290c2c80-639e-51d4-b6c1-749cd4dc2108",
+      "playerId": "aec94fb5-06b7-5822-ba5c-a89282dfd8db",
+      "startDate": "2026-07-01",
+      "endDate": "2029-06-30",
+      "annualSalary": 310000
+    }
+  ]
+}

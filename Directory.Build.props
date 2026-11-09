@@ -1,0 +1,18 @@
+<Project>
+  <!-- Shared build settings for every project in the solution. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Deterministic>true</Deterministic>
+
+    <!-- Versioning: 0.<step>.<patch> during Milestone 1. See docs/TECHNICAL_ARCHITECTURE.md. -->
+    <Version>0.3.0</Version>
+    <Product>European Basketball Manager</Product>
+    <Company>European Basketball Manager</Company>
+    <Copyright>Copyright © 2026</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+</Project>

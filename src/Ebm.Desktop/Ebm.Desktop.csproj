@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Application/UI layer: WPF shell, views and view models. Talks to the game only through Services. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Ebm.Desktop</RootNamespace>
+    <AssemblyName>Ebm.Desktop</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ebm.Hosting\Ebm.Hosting.csproj" />
+    <ProjectReference Include="..\Ebm.Services\Ebm.Services.csproj" />
+    <ProjectReference Include="..\Ebm.Domain\Ebm.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Import templates and the sample dataset ship next to the executable (data/templates, data/sample). -->
+    <None Include="../../data/**/*" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

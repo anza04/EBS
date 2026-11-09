@@ -1,0 +1,89 @@
+{
+  "format": "ebm-dataset",
+  "version": 1,
+  "countries": [
+    {
+      "code": "ITA",
+      "name": "Italy"
+    }
+  ],
+  "arenas": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000001",
+      "name": "Example Arena",
+      "city": "Example City",
+      "country": "ITA",
+      "capacity": 5000
+    }
+  ],
+  "clubs": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000002",
+      "name": "Example Basket Club",
+      "shortName": "EXB",
+      "country": "ITA",
+      "homeArenaId": "0198a000-0000-7000-8000-000000000001",
+      "foundedYear": 1950
+    }
+  ],
+  "leagues": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000003",
+      "name": "Example League",
+      "shortName": "EXL",
+      "country": "ITA"
+    }
+  ],
+  "divisions": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000004",
+      "leagueId": "0198a000-0000-7000-8000-000000000003",
+      "name": "Example First Division",
+      "level": 1
+    }
+  ],
+  "competitions": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000005",
+      "name": "Example Championship",
+      "shortName": "EXC",
+      "type": "League",
+      "country": "ITA",
+      "divisionId": "0198a000-0000-7000-8000-000000000004",
+      "rules": {
+        "pointsForWin": 2,
+        "pointsForLoss": 0
+      }
+    }
+  ],
+  "players": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000006",
+      "firstName": "Example",
+      "lastName": "Player",
+      "dateOfBirth": "2001-03-15",
+      "nationality": "ITA",
+      "heightCm": 198,
+      "weightKg": 95,
+      "position": "SF",
+      "shooting": 65,
+      "insideScoring": 58,
+      "passing": 55,
+      "ballHandling": 60,
+      "rebounding": 50,
+      "defense": 62,
+      "athleticism": 70,
+      "basketballIq": 61
+    }
+  ],
+  "contracts": [
+    {
+      "id": "0198a000-0000-7000-8000-000000000007",
+      "clubId": "0198a000-0000-7000-8000-000000000002",
+      "playerId": "0198a000-0000-7000-8000-000000000006",
+      "startDate": "2026-07-01",
+      "endDate": "2028-06-30",
+      "annualSalary": 150000
+    }
+  ]
+}

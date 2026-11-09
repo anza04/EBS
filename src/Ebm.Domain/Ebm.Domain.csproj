@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Game domain layer: pure model and rules. Must not reference any other project or framework package. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Ebm.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>

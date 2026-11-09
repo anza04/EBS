@@ -1,0 +1,55 @@
+﻿<Window x:Class="Ebm.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Ebm.Desktop.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
+        Title="{Binding WindowTitle}"
+        Width="1280" Height="760" MinWidth="960" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Brush.Background}">
+  <DockPanel>
+    <!-- Header bar -->
+    <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Header}" Padding="24,14">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding VersionText}" Style="{StaticResource Text.Muted}"
+                   Foreground="{StaticResource Brush.HeaderMuted}" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding ProductName}" Style="{StaticResource Text.Title}"
+                   Foreground="{StaticResource Brush.HeaderText}" />
+      </DockPanel>
+    </Border>
+
+    <!-- Status bar -->
+    <Border DockPanel.Dock="Bottom" Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0" Padding="24,6">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Open logs folder" Command="{Binding OpenLogsFolderCommand}"
+                Style="{StaticResource Button.Secondary}" Padding="10,2" />
+        <TextBlock Style="{StaticResource Text.Muted}" VerticalAlignment="Center">
+          <Run Text="{Binding Editor.Counts, Mode=OneWay}" /> <Run Text=" · Data folder:" /> <Run Text="{Binding DataFolder, Mode=OneWay}" />
+        </TextBlock>
+      </DockPanel>
+    </Border>
+
+    <!-- Content area: the database editor (game screens are added by later steps) -->
+    <TabControl DataContext="{Binding Editor}" Margin="12" Padding="0" FontSize="13">
+      <TabItem Header="Players" Content="{Binding Players}" />
+      <TabItem Header="Clubs" Content="{Binding Clubs}" />
+      <TabItem Header="Contracts" Content="{Binding Contracts}" />
+      <TabItem Header="Leagues and competitions">
+        <Grid Margin="16">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="2*" />
+          </Grid.RowDefinitions>
+          <ContentControl Content="{Binding Leagues}" />
+          <ContentControl Grid.Row="2" Content="{Binding Competitions}" />
+        </Grid>
+      </TabItem>
+      <TabItem Header="Import" Content="{Binding Import}" />
+    </TabControl>
+  </DockPanel>
+</Window>
