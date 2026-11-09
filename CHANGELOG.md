@@ -3,6 +3,41 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.0] — 2026-11-09 — Step 07: Contracts and player availability
+
+### Added
+- Contract terms: payment frequency (monthly, quarterly, annually), signing bonus, performance bonuses (per game,
+  playoffs, league title, cup title, promotion, avoid relegation), release clause, club option and player option.
+  Grouped as `ContractTerms`; importable and editable in *Contracts (editor)*.
+- Contract lifecycle: status `Active`, `Expired`, `Terminated`, `Renewed`, with the early end date and the
+  termination settlement. `Contract.RunningOn(date)` is the single "running" rule used by every service.
+- `IContractService`: sign a free agent (overlap check, player acceptance, signing bonus paid, player joins the club),
+  renew (the old contract is kept as `Renewed`), terminate by release (remaining salary paid) or mutual agreement
+  (agreed settlement), club and player option decisions, free-agent list, club and player contract views, and
+  `ProcessContractDatesAsync` (expiry frees the player; contracts signed in advance move him on their start date).
+  Run at application start.
+- Salary calculations (`SalaryCalculator`): day-by-day accrual per contract year, remaining and total salary,
+  payment schedule by frequency, next payment. Club `SalaryCommitments`: wage bill, salary still owed, commitments
+  per 12 months, maximum season bonuses.
+- Simplified, deterministic negotiation (`ContractNegotiator`): asking salary from overall, reputation, age,
+  potential and club prestige; offers accepted, countered or rejected; player option decisions.
+- Screens: *Club contracts* (current contracts and history, wages and commitments, renew, terminate, options, sign
+  a free agent with *Ask the player* and counter-offers); the player profile shows contract status and history.
+- `Club.ChangeBalance` for one-off payments. Documented in `docs/CONTRACTS.md`.
+- Sample dataset: 4 free agents; some Aurora Milano contracts have bonuses, a release clause or options.
+- Tests: contract rules, bonuses, salary accrual and schedules, commitments, negotiation, contract service (signing,
+  refusal, pre-contract, expiry, release, mutual agreement, renewal, options), editor and import of the new terms,
+  Step 06 database upgrade, club contracts screen render.
+
+### Changed
+- Migration `Contracts` (add-column only, with defaults); existing contracts become active, paid monthly, no extras.
+- Terminated and expired contracts no longer make a player a club member, in the squad, club profile wage bill and
+  player profile (`Contract.RunningOn`).
+- Club spell and roster-spot moves are shared by squad management and contracts (`ClubMembership`).
+- `ContractDraft` gains the new terms (optional parameters); `DatabaseEditorViewModel` and
+  `PlayerProfileViewModel` take `IContractService`. The editor tab is now *Contracts (editor)*.
+- `.gitignore` no longer ignores the root `logs/` folder, so step logs are versioned.
+
 ## [0.6.0] — 2026-11-09 — Step 06: Club and roster management
 
 ### Added

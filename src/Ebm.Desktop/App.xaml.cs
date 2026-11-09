@@ -3,6 +3,7 @@ using System.Windows;
 using Ebm.Desktop.Startup;
 using Ebm.Hosting;
 using Ebm.Hosting.ErrorHandling;
+using Ebm.Services.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -49,6 +50,14 @@ public partial class App : Application
             RuntimeInformation.OSDescription,
             paths.DataRoot,
             launch.SmokeTest);
+
+        // Contracts that ran out or started since the last session take effect before any screen loads (docs/CONTRACTS.md §5).
+        var changes = services.GetRequiredService<IContractService>().ProcessContractDatesAsync().GetAwaiter().GetResult();
+        _logger.LogInformation(
+            "Contract dates applied: {Expired} expired, {Started} started, {FreeAgents} new free agents",
+            changes.Expired,
+            changes.Started,
+            changes.NewFreeAgents.Count);
 
         var window = services.GetRequiredService<MainWindow>();
         if (launch.SmokeTest)

@@ -104,7 +104,7 @@ public sealed class PlayerProfileTests : IAsyncLifetime
         var rival = await AddRivalAsync();
         var lookups = new EditorLookups();
         lookups.Refresh(await _db.Services.GetRequiredService<IDatabaseEditor>().LoadAsync());
-        var profile = new PlayerProfileViewModel(Profiles, lookups);
+        var profile = new PlayerProfileViewModel(Profiles, _db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(), lookups);
         var comparison = new PlayerComparisonViewModel(Profiles, lookups);
 
         profile.PlayerId = _world.Player.Id;

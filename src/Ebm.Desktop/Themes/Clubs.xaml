@@ -131,7 +131,7 @@
           <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
             <StackPanel>
               <TextBlock Text="Add a player to the squad" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
-              <TextBlock Text="Moves the player to this club from today (contracts are unchanged)." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
+              <TextBlock Text="Moves the player to this club from today without a contract (squad tool). To sign a player, use the Club contracts tab." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
               <TextBlock Text="Player" Style="{StaticResource Form.Label}" />
               <ComboBox ItemsSource="{Binding Lookups.Players}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding PlayerToAdd}" />
               <TextBlock Text="Joins as" Style="{StaticResource Form.Label}" />

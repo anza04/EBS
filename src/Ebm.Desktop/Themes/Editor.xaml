@@ -253,6 +253,7 @@
           <DataGridTextColumn Header="Start" Binding="{Binding Contract.StartDate}" Width="90" />
           <DataGridTextColumn Header="End" Binding="{Binding Contract.EndDate}" Width="90" />
           <DataGridTextColumn Header="Salary (€)" Binding="{Binding Contract.AnnualSalary, StringFormat=N0}" Width="100" />
+          <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -268,7 +269,20 @@
           <DatePicker SelectedDate="{Binding EndDate}" />
           <TextBlock Text="Annual salary (€)" Style="{StaticResource Form.Label}" />
           <TextBox Text="{Binding AnnualSalary, UpdateSourceTrigger=PropertyChanged}" />
-          <TextBlock Text="Club and player are fixed once a contract exists; a new deal is a new contract." Style="{StaticResource Text.Muted}" Margin="0,10,0,0" />
+          <TextBlock Text="Paid" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding PaymentFrequency}" />
+          <TextBlock Text="Signing bonus (€)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding SigningBonus, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Performance bonuses (Condition:amount; …)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding PerformanceBonuses, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Release clause (€, empty = none)" Style="{StaticResource Form.Label}" />
+          <TextBox Text="{Binding ReleaseClause, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Text="Club option until / player option until" Style="{StaticResource Form.Label}" />
+          <StackPanel Orientation="Horizontal">
+            <DatePicker SelectedDate="{Binding ClubOptionUntil}" Width="190" />
+            <DatePicker SelectedDate="{Binding PlayerOptionUntil}" Width="190" Margin="8,0,0,0" />
+          </StackPanel>
+          <TextBlock Text="Club and player are fixed once a contract exists; a new deal is a new contract. Sign, renew and terminate on the Club contracts tab." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,10,0,0" />
           <ContentControl Template="{StaticResource Editor.Actions}" />
         </StackPanel>
       </Border>

@@ -75,8 +75,27 @@ public sealed record ClubDraft(
     long WageBudget = 0,
     BoardExpectation BoardExpectation = Club.DefaultBoardExpectation);
 
-/// <summary>Values of a player contract to create (<paramref name="Id"/> is <c>null</c>) or update. Club and player are fixed once created.</summary>
-public sealed record ContractDraft(ContractId? Id, ClubId ClubId, PlayerId PlayerId, DateOnly StartDate, DateOnly EndDate, long AnnualSalary);
+/// <summary>
+/// Values of a player contract to create (<paramref name="Id"/> is <c>null</c>) or update. Club and player are fixed
+/// once created; the lifecycle (status, termination) changes only through <see cref="Contracts.IContractService"/>.
+/// Money is in whole euros.
+/// </summary>
+public sealed record ContractDraft(
+    ContractId? Id,
+    ClubId ClubId,
+    PlayerId PlayerId,
+    DateOnly StartDate,
+    DateOnly EndDate,
+    long AnnualSalary,
+    PaymentFrequency PaymentFrequency = PaymentFrequency.Monthly,
+    long SigningBonus = 0,
+    PerformanceBonuses? PerformanceBonuses = null,
+    long? ReleaseClause = null,
+    DateOnly? ClubOptionUntil = null,
+    DateOnly? PlayerOptionUntil = null)
+{
+    public ContractTerms Terms => new(StartDate, EndDate, AnnualSalary, PaymentFrequency, SigningBonus, PerformanceBonuses, ReleaseClause, ClubOptionUntil, PlayerOptionUntil);
+}
 
 /// <summary>Values of a league to create (<paramref name="Id"/> is <c>null</c>) or update.</summary>
 public sealed record LeagueDraft(LeagueId? Id, string Name, string ShortName, CountryId? CountryId);

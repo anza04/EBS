@@ -1,0 +1,146 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ct="clr-namespace:Ebm.Desktop.ViewModels.Contracts">
+  <!-- Club contracts screen (Step 07). Uses the tokens from Shell.xaml, the styles from Editor.xaml and Players.Lines from Players.xaml. -->
+
+  <BooleanToVisibilityConverter x:Key="Contracts.Visible" />
+
+  <DataTemplate DataType="{x:Type ct:ClubContractsViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+        <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" Margin="20,0,0,0" />
+      </StackPanel>
+      <TextBlock DockPanel.Dock="Bottom" Text="{Binding Message}" Style="{StaticResource Text.Status}" TextWrapping="Wrap" Margin="0,12,0,0" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="420" />
+        </Grid.ColumnDefinitions>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <TextBlock Text="Running and upcoming contracts" Style="{StaticResource Text.Title}" Margin="0,0,0,6" />
+          <DataGrid Grid.Row="1" ItemsSource="{Binding Current}" SelectedItem="{Binding SelectedContract}" Style="{StaticResource Editor.Grid}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="130" />
+              <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="105" />
+              <DataGridTextColumn Header="Ends" Binding="{Binding End}" Width="85" />
+              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="95" />
+              <DataGridTextColumn Header="Paid" Binding="{Binding Frequency}" Width="70" />
+              <DataGridTextColumn Header="Remaining" Binding="{Binding Remaining}" Width="100" />
+              <DataGridTextColumn Header="Next payment" Binding="{Binding NextPayment}" Width="150" />
+              <DataGridTextColumn Header="Options" Binding="{Binding Options}" Width="130" />
+              <DataGridTextColumn Header="Release clause" Binding="{Binding ReleaseClause}" Width="105" />
+              <DataGridTextColumn Header="Bonuses" Binding="{Binding Bonuses}" Width="160" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock Grid.Row="2" Text="Contract history" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
+          <DataGrid Grid.Row="3" ItemsSource="{Binding History}" Style="{StaticResource Editor.Grid}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="130" />
+              <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85" />
+              <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="85" />
+              <DataGridTextColumn Header="End" Binding="{Binding End}" Width="150" />
+              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="95" />
+              <DataGridTextColumn Header="Settlement" Binding="{Binding Settlement}" Width="95" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="12,0,0,0">
+          <StackPanel>
+            <Border Style="{StaticResource Card}" Padding="16">
+              <StackPanel>
+                <TextBlock Text="Wages" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+                <ContentControl Content="{Binding Finances}" ContentTemplate="{StaticResource Players.Lines}" />
+                <TextBlock Text="Salary commitments, 12 months at a time (contracts)" Style="{StaticResource Text.Label}" FontWeight="SemiBold" Margin="0,12,0,4" />
+                <ContentControl Content="{Binding Commitments}" ContentTemplate="{StaticResource Players.Lines}" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="Selected contract" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                <TextBlock Text="{Binding SelectedSummary}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
+                <StackPanel IsEnabled="{Binding HasSelection}">
+                  <Button Content="Renew…" Command="{Binding StartRenewalCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,10,0,0" />
+                  <TextBlock Text="Terminate" Style="{StaticResource Form.Label}" />
+                  <StackPanel Orientation="Horizontal">
+                    <ComboBox ItemsSource="{Binding TerminationKinds}" SelectedItem="{Binding TerminationKind}" Width="150" />
+                    <TextBox Text="{Binding Settlement, UpdateSourceTrigger=PropertyChanged}" Width="110" Margin="8,0,0,0" ToolTip="Settlement in euros (mutual agreement only; empty = half the remaining salary)" />
+                    <Button Content="Terminate" Command="{Binding TerminateCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+                  </StackPanel>
+                  <TextBlock Text="A release pays the remaining salary in full; a mutual agreement pays the settlement (default: half)." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                  <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding SelectedHasClubOption, Converter={StaticResource Contracts.Visible}}">
+                    <TextBlock Text="Club option" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Width="90" />
+                    <Button Content="Take up" Command="{Binding ExerciseClubOptionCommand}" Style="{StaticResource Button.Secondary}" />
+                    <Button Content="Decline" Command="{Binding DeclineClubOptionCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding SelectedHasPlayerOption, Converter={StaticResource Contracts.Visible}}">
+                    <TextBlock Text="Player option" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Width="90" />
+                    <Button Content="Ask the player to decide" Command="{Binding PlayerOptionCommand}" Style="{StaticResource Button.Secondary}" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+              <StackPanel>
+                <DockPanel>
+                  <Button DockPanel.Dock="Right" Content="New signing" Command="{Binding StartSigningCommand}" Style="{StaticResource Button.Secondary}" Padding="8,2" />
+                  <TextBlock Text="{Binding OfferTitle}" Style="{StaticResource Text.Title}" VerticalAlignment="Center" />
+                </DockPanel>
+                <StackPanel Visibility="{Binding IsNewSigning, Converter={StaticResource Contracts.Visible}}">
+                  <TextBlock Text="Free agent" Style="{StaticResource Form.Label}" />
+                  <ComboBox ItemsSource="{Binding FreeAgents}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding OfferPlayerId}" />
+                  <TextBlock Text="Joins as" Style="{StaticResource Form.Label}" />
+                  <ComboBox ItemsSource="{Binding JoinRoles}" SelectedItem="{Binding JoinAs}" />
+                </StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <TextBlock Text="Start date" Style="{StaticResource Form.Label}" />
+                    <DatePicker SelectedDate="{Binding OfferStart}" />
+                    <TextBlock Text="Annual salary (€)" Style="{StaticResource Form.Label}" />
+                    <TextBox Text="{Binding OfferSalary, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="Signing bonus (€)" Style="{StaticResource Form.Label}" />
+                    <TextBox Text="{Binding OfferSigningBonus, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="Club option until" Style="{StaticResource Form.Label}" />
+                    <DatePicker SelectedDate="{Binding OfferClubOption}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="End date" Style="{StaticResource Form.Label}" />
+                    <DatePicker SelectedDate="{Binding OfferEnd}" />
+                    <TextBlock Text="Paid" Style="{StaticResource Form.Label}" />
+                    <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding OfferFrequency}" />
+                    <TextBlock Text="Release clause (€)" Style="{StaticResource Form.Label}" />
+                    <TextBox Text="{Binding OfferReleaseClause, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="Player option until" Style="{StaticResource Form.Label}" />
+                    <DatePicker SelectedDate="{Binding OfferPlayerOption}" />
+                  </StackPanel>
+                </Grid>
+                <TextBlock Text="Performance bonuses (e.g. ReachPlayoffs:20000; LeagueTitle:50000)" Style="{StaticResource Form.Label}" />
+                <TextBox Text="{Binding OfferBonuses, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <Button Content="Ask the player" Command="{Binding AskPlayerCommand}" Style="{StaticResource Button.Secondary}" />
+                  <Button Content="Use his counter-offer" Command="{Binding AcceptCounterCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+                  <Button Content="Submit" Command="{Binding SubmitOfferCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+                </StackPanel>
+                <TextBlock Text="{Binding Negotiation}" Style="{StaticResource Text.Body}" TextWrapping="Wrap" Margin="0,8,0,0" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

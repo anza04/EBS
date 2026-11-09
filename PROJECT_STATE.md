@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 06 — Club and roster management (2026-11-09)
+STEP 07 — Contracts and player availability (2026-11-09)
 
 ## Next step
-STEP 07 — Contracts and player availability
+STEP 08 — Transfers and free agents
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (287/287: 208 unit, 79 integration)
-- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`.
+- Tests: PASS (331/331: 240 unit, 91 integration)
+- Run status: Launches. Creates/migrates the game database at startup, applies contract dates (expiries, contracts starting) and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, club contracts, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -43,12 +43,13 @@ STEP 07 — Contracts and player availability
 - [x] Competition configuration, fixture generator, standings, playoffs, promotion/relegation (Step 04)
 - [x] Player model: 27 attributes, tendencies, ratings, position suitability, profile and comparison screens (Step 05)
 - [x] Club profile, squad roles, starting five, rotation, roster validation, competition registration (Step 06)
-- [ ] Contracts and player availability (Step 07) … see docs/ROADMAP.md
+- [x] Contracts: terms, lifecycle (sign, renew, terminate, options, expiry), free agents, salary calculations and commitments, negotiation (Step 07)
+- [ ] Transfers and free agents (Step 08) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261109171322_ClubsAndRosters`
-- Latest migration: `20261109171322_ClubsAndRosters` (club city, reputation, balance, wage budget, board expectation; new `RosterSpots`; 19 tables)
-- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 33 players with full Step 05 profiles; club profiles; Aurora Milano has a complete 12-player squad) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
+- Current schema version: `20261109194813_Contracts`
+- Latest migration: `20261109194813_Contracts` (contract payment frequency, signing bonus, performance bonuses, release clause, options, status, termination date and settlement; 19 tables)
+- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
 1. Layered architecture with inward-only dependencies (Domain ← Services ← Persistence/DataImport ← Hosting ← Desktop). Enforced by architecture tests.
@@ -77,8 +78,14 @@ STEP 07 — Contracts and player availability
 24. A player's current club = open club spell, else latest running contract. Squad roles live in `RosterSpots` (one per player, current state, not history); no row = bench. Moves go through `IClubService.AssignPlayerAsync`.
 25. Roster rules are a pure validator (`RosterValidator`) over `SquadRules`: club defaults in code, competition registration limits in the rules JSON (`registration.squad`). Invalid rosters can be saved; validation reports errors and warnings instead of blocking, so squads can be rearranged in steps.
 26. An enum column with `HasDefaultValue` needs an EF sentinel outside the enum (`HasSentinel((T)(-1))`) unless the default is the enum's value 0; otherwise value 0 is replaced by the column default.
+27. A contract runs on a date by `Contract.RunningOn(date)` only (dates plus `TerminationDate`); never re-implement the rule. Early ends keep the agreed `EndDate` and set `TerminationDate` (first day not under contract); contracts are never deleted.
+28. Contract lifecycle changes go through `IContractService` (negotiation, payments, club moves in one unit of work). The editor and the importer are data tools: they set terms only, without negotiation, payments, overlap checks or moves.
+29. One-off contract payments (signing bonus, settlement) are booked to `Club.Balance` at once (`Club.ChangeBalance`). Salaries and performance bonuses are calculated (`SalaryCalculator`, `SalaryCommitments`) but not booked until the calendar and finances exist (Steps 12, 27).
+30. Contract dates take effect through `IContractService.ProcessContractDatesAsync` (idempotent): at application start now, every game day from Step 12.
+31. Negotiation is deterministic and parameterised (`ContractNegotiator` properties, registered as a singleton): the same offer always gets the same answer.
+32. Club membership moves (spells and roster spots) go through `ClubMembership` (Services), shared by the squad and contract use cases.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
@@ -88,7 +95,10 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Season outcome (promoted/relegated) is calculated but not applied to next season's entries; Step 12 does that.
 - No UI for competitions yet (schedule, table, playoffs); Step 11 adds presentation.
 - Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7); squad roles are set in the game.
-- Assigning a player to a club does not touch contracts (Step 07); the old contract stays until termination exists. Board expectations and finances are stored but not used by any game system yet (Steps 12, 27).
+- The squad screen's *Add a player to the squad* (`AssignPlayerAsync`) still moves a player without a contract (squad tool); the game flow signs through *Club contracts*. Board expectations and finances are stored but not used by any game system yet (Steps 12, 27).
+- Contracts: salaries and performance bonuses are calculated but not paid from the club balance (Steps 12, 27); the wage budget is reported, not enforced (Steps 08, 27); undecided options lapse at expiry (no reminders before Step 12); a player can only sign when free for the offered period (buy-outs and transfers are Step 08); the editor and the importer do not check overlapping contracts.
+- A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
+- Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
 
 ## Current dependencies
@@ -111,7 +121,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_06_LOG.md
+logs/STEP_07_LOG.md (logs before Step 07 were never committed: the old `.gitignore` excluded `logs/`)
 
 ## Instructions for continuing
 1. Read this file.

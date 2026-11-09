@@ -99,5 +99,18 @@ internal sealed class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.HasOne<Club>().WithMany().HasForeignKey(x => x.ClubId);
         builder.HasOne<Player>().WithMany().HasForeignKey(x => x.PlayerId);
         builder.HasOne<StaffMember>().WithMany().HasForeignKey(x => x.StaffMemberId);
+
+        // Columns added in Step 07 have defaults so existing contracts upgrade in place; their rules are checked by the
+        // domain only (a check constraint would force SQLite to rebuild the Contracts table, decision 21).
+        // Both enum defaults are the enums' value 0, so no sentinel is needed (decision 26).
+        builder.Property(x => x.PaymentFrequency).HasConversion<string>().HasMaxLength(16).HasDefaultValue(PaymentFrequency.Monthly);
+        builder.Property(x => x.SigningBonus).HasDefaultValue(0L);
+        builder.Property(x => x.PerformanceBonuses)
+            .HasConversion(v => v.ToString(), v => PerformanceBonuses.Parse(v))
+            .HasMaxLength(200)
+            .HasDefaultValue(PerformanceBonuses.None);
+        builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(16).HasDefaultValue(ContractStatus.Active);
+        builder.Property(x => x.TerminationCompensation).HasDefaultValue(0L);
+        builder.HasIndex(x => new { x.ClubId, x.EndDate });
     }
 }

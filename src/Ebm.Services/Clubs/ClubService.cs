@@ -129,23 +129,7 @@ internal sealed class ClubService : IClubService
             throw new DomainValidationException($"{player.FullName} already plays for {club.Name}.");
         }
 
-        var history = data.Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>();
-        foreach (var open in await history.ListAsync(s => s.PlayerId == playerId && s.EndDate == null, cancellationToken).ConfigureAwait(false))
-        {
-            open.Close(open.StartDate > data.Today ? open.StartDate : data.Today);
-        }
-
-        history.Add(new PlayerClubHistoryEntry(PlayerClubHistoryEntryId.New(), playerId, clubId, data.Today));
-        var spots = data.Repo<RosterSpot, RosterSpotId>();
-        if ((await spots.ListAsync(s => s.PlayerId == playerId, cancellationToken).ConfigureAwait(false)).SingleOrDefault() is { } spot)
-        {
-            spot.MoveTo(clubId);
-            spot.Assign(role, null, null);
-        }
-        else
-        {
-            spots.Add(new RosterSpot(RosterSpotId.New(), playerId, clubId, role));
-        }
+        await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, clubId, data.Today, role, cancellationToken).ConfigureAwait(false);
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -161,25 +145,13 @@ internal sealed class ClubService : IClubService
 
         public Task SaveAsync(CancellationToken cancellationToken) => services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken);
 
-        public Task<IReadOnlyList<Contract>> RunningContractsAsync(CancellationToken cancellationToken) =>
-            Repo<Contract, ContractId>().ListAsync(c => c.PlayerId != null && c.StartDate <= Today && c.EndDate >= Today, cancellationToken);
+        /// <summary>Player contracts running today.</summary>
+        public async Task<IReadOnlyList<Contract>> RunningContractsAsync(CancellationToken cancellationToken) =>
+            [.. (await Repo<Contract, ContractId>().ListAsync(Contract.RunningOn(Today), cancellationToken).ConfigureAwait(false)).Where(c => c.PlayerId is not null)];
 
         /// <summary>Current club of every player who has one: the open spell, else the latest running contract.</summary>
-        public async Task<Dictionary<PlayerId, ClubId>> MembersAsync(CancellationToken cancellationToken)
-        {
-            var members = new Dictionary<PlayerId, ClubId>();
-            foreach (var contract in (await RunningContractsAsync(cancellationToken).ConfigureAwait(false)).OrderBy(c => c.StartDate))
-            {
-                members[contract.PlayerId!.Value] = contract.ClubId;
-            }
-
-            foreach (var spell in await Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>().ListAsync(s => s.EndDate == null, cancellationToken).ConfigureAwait(false))
-            {
-                members[spell.PlayerId] = spell.ClubId;
-            }
-
-            return members;
-        }
+        public Task<Dictionary<PlayerId, ClubId>> MembersAsync(CancellationToken cancellationToken) =>
+            ClubMembership.CurrentClubsAsync(services, Today, cancellationToken);
 
         /// <summary>The current season (earliest not yet ended) and the club's competitions in it.</summary>
         public async Task<(Season? Season, IReadOnlyList<Competition> Competitions)> CurrentCompetitionsAsync(ClubId clubId, CancellationToken cancellationToken)

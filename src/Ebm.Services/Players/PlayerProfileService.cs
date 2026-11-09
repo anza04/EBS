@@ -114,7 +114,8 @@ internal sealed class PlayerProfileService : IPlayerProfileService
             }
 
             var spell = (await spells.ListAsync(s => s.PlayerId == id && s.EndDate == null, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
-            var contract = (await contracts.ListAsync(c => c.PlayerId == id && c.StartDate <= today && c.EndDate >= today, cancellationToken).ConfigureAwait(false))
+            var contract = (await contracts.ListAsync(c => c.PlayerId == id, cancellationToken).ConfigureAwait(false))
+                .Where(c => c.IsRunningOn(today))
                 .OrderByDescending(c => c.StartDate)
                 .FirstOrDefault();
             async Task<string?> ClubName(ClubId? clubId) =>

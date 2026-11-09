@@ -31,7 +31,11 @@ internal static class ImportFields
             ["firstName", "lastName", "dateOfBirth", "nationality", "heightCm", "weightKg", "position", .. PlayerCatalog.Attributes.Select(PlayerCatalog.FieldName)],
             ["id", "wingspanCm", "secondaryPositions", "experience", "reputation", "potential", "fitness", "morale", "injuryStatus", "injuryReturnDate",
              .. PlayerCatalog.Tendencies.Select(PlayerCatalog.FieldName)]),
-        new(ImportRecordKind.Contract, "contracts", ["clubId", "playerId", "startDate", "endDate", "annualSalary"], ["id"]),
+        new(
+            ImportRecordKind.Contract,
+            "contracts",
+            ["clubId", "playerId", "startDate", "endDate", "annualSalary"],
+            ["id", "paymentFrequency", "signingBonus", "performanceBonuses", "releaseClause", "clubOptionUntil", "playerOptionUntil"]),
     ];
 
     public static Schema For(ImportRecordKind kind) => All.Single(s => s.Kind == kind);

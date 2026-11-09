@@ -125,12 +125,11 @@ internal sealed class ImportSession
                 target.UpdateCondition(p.Fitness, p.Morale, p.InjuryStatus, p.InjuryReturnDate);
                 target.UpdateTendencies(p.Tendencies);
             }),
-        ImportRecordKind.Contract => Apply(record, _contracts, (f, id) =>
-            Contract.ForPlayer(id, Ref(f, "clubId", _clubs, "club"), Ref(f, "playerId", _players, "player"), f.Date("startDate"), f.Date("endDate"), f.Long("annualSalary")),
+        ImportRecordKind.Contract => Apply(record, _contracts, BuildContract,
             (target, c) =>
             {
                 Immutable(target.ClubId == c.ClubId && target.PlayerId == c.PlayerId, "The club and player of a contract cannot be changed. Import it as a new contract.");
-                target.UpdateTerms(c.StartDate, c.EndDate, c.AnnualSalary);
+                target.UpdateTerms(c.Terms);
             }),
         _ => throw new ArgumentOutOfRangeException(nameof(record), record.Kind, "Unknown record kind."),
     };
@@ -168,6 +167,27 @@ internal sealed class ImportSession
         var club = new Club(id, name, shortName, country, arena, founded);
         club.UpdateProfile(city, reputation, balance, wageBudget, expectation);
         return club;
+    }
+
+    // Optional terms default to monthly pay, no bonuses, no release clause and no options (docs/IMPORT_FORMATS.md).
+    private Contract BuildContract(FieldReader f, ContractId id)
+    {
+        var (club, player) = (Ref(f, "clubId", _clubs, "club"), Ref(f, "playerId", _players, "player"));
+        var (start, end, salary) = (f.Date("startDate"), f.Date("endDate"), f.Long("annualSalary"));
+        var frequency = f.OptionalEnum("paymentFrequency", PaymentFrequency.Monthly);
+        var (signingBonus, releaseClause) = (f.OptionalLong("signingBonus") ?? 0, f.OptionalLong("releaseClause"));
+        var (clubOption, playerOption) = (f.OptionalDate("clubOptionUntil"), f.OptionalDate("playerOptionUntil"));
+        var bonuses = PerformanceBonuses.None;
+        try
+        {
+            bonuses = PerformanceBonuses.Parse(f.Optional("performanceBonuses"));
+        }
+        catch (DomainValidationException ex)
+        {
+            f.Errors.Add($"'performanceBonuses': {ex.Message}");
+        }
+
+        return Contract.ForPlayer(id, club, player, new ContractTerms(start, end, salary, frequency, signingBonus, bonuses, releaseClause, clubOption, playerOption));
     }
 
     // Optional fields take the defaults of a new player (docs/IMPORT_FORMATS.md); missing tendencies are suggested from the attributes.

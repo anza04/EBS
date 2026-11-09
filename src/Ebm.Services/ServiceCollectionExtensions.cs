@@ -1,6 +1,8 @@
+using Ebm.Domain.Contracts;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
+using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Players;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,8 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(PlayerRatingCalculator.Default);
         services.TryAddSingleton<IPlayerProfileService, PlayerProfileService>();
         services.TryAddSingleton<IClubService, ClubService>();
+        services.TryAddSingleton(ContractNegotiator.Default);
+        services.TryAddSingleton<IContractService, ContractService>();
 
         return services;
     }

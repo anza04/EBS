@@ -41,7 +41,8 @@
       <TabItem Header="Clubs" Content="{Binding Clubs}" />
       <TabItem Header="Club profile" Content="{Binding ClubProfile}" />
       <TabItem Header="Squad" Content="{Binding Squad}" />
-      <TabItem Header="Contracts" Content="{Binding Contracts}" />
+      <TabItem Header="Club contracts" Content="{Binding ClubContracts}" />
+      <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">
         <Grid Margin="16">
           <Grid.RowDefinitions>

@@ -11,8 +11,11 @@ profile). Free agents have no club.
 
 `IClubService.AssignPlayerAsync(player, club, role)` moves a player to a club from today: it closes his open spell
 (end date = today), opens a new one and moves his roster spot. It joins the bench, the inactive list or the youth
-squad; starting and rotation roles are chosen in the squad. Contracts are not touched: signing, termination and free
-agency are Step 07, so a moved player keeps his old contract until then (the squad shows "Contract: none").
+squad; starting and rotation roles are chosen in the squad. Contracts are not touched (a squad tool: the squad shows
+"Contract: none"). Since Step 07 the game moves players through contracts: signing (`IContractService.SignAsync`)
+joins the club, termination and expiry leave it (`docs/CONTRACTS.md` §2). Both use the same `ClubMembership` rules.
+A contract counts only while it runs (`Contract.RunningOn`): a terminated or expired contract no longer makes a
+player a club member.
 
 ## 2. Roles
 
@@ -109,7 +112,6 @@ today; staff wages come with Step 27). Board expectations are stored but not yet
 
 * Match engine (Step 08–10): read `ClubRoster.Starters` (lineup positions) and `ClubRoster.Rotation` (order);
   refuse to simulate when `ClubRoster.Validation.IsValid` is false, or let the AI fix the roster first (Step 13).
-* Contracts (Step 07): signing a free agent should call `AssignPlayerAsync`; releasing a player should close his
-  spell and remove his roster spot.
+* Contracts (Step 07, done): signing joins the club and releasing/expiry leave it, through `ClubMembership`.
 * Not implemented: roster import (spots are created in the game), shirt numbers, homegrown rules, registration
   deadlines and in-season registration changes.

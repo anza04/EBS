@@ -3,10 +3,11 @@
 Offline, single-player basketball management game for Windows, covering the top two domestic
 divisions of European countries.
 
-**Status:** Step 06 (club and roster management) complete. The application creates and migrates the game
+**Status:** Step 07 (contracts and player availability) complete. The application creates and migrates the game
 database, imports data and edits it, shows player profiles and comparisons (27 attributes, tendencies, position
-ratings), club profiles and squads (starting five, rotation, roster validation and competition registration); the
-competition engine (schedules, standings, playoffs, promotion and relegation) runs as a service.
+ratings), club profiles and squads (starting five, rotation, roster validation and competition registration), and
+manages contracts (signing free agents with a simple negotiation, renewals, terminations, options, expiry, salary
+commitments); the competition engine (schedules, standings, playoffs, promotion and relegation) runs as a service.
 See [PROJECT_STATE.md](PROJECT_STATE.md) for the current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan.
 
 ## Requirements
@@ -39,6 +40,7 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/COMPETITION_FORMATS.md](docs/COMPETITION_FORMATS.md) | Competition rules schema, supported formats, adding a league |
 | [docs/PLAYER_MODEL.md](docs/PLAYER_MODEL.md) | Player fields, attributes, tendencies, rating and position formulas |
 | [docs/ROSTER_RULES.md](docs/ROSTER_RULES.md) | Club profile, squad roles, roster validation, competition registration |
+| [docs/CONTRACTS.md](docs/CONTRACTS.md) | Contract lifecycle, salary calculations, negotiation, transaction rules |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |
 | [logs/](logs/) | Detailed log of each development step |

@@ -81,6 +81,21 @@ public sealed class Club : Entity<ClubId>
 
     public void ChangeHomeArena(ArenaId? arenaId) => HomeArenaId = Guard.Optional(arenaId, "Home arena");
 
+    /// <summary>
+    /// Books a one-off income (positive) or payment (negative), such as a signing bonus or a contract settlement.
+    /// The balance may go negative but must stay within ±<see cref="MaxBalance"/>.
+    /// </summary>
+    public void ChangeBalance(long amount)
+    {
+        var balance = Balance + amount;
+        if (balance is < -MaxBalance or > MaxBalance)
+        {
+            throw new DomainValidationException($"The club's balance would leave the allowed range of ±{MaxBalance:N0} euros.");
+        }
+
+        Balance = balance;
+    }
+
     /// <summary>Changes city, reputation, finances and board expectation.</summary>
     public void UpdateProfile(string? city, int reputation, long balance, long wageBudget, BoardExpectation boardExpectation)
     {

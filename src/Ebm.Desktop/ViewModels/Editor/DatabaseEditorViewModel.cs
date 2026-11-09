@@ -1,15 +1,20 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Clubs;
+using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Players;
 using Ebm.Services.Clubs;
+using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Players;
 
 namespace Ebm.Desktop.ViewModels.Editor;
 
-/// <summary>The database editor: one page per record type, the import page, the player profile and comparison screens and the club profile and squad screens.</summary>
+/// <summary>
+/// The database editor: one page per record type, the import page, the player profile and comparison screens, the
+/// club profile and squad screens and the club contracts screen.
+/// </summary>
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
     private readonly IDatabaseEditor _editor;
@@ -17,7 +22,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     [ObservableProperty]
     private string _counts = string.Empty;
 
-    public DatabaseEditorViewModel(IDatabaseEditor editor, IDataImportService importer, IFilePicker filePicker, IPlayerProfileService profiles, IClubService clubs)
+    public DatabaseEditorViewModel(IDatabaseEditor editor, IDataImportService importer, IFilePicker filePicker, IPlayerProfileService profiles, IClubService clubs, IContractService contracts)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -29,10 +34,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Leagues = new LeaguesPageViewModel(editor, Lookups, ReloadAsync);
         Competitions = new CompetitionsPageViewModel(editor, Lookups, ReloadAsync);
         Import = new ImportViewModel(importer, filePicker, ReloadAsync);
-        Profile = new PlayerProfileViewModel(profiles, Lookups);
+        Profile = new PlayerProfileViewModel(profiles, contracts, Lookups);
         Comparison = new PlayerComparisonViewModel(profiles, Lookups);
         ClubProfile = new ClubProfileViewModel(clubs, Lookups);
         Squad = new SquadViewModel(clubs, Lookups, ReloadAsync);
+        ClubContracts = new ClubContractsViewModel(contracts, Lookups, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -57,6 +63,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public SquadViewModel Squad { get; }
 
+    public ClubContractsViewModel ClubContracts { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -71,6 +79,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         await Comparison.RefreshAsync();
         await ClubProfile.RefreshAsync();
         await Squad.RefreshAsync();
+        await ClubContracts.RefreshAsync();
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";
     }

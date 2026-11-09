@@ -91,7 +91,7 @@ internal sealed class DatabaseEditor : IDatabaseEditor
         ArgumentNullException.ThrowIfNull(draft);
         return SaveAsync<Contract, ContractId>(
             draft.Id,
-            () => Contract.ForPlayer(ContractId.New(), draft.ClubId, draft.PlayerId, draft.StartDate, draft.EndDate, draft.AnnualSalary),
+            () => Contract.ForPlayer(ContractId.New(), draft.ClubId, draft.PlayerId, draft.Terms),
             c =>
             {
                 if (c.ClubId != draft.ClubId || c.PlayerId != draft.PlayerId)
@@ -99,7 +99,7 @@ internal sealed class DatabaseEditor : IDatabaseEditor
                     throw new DomainValidationException("The club and player of a contract cannot be changed. Create a new contract instead.");
                 }
 
-                c.UpdateTerms(draft.StartDate, draft.EndDate, draft.AnnualSalary);
+                c.UpdateTerms(draft.Terms);
             },
             DuplicateKeys.Of,
             _ => "This player already has a contract with this club starting on the same date.",

@@ -238,11 +238,39 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("ClubId")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("ClubOptionUntil")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PaymentFrequency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Monthly");
+
+                    b.Property<string>("PerformanceBonuses")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("");
+
                     b.Property<Guid?>("PlayerId")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("PlayerOptionUntil")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("ReleaseClause")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("SigningBonus")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L);
 
                     b.Property<Guid?>("StaffMemberId")
                         .HasColumnType("TEXT");
@@ -250,13 +278,28 @@ namespace Ebm.Persistence.Migrations
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Active");
 
-                    b.HasIndex("ClubId");
+                    b.Property<long>("TerminationCompensation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L);
+
+                    b.Property<DateOnly?>("TerminationDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("PlayerId");
 
                     b.HasIndex("StaffMemberId");
+
+                    b.HasIndex("ClubId", "EndDate");
 
                     b.ToTable("Contracts", null, t =>
                         {

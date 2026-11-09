@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109171322_ClubsAndRosters`** (Step 06).
+Schema version: **`20261109194813_Contracts`** (Step 07).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -9,6 +9,7 @@ Schema version: **`20261109171322_ClubsAndRosters`** (Step 06).
 | `20261109124652_FixtureStages` | 04 | `Fixtures.Stage` and `Fixtures.GameNumber` with defaults, so existing fixtures stay regular-season games. Add-column only, so the upgrade runs in one transaction (a check constraint would force a table rebuild on SQLite; the domain enforces the range) |
 | `20261109125814_PlayerModel` | 05 | Players: profile and condition columns (with defaults). `PlayerAttributes` replaced by the 27-attribute table (old table renamed, new one created and filled from the old ratings, old one dropped) and new `PlayerTendencies`. Hand-written `Up` so nothing is rebuilt and the upgrade stays in one transaction; mapping in `docs/PLAYER_MODEL.md` §7 |
 | `20261109171322_ClubsAndRosters` | 06 | Clubs: `City`, `Reputation`, `Balance`, `WageBudget`, `BoardExpectation` (add-column with defaults; `City` copied from the home arena). New `RosterSpots` table |
+| `20261109194813_Contracts` | 07 | Contracts: `PaymentFrequency`, `SigningBonus`, `PerformanceBonuses`, `ReleaseClause`, `ClubOptionUntil`, `PlayerOptionUntil`, `Status`, `TerminationDate`, `TerminationCompensation` (add-column with defaults; existing contracts become `Active` with monthly pay and no extras). Index `ClubId` replaced by (`ClubId`, `EndDate`) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -177,10 +178,20 @@ Step 05 columns are checked by the domain only: adding check constraints to an e
 | ClubId | id | FK Clubs |
 | PlayerId | id? | FK Players |
 | StaffMemberId | id? | FK Staff. **Exactly one** of `PlayerId` and `StaffMemberId` is set |
-| StartDate / EndDate | date | `EndDate > StartDate` |
+| StartDate / EndDate | date | `EndDate > StartDate`; at most 10 years (domain) |
 | AnnualSalary | int | Euros, 0–100,000,000 (`>= 0` in schema) |
+| PaymentFrequency | text(16) | `Monthly` (default), `Quarterly`, `Annually` |
+| SigningBonus | int | Euros, default 0 |
+| PerformanceBonuses | text(200) | `Condition:amount;…`, default empty |
+| ReleaseClause | int? | Euros; null = none |
+| ClubOptionUntil / PlayerOptionUntil | date? | Option end dates; after `EndDate`, at most 3 years |
+| Status | text(16) | `Active` (default), `Expired`, `Terminated`, `Renewed` |
+| TerminationDate | date? | First day not under contract after an early end |
+| TerminationCompensation | int | Settlement paid on termination, default 0 |
 
-Contracts are never deleted; expired ones are history.
+Index (`ClubId, EndDate`). Columns added in Step 07 have defaults and domain-only range checks (decision 21).
+Contracts are never deleted; expired, terminated and renewed ones are history. Lifecycle and salary rules:
+`docs/CONTRACTS.md`.
 
 ### PlayerClubHistory
 One row per spell of a player at a club.

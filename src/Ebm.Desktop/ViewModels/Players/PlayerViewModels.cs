@@ -1,8 +1,10 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Editor;
 using Ebm.Domain.Common;
 using Ebm.Domain.Players;
+using Ebm.Services.Contracts;
 using Ebm.Services.Players;
 
 namespace Ebm.Desktop.ViewModels.Players;
@@ -20,9 +22,13 @@ public sealed record PositionLine(string Position, int Rating, int EffectiveRati
 public sealed partial class PlayerProfileViewModel : ObservableObject
 {
     private readonly IPlayerProfileService _profiles;
+    private readonly IContractService _contracts;
 
     [ObservableProperty]
     private PlayerId? _playerId;
+
+    [ObservableProperty]
+    private IReadOnlyList<ContractRowView> _contractHistory = [];
 
     [ObservableProperty]
     private PlayerProfile? _profile;
@@ -42,10 +48,12 @@ public sealed partial class PlayerProfileViewModel : ObservableObject
     [ObservableProperty]
     private IReadOnlyList<InfoGroup> _groups = [];
 
-    public PlayerProfileViewModel(IPlayerProfileService profiles, EditorLookups lookups)
+    public PlayerProfileViewModel(IPlayerProfileService profiles, IContractService contracts, EditorLookups lookups)
     {
         ArgumentNullException.ThrowIfNull(profiles);
+        ArgumentNullException.ThrowIfNull(contracts);
         _profiles = profiles;
+        _contracts = contracts;
         Lookups = lookups;
     }
 
@@ -55,15 +63,17 @@ public sealed partial class PlayerProfileViewModel : ObservableObject
     public async Task RefreshAsync()
     {
         var profile = PlayerId is { } id ? await _profiles.GetProfileAsync(id) : null;
-        Show(profile);
+        var contracts = PlayerId is { } pid ? await _contracts.GetPlayerContractsAsync(pid) : null;
+        Show(profile, contracts);
     }
 
     // Fire-and-forget is safe: GetProfileAsync only reads, and unexpected errors reach the global handler.
     async partial void OnPlayerIdChanged(PlayerId? value) => await RefreshAsync();
 
-    private void Show(PlayerProfile? profile)
+    private void Show(PlayerProfile? profile, PlayerContracts? contracts)
     {
         Profile = profile;
+        ContractHistory = contracts is null ? [] : [.. contracts.Contracts.Select(c => new ContractRowView(c))];
         if (profile is null)
         {
             Title = "Choose a player";
@@ -85,7 +95,8 @@ public sealed partial class PlayerProfileViewModel : ObservableObject
             new("Wingspan", $"{p.WingspanCm} cm"),
             new("Secondary positions", p.SecondaryPositions.IsEmpty ? "none" : string.Join(", ", p.SecondaryPositions.Positions.Select(PlayerCatalog.DisplayName))),
             new("Current club", profile.CurrentClub ?? "free agent"),
-            new("Contract", contract is null ? "none" : $"{profile.ContractClub}, {Date(contract.StartDate)} to {Date(contract.EndDate)}, € {contract.AnnualSalary.ToString("N0", CultureInfo.CurrentCulture)} a year"),
+            new("Salary", contract is null ? "none" : $"€ {contract.AnnualSalary.ToString("N0", CultureInfo.CurrentCulture)} a year"),
+            new("Contract status", ContractStatusText(contracts)),
             new("Experience", Number(p.Experience)),
             new("Reputation", Number(p.Reputation)),
             new("Fitness", $"{p.Fitness}%"),
@@ -113,6 +124,16 @@ public sealed partial class PlayerProfileViewModel : ObservableObject
             new InfoGroup("Tendencies", [.. PlayerCatalog.Tendencies.Select(t => new InfoLine(PlayerCatalog.DisplayName(t), Number(p.Tendencies[t])))]),
         ];
     }
+
+    private static string ContractStatusText(PlayerContracts? contracts) => contracts switch
+    {
+        null => string.Empty,
+        { IsFreeAgent: true } => "free agent",
+        { Running: { } running, Upcoming: { } next } when next.Club != running.Club => $"under contract; joins {next.Club} on {Date(next.Contract.StartDate)}",
+        { Running: { } running } => $"under contract until {Date(running.Contract.EffectiveEndDate)}",
+        { Upcoming: { } next } => $"signed with {next.Club} from {Date(next.Contract.StartDate)}",
+        _ => string.Empty,
+    };
 
     private static string Date(DateOnly date) => date.ToString("d", CultureInfo.CurrentCulture);
 

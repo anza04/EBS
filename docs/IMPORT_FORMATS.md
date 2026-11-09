@@ -23,7 +23,7 @@ the import modes, and the database editor. Code: `src/Ebm.DataImport` (import), 
 
 Templates: `data/templates/<type>.csv` (one example row each; together they form a valid mini dataset) and
 `data/templates/dataset-template.json`. Sample dataset: `data/sample/italy-sample.json` (fictional Italian
-league: 5 countries, 1 league, 2 divisions, 3 competitions, 8 arenas, 8 clubs, 33 players, 33 contracts; Aurora Milano has a complete 12-player squad).
+league: 5 countries, 1 league, 2 divisions, 3 competitions, 8 arenas, 8 clubs, 37 players, 33 contracts; Aurora Milano has a complete 12-player squad, some contracts have bonuses, a release clause or options, and 4 players are free agents).
 Both folders are copied next to the executable (`data\…`) and the import file dialog opens there.
 
 ## 2. Field mappings
@@ -79,6 +79,14 @@ Both folders are copied next to the executable (`data\…`) and the import file 
 | | `clubId`*, `playerId`* | | Club and player IDs; cannot change on update |
 | | `startDate`*, `endDate`* | | End after start |
 | | `annualSalary`* | `AnnualSalary` | Whole euros, 0–100 000 000 |
+| | `paymentFrequency` | `PaymentFrequency` | `Monthly` (default), `Quarterly`, `Annually` |
+| | `signingBonus` | `SigningBonus` | Whole euros; default 0 |
+| | `performanceBonuses` | `PerformanceBonuses` | `Condition:amount` pairs separated by `;` or `\|` (`ReachPlayoffs:20000;LeagueTitle:50000`); conditions `PerGamePlayed`, `ReachPlayoffs`, `LeagueTitle`, `CupTitle`, `Promotion`, `AvoidRelegation`; default none |
+| | `releaseClause` | `ReleaseClause` | Whole euros, 1–1 000 000 000; default none |
+| | `clubOptionUntil`, `playerOptionUntil` | | Option end dates, after `endDate` by at most 3 years; default none |
+
+Imported contracts are `Active`; status, termination and expiry are managed by the game (`docs/CONTRACTS.md`). An
+import creates the contract only: it does not move the player, charge the signing bonus or check overlapping contracts.
 
 ## 3. Validation rules
 
@@ -140,13 +148,14 @@ A summary line also goes to the application log.
 
 ## 6. Database editor
 
-The main window shows the editor (tabs *Players*, *Player profile*, *Compare players*, *Clubs*, *Club profile*, *Squad*, *Contracts*, *Leagues and competitions*, *Import*).
+The main window shows the editor (tabs *Players*, *Player profile*, *Compare players*, *Clubs*, *Club profile*, *Squad*, *Club contracts*, *Contracts (editor)*, *Leagues and competitions*, *Import*).
 Select a row to edit it, or *New* for a blank form; *Save* runs the same domain validation and duplicate rules as
 the import and shows the result under the form. Each save is its own unit of work (`IDatabaseEditor`).
 Players include profile, condition, the 27 attributes and the tendencies (*Suggest from attributes* fills them from the
 attributes); a blank wingspan means "same as height". *Player profile* and *Compare players* are read-only views
 (`IPlayerProfileService`). Clubs include city, reputation, balance, wage budget and board expectation; *Club profile*
-and *Squad* use `IClubService` (`docs/ROSTER_RULES.md`). Contracts: club and player are fixed once created.
+and *Squad* use `IClubService` (`docs/ROSTER_RULES.md`). *Contracts (editor)* edits every negotiable term; club and
+player are fixed once created. *Club contracts* signs, renews and terminates through `IContractService` (`docs/CONTRACTS.md`).
 
 ## 7. Known data limitations
 

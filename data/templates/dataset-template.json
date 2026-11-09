@@ -129,7 +129,12 @@
       "playerId": "0198a000-0000-7000-8000-000000000006",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 150000
+      "annualSalary": 150000,
+      "paymentFrequency": "Monthly",
+      "signingBonus": 10000,
+      "performanceBonuses": "ReachPlayoffs:15000;LeagueTitle:30000",
+      "releaseClause": 1500000,
+      "clubOptionUntil": "2029-06-30"
     }
   ]
 }

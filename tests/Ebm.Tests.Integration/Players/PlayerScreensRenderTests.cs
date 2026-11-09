@@ -31,7 +31,8 @@ public sealed class PlayerScreensRenderTests
             db.Services.GetRequiredService<IDataImportService>(),
             new NoFiles(),
             db.Services.GetRequiredService<IPlayerProfileService>(),
-            db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>());
+            db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
+            db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>());
         await editor.ReloadAsync();
         var players = editor.Lookups.Players;
         editor.Players.SelectedItem = editor.Players.Items[0];
@@ -64,16 +65,47 @@ public sealed class PlayerScreensRenderTests
         Assert.Equal(rotation, editor.Squad.Rows.Where(r => r.Role == RosterRole.Rotation).Select(r => r.Name)); // reloaded in rotation order
         await editor.ClubProfile.RefreshAsync();
 
+        // Sign a free agent through the club contracts screen: ask, take his counter-offer, submit.
+        var contracts = editor.ClubContracts;
+        contracts.ClubId = club;
+        await contracts.RefreshAsync();
+        Assert.Equal(12, contracts.Current.Count);
+        Assert.Equal(4, contracts.FreeAgents.Count);
+        Assert.Contains(contracts.Current, r => r.Options != "—");
+        contracts.StartSigningCommand.Execute(null);
+        contracts.OfferPlayerId = contracts.FreeAgents[0].Id;
+        contracts.OfferSalary = "50000";
+        await contracts.AskPlayerCommand.ExecuteAsync(null);
+        Assert.NotNull(contracts.Negotiation);
+        if (contracts.AcceptCounterCommand.CanExecute(null))
+        {
+            contracts.AcceptCounterCommand.Execute(null);
+        }
+        else
+        {
+            contracts.OfferSalary = "5,000,000".Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, StringComparison.Ordinal);
+        }
+
+        await contracts.SubmitOfferCommand.ExecuteAsync(null);
+        Assert.False(contracts.IsError, contracts.Message);
+        Assert.Equal(13, contracts.Current.Count);
+        Assert.Equal(3, contracts.FreeAgents.Count);
+        contracts.SelectedContract = contracts.Current.First(r => r.Contract.ClubOptionUntil is not null);
+        Assert.True(contracts.SelectedHasClubOption);
+        editor.Profile.PlayerId = contracts.SelectedContract.Contract.PlayerId;
+        await editor.Profile.RefreshAsync();
+        Assert.Single(editor.Profile.ContractHistory);
+
         var sizes = RunOnSta(() =>
         {
             // Like App.xaml: the themes are application resources, so each dictionary can use the previous ones.
             var resources = (System.Windows.Application.Current ?? new System.Windows.Application()).Resources;
-            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs" })
+            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts" })
             {
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Ebm.Desktop;component/Themes/{name}.xaml") });
             }
 
-            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad) }
+            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("contracts-editor", editor.Contracts) }
                 .Select(screen => Render(screen.Item1, screen.Item2))
                 .ToList();
         });
