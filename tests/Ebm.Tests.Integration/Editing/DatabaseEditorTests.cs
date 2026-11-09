@@ -62,13 +62,13 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
         var contractId = await Editor.SaveContractAsync(new ContractDraft(null, club.Id, _world.Player.Id, new DateOnly(2028, 7, 1), new DateOnly(2030, 6, 30), 500_000));
         await Editor.SaveContractAsync(new ContractDraft(contractId, club.Id, _world.Player.Id, new DateOnly(2028, 7, 1), new DateOnly(2031, 6, 30), 600_000));
         await Editor.SaveLeagueAsync(new LeagueDraft(_world.League.Id, "Renamed League", "RL", null));
-        await Editor.SaveCompetitionAsync(new CompetitionDraft(_world.Cup.Id, "Cup", "CUP", CompetitionType.Cup, _world.Italy.Id, null, """{"rounds":4}"""));
+        await Editor.SaveCompetitionAsync(new CompetitionDraft(_world.Cup.Id, "Cup", "CUP", CompetitionType.Cup, _world.Italy.Id, null, """{"regularSeason":{"legs":4}}"""));
 
         var snapshot = await Editor.LoadAsync();
         Assert.Equal("Renamed Bologna", snapshot.Clubs.Single(c => c.Id == club.Id).Name);
         Assert.Equal(600_000, snapshot.PlayerContracts.Single(c => c.Id == contractId).AnnualSalary);
         Assert.Null(snapshot.Leagues.Single().CountryId);
-        Assert.Equal("""{"rounds":4}""", snapshot.Competitions.Single(c => c.Id == _world.Cup.Id).RulesJson);
+        Assert.Equal("""{"regularSeason":{"legs":4}}""", snapshot.Competitions.Single(c => c.Id == _world.Cup.Id).RulesJson);
     }
 
     [Fact]

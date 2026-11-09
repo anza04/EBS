@@ -51,6 +51,27 @@ public sealed class DatabaseInitializerTests
     }
 
     [Fact]
+    public async Task Step_02_database_with_fixtures_upgrades_in_place()
+    {
+        await using var db = await TestDatabase.CreateAsync();
+        await db.ReadAsync(async s =>
+        {
+            await s.Services.GetRequiredService<EbmDbContext>().Database.MigrateAsync("20261109114155_InitialSchema");
+            return 0;
+        });
+        await db.ExecuteSqlAsync("""
+            PRAGMA foreign_keys = OFF;
+            INSERT INTO Fixtures (Id, CompetitionId, SeasonId, Round, Date, HomeClubId, AwayClubId)
+            VALUES ('11111111-1111-1111-1111-111111111111', 'c', 's', 3, '2026-10-01', 'h', 'a');
+            """);
+
+        var version = await db.Initializer.InitializeAsync();
+
+        Assert.EndsWith("_FixtureStages", version, StringComparison.Ordinal);
+        Assert.Equal(["RegularSeason|1"], await db.QueryStringsAsync("SELECT Stage || '|' || GameNumber FROM Fixtures"));
+    }
+
+    [Fact]
     public async Task Model_has_no_changes_missing_from_migrations()
     {
         await using var db = await TestDatabase.CreateAsync();

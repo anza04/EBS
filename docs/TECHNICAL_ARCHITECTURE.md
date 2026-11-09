@@ -63,8 +63,8 @@ project for large-scale match statistics is added in Step 10.
 
 | Layer | Responsibility | May reference |
 |---|---|---|
-| **Domain** | Entities, value objects, game rules, rule violations (`DomainException`). Pure C#. | nothing (no NuGet packages either) |
-| **Services** | Use cases and orchestration (career, season, transfers, match simulation). Defines *ports* (interfaces such as repositories) that outer layers implement. | Domain |
+| **Domain** | Entities, value objects, game rules, rule violations (`DomainException`); the competition engine (`Competitions.Rules`, `Competitions.Engine`: pure, stateless algorithms). Pure C#. | nothing (no NuGet packages either) |
+| **Services** | Use cases and orchestration (career, season, transfers, match simulation; `ICompetitionService` runs league seasons, see `docs/COMPETITION_FORMATS.md`). Defines *ports* (interfaces such as repositories) that outer layers implement. | Domain |
 | **Persistence** | Database (`EbmDbContext`), migrations, repository implementations, database initialisation, save games. The only layer that references EF Core. | Domain, Services |
 | **DataImport** | CSV/JSON parsing, validation, mapping to domain objects. Implements `IDataImportService` (Services). See `docs/IMPORT_FORMATS.md`. | Domain, Services |
 | **Hosting** | Builds the generic host: configuration, logging, error-handling policy, DI wiring of all layers. UI-agnostic. | all of the above |

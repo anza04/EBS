@@ -38,6 +38,8 @@ public enum ImportRecordKind
     League,
     Division,
     Competition,
+    Season,
+    Participant,
     Player,
     Contract,
 }

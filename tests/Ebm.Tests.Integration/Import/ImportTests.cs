@@ -1,8 +1,11 @@
 using System.Reflection;
 using Ebm.Domain.Clubs;
+using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Players;
+using Ebm.Domain.Seasons;
+using Ebm.Services.Competitions;
 using Ebm.Services.Import;
 using Ebm.Tests.Integration.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,9 +39,9 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Empty(report.Problems);
         Assert.Equal(0, report.Rejected);
         Assert.True(report.Committed);
-        Assert.Equal(5 + 8 + 8 + 1 + 2 + 3 + 24 + 24, report.Added);
+        Assert.Equal(5 + 8 + 14 + 1 + 2 + 3 + 1 + 14 + 24 + 24, report.Added);
         Assert.Equal(24, await CountAsync<Player, PlayerId>());
-        Assert.Equal(8, await CountAsync<Club, ClubId>());
+        Assert.Equal(14, await CountAsync<Club, ClubId>());
         Assert.Equal(24, await CountAsync<Contract, ContractId>());
         Assert.True(File.Exists(report.LogFile));
         Assert.Contains("Added", await File.ReadAllTextAsync(report.LogFile!), StringComparison.Ordinal);
@@ -52,7 +55,7 @@ public sealed class ImportTests : IAsyncLifetime
         var report = await Importer.ImportAsync(files, new ImportOptions());
 
         Assert.Empty(report.Problems);
-        Assert.Equal(8, report.Added);
+        Assert.Equal(10, report.Added);
         Assert.True(report.Committed);
         var player = Assert.Single(await ListAsync<Player, PlayerId>());
         Assert.Equal(Position.SmallForward, player.Position);
@@ -189,7 +192,7 @@ public sealed class ImportTests : IAsyncLifetime
         var file = await WriteAsync("countries.csv", "code,name\nITA,Italy\nXX,Broken\n");
         var allOrNothing = await Importer.ImportAsync([file], new ImportOptions(AllOrNothing: true));
 
-        Assert.Equal(75, dryRun.Added);
+        Assert.Equal(96, dryRun.Added);
         Assert.False(dryRun.Committed);
         Assert.Equal(1, allOrNothing.Added);
         Assert.False(allOrNothing.Committed);
@@ -227,6 +230,35 @@ public sealed class ImportTests : IAsyncLifetime
         Assert.Contains(report.Problems, p => p.Contains("unknown field(s) flag ignored", StringComparison.Ordinal));
         Assert.Contains(report.Problems, p => p.StartsWith("missing.csv: the file cannot be read", StringComparison.Ordinal));
         Assert.Equal(1, report.Added);
+    }
+
+    [Fact]
+    public async Task Competition_entries_follow_the_registration_rules()
+    {
+        await Importer.ImportAsync([SampleFile], new ImportOptions());
+        var competitions = await ListAsync<Competition, CompetitionId>();
+        var serieA = competitions.Single(c => c.Name == "Serie A").Id.Value;
+        var serieA2 = competitions.Single(c => c.Name == "Serie A2").Id.Value;
+        var season = (await ListAsync<Season, SeasonId>()).Single().Id.Value;
+        var clubs = await ListAsync<Club, ClubId>();
+        var milano = clubs.Single(c => c.Name == "Aurora Milano").Id.Value;
+        await _db.Services.GetRequiredService<ICompetitionService>().GenerateScheduleAsync(CompetitionId.From(serieA), SeasonId.From(season));
+        var seasons = await WriteAsync("seasons.csv", "id,name,startDate,endDate\n0198a000-0000-7000-8000-0000000000aa,2027-28,2027-10-01,2028-06-30\n");
+        var participants = await WriteAsync("participants.csv",
+            "competitionId,seasonId,clubId\n" +
+            $"{serieA2},0198a000-0000-7000-8000-0000000000aa,{milano}\n" +
+            $"{serieA},0198a000-0000-7000-8000-0000000000aa,{milano}\n" +
+            $"{serieA},{season},{clubs.Single(c => c.Name == "Lince Verona").Id.Value}\n" +
+            $"{serieA2},{Guid.NewGuid()},{milano}\n");
+
+        var report = await Importer.ImportAsync([seasons, participants], new ImportOptions());
+
+        Assert.Equal(2, report.Added);
+        var rejected = report.Records.Where(r => r.Outcome == ImportOutcome.Rejected).ToList();
+        Assert.Equal(3, rejected.Count);
+        Assert.Contains("another league", rejected[0].Messages[0], StringComparison.Ordinal);
+        Assert.Contains("closed", rejected[1].Messages[0], StringComparison.Ordinal);
+        Assert.Contains("seasonId", rejected[2].Messages[0], StringComparison.Ordinal);
     }
 
     private async Task<string> WriteAsync(string name, string content)

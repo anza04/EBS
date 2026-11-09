@@ -17,6 +17,9 @@ internal sealed class FixtureConfiguration : IEntityTypeConfiguration<Fixture>
             t.HasCheckConstraint("CK_Fixtures_DifferentClubs", "HomeClubId <> AwayClubId");
             t.HasCheckConstraint("CK_Fixtures_Round", "Round >= 1");
         });
+        builder.Property(x => x.Stage).HasConversion<string>().HasMaxLength(32).HasDefaultValue(FixtureStage.RegularSeason).HasSentinel((FixtureStage)(-1));
+        // No check constraint: on SQLite it would force a non-transactional table rebuild of existing saves.
+        builder.Property(x => x.GameNumber).HasDefaultValue(1).HasSentinel(0);
         builder.HasOne<Competition>().WithMany().HasForeignKey(x => x.CompetitionId);
         builder.HasOne<Season>().WithMany().HasForeignKey(x => x.SeasonId);
         builder.HasOne<Club>().WithMany().HasForeignKey(x => x.HomeClubId);

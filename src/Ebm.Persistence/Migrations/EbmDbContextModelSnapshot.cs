@@ -279,6 +279,11 @@ namespace Ebm.Persistence.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("GameNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid>("HomeClubId")
                         .HasColumnType("TEXT");
 
@@ -287,6 +292,13 @@ namespace Ebm.Persistence.Migrations
 
                     b.Property<Guid>("SeasonId")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("RegularSeason");
 
                     b.HasKey("Id");
 

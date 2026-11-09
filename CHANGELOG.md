@@ -3,6 +3,33 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] — 2026-11-09 — Step 04: Countries, leagues and competitions
+
+### Added
+- Competition rules schema (`Ebm.Domain.Competitions.Rules.CompetitionRules`): points system, registration limits,
+  regular-season legs and round spacing, ordered tie-breakers, optional playoffs (2–32 clubs, best-of per round,
+  seeding from any table position), promotion (direct places and/or playoff winner) and relegation. Validated on
+  every save and import; unknown properties are refused. Documented in `docs/COMPETITION_FORMATS.md`.
+- Competition engine (`Ebm.Domain.Competitions.Engine`): `RoundRobinScheduler` (circle method, 1–4 legs, any
+  number of clubs, balanced home/away), `StandingsCalculator` (points, configurable tie-breakers with head-to-head
+  mini-leagues), `PlayoffBracket` (fixed bracket, home-court patterns, game-by-game scheduling),
+  `SeasonOutcomeCalculator` (champion, promoted, relegated) and `CompetitionRegistration`.
+- `ICompetitionService` (`Ebm.Services.Competitions`): register clubs, generate the schedule, record results
+  (updates `LeagueStandings`), advance into and through the playoffs, standings, season outcome.
+- Import of `seasons` and `participants` (competition entries, checked against the registration rules); CSV
+  templates `seasons.csv`, `participants.csv`.
+- Sample dataset: two divisions with full rules (Serie A: 8 clubs, top-4 playoffs, 2 relegated; Serie A2: 6 clubs,
+  1 promoted plus the playoff winner), 6 more clubs, season 2026-27 and its 14 entries.
+- `Season.UpdateDetails`; `Competition.ParseRules`.
+- Tests: rules schema, scheduler properties (2–20 clubs, 1–4 legs), standings and tie-breakers, playoff bracket,
+  outcome, registration; full simulated seasons of both sample divisions; registration and import rules;
+  Step 02 database upgrade.
+
+### Changed
+- `Fixtures` gain `Stage` (`RegularSeason`/`Playoffs`) and `GameNumber` (migration `FixtureStages`; existing
+  fixtures become regular-season games).
+- `Competition.UpdateRules` validates against the rules schema instead of accepting any JSON object.
+
 ## [0.3.0] — 2026-11-09 — Step 03: Data import and database editor
 
 ### Added

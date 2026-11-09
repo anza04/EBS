@@ -31,6 +31,9 @@ internal sealed class EntityStore<TEntity, TId>
 
     public Func<TEntity, string> Label { get; }
 
+    /// <summary>Existing and accepted records.</summary>
+    public IEnumerable<TEntity> All => _byId.Values;
+
     public bool Contains(TId id) => _byId.ContainsKey(id);
 
     public TEntity? Find(TId id) => _byId.GetValueOrDefault(id);

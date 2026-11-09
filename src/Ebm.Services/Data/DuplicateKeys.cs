@@ -3,6 +3,7 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Players;
+using Ebm.Domain.Seasons;
 
 namespace Ebm.Services.Data;
 
@@ -56,6 +57,20 @@ public static class DuplicateKeys
     {
         ArgumentNullException.ThrowIfNull(competition);
         return Join(competition.CountryId?.ToString() ?? "-", Normalise(competition.Name));
+    }
+
+    /// <summary>Same name.</summary>
+    public static string Of(Season season)
+    {
+        ArgumentNullException.ThrowIfNull(season);
+        return Normalise(season.Name);
+    }
+
+    /// <summary>Same club in the same competition season (also enforced by the database).</summary>
+    public static string Of(CompetitionParticipant participant)
+    {
+        ArgumentNullException.ThrowIfNull(participant);
+        return Join(participant.CompetitionId.ToString(), participant.SeasonId.ToString(), participant.ClubId.ToString());
     }
 
     /// <summary>Same person, club and start date.</summary>

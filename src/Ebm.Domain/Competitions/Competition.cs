@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Ebm.Domain.Common;
+using Ebm.Domain.Competitions.Rules;
 using Ebm.Domain.Countries;
 
 namespace Ebm.Domain.Competitions;
@@ -45,10 +45,13 @@ public sealed class Competition : Entity<CompetitionId>
     public DivisionId? DivisionId { get; private set; }
 
     /// <summary>
-    /// Competition rules as a JSON object. The rule schema is defined in Step 04; this step only
-    /// guarantees the value is a well-formed JSON object.
+    /// Competition rules as a JSON object following the <see cref="CompetitionRules"/> schema
+    /// (docs/COMPETITION_FORMATS.md). Always valid: <see cref="UpdateRules"/> refuses anything else.
     /// </summary>
     public string RulesJson { get; private set; } = EmptyRules;
+
+    /// <summary>The rules as an object (missing settings take their defaults).</summary>
+    public CompetitionRules ParseRules() => CompetitionRules.Parse(RulesJson);
 
     public void UpdateDetails(string name, string shortName, CompetitionType type, CountryId? countryId, DivisionId? divisionId)
     {
@@ -61,24 +64,7 @@ public sealed class Competition : Entity<CompetitionId>
 
     public void UpdateRules(string rulesJson)
     {
-        if (string.IsNullOrWhiteSpace(rulesJson))
-        {
-            throw new DomainValidationException("Competition rules are required (use {} for none).");
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(rulesJson);
-            if (document.RootElement.ValueKind != JsonValueKind.Object)
-            {
-                throw new DomainValidationException("Competition rules must be a JSON object.");
-            }
-        }
-        catch (JsonException ex)
-        {
-            throw new DomainValidationException($"Competition rules are not valid JSON: {ex.Message}");
-        }
-
-        RulesJson = rulesJson;
+        CompetitionRules.Parse(rulesJson);
+        RulesJson = rulesJson.Trim();
     }
 }

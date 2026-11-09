@@ -1,3 +1,4 @@
+using Ebm.Services.Competitions;
 using Ebm.Services.Editing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
 
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<IDatabaseEditor, DatabaseEditor>();
+        services.TryAddSingleton<ICompetitionService, CompetitionService>();
 
         return services;
     }

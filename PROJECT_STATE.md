@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 03 — Data import and database editor (2026-11-09)
+STEP 04 — Countries, leagues and competitions (2026-11-09)
 
 ## Next step
-STEP 04 — Countries, leagues and competitions
+STEP 05 — Player model and attributes
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (131/131: 80 unit, 51 integration)
-- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, clubs, contracts, leagues, competitions, import). No game features yet.
+- Tests: PASS (228/228: 170 unit, 58 integration)
+- Run status: Launches. Creates/migrates the game database at startup and opens the database editor (players, clubs, contracts, leagues, competitions, import). The competition engine is available as `ICompetitionService` (no game screens yet).
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -40,12 +40,13 @@ STEP 04 — Countries, leagues and competitions
 - [x] Automated tests (unit, integration, architecture, launch)
 - [x] Database and entity model (Step 02)
 - [x] Data import and database editor (Step 03)
-- [ ] Competitions (Step 04) … see docs/ROADMAP.md
+- [x] Competition configuration, fixture generator, standings, playoffs, promotion/relegation (Step 04)
+- [ ] Player model and attributes (Step 05) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261109114155_InitialSchema`
-- Latest migration: `20261109114155_InitialSchema` (17 tables)
-- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
+- Current schema version: `20261109124652_FixtureStages`
+- Latest migration: `20261109124652_FixtureStages` (adds `Fixtures.Stage`, `Fixtures.GameNumber`; 17 tables)
+- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
 1. Layered architecture with inward-only dependencies (Domain ← Services ← Persistence/DataImport ← Hosting ← Desktop). Enforced by architecture tests.
@@ -65,16 +66,21 @@ STEP 04 — Countries, leagues and competitions
 15. UI-facing use cases (`IDatabaseEditor`, `IDataImportService`) are Services interfaces; each call opens its own DI scope. Desktop never references DataImport or Persistence.
 16. Imports never overwrite silently: existing records are rejected unless the explicit update mode is chosen. Accepted records are saved in one transaction. Duplicate rules live in `DuplicateKeys`, shared by importer and editor.
 17. Import files reference countries by ISO alpha-3 code and every other record by its GUID; records without an ID get a new one.
+18. The competition engine is pure, stateless domain code (`Ebm.Domain.Competitions.Rules` / `.Engine`); `ICompetitionService` orchestrates it over the repositories. Rules are validated by `CompetitionRules.Parse` on every save/import (unknown properties refused).
+19. Standings rankings are always calculated from match results; `LeagueStandings` stores the totals, updated by `RecordResultAsync`.
+20. Playoff fixtures are created on demand (`AdvanceAsync`), one game per series at a time, so no unneeded games exist. Fixtures carry `Stage` and `GameNumber`.
+21. Migrations must stay transactional on SQLite: prefer add-column changes; avoid operations that force a table rebuild (e.g. adding check constraints) on existing tables.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
-- Not yet under version control. The owner will run `git init`. `.gitignore` is already present.
 - The player attribute set is an initial one (8 ratings, 1–100). Step 05 finalises it.
-- The competition rules JSON has no schema yet (only "must be a JSON object"). Step 04 defines it.
-- Import covers countries, arenas, clubs, leagues, divisions, competitions, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7).
-- The editor screens were verified by the smoke-test launch and view-model tests; no interactive screenshot review was possible in the Step 03 session.
+- Only league competitions can be scheduled; cups/knockout formats come in Step 17. No relegation playoffs, groups or reseeding (see `docs/COMPETITION_FORMATS.md` §2).
+- Season outcome (promoted/relegated) is calculated but not applied to next season's entries; Step 12 does that.
+- No UI for competitions yet (schedule, table, playoffs); Step 11 adds presentation.
+- Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7).
+- The editor screens were verified by the smoke-test launch and view-model tests; no interactive screenshot review has been done yet (Steps 03–04).
 
 ## Current dependencies
 | Package | Version | Used by |
@@ -96,7 +102,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_03_LOG.md
+logs/STEP_04_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

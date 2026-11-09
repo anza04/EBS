@@ -22,6 +22,8 @@ internal static class ImportFields
         new(ImportRecordKind.League, "leagues", ["name", "shortName"], ["id", "country"]),
         new(ImportRecordKind.Division, "divisions", ["leagueId", "name", "level"], ["id"]),
         new(ImportRecordKind.Competition, "competitions", ["name", "shortName", "type"], ["id", "country", "divisionId", "rules"]),
+        new(ImportRecordKind.Season, "seasons", ["name", "startDate", "endDate"], ["id"]),
+        new(ImportRecordKind.Participant, "participants", ["competitionId", "seasonId", "clubId"], ["id"]),
         new(
             ImportRecordKind.Player,
             "players",

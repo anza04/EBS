@@ -145,6 +145,48 @@
       "country": "ITA",
       "homeArenaId": "f5f179e1-8742-5b74-9ac7-887d74cd838b",
       "foundedYear": 1995
+    },
+    {
+      "id": "99a360b5-f7c8-5d83-922d-1b73aac0d805",
+      "name": "Ardesia Genova",
+      "shortName": "GEN",
+      "country": "ITA",
+      "foundedYear": 1946
+    },
+    {
+      "id": "dc633f6b-ed3a-57d6-9a36-14390552a22a",
+      "name": "Lince Verona",
+      "shortName": "LIN",
+      "country": "ITA",
+      "foundedYear": 1958
+    },
+    {
+      "id": "1c687aaf-b302-578f-946e-5987755b42f5",
+      "name": "Vela Trieste",
+      "shortName": "VEL",
+      "country": "ITA",
+      "foundedYear": 1951
+    },
+    {
+      "id": "c25df5cc-cb68-5a1a-b4cb-7920d7aa26bf",
+      "name": "Fenice Padova",
+      "shortName": "FEN",
+      "country": "ITA",
+      "foundedYear": 1963
+    },
+    {
+      "id": "33db7870-ff37-5cfc-b087-4bf4bd4b43c5",
+      "name": "Toro Brescia",
+      "shortName": "BRE",
+      "country": "ITA",
+      "foundedYear": 1972
+    },
+    {
+      "id": "0559f6ac-a87b-5826-9eb4-335652cf6fcc",
+      "name": "Delfino Pesaro",
+      "shortName": "PES",
+      "country": "ITA",
+      "foundedYear": 1949
     }
   ],
   "leagues": [
@@ -179,7 +221,32 @@
       "divisionId": "f4d2332d-cc3a-538c-96c4-df30e49f6a1b",
       "rules": {
         "pointsForWin": 2,
-        "pointsForLoss": 0
+        "pointsForLoss": 0,
+        "registration": {
+          "minTeams": 8,
+          "maxTeams": 8
+        },
+        "regularSeason": {
+          "legs": 2,
+          "daysBetweenRounds": 7
+        },
+        "tieBreakers": [
+          "HeadToHeadWins",
+          "HeadToHeadPointDifference",
+          "PointDifference",
+          "PointsFor"
+        ],
+        "playoffs": {
+          "teams": 4,
+          "bestOf": [
+            5,
+            5
+          ],
+          "daysBetweenGames": 2
+        },
+        "relegation": {
+          "direct": 2
+        }
       }
     },
     {
@@ -191,7 +258,34 @@
       "divisionId": "0d28ebbd-9462-5579-b209-e445b385d255",
       "rules": {
         "pointsForWin": 2,
-        "pointsForLoss": 0
+        "pointsForLoss": 0,
+        "registration": {
+          "minTeams": 6,
+          "maxTeams": 6
+        },
+        "regularSeason": {
+          "legs": 2,
+          "daysBetweenRounds": 7
+        },
+        "tieBreakers": [
+          "HeadToHeadWins",
+          "HeadToHeadPointDifference",
+          "PointDifference",
+          "PointsFor"
+        ],
+        "playoffs": {
+          "teams": 4,
+          "fromPosition": 2,
+          "bestOf": [
+            3,
+            3
+          ],
+          "daysBetweenGames": 2
+        },
+        "promotion": {
+          "direct": 1,
+          "playoffWinner": true
+        }
       }
     },
     {
@@ -200,6 +294,100 @@
       "shortName": "CUP",
       "type": "Cup",
       "country": "ITA"
+    }
+  ],
+  "seasons": [
+    {
+      "id": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "name": "2026-27",
+      "startDate": "2026-10-01",
+      "endDate": "2027-06-30"
+    }
+  ],
+  "participants": [
+    {
+      "id": "b5dd0b58-6b2e-55ec-b07f-cff4324ff447",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "3d0e0217-57cc-5f9f-91b3-d0c52a5e446d"
+    },
+    {
+      "id": "b3283616-f552-5651-8dd8-fc746ac0373f",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "87160b5b-5ce0-585a-a521-6d51e21a390e"
+    },
+    {
+      "id": "2ad43193-1584-5eca-86c0-82ad1f5ef5c7",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "60a4695c-50a8-5f74-9794-4e254d669c3a"
+    },
+    {
+      "id": "a9acdafc-8f26-536e-909b-44bb274fdcb4",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "ab016e54-1cd0-5dcd-8e30-92a35c42916d"
+    },
+    {
+      "id": "994c4833-706e-57eb-8bba-035a63ac2441",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "2abdc667-e89f-57bf-bba2-21d6ca7090c8"
+    },
+    {
+      "id": "7ea91ee5-7b33-5cd3-a1c2-7170e059cd44",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f"
+    },
+    {
+      "id": "9cfca917-67a4-5ebd-8bd2-658988a6bf68",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a"
+    },
+    {
+      "id": "bcf723e0-c72c-51bf-8c3f-2751849c1386",
+      "competitionId": "4e850582-106c-5a9a-a713-216387b4ac5a",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "290c2c80-639e-51d4-b6c1-749cd4dc2108"
+    },
+    {
+      "id": "9305f382-d9f7-586a-9714-3243185c716c",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "99a360b5-f7c8-5d83-922d-1b73aac0d805"
+    },
+    {
+      "id": "1d5b5b8b-3b5d-529b-a7da-2651aad0253c",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "dc633f6b-ed3a-57d6-9a36-14390552a22a"
+    },
+    {
+      "id": "a0614aca-fafe-5e92-b615-8282500f5a4b",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "1c687aaf-b302-578f-946e-5987755b42f5"
+    },
+    {
+      "id": "39f6f72e-a292-584e-85c5-cc25edd9fed9",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "c25df5cc-cb68-5a1a-b4cb-7920d7aa26bf"
+    },
+    {
+      "id": "c0243fc2-f3a9-5ba4-9135-46759b0185fb",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "33db7870-ff37-5cfc-b087-4bf4bd4b43c5"
+    },
+    {
+      "id": "8f503217-515f-5acb-a18d-a054aa4894bd",
+      "competitionId": "0c82d0e3-a787-5dff-8dd9-045636fb81e3",
+      "seasonId": "4cb76ba5-f1b7-555b-b812-b9d968ff969c",
+      "clubId": "0559f6ac-a87b-5826-9eb4-335652cf6fcc"
     }
   ],
   "players": [

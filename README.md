@@ -3,8 +3,9 @@
 Offline, single-player basketball management game for Windows, covering the top two domestic
 divisions of European countries.
 
-**Status:** Step 02 (core database and entity model) complete. The application is a shell that creates and migrates
-the game database at startup; there are no playable features yet.
+**Status:** Step 04 (countries, leagues and competitions) complete. The application creates and migrates the game
+database, imports data and edits it; the competition engine (schedules, standings, playoffs, promotion and
+relegation) runs as a service, with no game screens yet.
 See [PROJECT_STATE.md](PROJECT_STATE.md) for the current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan.
 
 ## Requirements
@@ -34,6 +35,7 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md) | Stack, layers, conventions, build commands |
 | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Entities, fields, relationships, constraints, migrations |
 | [docs/IMPORT_FORMATS.md](docs/IMPORT_FORMATS.md) | CSV/JSON import formats, validation rules, database editor |
+| [docs/COMPETITION_FORMATS.md](docs/COMPETITION_FORMATS.md) | Competition rules schema, supported formats, adding a league |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |
 | [logs/](logs/) | Detailed log of each development step |

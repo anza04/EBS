@@ -1,7 +1,12 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109114155_InitialSchema`** (Step 02).
+Schema version: **`20261109124652_FixtureStages`** (Step 04).
+
+| Migration | Step | Change |
+|---|---|---|
+| `20261109114155_InitialSchema` | 02 | 17 tables |
+| `20261109124652_FixtureStages` | 04 | `Fixtures.Stage` and `Fixtures.GameNumber` with defaults, so existing fixtures stay regular-season games. Add-column only, so the upgrade runs in one transaction (a check constraint would force a table rebuild on SQLite; the domain enforces the range) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -168,7 +173,9 @@ Overlap checks between closed spells and loans are added with transfers (Step 08
 |---|---|---|
 | Id | id | PK |
 | CompetitionId / SeasonId | id | FKs. Index (`CompetitionId, SeasonId, Round`) |
-| Round | int | 1–200 |
+| Stage | text | `RegularSeason` or `Playoffs` (default `RegularSeason`) |
+| Round | int | 1–200, within the stage (playoff round 1 = first round) |
+| GameNumber | int | Game in a playoff series, 1–7; always 1 in the regular season (default 1) |
 | Date | date | Indexed |
 | HomeClubId / AwayClubId | id | FKs Clubs; must differ |
 

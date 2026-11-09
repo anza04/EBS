@@ -10,9 +10,14 @@ public sealed class Season : Entity<SeasonId>
     public Season(SeasonId id, string name, DateOnly startDate, DateOnly endDate)
         : base(id)
     {
+        UpdateDetails(name, startDate, endDate);
+    }
+
+    public void UpdateDetails(string name, DateOnly startDate, DateOnly endDate)
+    {
         Name = Guard.Text(name, "Season name", NameMaxLength);
-        StartDate = startDate;
         EndDate = Guard.After(endDate, startDate, "Season end date");
+        StartDate = startDate;
     }
 
     private Season()

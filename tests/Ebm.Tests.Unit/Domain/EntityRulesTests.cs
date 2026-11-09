@@ -71,6 +71,8 @@ public sealed class EntityRulesTests
     [InlineData("42")]
     [InlineData("{ not json")]
     [InlineData("")]
+    [InlineData("""{"rounds":4}""")]
+    [InlineData("""{"pointsForWin":"two"}""")]
     public void Competition_rules_must_be_a_json_object(string rules)
     {
         Assert.Throws<DomainValidationException>(() =>

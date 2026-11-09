@@ -4,7 +4,10 @@ using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
+using Ebm.Domain.Competitions.Engine;
+using Ebm.Domain.Matches;
 using Ebm.Domain.Players;
+using Ebm.Domain.Seasons;
 using Ebm.Services.Data;
 using Ebm.Services.Import;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +36,9 @@ internal sealed class ImportSession
     private EntityStore<League, LeagueId> _leagues = null!;
     private EntityStore<Division, DivisionId> _divisions = null!;
     private EntityStore<Competition, CompetitionId> _competitions = null!;
+    private EntityStore<Season, SeasonId> _seasons = null!;
+    private EntityStore<CompetitionParticipant, CompetitionParticipantId> _participants = null!;
+    private HashSet<(CompetitionId, SeasonId)> _scheduled = null!;
     private EntityStore<Player, PlayerId> _players = null!;
     private EntityStore<Contract, ContractId> _contracts = null!;
 
@@ -48,6 +54,11 @@ internal sealed class ImportSession
         session._leagues = await Store<League, LeagueId>(services, DuplicateKeys.Of, l => l.Name, cancellationToken).ConfigureAwait(false);
         session._divisions = await Store<Division, DivisionId>(services, DuplicateKeys.Of, d => d.Name, cancellationToken).ConfigureAwait(false);
         session._competitions = await Store<Competition, CompetitionId>(services, DuplicateKeys.Of, c => c.Name, cancellationToken).ConfigureAwait(false);
+        session._seasons = await Store<Season, SeasonId>(services, DuplicateKeys.Of, s => s.Name, cancellationToken).ConfigureAwait(false);
+        session._participants = await Store<CompetitionParticipant, CompetitionParticipantId>(services, DuplicateKeys.Of, _ => "participant", cancellationToken).ConfigureAwait(false);
+        session._scheduled = (await services.GetRequiredService<IRepository<Fixture, FixtureId>>().ListAsync(null, cancellationToken).ConfigureAwait(false))
+            .Select(f => (f.CompetitionId, f.SeasonId))
+            .ToHashSet();
         session._players = await Store<Player, PlayerId>(services, DuplicateKeys.Of, p => p.FullName, cancellationToken).ConfigureAwait(false);
         session._contracts = await Store<Contract, ContractId>(services, DuplicateKeys.Of, _ => "contract", cancellationToken).ConfigureAwait(false);
         return session;
@@ -87,6 +98,23 @@ internal sealed class ImportSession
                 target.UpdateDetails(c.Name, c.ShortName, c.Type, c.CountryId, c.DivisionId);
                 target.UpdateRules(c.RulesJson);
             }),
+        ImportRecordKind.Season => Apply(record, _seasons, (f, id) => new Season(id, f.Text("name"), f.Date("startDate"), f.Date("endDate")),
+            (target, s) => target.UpdateDetails(s.Name, s.StartDate, s.EndDate)),
+        ImportRecordKind.Participant => Apply(record, _participants, (f, id) =>
+            {
+                var participant = new CompetitionParticipant(
+                    id, Ref(f, "competitionId", _competitions, "competition"), Ref(f, "seasonId", _seasons, "season"), Ref(f, "clubId", _clubs, "club"));
+                if (!f.HasErrors)
+                {
+                    CheckRegistration(participant);
+                }
+
+                return participant;
+            },
+            (target, p) => Immutable(
+                target.CompetitionId == p.CompetitionId && target.SeasonId == p.SeasonId && target.ClubId == p.ClubId,
+                "The competition, season and club of an entry cannot be changed. Import it as a new entry."),
+            identifyByKey: true),
         ImportRecordKind.Player => Apply(record, _players, (f, id) =>
             new Player(
                 id,
@@ -164,8 +192,25 @@ internal sealed class ImportSession
             ImportRecordKind.Player => $"{Field("firstName")} {Field("lastName")}".Trim(),
             ImportRecordKind.Country => Field("name") ?? Field("code") ?? string.Empty,
             ImportRecordKind.Contract => "contract",
+            ImportRecordKind.Participant => "participant",
             _ => Field("name") ?? string.Empty,
         };
+    }
+
+    /// <summary>The registration rules of the competition, against the entries already stored or accepted.</summary>
+    private void CheckRegistration(CompetitionParticipant participant)
+    {
+        var competition = _competitions.Find(participant.CompetitionId)!;
+        if (_scheduled.Contains((participant.CompetitionId, participant.SeasonId)))
+        {
+            throw new DomainValidationException($"Registration for {competition.Name} is closed: the schedule has been generated.");
+        }
+
+        var seasonEntries = _participants.All.Where(p => p.SeasonId == participant.SeasonId).ToList();
+        var registered = seasonEntries.Count(p => p.CompetitionId == participant.CompetitionId && p.ClubId != participant.ClubId);
+        var inAnotherLeague = seasonEntries.Any(p => p.ClubId == participant.ClubId && p.CompetitionId != participant.CompetitionId
+            && _competitions.Find(p.CompetitionId)?.Type == CompetitionType.League);
+        CompetitionRegistration.Check(competition, _clubs.Find(participant.ClubId)!, registered, inAnotherLeague);
     }
 
     private CountryId CountryRef(FieldReader f, string name) => OptionalCountryRef(f, name, required: true) ?? default;
