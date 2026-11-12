@@ -4,21 +4,21 @@
 European Basketball Manager
 
 ## Current milestone
-Milestone 1 — Playable core game
+Milestone 1 — Playable core game: **completed** (release 0.14.0). Next: Milestone 2 — Complete European basketball ecosystem
 
 ## Current step
 None in progress
 
 ## Last completed step
-STEP 13 — AI club management and career testing (2026-11-12)
+STEP 14 — Milestone 1 integration and release (2026-11-12)
 
 ## Next step
-STEP 14 — see docs/ROADMAP.md
+STEP 15 — see docs/ROADMAP.md (Milestone 2)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (402/402: 291 unit, 111 integration)
-- Run status: Launches. Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`.
+- Tests: PASS (404/404: 291 unit, 113 integration)
+- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -50,11 +50,12 @@ STEP 14 — see docs/ROADMAP.md
 - [x] Match centre: schedule, preview, live match with play-by-play, scoreboard, substitutions, timeouts and tactical changes, live and stored box scores, team stats, match report (Step 11)
 - [x] Career: club selection, calendar and game days, forfeits, playoffs, season review, promotion/relegation, next season, club history, career screen (Step 12)
 - [x] AI clubs: line-ups, tactics, renewals, releases, transfer windows, free-agent replenishment, salaries and income, board objectives; multi-season simulation test (Step 13)
-- [ ] Step 14 onwards … see docs/ROADMAP.md
+- [x] Milestone 1 release: save files (save, load with upgrade, delete, new game), assistant (holiday) mode, Windows self-contained build with smoke test, acceptance and long-run tests (Step 14)
+- [ ] Step 15 onwards (Milestone 2) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261112144630_Careers`
-- Latest migration: `20261112144630_Careers` (new `Careers` table, `Matches.IsForfeit`; 22 tables)
+- Current schema version: `20261112154154_CareerAssistant`
+- Latest migration: `20261112154154_CareerAssistant` (`Careers.AssistantManages`; 22 tables)
 - Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
@@ -104,12 +105,15 @@ STEP 14 — see docs/ROADMAP.md
 44. AI decisions are pure planners in `Ebm.Domain.Management`, applied by `IClubManagementService` through the same use cases as the user (rosters, tactics, contracts, transfers), so AI clubs obey the same rules. Every club but `Career.ClubId` is AI-managed; the calendar decides when (docs/AI_MANAGEMENT.md §1).
 45. Money moves with the calendar: salary instalments are paid on their due dates and the placeholder income (wage budget / 12) at month end, booked in the same transaction as the date change.
 46. The free-agent market is kept at two free agents per club by generated fictional players whose names recombine existing players' names of the nationality (no hard-coded name lists).
+47. The live game database is always up to date; save files are SQLite backups (`<DataRoot>\saves\*.ebmsave`) made and restored with the online backup API. Loading upgrades the save through the normal migrations and reloads the career date; saves from a newer schema are refused (docs/SAVE_FILES.md).
+48. With `Career.AssistantManages` the user's club is AI-managed and its matches are played by the calendar (holiday mode); the user takes over by switching it off.
+49. Releases are self-contained single-file win-x64 builds (`build/publish.ps1`), smoke-tested before zipping (docs/RELEASE.md).
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`.
 
 ## Known issues
 - AI: no youth intake or retirement (generated free agents keep the market supplied); placeholder income, so balances drift up (Step 27); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
-- Career: the contracts and transfer-market screens default empty dates to the real date, not the career date; one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
+- Career: one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
 - Experience, reputation, potential, fitness, morale and injury are stored and edited but not yet changed by the game (Steps 12, 21, 22). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
 - Player import files in the old 8-rating format are no longer accepted.
@@ -145,7 +149,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_13_LOG.md
+logs/STEP_14_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

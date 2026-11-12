@@ -1,6 +1,6 @@
 # AI club management
 
-Step 13. Every club except the career club (`Career.ClubId`) runs itself. Pure decision rules live in
+Step 13. Every club except the career club (`Career.ClubId`) runs itself; with *Assistant manages* (`Career.AssistantManages`, Step 14) the career club too, and its matches are played by the calendar. Pure decision rules live in
 `Ebm.Domain.Management` (`LineupPlanner`, `TacticPlanner`, `SeasonObjectives`, `ClubFinances`, `RenewalPolicy`,
 `PlayerGenerator`); `IClubManagementService` (Services) applies them; the career calendar (`CareerService.AdvanceDayAsync`,
 docs/SEASON_LIFECYCLE.md) decides when. Recruitment itself is the Step 08 `ClubRecruiter` (docs/TRANSFERS.md §6).
@@ -35,7 +35,7 @@ the club's tactic "AI plan" and selected.
 
 ## 4. Contracts
 
-* Renewals (`RenewalPolicy`): players among the club's best 8 by overall, aged ≤ 32, whose contract ends within 150 days.
+* Renewals (`RenewalPolicy`): players among the club's best 10 by overall, aged ≤ 33, whose contract ends within 150 days.
   Length 3 years (< 27), 2 (< 31), else 1. Offer: the current salary; a counter-offer is accepted up to 1.5× the
   current salary if the wage bill stays within the wage budget.
 * Expiries: contracts end on their date (`ProcessContractDatesAsync`); the player becomes a free agent.
@@ -85,6 +85,8 @@ balance below zero; at most 6 moves per club. Over the three seasons the three s
 
 ## 9. Known weaknesses
 
+* Turnover grows over long careers (six-season run: 34 → 76 moves per season) as players age without youth intake or retirement.
+* A user's club that nobody manages loses its players as contracts expire (found by the six-season run): use the assistant.
 * Without youth intake or retirement, players only age; generated free agents keep the market supplied.
 * Income equals the wage budget, so AI balances drift upwards; real revenues come with Step 27.
 * The AI does not use loans, release clauses or bids for the user's players, and does not react to injuries beyond

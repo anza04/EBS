@@ -46,6 +46,7 @@
               <Button Content="Play match" Command="{Binding PlayMatchCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
               <Button Content="Season review" Command="{Binding ReviewSeasonCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
               <Button Content="Start next season" Command="{Binding StartNextSeasonCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+              <CheckBox Content="Assistant manages (holiday)" IsChecked="{Binding AssistantManages}" VerticalAlignment="Center" Margin="16,0,0,0" />
             </StackPanel>
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
               <TextBlock Text="Standings" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />

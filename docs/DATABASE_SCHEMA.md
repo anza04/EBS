@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261112144630_Careers`** (Step 12).
+Schema version: **`20261112154154_CareerAssistant`** (Step 14).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -13,6 +13,7 @@ Schema version: **`20261112144630_Careers`** (Step 12).
 | `20261109204206_Transfers` | 08 | New `Transfers` table (create-table only, so the upgrade runs in one transaction). No existing table changes; `Contracts.Status` gains the values `OnLoan` and `Transferred` (text column, no schema change) |
 | `20261112140336_Tactics` | 09 | New `Tactics` table (create-table only) |
 | `20261112144630_Careers` | 12 | New `Careers` table; `Matches.IsForfeit` (add-column, default false) |
+| `20261112154154_CareerAssistant` | 14 | `Careers.AssistantManages` (add-column, default false) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -297,6 +298,7 @@ The user's career (at most one per game database, enforced by `ICareerService`; 
 | SeasonId | id | FK Seasons: the season being played |
 | StartDate / CurrentDate | date | `CurrentDate` is the game date; it only moves forward |
 | SeasonsPlayed | int | Seasons started, the first included |
+| AssistantManages | bool | Holiday mode: the user's club is run by the AI (default false) |
 
 ### PlayerMatchStatistics
 One box-score line per player per match.

@@ -106,7 +106,7 @@ internal sealed class CareerService(
             var s = scope.ServiceProvider;
             leagues = [.. (await LeagueCompetitionsAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false)).Values];
             var unplayed = await UnplayedFixturesAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false);
-            if (unplayed.Any(f => f.Date <= today && IsClubFixture(f, career.ClubId)))
+            if (!career.AssistantManages && unplayed.Any(f => f.Date <= today && IsClubFixture(f, career.ClubId)))
             {
                 throw new DomainValidationException("Your club plays today: play the match first.");
             }
@@ -125,7 +125,7 @@ internal sealed class CareerService(
 
         // AI coaches name their matchday squads; the user's club plays with the roles the user set.
         var lineups = await management.PrepareMatchdayAsync(
-            [.. due.SelectMany(d => new[] { d.Fixture.HomeClubId, d.Fixture.AwayClubId }).Distinct().Where(c => c != career.ClubId)],
+            [.. due.SelectMany(d => new[] { d.Fixture.HomeClubId, d.Fixture.AwayClubId }).Distinct().Where(c => career.AssistantManages || c != career.ClubId)],
             cancellationToken).ConfigureAwait(false);
         var results = new List<PlayedFixture>();
         foreach (var (fixture, competition) in due)
@@ -142,7 +142,7 @@ internal sealed class CareerService(
 
         var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
-        ClubId[] managed = [career.ClubId];
+        ClubId[] managed = career.AssistantManages ? [] : [career.ClubId];
 
         // Transfer windows: the last day of a season, two weeks before a season, and any Monday an AI club is short of players.
         if (!windowOpens && today.DayOfWeek == DayOfWeek.Monday)
@@ -199,6 +199,25 @@ internal sealed class CareerService(
             days.Add(await AdvanceDayAsync(cancellationToken).ConfigureAwait(false));
             state = await StateAsync(await RequireCareerAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    public async Task<CareerState> SetAssistantAsync(bool manages, CancellationToken cancellationToken = default)
+    {
+        var career = await RequireCareerAsync(cancellationToken).ConfigureAwait(false);
+        using (var scope = scopes.CreateScope())
+        {
+            var s = scope.ServiceProvider;
+            career = (await Repo<Career, CareerId>(s).FindAsync(career.Id, cancellationToken).ConfigureAwait(false))!;
+            career.SetAssistant(manages);
+            await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (manages)
+        {
+            await management.PlanTacticsAsync([], cancellationToken).ConfigureAwait(false);
+        }
+
+        return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Match> PlayUserMatchAsync(CancellationToken cancellationToken = default)

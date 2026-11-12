@@ -22,6 +22,9 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("AssistantManages")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("ClubId")
                         .HasColumnType("TEXT");
 

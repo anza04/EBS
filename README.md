@@ -27,9 +27,12 @@ dotnet run   --project src/Ebm.Desktop
 
 The main window is the database editor. To load the sample league, open the *Import* tab, choose
 `data\sample\italy-sample.json` and press *Import*; then import `data\sample\italy-squads.json` (squads for every
-club and more free agents) and start a career from the *Career* tab. CSV templates are in `data\templates`.
+club and more free agents) and start a career from the *Career* tab. Copies of the game are kept in *Saved games*.
+CSV templates are in `data\templates`.
 
-User data (logs, game database) is stored in `%LOCALAPPDATA%\EuropeanBasketballManager`.
+Windows release: `build/publish.ps1` builds a self-contained executable and a zip (docs/RELEASE.md).
+
+User data (logs, game database, saves) is stored in `%LOCALAPPDATA%\EuropeanBasketballManager`.
 To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 
 ## Documentation
@@ -47,6 +50,10 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/TRANSFERS.md](docs/TRANSFERS.md) | Transfer lifecycle, valuations and fee negotiation, loans, AI recruitment |
 | [docs/TACTICS.md](docs/TACTICS.md) | Tactical systems, settings, player roles and how the match engine reads them |
 | [docs/MATCH_UI.md](docs/MATCH_UI.md) | Match centre: preview, live match, controls, play-by-play, box scores and reports |
+| [docs/SEASON_LIFECYCLE.md](docs/SEASON_LIFECYCLE.md) | Career, calendar, game days, season end, promotion/relegation, next season |
+| [docs/AI_MANAGEMENT.md](docs/AI_MANAGEMENT.md) | AI clubs: line-ups, tactics, contracts, transfers, finances, objectives; simulation results |
+| [docs/SAVE_FILES.md](docs/SAVE_FILES.md) | Save, load, new game, compatibility |
+| [docs/RELEASE.md](docs/RELEASE.md) | Windows build, installation, first career, release checklist |
 | [docs/MATCH_ENGINE.md](docs/MATCH_ENGINE.md) | Match rules, possession flow, formulas, fatigue, substitutions, simulation modes, statistical validation |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |

@@ -47,7 +47,7 @@ public static class EbmHost
 
         builder.Services
             .AddGameServices()
-            .AddPersistence(paths.DatabaseFile)
+            .AddPersistence(paths.DatabaseFile, paths.SavesDirectory)
             .AddDataImport(paths.ImportLogsDirectory);
 
         return builder;

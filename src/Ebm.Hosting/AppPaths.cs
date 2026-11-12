@@ -18,6 +18,7 @@ public sealed class AppPaths
         DatabasesDirectory = Path.Combine(dataRoot, "databases");
         DatabaseFile = Path.Combine(DatabasesDirectory, DatabaseFileName);
         ImportLogsDirectory = Path.Combine(LogsDirectory, "imports");
+        SavesDirectory = Path.Combine(dataRoot, "saves");
     }
 
     public string DataRoot { get; }
@@ -28,6 +29,9 @@ public sealed class AppPaths
 
     /// <summary>One log file per data import.</summary>
     public string ImportLogsDirectory { get; }
+
+    /// <summary>Save files (copies of the game database).</summary>
+    public string SavesDirectory { get; }
 
     /// <summary>SQLite game database.</summary>
     public string DatabaseFile { get; }
@@ -53,5 +57,6 @@ public sealed class AppPaths
         Directory.CreateDirectory(LogsDirectory);
         Directory.CreateDirectory(DatabasesDirectory);
         Directory.CreateDirectory(ImportLogsDirectory);
+        Directory.CreateDirectory(SavesDirectory);
     }
 }

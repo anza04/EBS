@@ -36,6 +36,9 @@ On the current date D:
 5. If D is the last day of a season (`Season.EndDate`), the AI transfer window runs (`RunAiTransferWindowAsync`, the
    user's club excluded): offseason recruitment.
 
+With the assistant on (`SetAssistantAsync(true)`, "holiday"), step 1 does not apply: the user's fixtures are played
+like the others and the club is AI-managed (docs/AI_MANAGEMENT.md).
+
 `ContinueAsync` repeats game days until the user's club plays today, the season is complete or a day limit (366) is
 reached. It is refused once the season is complete.
 

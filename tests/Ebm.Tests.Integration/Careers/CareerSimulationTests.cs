@@ -16,15 +16,16 @@ using Xunit.Abstractions;
 namespace Ebm.Tests.Integration.Careers;
 
 /// <summary>
-/// Simulated careers (Step 13): three seasons of the sample world with AI clubs running themselves. Checks rosters,
+/// Simulated careers (Step 13): three seasons (or EBM_SIM_SEASONS) of the sample world with AI clubs running themselves. Checks rosters,
 /// transfer activity, finances, results and season progression, and prints the statistics for docs/AI_MANAGEMENT.md.
 /// </summary>
 public sealed class CareerSimulationTests(ITestOutputHelper output)
 {
-    private const int Seasons = 3;
+    /// <summary>Seasons to simulate: 3, or the <c>EBM_SIM_SEASONS</c> environment variable (long runs, Step 14).</summary>
+    private static readonly int Seasons = int.TryParse(Environment.GetEnvironmentVariable("EBM_SIM_SEASONS"), out var n) && n > 0 ? n : 3;
 
     [Fact]
-    public async Task Three_seasons_run_without_user_intervention()
+    public async Task Seasons_run_without_user_intervention()
     {
         await using var db = await TestDatabase.CreateAsync();
         var data = typeof(CareerSimulationTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().Single(a => a.Key == "RepositoryDataPath").Value!;
@@ -38,6 +39,7 @@ public sealed class CareerSimulationTests(ITestOutputHelper output)
         var all = await db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync());
         var user = all.Single(c => c.Name == "Laguna Venezia");
         var state = await careers.StartAsync(user.Id, "Simulation");
+        state = await careers.SetAssistantAsync(true); // nobody manages the user's club: the assistant does
 
         var positionsByStrength = new List<(int StrengthRank, int Position)>();
         var totalRenewals = 0;
@@ -70,12 +72,7 @@ public sealed class CareerSimulationTests(ITestOutputHelper output)
                     break;
                 }
 
-                Assert.Equal(CalendarStop.UserMatch, report.StoppedBecause);
-                await careers.PlayUserMatchAsync();
-                if ((await careers.LoadAsync())!.SeasonComplete)
-                {
-                    break;
-                }
+                Assert.Equal(CalendarStop.DayLimit, report.StoppedBecause); // the assistant plays the user's matches
             }
 
             state = (await careers.LoadAsync())!;
@@ -93,8 +90,8 @@ public sealed class CareerSimulationTests(ITestOutputHelper output)
                 output.WriteLine($"  {competition.Competition.Name}: champion {competition.Champion}, objectives met {competition.Objectives.Count(o => o.Met)}/{competition.Objectives.Count}");
             }
 
-            // Every AI club keeps a valid squad, a selected tactic and money in the bank.
-            foreach (var club in all.Where(c => c.Id != user.Id))
+            // Every club (the user's one run by the assistant) keeps a valid squad, a selected tactic and money in the bank.
+            foreach (var club in all)
             {
                 var roster = (await clubs.GetRosterAsync(club.Id))!;
                 var first = roster.FirstTeam.Count();

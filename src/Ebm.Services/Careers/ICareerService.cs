@@ -40,6 +40,9 @@ public interface ICareerService
     /// </summary>
     Task<CalendarReport> ContinueAsync(int maxDays = 366, CancellationToken cancellationToken = default);
 
+    /// <summary>Turns the assistant ("holiday") on or off: while on, the user's club is managed like an AI club.</summary>
+    Task<CareerState> SetAssistantAsync(bool manages, CancellationToken cancellationToken = default);
+
     /// <summary>Plays the user's fixture of today instantly (live games are played in the match centre).</summary>
     Task<Match> PlayUserMatchAsync(CancellationToken cancellationToken = default);
 
@@ -73,7 +76,7 @@ public sealed record CareerState(
     public DateOnly Today => Career.CurrentDate;
 
     /// <summary>The user's club has an unplayed fixture today (or earlier): it must be played before the calendar moves on.</summary>
-    public bool MatchToday => NextFixture is { } next && next.Fixture.Date <= Today;
+    public bool MatchToday => !Career.AssistantManages && NextFixture is { } next && next.Fixture.Date <= Today;
 
     /// <summary>Every scheduled league competition of the season is finished.</summary>
     public bool SeasonComplete => Competitions.Count > 0 && Competitions.All(c => c.Phase == CompetitionPhase.Completed);

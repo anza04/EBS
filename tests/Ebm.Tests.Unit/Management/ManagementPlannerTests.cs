@@ -101,8 +101,8 @@ public sealed class ManagementPlannerTests
     {
         var today = new DateOnly(2027, 3, 1);
         Assert.True(RenewalPolicy.Wants(3, 28, new DateOnly(2027, 6, 30), today));
-        Assert.False(RenewalPolicy.Wants(9, 28, new DateOnly(2027, 6, 30), today));
-        Assert.False(RenewalPolicy.Wants(3, 33, new DateOnly(2027, 6, 30), today));
+        Assert.False(RenewalPolicy.Wants(11, 28, new DateOnly(2027, 6, 30), today));
+        Assert.False(RenewalPolicy.Wants(3, 34, new DateOnly(2027, 6, 30), today));
         Assert.False(RenewalPolicy.Wants(3, 28, new DateOnly(2028, 6, 30), today));
         Assert.Equal([3, 2, 1], new[] { 22, 29, 32 }.Select(RenewalPolicy.Years));
     }

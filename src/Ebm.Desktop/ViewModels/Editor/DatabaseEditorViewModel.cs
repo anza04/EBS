@@ -5,6 +5,7 @@ using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
+using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Careers;
@@ -15,6 +16,7 @@ using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Matches;
 using Ebm.Services.Players;
+using Ebm.Services.Saves;
 using Ebm.Services.Tactics;
 using Ebm.Services.Transfers;
 
@@ -42,7 +44,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ITacticsService tactics,
         IMatchService matches,
         ICompetitionService competitions,
-        ICareerService? careers = null)
+        ICareerService? careers = null,
+        ISaveGameService? saves = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -63,6 +66,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Tactics = new TacticsViewModel(tactics, Lookups);
         Matches = new MatchCenterViewModel(matches, competitions, ReloadAsync);
         Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
+        Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -98,6 +102,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     /// <summary>The career screen; <c>null</c> when no career service is available (editor-only tests).</summary>
     public CareerViewModel? Career { get; }
 
+    /// <summary>The saved-games screen; <c>null</c> without a save service (editor-only tests).</summary>
+    public SaveGamesViewModel? Saves { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -119,6 +126,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Career is not null)
         {
             await Career.RefreshAsync();
+        }
+
+        if (Saves is not null)
+        {
+            await Saves.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

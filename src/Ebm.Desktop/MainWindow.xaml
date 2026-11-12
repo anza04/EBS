@@ -59,6 +59,7 @@
         </Grid>
       </TabItem>
       <TabItem Header="Import" Content="{Binding Import}" />
+      <TabItem Header="Saved games" Content="{Binding Saves}" />
     </TabControl>
   </DockPanel>
 </Window>

@@ -3,6 +3,21 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.14.0] — 2026-11-12 — Step 14: Milestone 1 integration and release
+
+### Added
+- Save files (`ISaveGameService`, *Saved games* screen): save, load (with schema upgrade and career-date reload),
+  delete, new game; saves from newer versions and foreign files are refused. Documentation `docs/SAVE_FILES.md`.
+- Assistant (holiday) mode: `ICareerService.SetAssistantAsync`, *Assistant manages* on the career screen; the user's
+  club is AI-managed and its matches are played by the calendar. Migration `20261112154154_CareerAssistant`.
+- Windows release: `build/publish.ps1` (self-contained single-file win-x64, smoke test, zip). `docs/RELEASE.md`.
+- Tests: Milestone 1 acceptance (career, management, signing, live match, save/load, second season), save-file rules,
+  long simulation (`EBM_SIM_SEASONS`).
+
+### Fixed
+- A user's club nobody manages ran out of players in long careers and forfeited (assistant mode; found by the
+  six-season run).
+
 ## [0.13.0] — 2026-11-12 — Step 13: AI club management and career testing
 
 ### Added

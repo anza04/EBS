@@ -67,6 +67,11 @@ public sealed partial class CareerViewModel : ObservableObject
     private string _nextMatch = string.Empty;
 
     [ObservableProperty]
+    private bool _assistantManages;
+
+    private bool _refreshing;
+
+    [ObservableProperty]
     private string? _message;
 
     [ObservableProperty]
@@ -105,6 +110,9 @@ public sealed partial class CareerViewModel : ObservableObject
         }
 
         var state = State;
+        _refreshing = true;
+        AssistantManages = state.Career.AssistantManages;
+        _refreshing = false;
         Summary = $"{state.Career.ManagerName} · {state.Club.Name} · Season {state.Season.Name} · {Format(state.Today)}"
             + (state.SeasonComplete ? " · Season complete" : string.Empty);
         NextMatch = state.NextFixture is { } next
@@ -118,6 +126,23 @@ public sealed partial class CareerViewModel : ObservableObject
             ?? CompetitionsList.FirstOrDefault();
         await LoadStandingsAsync();
         History = await _careers.GetClubHistoryAsync(state.Club.Id);
+    }
+
+    async partial void OnAssistantManagesChanged(bool value)
+    {
+        if (_refreshing || State is null || State.Career.AssistantManages == value)
+        {
+            return;
+        }
+
+        await RunAsync(async () =>
+        {
+            await _careers.SetAssistantAsync(value);
+            await _reloadAll();
+            return value
+                ? "Your assistant manages the club and plays its matches until you take over again."
+                : "You manage the club again.";
+        });
     }
 
     async partial void OnSelectedCompetitionChanged(CareerCompetition? value) => await LoadStandingsAsync();

@@ -42,6 +42,14 @@ public sealed class Career : Entity<CareerId>
     /// <summary>Number of seasons started, the first one included.</summary>
     public int SeasonsPlayed { get; private set; } = 1;
 
+    /// <summary>
+    /// "Holiday": the assistant manages the user's club like an AI club (line-ups, tactics, contracts, transfers) and
+    /// plays its matches, so the calendar no longer stops for them.
+    /// </summary>
+    public bool AssistantManages { get; private set; }
+
+    public void SetAssistant(bool manages) => AssistantManages = manages;
+
     public void MoveTo(DateOnly date)
     {
         if (date < CurrentDate)
