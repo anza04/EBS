@@ -17,6 +17,40 @@ namespace Ebm.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
+            modelBuilder.Entity("Ebm.Domain.Careers.Career", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("CurrentDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ManagerName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeasonsPlayed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("SeasonId");
+
+                    b.ToTable("Careers", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Clubs.Arena", b =>
                 {
                     b.Property<Guid>("Id")
@@ -401,6 +435,9 @@ namespace Ebm.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("HomeScore")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsForfeit")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Overtimes")
@@ -817,6 +854,21 @@ namespace Ebm.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_Transfers_Return", "ReturnedOn IS NULL OR (Kind = 'Loan' AND ReturnedOn > Date)");
                         });
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Careers.Career", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Seasons.Season", null)
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Ebm.Domain.Clubs.Arena", b =>

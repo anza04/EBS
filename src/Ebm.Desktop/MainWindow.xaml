@@ -35,6 +35,7 @@
 
     <!-- Content area: the database editor (game screens are added by later steps) -->
     <TabControl DataContext="{Binding Editor}" Margin="12" Padding="0" FontSize="13">
+      <TabItem Header="Career" Content="{Binding Career}" />
       <TabItem Header="Players" Content="{Binding Players}" />
       <TabItem Header="Player profile" Content="{Binding Profile}" />
       <TabItem Header="Compare players" Content="{Binding Comparison}" />

@@ -34,6 +34,12 @@ public interface IMatchService
     /// <summary>Instant mode: simulates the fixture to the end and stores it.</summary>
     Task<MatchReport> PlayAsync(FixtureId fixtureId, int? seed = null, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Plays the fixture instantly and stores it, like <see cref="PlayAsync"/>, except that a club that cannot field
+    /// five players forfeits (20–0, no box score) instead of failing. Used by the career calendar.
+    /// </summary>
+    Task<Match> PlayOrForfeitAsync(FixtureId fixtureId, int? seed = null, CancellationToken cancellationToken = default);
+
     /// <summary>A stored match with its box score, or <c>null</c> when it does not exist.</summary>
     Task<MatchReport?> GetReportAsync(MatchId matchId, CancellationToken cancellationToken = default);
 }

@@ -24,6 +24,8 @@ the import modes, and the database editor. Code: `src/Ebm.DataImport` (import), 
 Templates: `data/templates/<type>.csv` (one example row each; together they form a valid mini dataset) and
 `data/templates/dataset-template.json`. Sample dataset: `data/sample/italy-sample.json` (fictional Italian
 league: 5 countries, 1 league, 2 divisions, 3 competitions, 8 arenas, 8 clubs, 37 players, 33 contracts; Aurora Milano has a complete 12-player squad, some contracts have bonuses, a release clause or options, and 4 players are free agents).
+`data/sample/italy-squads.json` (Step 12, import after the sample) adds 122 generated fictional players with contracts so
+every club has 11 players, and 12 more free agents: the sample can then be played as a full career.
 Both folders are copied next to the executable (`data\…`) and the import file dialog opens there.
 
 ## 2. Field mappings

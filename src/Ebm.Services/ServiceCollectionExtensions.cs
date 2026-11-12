@@ -1,6 +1,7 @@
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Transfers;
+using Ebm.Services.Careers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
@@ -20,8 +21,8 @@ public static class ServiceCollectionExtensions
     /// Registers the game services layer.
     /// </summary>
     /// <remarks>
-    /// Every service that needs the current real-world time must take the shared <see cref="TimeProvider"/>
-    /// from DI so tests can substitute a fake clock. Use cases that write data create their own DI scope
+    /// Every service that needs the game date must take the shared <see cref="GameClock"/> (career date, else the
+    /// <see cref="TimeProvider"/> date) from DI so tests can substitute a fake clock. Use cases that write data create their own DI scope
     /// per unit of work, so they are registered as singletons.
     /// </remarks>
     public static IServiceCollection AddGameServices(this IServiceCollection services)
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<GameClock>();
         services.TryAddSingleton<IDatabaseEditor, DatabaseEditor>();
         services.TryAddSingleton<ICompetitionService, CompetitionService>();
         services.TryAddSingleton(PlayerRatingCalculator.Default);
@@ -41,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ITransferService, TransferService>();
         services.TryAddSingleton<ITacticsService, TacticsService>();
         services.TryAddSingleton<IMatchService, MatchService>();
+        services.TryAddSingleton<ICareerService, CareerService>();
 
         return services;
     }

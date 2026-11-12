@@ -17,9 +17,9 @@ internal sealed class ClubService : IClubService
 {
     private readonly IServiceScopeFactory _scopes;
     private readonly PlayerRatingCalculator _calculator;
-    private readonly TimeProvider _time;
+    private readonly GameClock _time;
 
-    public ClubService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, TimeProvider time)
+    public ClubService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, GameClock time)
     {
         ArgumentNullException.ThrowIfNull(scopes);
         ArgumentNullException.ThrowIfNull(calculator);
@@ -29,7 +29,7 @@ internal sealed class ClubService : IClubService
         _time = time;
     }
 
-    private DateOnly Today => DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
+    private DateOnly Today => _time.Today;
 
     public async Task<ClubProfile?> GetProfileAsync(ClubId clubId, CancellationToken cancellationToken = default)
     {

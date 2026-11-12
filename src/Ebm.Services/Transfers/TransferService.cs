@@ -28,7 +28,7 @@ internal sealed class TransferService : ITransferService
     private readonly ClubRecruiter _recruiter;
     private readonly IContractService _contracts;
     private readonly IClubService _clubs;
-    private readonly TimeProvider _time;
+    private readonly GameClock _time;
 
     public TransferService(
         IServiceScopeFactory scopes,
@@ -38,7 +38,7 @@ internal sealed class TransferService : ITransferService
         ClubRecruiter recruiter,
         IContractService contracts,
         IClubService clubs,
-        TimeProvider time)
+        GameClock time)
     {
         ArgumentNullException.ThrowIfNull(scopes);
         ArgumentNullException.ThrowIfNull(calculator);
@@ -58,7 +58,7 @@ internal sealed class TransferService : ITransferService
         _time = time;
     }
 
-    private DateOnly Today => DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
+    private DateOnly Today => _time.Today;
 
     public async Task<IReadOnlyList<MarketPlayer>> SearchAsync(PlayerSearch search, CancellationToken cancellationToken = default)
     {

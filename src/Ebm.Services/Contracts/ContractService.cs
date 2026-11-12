@@ -18,9 +18,9 @@ internal sealed class ContractService : IContractService
     private readonly IServiceScopeFactory _scopes;
     private readonly PlayerRatingCalculator _calculator;
     private readonly ContractNegotiator _negotiator;
-    private readonly TimeProvider _time;
+    private readonly GameClock _time;
 
-    public ContractService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, ContractNegotiator negotiator, TimeProvider time)
+    public ContractService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, ContractNegotiator negotiator, GameClock time)
     {
         ArgumentNullException.ThrowIfNull(scopes);
         ArgumentNullException.ThrowIfNull(calculator);
@@ -32,7 +32,7 @@ internal sealed class ContractService : IContractService
         _time = time;
     }
 
-    private DateOnly Today => DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
+    private DateOnly Today => _time.Today;
 
     public async Task<ClubContracts?> GetClubContractsAsync(ClubId clubId, CancellationToken cancellationToken = default)
     {

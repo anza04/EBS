@@ -8,7 +8,7 @@ using Ebm.Domain.Seasons;
 namespace Ebm.Services.Clubs;
 
 /// <summary>
-/// Club profile and squad management. One DI scope per call; "today" comes from the shared <see cref="TimeProvider"/>.
+/// Club profile and squad management. One DI scope per call; "today" comes from the <see cref="GameClock"/>.
 /// </summary>
 /// <remarks>
 /// A club's players are those whose open club spell is at the club, plus those with a contract running at the club

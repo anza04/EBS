@@ -12,11 +12,11 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_Tactics";
+    private const string LatestMigration = "_Careers";
 
     private static readonly string[] ExpectedTables =
     [
-        "Arenas", "Clubs", "CompetitionParticipants", "Competitions", "Contracts", "Countries", "Divisions",
+        "Arenas", "Careers", "Clubs", "CompetitionParticipants", "Competitions", "Contracts", "Countries", "Divisions",
         "Fixtures", "LeagueStandings", "Leagues", "Matches", "PlayerAttributes", "PlayerClubHistory",
         "PlayerMatchStatistics", "PlayerTendencies", "Players", "RosterSpots", "Seasons", "Staff", "Tactics", "Transfers",
     ];

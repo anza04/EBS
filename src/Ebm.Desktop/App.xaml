@@ -14,6 +14,7 @@
         <ResourceDictionary Source="Themes/Transfers.xaml" />
         <ResourceDictionary Source="Themes/Tactics.xaml" />
         <ResourceDictionary Source="Themes/Matches.xaml" />
+        <ResourceDictionary Source="Themes/Careers.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

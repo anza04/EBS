@@ -43,6 +43,9 @@ public interface ICompetitionService
     /// </summary>
     Task<CompetitionProgress> AdvanceAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
+    /// <summary>Where the competition season stands, without changing anything.</summary>
+    Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
+
     /// <summary>The regular-season table, ranked by the rules (points, then tie-breakers).</summary>
     Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 

@@ -12,7 +12,7 @@ namespace Ebm.Services.Transfers;
 /// <summary>
 /// The player market (docs/TRANSFERS.md): search, valuations, transfer and loan negotiations, transfers, loans and
 /// loan returns, the transfer history and the AI clubs' transfer window. One DI scope per call; "today" comes from
-/// the shared <see cref="TimeProvider"/>. Free agents are signed through <see cref="IContractService.SignAsync"/>.
+/// the <see cref="GameClock"/>. Free agents are signed through <see cref="IContractService.SignAsync"/>.
 /// </summary>
 /// <remarks>Writes throw <see cref="Ebm.Domain.Common.DomainException"/> with a player-facing message.</remarks>
 public interface ITransferService

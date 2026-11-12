@@ -14,9 +14,9 @@ internal sealed class PlayerProfileService : IPlayerProfileService
 {
     private readonly IServiceScopeFactory _scopes;
     private readonly PlayerRatingCalculator _calculator;
-    private readonly TimeProvider _time;
+    private readonly GameClock _time;
 
-    public PlayerProfileService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, TimeProvider time)
+    public PlayerProfileService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, GameClock time)
     {
         ArgumentNullException.ThrowIfNull(scopes);
         ArgumentNullException.ThrowIfNull(calculator);
@@ -97,7 +97,7 @@ internal sealed class PlayerProfileService : IPlayerProfileService
         using var scope = _scopes.CreateScope();
         var services = scope.ServiceProvider;
         T Repo<T>() where T : notnull => services.GetRequiredService<T>();
-        var today = DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
+        var today = _time.Today;
         var players = Repo<IRepository<Player, PlayerId>>();
         var spells = Repo<IRepository<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>>();
         var contracts = Repo<IRepository<Contract, ContractId>>();

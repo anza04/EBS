@@ -110,7 +110,7 @@ internal sealed class CompetitionService : ICompetitionService
     /// Adds the result of a fixture and its standings update to the unit of work of <paramref name="services"/>,
     /// without saving, so a caller can store more (the box score) in the same transaction.
     /// </summary>
-    internal static async Task<Match> AddResultAsync(IServiceProvider services, FixtureId fixtureId, int homeScore, int awayScore, int overtimes, CancellationToken cancellationToken)
+    internal static async Task<Match> AddResultAsync(IServiceProvider services, FixtureId fixtureId, int homeScore, int awayScore, int overtimes, CancellationToken cancellationToken, bool forfeit = false)
     {
         var fixture = await RequireAsync<Fixture, FixtureId>(services, fixtureId, "fixture", cancellationToken).ConfigureAwait(false);
         var matches = Repo<Match, MatchId>(services);
@@ -119,7 +119,9 @@ internal sealed class CompetitionService : ICompetitionService
             throw new DomainValidationException("This fixture already has a result.");
         }
 
-        var match = new Match(MatchId.New(), fixtureId, homeScore, awayScore, overtimes);
+        var match = forfeit
+            ? Match.Forfeit(MatchId.New(), fixtureId, homeForfeits: homeScore < awayScore)
+            : new Match(MatchId.New(), fixtureId, homeScore, awayScore, overtimes);
         matches.Add(match);
         if (fixture.Stage == FixtureStage.RegularSeason)
         {
@@ -184,6 +186,12 @@ internal sealed class CompetitionService : ICompetitionService
 
         await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return new CompetitionProgress(CompetitionPhase.Playoffs, requests.Count);
+    }
+
+    public async Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        return (await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Phase();
     }
 
     public async Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)

@@ -26,7 +26,8 @@ dotnet run   --project src/Ebm.Desktop
 ```
 
 The main window is the database editor. To load the sample league, open the *Import* tab, choose
-`data\sample\italy-sample.json` and press *Import*. CSV templates are in `data\templates`.
+`data\sample\italy-sample.json` and press *Import*; then import `data\sample\italy-squads.json` (squads for every
+club and more free agents) and start a career from the *Career* tab. CSV templates are in `data\templates`.
 
 User data (logs, game database) is stored in `%LOCALAPPDATA%\EuropeanBasketballManager`.
 To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.

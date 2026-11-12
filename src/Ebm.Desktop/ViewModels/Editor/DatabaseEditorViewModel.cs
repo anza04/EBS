@@ -1,11 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.Startup;
+using Ebm.Desktop.ViewModels.Careers;
 using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Transfers;
+using Ebm.Services.Careers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
@@ -20,7 +22,7 @@ namespace Ebm.Desktop.ViewModels.Editor;
 
 /// <summary>
 /// The database editor: one page per record type, the import page, the player profile and comparison screens, the
-/// club profile and squad screens, the club contracts screen, the transfer market, the tactics screen and the match centre.
+/// club profile and squad screens, the club contracts screen, the transfer market, the tactics screen, the match centre and the career screen.
 /// </summary>
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
@@ -39,7 +41,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ITransferService transfers,
         ITacticsService tactics,
         IMatchService matches,
-        ICompetitionService competitions)
+        ICompetitionService competitions,
+        ICareerService? careers = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -59,6 +62,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         TransferMarket = new TransferMarketViewModel(transfers, contracts, Lookups, ReloadAsync);
         Tactics = new TacticsViewModel(tactics, Lookups);
         Matches = new MatchCenterViewModel(matches, competitions, ReloadAsync);
+        Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -91,6 +95,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public MatchCenterViewModel Matches { get; }
 
+    /// <summary>The career screen; <c>null</c> when no career service is available (editor-only tests).</summary>
+    public CareerViewModel? Career { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -109,6 +116,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         await TransferMarket.RefreshAsync();
         await Tactics.RefreshAsync();
         await Matches.RefreshAsync();
+        if (Career is not null)
+        {
+            await Career.RefreshAsync();
+        }
+
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";
     }

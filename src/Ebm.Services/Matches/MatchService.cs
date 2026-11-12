@@ -54,20 +54,9 @@ internal sealed class MatchService(
 
     public async Task<MatchPreview?> GetPreviewAsync(FixtureId fixtureId, CancellationToken cancellationToken = default)
     {
-        Fixture? fixture;
-        string competition;
-        Match? result;
-        using (var scope = scopes.CreateScope())
+        if (await LoadFixtureAsync(fixtureId, cancellationToken).ConfigureAwait(false) is not var (fixture, competition, result))
         {
-            var s = scope.ServiceProvider;
-            fixture = await Repo<Fixture, FixtureId>(s).FindAsync(fixtureId, cancellationToken).ConfigureAwait(false);
-            if (fixture is null)
-            {
-                return null;
-            }
-
-            competition = (await Repo<Competition, CompetitionId>(s).FindAsync(fixture.CompetitionId, cancellationToken).ConfigureAwait(false))?.Name ?? string.Empty;
-            result = (await Repo<Match, MatchId>(s).ListAsync(m => m.FixtureId == fixtureId, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+            return null;
         }
 
         var home = await SheetAsync(fixture.HomeClubId, cancellationToken).ConfigureAwait(false);
@@ -88,7 +77,44 @@ internal sealed class MatchService(
         return new MatchSession(preview.Fixture, preview.Competition, new MatchSimulation(setup, mode, calculator));
     }
 
-    public async Task<MatchId> SaveAsync(MatchSession session, CancellationToken cancellationToken = default)
+    public async Task<MatchId> SaveAsync(MatchSession session, CancellationToken cancellationToken = default) =>
+        (await SaveCoreAsync(session, cancellationToken).ConfigureAwait(false)).Id;
+
+    public async Task<Match> PlayOrForfeitAsync(FixtureId fixtureId, int? seed = null, CancellationToken cancellationToken = default)
+    {
+        var (fixture, competition, result) = await LoadFixtureAsync(fixtureId, cancellationToken).ConfigureAwait(false)
+            ?? throw new DomainException("The fixture no longer exists in the database.");
+        if (result is not null)
+        {
+            throw new DomainValidationException("This fixture has already been played.");
+        }
+
+        var home = await TrySheetAsync(fixture.HomeClubId, cancellationToken).ConfigureAwait(false);
+        var away = await TrySheetAsync(fixture.AwayClubId, cancellationToken).ConfigureAwait(false);
+        if (home is not null && away is not null)
+        {
+            var simulation = new MatchSimulation(new MatchSetup(home, away, seed ?? Random.Shared.Next()), SimulationMode.Instant, calculator);
+            simulation.RunToEnd();
+            return await SaveCoreAsync(new MatchSession(fixture, competition, simulation), cancellationToken).ConfigureAwait(false);
+        }
+
+        // A club that cannot field five players loses 20-0 (if neither can, the home side forfeits).
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        var homeForfeits = home is null;
+        var match = await CompetitionService.AddResultAsync(
+            s,
+            fixtureId,
+            homeForfeits ? 0 : Match.ForfeitScore,
+            homeForfeits ? Match.ForfeitScore : 0,
+            0,
+            cancellationToken,
+            forfeit: true).ConfigureAwait(false);
+        await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return match;
+    }
+
+    private async Task<Match> SaveCoreAsync(MatchSession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(session);
         if (session.IsSaved)
@@ -112,7 +138,7 @@ internal sealed class MatchService(
 
         await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         session.IsSaved = true;
-        return match.Id;
+        return match;
     }
 
     public async Task<MatchReport> PlayAsync(FixtureId fixtureId, int? seed = null, CancellationToken cancellationToken = default)
@@ -148,6 +174,33 @@ internal sealed class MatchService(
         ];
 
         return new MatchReport(match, fixture, competition, home, away, Side(home.Id), Side(away.Id));
+    }
+
+    private async Task<(Fixture Fixture, string Competition, Match? Result)?> LoadFixtureAsync(FixtureId fixtureId, CancellationToken cancellationToken)
+    {
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        if (await Repo<Fixture, FixtureId>(s).FindAsync(fixtureId, cancellationToken).ConfigureAwait(false) is not { } fixture)
+        {
+            return null;
+        }
+
+        var competition = (await Repo<Competition, CompetitionId>(s).FindAsync(fixture.CompetitionId, cancellationToken).ConfigureAwait(false))?.Name ?? string.Empty;
+        var result = (await Repo<Match, MatchId>(s).ListAsync(m => m.FixtureId == fixtureId, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+        return (fixture, competition, result);
+    }
+
+    /// <summary>The club's matchday squad, or <c>null</c> when it cannot field enough players.</summary>
+    private async Task<TeamSheet?> TrySheetAsync(ClubId clubId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await SheetAsync(clubId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (DomainException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return null;
+        }
     }
 
     private async Task<TeamSheet> SheetAsync(ClubId clubId, CancellationToken cancellationToken)

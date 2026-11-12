@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261112140336_Tactics`** (Step 09).
+Schema version: **`20261112144630_Careers`** (Step 12).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -12,6 +12,7 @@ Schema version: **`20261112140336_Tactics`** (Step 09).
 | `20261109194813_Contracts` | 07 | Contracts: `PaymentFrequency`, `SigningBonus`, `PerformanceBonuses`, `ReleaseClause`, `ClubOptionUntil`, `PlayerOptionUntil`, `Status`, `TerminationDate`, `TerminationCompensation` (add-column with defaults; existing contracts become `Active` with monthly pay and no extras). Index `ClubId` replaced by (`ClubId`, `EndDate`) |
 | `20261109204206_Transfers` | 08 | New `Transfers` table (create-table only, so the upgrade runs in one transaction). No existing table changes; `Contracts.Status` gains the values `OnLoan` and `Transferred` (text column, no schema change) |
 | `20261112140336_Tactics` | 09 | New `Tactics` table (create-table only) |
+| `20261112144630_Careers` | 12 | New `Careers` table; `Matches.IsForfeit` (add-column, default false) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -283,6 +284,19 @@ The played result of a fixture.
 | FixtureId | id | FK Fixtures, **unique** (one result per fixture) |
 | HomeScore / AwayScore | int | 0–300, **no draws** (`HomeScore <> AwayScore`) |
 | Overtimes | int | 0–10 |
+| IsForfeit | bool | Game awarded 20–0 because a club could not field five players; no box score (default false) |
+
+### Careers
+The user's career (at most one per game database, enforced by `ICareerService`; rules in `docs/SEASON_LIFECYCLE.md`).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ManagerName | text(60) | |
+| ClubId | id | FK Clubs: the managed club |
+| SeasonId | id | FK Seasons: the season being played |
+| StartDate / CurrentDate | date | `CurrentDate` is the game date; it only moves forward |
+| SeasonsPlayed | int | Seasons started, the first included |
 
 ### PlayerMatchStatistics
 One box-score line per player per match.

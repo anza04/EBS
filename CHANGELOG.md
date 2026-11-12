@@ -3,6 +3,22 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.12.0] — 2026-11-12 — Step 12: Season progression and career management
+
+### Added
+- Career (`ICareerService`, `Careers` table): choose a club, start a career, game days (`AdvanceDayAsync`), continue to
+  the next match (`ContinueAsync`), instant play of the user's match, playoffs advancing automatically, AI transfer
+  window at season end, season review, next season with promotion/relegation and schedules, club history.
+- `GameClock`: the career date is the game's "today" for every service.
+- Forfeits (`Match.IsForfeit`, `IMatchService.PlayOrForfeitAsync`): clubs without five players lose 20–0.
+- `ICompetitionService.GetPhaseAsync`, `SeasonTransition`, `SeasonCalendar`.
+- *Career* screen: new career, calendar controls, standings, news, club history.
+- Sample `data/sample/italy-squads.json` (squads for every club, more free agents). Docs `docs/SEASON_LIFECYCLE.md`.
+- Tests: full career season with next season and offseason, forfeits, career screen, season lifecycle unit tests.
+
+### Changed
+- Services take the date from `GameClock` instead of `TimeProvider`. Migration `20261112144630_Careers`.
+
 ## [0.11.0] — 2026-11-12 — Step 11: Match presentation and statistics
 
 ### Added

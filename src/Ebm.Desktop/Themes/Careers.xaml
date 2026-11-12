@@ -1,0 +1,92 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:cr="clr-namespace:Ebm.Desktop.ViewModels.Careers">
+  <!-- Career screen (Step 12). Uses the tokens from Shell.xaml and the styles from Editor.xaml. -->
+
+  <BooleanToVisibilityConverter x:Key="Careers.Visible" />
+
+  <DataTemplate DataType="{x:Type cr:CareerViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+        <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Heading}" />
+        <TextBlock Text="{Binding NextMatch}" Style="{StaticResource Text.Body}" Margin="0,4,0,0" />
+      </StackPanel>
+      <TextBlock DockPanel.Dock="Bottom" Text="{Binding Message}" Style="{StaticResource Text.Status}" TextWrapping="Wrap" Margin="0,8,0,0" />
+
+      <Grid>
+        <!-- New career -->
+        <StackPanel Width="360" HorizontalAlignment="Left" Visibility="{Binding NoCareer, Converter={StaticResource Careers.Visible}}">
+          <TextBlock Text="Club" Style="{StaticResource Form.Label}" />
+          <ComboBox ItemsSource="{Binding ClubOptions}" SelectedItem="{Binding SelectedClub}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock>
+                  <Run Text="{Binding Club.Name, Mode=OneWay}" /> <Run Text=" · " /> <Run Text="{Binding Competition, Mode=OneWay}" />
+                  <Run Text=" · reputation " /> <Run Text="{Binding Reputation, Mode=OneWay}" />
+                </TextBlock>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock Text="Manager name" Style="{StaticResource Form.Label}" Margin="0,8,0,0" />
+          <TextBox Text="{Binding ManagerName, UpdateSourceTrigger=PropertyChanged}" />
+          <Button Content="Start career" Command="{Binding StartCareerCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,12,0,0" />
+        </StackPanel>
+
+        <!-- Running career -->
+        <Grid Visibility="{Binding HasCareer, Converter={StaticResource Careers.Visible}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+              <Button Content="Continue" Command="{Binding ContinueCommand}" Style="{StaticResource Button.Secondary}" />
+              <Button Content="Next day" Command="{Binding AdvanceDayCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+              <Button Content="Play match" Command="{Binding PlayMatchCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+              <Button Content="Season review" Command="{Binding ReviewSeasonCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+              <Button Content="Start next season" Command="{Binding StartNextSeasonCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+              <TextBlock Text="Standings" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <ComboBox ItemsSource="{Binding CompetitionsList}" SelectedItem="{Binding SelectedCompetition}" DisplayMemberPath="Competition.Name" Width="220" />
+            </StackPanel>
+            <TextBlock DockPanel.Dock="Bottom" Text="Club history" Style="{StaticResource Text.Label}" Margin="0,12,0,4" />
+            <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding History}" Style="{StaticResource Editor.Grid}" Height="130">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season.Name}" Width="70" />
+                <DataGridTextColumn Header="Competition" Binding="{Binding Competition.Name}" Width="*" />
+                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="40" />
+                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="36" />
+                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="36" />
+                <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="120" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid ItemsSource="{Binding Standings}" Style="{StaticResource Editor.Grid}">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="30" />
+                <DataGridTextColumn Header="Club" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="P" Binding="{Binding Played}" Width="34" />
+                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="34" />
+                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="34" />
+                <DataGridTextColumn Header="PF" Binding="{Binding PointsFor}" Width="46" />
+                <DataGridTextColumn Header="PA" Binding="{Binding PointsAgainst}" Width="46" />
+                <DataGridTextColumn Header="+/-" Binding="{Binding Difference}" Width="46" />
+                <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="38" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </DockPanel>
+          <DockPanel Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Text="News" Style="{StaticResource Text.Label}" Margin="0,4,0,8" />
+            <DataGrid ItemsSource="{Binding News}" Style="{StaticResource Editor.Grid}">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="110" />
+                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </DockPanel>
+        </Grid>
+      </Grid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

@@ -3,6 +3,7 @@ using System.Windows;
 using Ebm.Desktop.Startup;
 using Ebm.Hosting;
 using Ebm.Hosting.ErrorHandling;
+using Ebm.Services.Careers;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -50,6 +51,9 @@ public partial class App : Application
             RuntimeInformation.OSDescription,
             paths.DataRoot,
             launch.SmokeTest);
+
+        // The career date (if a career exists) is the game's "today" for everything below.
+        services.GetRequiredService<ICareerService>().LoadAsync().GetAwaiter().GetResult();
 
         // Loans that ended and contracts that ran out or started since the last session take effect before any screen
         // loads (docs/TRANSFERS.md §4, docs/CONTRACTS.md §5).

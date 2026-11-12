@@ -7,7 +7,7 @@ namespace Ebm.Services.Contracts;
 
 /// <summary>
 /// The contract system (docs/CONTRACTS.md): signing, renewal, termination, options, expiry, free agency and salary
-/// commitments. One DI scope per call; "today" comes from the shared <see cref="TimeProvider"/>.
+/// commitments. One DI scope per call; "today" comes from the <see cref="GameClock"/>.
 /// </summary>
 /// <remarks>Writes throw <see cref="Ebm.Domain.Common.DomainException"/> with a player-facing message.</remarks>
 public interface IContractService
