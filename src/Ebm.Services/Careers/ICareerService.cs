@@ -85,13 +85,17 @@ public sealed record PlayedFixture(string Competition, string Home, string Away,
     public string Score => Match.IsForfeit ? $"{Match.HomeScore}–{Match.AwayScore} (forfeit)" : $"{Match.HomeScore}–{Match.AwayScore}";
 }
 
+/// <summary>What the AI clubs and the club finances did on one game day.</summary>
+public sealed record ManagementDay(int LineupsChanged, int TacticsPlanned, int Renewals, int Releases, int EmergencySignings, int PlayersCreated, long SalariesPaid, long Income);
+
 /// <summary>What happened on one game day.</summary>
 public sealed record GameDayReport(
     DateOnly Date,
     IReadOnlyList<PlayedFixture> Results,
     int PlayoffFixturesScheduled,
     TransferDateChanges DateChanges,
-    TransferWindowReport? TransferWindow);
+    TransferWindowReport? TransferWindow,
+    ManagementDay Management);
 
 /// <summary>Why <see cref="ICareerService.ContinueAsync"/> stopped.</summary>
 public enum CalendarStop
@@ -107,8 +111,17 @@ public sealed record CalendarReport(IReadOnlyList<GameDayReport> Days, CalendarS
     public int MatchesPlayed => Days.Sum(d => d.Results.Count);
 }
 
+/// <summary>A club's board objective for the season and whether it was met.</summary>
+public sealed record ObjectiveResult(Club Club, int Position, BoardExpectation Expectation, bool Met);
+
 /// <summary>The result of one league competition's season.</summary>
-public sealed record CompetitionReview(Competition Competition, string Champion, IReadOnlyList<string> Promoted, IReadOnlyList<string> Relegated, int? UserPosition);
+public sealed record CompetitionReview(
+    Competition Competition,
+    string Champion,
+    IReadOnlyList<string> Promoted,
+    IReadOnlyList<string> Relegated,
+    int? UserPosition,
+    IReadOnlyList<ObjectiveResult> Objectives);
 
 public sealed record SeasonReview(Season Season, IReadOnlyList<CompetitionReview> Competitions);
 

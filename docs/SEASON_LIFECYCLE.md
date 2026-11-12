@@ -69,5 +69,5 @@ box scores, all kept per season.
 
 ## 7. Not in this step
 
-Salaries are not booked yet (finances, Step 13/27); fitness, morale and injuries do not change (Step 22); AI line-ups,
-tactics and in-season roster management are Step 13; cups are not scheduled (Step 17).
+Fitness, morale and injuries do not change (Step 22); cups are not scheduled (Step 17). Step 13 added the AI clubs,
+salaries and income to the game day (docs/AI_MANAGEMENT.md §1).

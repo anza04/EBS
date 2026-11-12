@@ -3,10 +3,12 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
+using Ebm.Domain.Management;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
+using Ebm.Services.Management;
 using Ebm.Services.Matches;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,10 +21,14 @@ internal sealed class CareerService(
     ICompetitionService competitions,
     IMatchService matches,
     ITransferService transfers,
+    IClubManagementService management,
     GameClock clock) : ICareerService
 {
     /// <summary>A new career starts this many days before its season, so the squad can be prepared.</summary>
     public const int PreseasonDays = 7;
+
+    /// <summary>The preseason transfer window opens this many days before a season starts.</summary>
+    public const int PreseasonWindowDays = 14;
 
     public async Task<CareerState?> LoadAsync(CancellationToken cancellationToken = default)
     {
@@ -82,6 +88,8 @@ internal sealed class CareerService(
 
         clock.Set(career.CurrentDate);
         await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
+        await management.SetObjectivesAsync(season.Id, cancellationToken).ConfigureAwait(false);
+        await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
@@ -92,7 +100,7 @@ internal sealed class CareerService(
         List<(Fixture Fixture, string Competition)> due;
         Dictionary<ClubId, string> names;
         IReadOnlyList<Competition> leagues;
-        bool offseasonStarts;
+        bool windowOpens;
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
@@ -111,10 +119,14 @@ internal sealed class CareerService(
                     .Select(f => (f, byId[f.CompetitionId].Name)),
             ];
             names = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
-            var tomorrow = today.AddDays(1);
-            offseasonStarts = (await Repo<Season, SeasonId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).Any(x => x.EndDate.AddDays(1) == tomorrow);
+            windowOpens = (await Repo<Season, SeasonId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false))
+                .Any(x => x.EndDate == today || x.StartDate.AddDays(-PreseasonWindowDays) == today);
         }
 
+        // AI coaches name their matchday squads; the user's club plays with the roles the user set.
+        var lineups = await management.PrepareMatchdayAsync(
+            [.. due.SelectMany(d => new[] { d.Fixture.HomeClubId, d.Fixture.AwayClubId }).Distinct().Where(c => c != career.ClubId)],
+            cancellationToken).ConfigureAwait(false);
         var results = new List<PlayedFixture>();
         foreach (var (fixture, competition) in due)
         {
@@ -128,12 +140,33 @@ internal sealed class CareerService(
             scheduled += (await competitions.AdvanceAsync(league.Id, career.SeasonId, cancellationToken).ConfigureAwait(false)).FixturesCreated;
         }
 
-        await MoveCareerAsync(career.Id, today.AddDays(1), cancellationToken).ConfigureAwait(false);
+        var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
-        var window = offseasonStarts
-            ? await transfers.RunAiTransferWindowAsync([career.ClubId], cancellationToken).ConfigureAwait(false)
-            : null;
-        return new GameDayReport(today, results, scheduled, changes, window);
+        ClubId[] managed = [career.ClubId];
+
+        // Transfer windows: the last day of a season, two weeks before a season, and any Monday an AI club is short of players.
+        if (!windowOpens && today.DayOfWeek == DayOfWeek.Monday)
+        {
+            windowOpens = (await management.ClubsShortOfPlayersAsync(managed, cancellationToken).ConfigureAwait(false)).Count > 0;
+        }
+
+        TransferWindowReport? window = null;
+        int releases = 0, planned = 0, renewals = 0, emergency = 0, created = 0;
+        if (windowOpens)
+        {
+            created = await management.ReplenishFreeAgentsAsync(cancellationToken).ConfigureAwait(false);
+            window = await transfers.RunAiTransferWindowAsync(managed, cancellationToken).ConfigureAwait(false);
+            releases = await management.ReleaseSurplusAsync(managed, cancellationToken).ConfigureAwait(false);
+            emergency = await management.FillSquadsAsync(managed, cancellationToken).ConfigureAwait(false);
+            planned = await management.PlanTacticsAsync(managed, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (today.AddDays(1).Day == 1)
+        {
+            renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
+        }
+
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income));
     }
 
     public async Task<CalendarReport> ContinueAsync(int maxDays = 366, CancellationToken cancellationToken = default)
@@ -251,6 +284,7 @@ internal sealed class CareerService(
         }
 
         await ScheduleLeaguesAsync(next.Id, id => next.StartDate.AddDays(firstRoundOffsets.GetValueOrDefault(id)), cancellationToken).ConfigureAwait(false);
+        await management.SetObjectivesAsync(next.Id, cancellationToken).ConfigureAwait(false);
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
@@ -312,13 +346,13 @@ internal sealed class CareerService(
     {
         Season season;
         IReadOnlyList<Competition> leagues;
-        Dictionary<ClubId, string> names;
+        Dictionary<ClubId, Club> clubs;
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
             season = (await Repo<Season, SeasonId>(s).FindAsync(seasonId, cancellationToken).ConfigureAwait(false))!;
             leagues = [.. (await LeagueCompetitionsAsync(s, seasonId, cancellationToken).ConfigureAwait(false)).Values.OrderBy(c => c.Name)];
-            names = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
+            clubs = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
         }
 
         var reviews = new List<CompetitionReview>();
@@ -326,13 +360,22 @@ internal sealed class CareerService(
         {
             var outcome = await competitions.GetOutcomeAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
             var table = await competitions.GetStandingsAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
-            string Name(ClubId id) => names.GetValueOrDefault(id, "?");
+            string Name(ClubId id) => clubs.TryGetValue(id, out var club) ? club.Name : "?";
+            var rules = competition.ParseRules();
+            int[] playoffPlaces = rules.Playoffs is { } p ? [.. Enumerable.Range(p.FromPosition, p.Teams)] : [];
+            var objectives = table.Where(r => clubs.ContainsKey(r.ClubId)).Select(r =>
+            {
+                var club = clubs[r.ClubId];
+                var finish = new SeasonFinish(r.Position, table.Count, outcome.Champion == r.ClubId, outcome.Promoted.Contains(r.ClubId), outcome.Relegated.Contains(r.ClubId), playoffPlaces);
+                return new ObjectiveResult(club, r.Position, club.BoardExpectation, SeasonObjectives.IsMet(club.BoardExpectation, finish));
+            });
             reviews.Add(new CompetitionReview(
                 competition,
                 Name(outcome.Champion),
                 [.. outcome.Promoted.Select(Name)],
                 [.. outcome.Relegated.Select(Name)],
-                table.FirstOrDefault(r => r.ClubId == career.ClubId)?.Position));
+                table.FirstOrDefault(r => r.ClubId == career.ClubId)?.Position,
+                [.. objectives]));
         }
 
         return new SeasonReview(season, reviews);
@@ -395,14 +438,17 @@ internal sealed class CareerService(
         }
     }
 
-    private async Task MoveCareerAsync(CareerId careerId, DateOnly date, CancellationToken cancellationToken)
+    /// <summary>Closes the game day <paramref name="today"/>: books its salaries and income and moves the date on, in one transaction.</summary>
+    private async Task<(long Salaries, long Income)> MoveCareerAsync(CareerId careerId, DateOnly today, CancellationToken cancellationToken)
     {
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
         var career = (await Repo<Career, CareerId>(s).FindAsync(careerId, cancellationToken).ConfigureAwait(false))!;
-        career.MoveTo(date);
+        var money = await ClubManagementService.AddFinancesAsync(s, today, cancellationToken).ConfigureAwait(false);
+        career.MoveTo(today.AddDays(1));
         await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        clock.Set(date);
+        clock.Set(career.CurrentDate);
+        return money;
     }
 
     private async Task<int> EntriesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken)

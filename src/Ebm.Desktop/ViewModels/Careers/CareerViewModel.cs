@@ -219,6 +219,12 @@ public sealed partial class CareerViewModel : ObservableObject
                 lines.Add(new NewsLine(date, $"{day.DateChanges.Contracts.Expired} contract(s) expired."));
             }
 
+            var ai = day.Management;
+            if (ai.Renewals + ai.Releases + ai.EmergencySignings > 0)
+            {
+                lines.Add(new NewsLine(date, $"AI clubs: {ai.Renewals} renewal(s), {ai.Releases} release(s), {ai.EmergencySignings} emergency signing(s)."));
+            }
+
             if (day.TransferWindow is { } window)
             {
                 lines.Add(new NewsLine(date, $"AI transfer window: {window.Clubs.Sum(c => c.Transactions)} move(s)."));

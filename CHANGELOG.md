@@ -3,6 +3,17 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.13.0] — 2026-11-12 — Step 13: AI club management and career testing
+
+### Added
+- AI clubs (`IClubManagementService`, `Ebm.Domain.Management`): matchday line-ups and rotation (`LineupPlanner`),
+  tactics from squad strengths (`TacticPlanner`, tactic "AI plan"), contract renewals (`RenewalPolicy`), releases
+  above the squad limit, preseason/offseason/emergency transfer windows, emergency free-agent signings, free-agent
+  replenishment with generated players (`PlayerGenerator`), board objectives set and judged (`SeasonObjectives`).
+- Finances on the calendar (`ClubFinances`): salary instalments on their due dates, month-end income.
+- Season review: every club's objective and whether it was met. Career news shows AI activity.
+- Tests: three-season career simulation, planner unit tests. Documentation `docs/AI_MANAGEMENT.md`.
+
 ## [0.12.0] — 2026-11-12 — Step 12: Season progression and career management
 
 ### Added

@@ -120,14 +120,16 @@ public sealed class CareerServiceTests : IAsyncLifetime
         Assert.Equal(serieA.Champion == "Aurora Milano", first.Champion);
         Assert.Equal(2, history.Count);
 
-        // The offseason: contracts ending on 30 June expire, the AI transfer window opens on 1 July, the new season starts.
+        // The offseason: contracts ending on 30 June expire or are renewed, the AI transfer window opens, the new season starts.
         var expiring = await _db.ReadAsync(s => s.Repo<Ebm.Domain.Contracts.Contract, Ebm.Domain.Contracts.ContractId>()
             .ListAsync(c => c.EndDate == new DateOnly(2027, 6, 30)));
         Assert.NotEmpty(expiring);
         var report = await Careers.ContinueAsync();
         Assert.Equal(CalendarStop.UserMatch, report.StoppedBecause);
         Assert.Contains(report.Days, d => d.TransferWindow is not null && d.Date == new DateOnly(2027, 6, 30));
-        Assert.True(report.Days.Sum(d => d.DateChanges.Contracts.Expired) >= expiring.Count);
+        Assert.True(report.Days.Sum(d => d.DateChanges.Contracts.Expired) > 0);
+        Assert.True(report.Days.Sum(d => d.Management.Renewals) > 0);
+        Assert.True(report.Days.Sum(d => d.Management.SalariesPaid) > 0);
         Assert.True(report.State.Today >= next.Season.StartDate);
     }
 
@@ -136,23 +138,27 @@ public sealed class CareerServiceTests : IAsyncLifetime
     {
         await ImportAsync("italy-sample.json");
         var aurora = await ClubAsync("Aurora Milano");
-        await Careers.StartAsync(aurora.Id, "Test Manager");
+        var start = await Careers.StartAsync(aurora.Id, "Test Manager");
+
+        // Serie A2 clubs have no players at all: their games are forfeited by the home side.
+        var a2 = start.Competitions.Single(c => c.Competition.Name == "Serie A2").Competition;
+        var a2Fixture = (await _db.Services.GetRequiredService<Ebm.Services.Matches.IMatchService>().GetFixturesAsync(a2.Id, start.Season.Id)).Last();
+        var forfeit = await _db.Services.GetRequiredService<Ebm.Services.Matches.IMatchService>().PlayOrForfeitAsync(a2Fixture.Fixture.Id);
+        Assert.Equal((true, 0, Match.ForfeitScore), (forfeit.IsForfeit, forfeit.HomeScore, forfeit.AwayScore));
 
         var report = await Careers.ContinueAsync();
         Assert.Equal(CalendarStop.UserMatch, report.StoppedBecause);
         Assert.Equal(new DateOnly(2026, 10, 1), report.State.Today);
         Assert.Equal(7, report.Days.Count);
+        Assert.Contains(report.Days, d => d.Date.DayOfWeek == DayOfWeek.Monday && d.TransferWindow is not null); // clubs short of players recruit
         await Assert.ThrowsAsync<DomainValidationException>(() => Careers.AdvanceDayAsync());
 
-        var match = await Careers.PlayUserMatchAsync();
-        Assert.True(match.IsForfeit); // every opponent has three players
-        Assert.Equal(Match.ForfeitScore, report.State.NextFixture!.Fixture.HomeClubId == aurora.Id ? match.HomeScore : match.AwayScore);
+        await Careers.PlayUserMatchAsync();
         await Assert.ThrowsAsync<DomainValidationException>(() => Careers.PlayUserMatchAsync());
 
         var day = await Careers.AdvanceDayAsync();
         Assert.Equal(new DateOnly(2026, 10, 1), day.Date);
         Assert.Equal(6, day.Results.Count); // the other three Serie A games and three Serie A2 games
-        Assert.All(day.Results, r => Assert.True(r.Match.IsForfeit));
         Assert.Equal(new DateOnly(2026, 10, 2), (await Careers.LoadAsync())!.Today);
     }
 

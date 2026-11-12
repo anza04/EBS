@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 12 — Season progression and career management (2026-11-12)
+STEP 13 — AI club management and career testing (2026-11-12)
 
 ## Next step
-STEP 13 — see docs/ROADMAP.md
+STEP 14 — see docs/ROADMAP.md
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (387/387: 277 unit, 110 integration)
-- Run status: Launches. Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`.
+- Tests: PASS (402/402: 291 unit, 111 integration)
+- Run status: Launches. Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -49,7 +49,8 @@ STEP 13 — see docs/ROADMAP.md
 - [x] Match engine: possession-based FIBA simulation, statistics, fatigue, substitutions, timeouts, overtime, instant/commentary/live modes, statistical validation (Step 10)
 - [x] Match centre: schedule, preview, live match with play-by-play, scoreboard, substitutions, timeouts and tactical changes, live and stored box scores, team stats, match report (Step 11)
 - [x] Career: club selection, calendar and game days, forfeits, playoffs, season review, promotion/relegation, next season, club history, career screen (Step 12)
-- [ ] Step 13 onwards … see docs/ROADMAP.md
+- [x] AI clubs: line-ups, tactics, renewals, releases, transfer windows, free-agent replenishment, salaries and income, board objectives; multi-season simulation test (Step 13)
+- [ ] Step 14 onwards … see docs/ROADMAP.md
 
 ## Database
 - Current schema version: `20261112144630_Careers`
@@ -85,7 +86,7 @@ STEP 13 — see docs/ROADMAP.md
 26. An enum column with `HasDefaultValue` needs an EF sentinel outside the enum (`HasSentinel((T)(-1))`) unless the default is the enum's value 0; otherwise value 0 is replaced by the column default.
 27. A contract runs on a date by `Contract.RunningOn(date)` only (dates plus `TerminationDate`); never re-implement the rule. Early ends keep the agreed `EndDate` and set `TerminationDate` (first day not under contract); contracts are never deleted.
 28. Contract lifecycle changes go through `IContractService` (negotiation, payments, club moves in one unit of work). The editor and the importer are data tools: they set terms only, without negotiation, payments, overlap checks or moves.
-29. One-off contract payments (signing bonus, settlement) are booked to `Club.Balance` at once (`Club.ChangeBalance`). Salaries and performance bonuses are calculated (`SalaryCalculator`, `SalaryCommitments`) but not booked until the calendar and finances exist (Steps 12, 27).
+29. One-off contract payments (signing bonus, settlement) are booked to `Club.Balance` at once (`Club.ChangeBalance`). Salaries are booked by the career calendar since Step 13 (decision 45); performance bonuses are calculated but not booked (Step 27).
 30. Contract dates take effect through `IContractService.ProcessContractDatesAsync` (idempotent): at application start now, every game day from Step 12.
 31. Negotiation is deterministic and parameterised (`ContractNegotiator` properties, registered as a singleton): the same offer always gets the same answer.
 32. Club membership moves (spells and roster spots) go through `ClubMembership` (Services), shared by the squad, contract and transfer use cases.
@@ -100,11 +101,15 @@ STEP 13 — see docs/ROADMAP.md
 41. The game date is `GameClock.Today` (Services): the career date while a career is loaded, else the `TimeProvider` date. Services never read the `TimeProvider` date directly. The career date only moves forward, one game day at a time, through `ICareerService` (docs/SEASON_LIFECYCLE.md).
 42. A game database holds at most one career (`Careers` table); the database file is the save. A game day plays every other fixture of the day instantly, advances the competitions, moves the date and applies contract/transfer dates; the user's fixture must be played first (live or instantly). The AI transfer window runs on the last day of each season.
 43. A club that cannot field five players forfeits 20–0 (`Match.IsForfeit`, no box score) so the calendar never blocks. The next season keeps every competition's entries except divisions, which exchange clubs by `SeasonTransition` (promotion/relegation from the rules); schedules keep the previous first-round offset.
+44. AI decisions are pure planners in `Ebm.Domain.Management`, applied by `IClubManagementService` through the same use cases as the user (rosters, tactics, contracts, transfers), so AI clubs obey the same rules. Every club but `Career.ClubId` is AI-managed; the calendar decides when (docs/AI_MANAGEMENT.md §1).
+45. Money moves with the calendar: salary instalments are paid on their due dates and the placeholder income (wage budget / 12) at month end, booked in the same transaction as the date change.
+46. The free-agent market is kept at two free agents per club by generated fictional players whose names recombine existing players' names of the nationality (no hard-coded name lists).
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`.
 
 ## Known issues
-- Career: salaries not booked yet (Step 13/27); the contracts and transfer-market screens default empty dates to the real date, not the career date; one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
+- AI: no youth intake or retirement (generated free agents keep the market supplied); placeholder income, so balances drift up (Step 27); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
+- Career: the contracts and transfer-market screens default empty dates to the real date, not the career date; one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
 - Experience, reputation, potential, fitness, morale and injury are stored and edited but not yet changed by the game (Steps 12, 21, 22). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
 - Player import files in the old 8-rating format are no longer accepted.
@@ -116,7 +121,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Transfers: no persisted offers (negotiations answer at once and AI clubs never bid for a managed club's players; pending offers come with the career mode); AI clubs only buy surplus players of other AI clubs and free agents; valuations ignore form and statistics; loans copy the player's salary (no salary sharing, no option to buy) and the player does not negotiate them; a loaned player cannot be bought until recalled; transfer history is not importable (`Transfers` is created by the game only); the loan club's termination of a loan contract does not close the loan (use *Recall*).
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
 - Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike/intentional fouls or held balls; fitness, morale and injuries are not changed by matches yet (Steps 12, 22); box scores store whole minutes; play-by-play, energy and plus-minus are not stored (only box scores), so past matches show box scores and team stats only; an unfinished live match is lost when the application closes.
-- Tactics: AI clubs keep the default tactic until Step 13 (AI lineups and tactics). The tactics screen shows enum names (`PickAndRoll`, `Zone23`).
+- Tactics: the tactics screen shows enum names (`PickAndRoll`, `Zone23`).
 - Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
 
@@ -140,7 +145,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_12_LOG.md
+logs/STEP_13_LOG.md
 
 ## Instructions for continuing
 1. Read this file.
