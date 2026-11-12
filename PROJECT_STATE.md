@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 10 — Basketball match simulation engine (2026-11-12)
+STEP 11 — Match presentation and statistics (2026-11-12)
 
 ## Next step
-STEP 11 — see docs/ROADMAP.md
+STEP 12 — see docs/ROADMAP.md
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
 - Tests: PASS (379/379: 273 unit, 106 integration)
-- Run status: Launches. Creates/migrates the game database at startup, applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores).
+- Run status: Launches. Creates/migrates the game database at startup, applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores).
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -47,7 +47,8 @@ STEP 11 — see docs/ROADMAP.md
 - [x] Transfer market: search, valuations, fee negotiation, transfers, release clauses, loans and returns, transfer history, AI recruitment (Step 08)
 - [x] Tactics: offensive/defensive systems and settings, player roles and assignments, selected tactic per club, match-engine access (Step 09)
 - [x] Match engine: possession-based FIBA simulation, statistics, fatigue, substitutions, timeouts, overtime, instant/commentary/live modes, statistical validation (Step 10)
-- [ ] Step 11 onwards … see docs/ROADMAP.md
+- [x] Match centre: schedule, preview, live match with play-by-play, scoreboard, substitutions, timeouts and tactical changes, live and stored box scores, team stats, match report (Step 11)
+- [ ] Step 12 onwards … see docs/ROADMAP.md
 
 ## Database
 - Current schema version: `20261112140336_Tactics`
@@ -94,8 +95,9 @@ STEP 11 — see docs/ROADMAP.md
 37. `ITransferService.ProcessTransferDatesAsync` is the single "apply the calendar" entry point: loan returns first, then `ProcessContractDatesAsync`. Called at startup (every game day from Step 12).
 38. Tactics (`Tactic`) are club-owned configurations; at most one is selected per club (filtered unique index) and is what the club plays its next match with; no selection = `TeamTactics.Default`. Player assignments are current state in a JSON column without player FK (tactics never block deleting a player); `ITacticsService.GetMatchTacticsAsync` drops assignments of players who left and hands the engine an immutable `TeamTactics`; unassigned players get `TacticalRoles.Suggest`.
 39. The match engine (`Ebm.Domain.Matches.Simulation`) is pure and deterministic for a setup and seed; all its numbers live in `MatchSimulation.Play` and `TacticalModel` and are documented in `docs/MATCH_ENGINE.md`. `IMatchService` builds the matchday squads (`TeamSheet.Pick`) from the rosters and the selected tactics, and stores a finished match (result, standings, box scores) in one transaction through `CompetitionService.AddResultAsync`; a match in progress (`MatchSession`) lives in memory until saved. Statistical ranges are guarded by unit tests (`MatchStatisticsValidationTests`); retune them together with the docs.
+40. The match centre (`MatchCenterViewModel`) only drives `IMatchService` and the `MatchSimulation` API; a live match is saved automatically when it ends. Managing a side switches that side's automatic coach off (forced substitutions still happen).
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
@@ -103,13 +105,13 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Player import files in the old 8-rating format are no longer accepted.
 - Only league competitions can be scheduled; cups/knockout formats come in Step 17. No relegation playoffs, groups or reseeding (see `docs/COMPETITION_FORMATS.md` §2).
 - Season outcome (promoted/relegated) is calculated but not applied to next season's entries; Step 12 does that.
-- No UI for competitions yet (schedule, table, playoffs); Step 11 adds presentation.
+- Competition UI: the match centre shows schedules and results and can create a regular-season schedule; standings tables and playoff advancement have no screen yet (Step 12).
 - Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players and player contracts only (see `docs/IMPORT_FORMATS.md` §7); squad roles are set in the game.
 - The squad screen's *Add a player to the squad* (`AssignPlayerAsync`) still moves a player without a contract (squad tool); the game flow signs through *Club contracts*. Board expectations and finances are stored but not used by any game system yet (Steps 12, 27).
 - Contracts: salaries and performance bonuses are calculated but not paid from the club balance (Steps 12, 27); the wage budget is enforced for AI clubs only (the user gets a warning; Step 27 decides the board's rules); undecided options lapse at expiry (no reminders before Step 12); the editor and the importer do not check overlapping contracts.
 - Transfers: no persisted offers (negotiations answer at once and AI clubs never bid for a managed club's players; pending offers come with the career mode); AI clubs only buy surplus players of other AI clubs and free agents; valuations ignore form and statistics; loans copy the player's salary (no salary sharing, no option to buy) and the player does not negotiate them; a loaned player cannot be bought until recalled; transfer history is not importable (`Transfers` is created by the game only); the loan club's termination of a loan contract does not close the loan (use *Recall*).
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
-- Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike/intentional fouls or held balls; fitness, morale and injuries are not changed by matches yet (Steps 12, 22); box scores store whole minutes; there is no match UI before Step 11 (the engine is reachable through `IMatchService`).
+- Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike/intentional fouls or held balls; fitness, morale and injuries are not changed by matches yet (Steps 12, 22); box scores store whole minutes; play-by-play, energy and plus-minus are not stored (only box scores), so past matches show box scores and team stats only; an unfinished live match is lost when the application closes.
 - Tactics: AI clubs keep the default tactic until Step 12 (AI lineups and tactics). The tactics screen shows enum names (`PickAndRoll`, `Zone23`).
 - Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
@@ -134,7 +136,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_10_LOG.md
+logs/STEP_11_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

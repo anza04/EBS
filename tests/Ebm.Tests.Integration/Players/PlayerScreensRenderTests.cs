@@ -34,7 +34,9 @@ public sealed class PlayerScreensRenderTests
             db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
             db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
             db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>(),
-            db.Services.GetRequiredService<Ebm.Services.Tactics.ITacticsService>());
+            db.Services.GetRequiredService<Ebm.Services.Tactics.ITacticsService>(),
+            db.Services.GetRequiredService<Ebm.Services.Matches.IMatchService>(),
+            db.Services.GetRequiredService<Ebm.Services.Competitions.ICompetitionService>());
         await editor.ReloadAsync();
         var players = editor.Lookups.Players;
         editor.Players.SelectedItem = editor.Players.Items[0];
@@ -139,18 +141,79 @@ public sealed class PlayerScreensRenderTests
         Assert.Equal("Tactic 'Pick and roll' saved.", tactics.Message);
         Assert.Equal("Next match: Pick and roll", tactics.SelectedText);
         Assert.Equal(Ebm.Domain.Tactics.TacticalRole.ShotCreator, tactics.Assignments[0].Role);
+
+        // Match centre: give an opponent a playable squad, create the schedule and play Aurora's game live.
+        var opponent = editor.Lookups.Clubs.Single(c => c.Name == "Fortezza Bologna").Id!.Value;
+        var italy = editor.Lookups.Countries[0].Id!.Value;
+        await db.WriteAsync(s =>
+        {
+            foreach (var position in Enum.GetValues<Ebm.Domain.Players.Position>())
+            {
+                var player = new Ebm.Domain.Players.Player(Ebm.Domain.Players.PlayerId.New(), "Extra", $"{position}", new DateOnly(1999, 1, 1), italy, 200, 95, position, Ebm.Domain.Players.PlayerAttributes.Uniform(58));
+                s.Repo<Ebm.Domain.Players.Player, Ebm.Domain.Players.PlayerId>().Add(player);
+                s.Repo<Ebm.Domain.Contracts.Contract, Ebm.Domain.Contracts.ContractId>().Add(Ebm.Domain.Contracts.Contract.ForPlayer(Ebm.Domain.Contracts.ContractId.New(), opponent, player.Id, new DateOnly(2026, 7, 1), new DateOnly(2028, 6, 30), 80_000));
+            }
+        });
+        var center = editor.Matches;
+        await center.RefreshAsync();
+        center.SelectedCompetition = center.CompetitionSeasons.Single(c => c.Competition.Name == "Serie A");
+        await center.CreateScheduleCommand.ExecuteAsync(null);
+        Assert.False(center.IsError, center.Message);
+        var game = center.Fixtures.First(f => (f.Home, f.Away) is ("Aurora Milano", "Fortezza Bologna") or ("Fortezza Bologna", "Aurora Milano"));
+        center.SelectedFixture = game;
+        await center.ShowSelectedAsync();
+        Assert.Equal(12, (game.Home == "Aurora Milano" ? center.HomeSheet : center.AwaySheet).Count);
+        center.Managed = game.Home == "Aurora Milano" ? Ebm.Desktop.ViewModels.Matches.ManagedSide.Home : Ebm.Desktop.ViewModels.Matches.ManagedSide.Away;
+        await center.StartMatchCommand.ExecuteAsync(null);
+        Assert.False(center.IsError, center.Message);
+        Assert.True(center.CanIntervene);
+        for (var i = 0; i < 10; i++)
+        {
+            await center.NextPossessionCommand.ExecuteAsync(null);
+        }
+
+        center.SubOut = center.OnCourt[0].Id;
+        center.SubIn = center.Bench[0].Id;
+        await center.SubstituteCommand.ExecuteAsync(null);
+        Assert.Equal("Substitution made.", center.Message);
+        await center.TimeoutCommand.ExecuteAsync(null);
+        center.LiveDefense = Ebm.Domain.Tactics.DefensiveSystem.Zone23;
+        await center.ApplyTacticsCommand.ExecuteAsync(null);
+        Assert.Contains(center.PlayByPlay, e => e.Text.Contains("2-3", StringComparison.Ordinal) || e.Text.Contains("Zone23", StringComparison.Ordinal) || e.Text.Contains("zone23", StringComparison.OrdinalIgnoreCase));
+        await center.ToEndOfQuarterCommand.ExecuteAsync(null);
+        Assert.StartsWith("Q2", center.ClockText, StringComparison.Ordinal);
+        Assert.NotEmpty(center.HomeBox);
+        Assert.NotEmpty(center.TeamStats);
+        await center.ToEndOfMatchCommand.ExecuteAsync(null);
+        Assert.False(center.IsError, center.Message);
+        Assert.StartsWith("Final", center.Message, StringComparison.Ordinal);
+        Assert.False(center.InProgress);
+        Assert.Contains(center.Report, l => l.Label == "Q4");
+        Assert.NotEqual("—", center.Fixtures.Single(f => f.Line.Fixture.Id == game.Line.Fixture.Id).Result); // saved
+
+        // Historical box score: open another fixture, then the played one again.
+        center.SelectedFixture = center.Fixtures.First(f => f.Line.Match is null && f.Home != "Aurora Milano" && f.Away != "Aurora Milano" && f.Home != "Fortezza Bologna" && f.Away != "Fortezza Bologna");
+        await center.ShowSelectedAsync();
+        Assert.StartsWith("Preview", center.Title, StringComparison.Ordinal);
+        Assert.True(center.IsError); // three-player squads cannot play
+        Assert.Contains("at least 5", center.Message, StringComparison.Ordinal);
+        center.SelectedFixture = center.Fixtures.Single(f => f.Line.Fixture.Id == game.Line.Fixture.Id);
+        await center.ShowSelectedAsync();
+        Assert.StartsWith("Match report", center.Title, StringComparison.Ordinal);
+        Assert.NotEmpty(center.HomeBox);
+        Assert.Equal(center.ScoreText.Split(" – ").Select(int.Parse).Sum(), center.HomeBox.Sum(r => r.Points) + center.AwayBox.Sum(r => r.Points));
         Assert.NotEmpty(market.AiReport);
 
         var sizes = RunOnSta(() =>
         {
             // Like App.xaml: the themes are application resources, so each dictionary can use the previous ones.
             var resources = (System.Windows.Application.Current ?? new System.Windows.Application()).Resources;
-            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts", "Transfers", "Tactics" })
+            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts", "Transfers", "Tactics", "Matches" })
             {
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Ebm.Desktop;component/Themes/{name}.xaml") });
             }
 
-            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("transfer-market", editor.TransferMarket), ("tactics", editor.Tactics), ("contracts-editor", editor.Contracts) }
+            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("transfer-market", editor.TransferMarket), ("tactics", editor.Tactics), ("match-report", editor.Matches), ("contracts-editor", editor.Contracts) }
                 .Select(screen => Render(screen.Item1, screen.Item2))
                 .ToList();
         });

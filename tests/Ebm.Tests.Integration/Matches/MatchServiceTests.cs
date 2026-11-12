@@ -67,6 +67,8 @@ public sealed class MatchServiceTests : IAsyncLifetime
         Assert.All(standings, s => Assert.Equal(2, s.Played));
 
         await Assert.ThrowsAsync<DomainValidationException>(() => Matches.PlayAsync(_fixture.Id));
+        var seasons = await Matches.GetCompetitionSeasonsAsync();
+        Assert.Contains(seasons, c => c.Competition.Id == _world.Championship.Id && c.Season.Id == _world.Season.Id);
     }
 
     [Fact]

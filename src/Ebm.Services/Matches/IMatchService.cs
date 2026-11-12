@@ -13,6 +13,9 @@ namespace Ebm.Services.Matches;
 /// </summary>
 public interface IMatchService
 {
+    /// <summary>Every competition season with entered clubs, newest season first.</summary>
+    Task<IReadOnlyList<CompetitionSeason>> GetCompetitionSeasonsAsync(CancellationToken cancellationToken = default);
+
     /// <summary>The fixtures of a competition season in date order, with their results.</summary>
     Task<IReadOnlyList<FixtureLine>> GetFixturesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
@@ -33,6 +36,12 @@ public interface IMatchService
 
     /// <summary>A stored match with its box score, or <c>null</c> when it does not exist.</summary>
     Task<MatchReport?> GetReportAsync(MatchId matchId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>A competition in one season.</summary>
+public sealed record CompetitionSeason(Competition Competition, Season Season)
+{
+    public string Name => $"{Competition.Name} {Season.Name}";
 }
 
 /// <summary>One fixture of a schedule. <paramref name="Match"/> is set once played.</summary>

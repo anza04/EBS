@@ -3,7 +3,19 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.10.0] — 2026-11-12 — Step 10: Basketball match simulation engine
+## [0.11.0] — 2026-11-12 — Step 11: Match presentation and statistics
+
+### Added
+- Screen *Matches* (match centre): competition season and schedule (with *Create schedule*), match preview (starting
+  lineups, bench, tactics), live match (scoreboard with period clock, team fouls and timeouts; play-by-play; live box
+  scores with energy and plus-minus; team statistics; report with leaders and quarter scores), game controls (next
+  possession, to the end of the quarter / match), substitution, timeout and tactical-adjustment controls for the
+  managed side, instant play, automatic saving at the end and stored match reports for played fixtures.
+- `IMatchService.GetCompetitionSeasonsAsync`. Documentation `docs/MATCH_UI.md`.
+- Tests: the render test plays a live match through the screen (preview, possessions, substitution, timeout, tactics,
+  quarter and match end, saved result, reopened box score, preview error for short squads).
+
+ — 2026-11-12 — Step 10: Basketball match simulation engine
 
 ### Added
 - `MatchSimulation` (`Ebm.Domain.Matches.Simulation`): possession-based engine under FIBA rules — four 10-minute

@@ -21,6 +21,22 @@ internal sealed class MatchService(
     ITacticsService tactics,
     PlayerRatingCalculator calculator) : IMatchService
 {
+    public async Task<IReadOnlyList<CompetitionSeason>> GetCompetitionSeasonsAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false);
+        var competitions = (await Repo<Competition, CompetitionId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+        var seasons = (await Repo<Season, SeasonId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(x => x.Id);
+        return
+        [
+            .. entries.Select(e => (e.CompetitionId, e.SeasonId)).Distinct()
+                .Where(e => competitions.ContainsKey(e.CompetitionId) && seasons.ContainsKey(e.SeasonId))
+                .Select(e => new CompetitionSeason(competitions[e.CompetitionId], seasons[e.SeasonId]))
+                .OrderByDescending(c => c.Season.StartDate).ThenBy(c => c.Competition.Name),
+        ];
+    }
+
     public async Task<IReadOnlyList<FixtureLine>> GetFixturesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = scopes.CreateScope();

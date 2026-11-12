@@ -13,6 +13,7 @@
         <ResourceDictionary Source="Themes/Contracts.xaml" />
         <ResourceDictionary Source="Themes/Transfers.xaml" />
         <ResourceDictionary Source="Themes/Tactics.xaml" />
+        <ResourceDictionary Source="Themes/Matches.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

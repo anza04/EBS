@@ -44,6 +44,7 @@
       <TabItem Header="Club contracts" Content="{Binding ClubContracts}" />
       <TabItem Header="Transfer market" Content="{Binding TransferMarket}" />
       <TabItem Header="Tactics" Content="{Binding Tactics}" />
+      <TabItem Header="Matches" Content="{Binding Matches}" />
       <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">
         <Grid Margin="16">

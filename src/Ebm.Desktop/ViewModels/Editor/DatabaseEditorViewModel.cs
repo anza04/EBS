@@ -2,13 +2,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
+using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Clubs;
+using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
+using Ebm.Services.Matches;
 using Ebm.Services.Players;
 using Ebm.Services.Tactics;
 using Ebm.Services.Transfers;
@@ -17,7 +20,7 @@ namespace Ebm.Desktop.ViewModels.Editor;
 
 /// <summary>
 /// The database editor: one page per record type, the import page, the player profile and comparison screens, the
-/// club profile and squad screens, the club contracts screen, the transfer market and the tactics screen.
+/// club profile and squad screens, the club contracts screen, the transfer market, the tactics screen and the match centre.
 /// </summary>
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
@@ -34,7 +37,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IClubService clubs,
         IContractService contracts,
         ITransferService transfers,
-        ITacticsService tactics)
+        ITacticsService tactics,
+        IMatchService matches,
+        ICompetitionService competitions)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -53,6 +58,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ClubContracts = new ClubContractsViewModel(contracts, Lookups, ReloadAsync);
         TransferMarket = new TransferMarketViewModel(transfers, contracts, Lookups, ReloadAsync);
         Tactics = new TacticsViewModel(tactics, Lookups);
+        Matches = new MatchCenterViewModel(matches, competitions, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -83,6 +89,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public TacticsViewModel Tactics { get; }
 
+    public MatchCenterViewModel Matches { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -100,6 +108,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         await ClubContracts.RefreshAsync();
         await TransferMarket.RefreshAsync();
         await Tactics.RefreshAsync();
+        await Matches.RefreshAsync();
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";
     }
