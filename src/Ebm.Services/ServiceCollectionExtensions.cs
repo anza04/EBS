@@ -5,6 +5,7 @@ using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
+using Ebm.Services.Matches;
 using Ebm.Services.Players;
 using Ebm.Services.Tactics;
 using Ebm.Services.Transfers;
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(ClubRecruiter.Default);
         services.TryAddSingleton<ITransferService, TransferService>();
         services.TryAddSingleton<ITacticsService, TacticsService>();
+        services.TryAddSingleton<IMatchService, MatchService>();
 
         return services;
     }

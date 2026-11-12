@@ -9,7 +9,7 @@
     <Deterministic>true</Deterministic>
 
     <!-- Versioning: 0.<step>.<patch> during Milestone 1. See docs/TECHNICAL_ARCHITECTURE.md. -->
-    <Version>0.9.0</Version>
+    <Version>0.10.0</Version>
     <Product>European Basketball Manager</Product>
     <Company>European Basketball Manager</Company>
     <Copyright>Copyright © 2026</Copyright>

@@ -62,7 +62,7 @@ pick-and-roll advantages at the cost of size mismatches; **Pick-and-roll coverag
 `Hedge`/`Blitz` force turnovers but concede rolls, `Switch` creates mismatches); **Rebounding** `CrashBoards` adds
 defensive and offensive rebounds but concedes fast breaks, `GetBack` the reverse.
 
-The exact formulas of the match engine (Step 10) are in `docs/MATCH_ENGINE.md`.
+The exact formulas of the match engine (Step 10) are in `docs/MATCH_ENGINE.md` §2–§3.
 
 ## 4. Player roles
 

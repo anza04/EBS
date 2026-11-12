@@ -3,7 +3,29 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.9.0] — 2026-11-12 — Step 09: Tactical system
+## [0.10.0] — 2026-11-12 — Step 10: Basketball match simulation engine
+
+### Added
+- `MatchSimulation` (`Ebm.Domain.Matches.Simulation`): possession-based engine under FIBA rules — four 10-minute
+  quarters, overtimes, 24/14-second shot clock, two- and three-point shots by zone (rim, post, mid-range, three), free
+  throws, shooting and non-shooting fouls with the team-foul bonus, foul-outs, rebounds, assists, steals, blocks,
+  turnovers, shot-clock violations, jump ball and alternating possession, substitutions, timeouts, fatigue, form of
+  the day, home advantage, game lost by default. Deterministic for a seed.
+- Tactics in the engine (`TacticalModel`): systems, settings, roles, shot priority and minutes targets change pace,
+  shot mix, make probabilities, turnovers, fouls, rebounds, fast breaks and fatigue.
+- Simulation modes: instant, commentary (play-by-play `MatchEvent`s) and live (substitutions, timeouts, tactic changes,
+  user-managed side).
+- `TeamSheet.Pick` (matchday squad from a roster), `PlayerLine`, `TeamStatistics`, `MatchResult`.
+- `IMatchService`: fixtures with results, preview, start/save sessions, instant play, stored box scores and reports.
+- `docs/MATCH_ENGINE.md` with the formulas and the statistical validation results.
+- Tests: rule invariants, overtime, determinism, fatigue, live interventions, short-handed teams, squad picking,
+  large-scale statistical validation and tactical effects (unit); match service (integration).
+
+### Changed
+- `CompetitionService.RecordResultAsync` shares `AddResultAsync` with the match service (result + standings + box
+  score in one transaction). No schema change.
+
+ — 2026-11-12 — Step 09: Tactical system
 
 ### Added
 - `Tactics` table and `Tactic` entity (`Ebm.Domain.Tactics`): seven offensive systems, six defensive systems,

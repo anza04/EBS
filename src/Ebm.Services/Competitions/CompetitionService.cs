@@ -102,6 +102,16 @@ internal sealed class CompetitionService : ICompetitionService
     {
         using var scope = _scopes.CreateScope();
         var services = scope.ServiceProvider;
+        await AddResultAsync(services, fixtureId, homeScore, awayScore, overtimes, cancellationToken).ConfigureAwait(false);
+        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Adds the result of a fixture and its standings update to the unit of work of <paramref name="services"/>,
+    /// without saving, so a caller can store more (the box score) in the same transaction.
+    /// </summary>
+    internal static async Task<Match> AddResultAsync(IServiceProvider services, FixtureId fixtureId, int homeScore, int awayScore, int overtimes, CancellationToken cancellationToken)
+    {
         var fixture = await RequireAsync<Fixture, FixtureId>(services, fixtureId, "fixture", cancellationToken).ConfigureAwait(false);
         var matches = Repo<Match, MatchId>(services);
         if ((await matches.ListAsync(m => m.FixtureId == fixtureId, cancellationToken).ConfigureAwait(false)).Count > 0)
@@ -109,7 +119,8 @@ internal sealed class CompetitionService : ICompetitionService
             throw new DomainValidationException("This fixture already has a result.");
         }
 
-        matches.Add(new Match(MatchId.New(), fixtureId, homeScore, awayScore, overtimes));
+        var match = new Match(MatchId.New(), fixtureId, homeScore, awayScore, overtimes);
+        matches.Add(match);
         if (fixture.Stage == FixtureStage.RegularSeason)
         {
             var competition = await RequireAsync<Competition, CompetitionId>(services, fixture.CompetitionId, "competition", cancellationToken).ConfigureAwait(false);
@@ -136,7 +147,7 @@ internal sealed class CompetitionService : ICompetitionService
             Row(fixture.AwayClubId).RecordResult(awayScore, homeScore, Points(awayScore > homeScore));
         }
 
-        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return match;
     }
 
     public async Task<CompetitionProgress> AdvanceAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)

@@ -3,7 +3,7 @@
 Offline, single-player basketball management game for Windows, covering the top two domestic
 divisions of European countries.
 
-**Status:** Step 09 (tactical system) complete. The application creates and migrates the game
+**Status:** Step 10 (match simulation engine) complete. The application creates and migrates the game
 database, imports data and edits it, shows player profiles and comparisons (27 attributes, tendencies, position
 ratings), club profiles and squads (starting five, rotation, roster validation and competition registration),
 manages contracts (signing free agents with a simple negotiation, renewals, terminations, options, expiry, salary
@@ -45,6 +45,7 @@ To use another folder, run with `--Ebm:Paths:DataRoot=D:\EbmData`.
 | [docs/CONTRACTS.md](docs/CONTRACTS.md) | Contract lifecycle, salary calculations, negotiation, transaction rules |
 | [docs/TRANSFERS.md](docs/TRANSFERS.md) | Transfer lifecycle, valuations and fee negotiation, loans, AI recruitment |
 | [docs/TACTICS.md](docs/TACTICS.md) | Tactical systems, settings, player roles and how the match engine reads them |
+| [docs/MATCH_ENGINE.md](docs/MATCH_ENGINE.md) | Match rules, possession flow, formulas, fatigue, substitutions, simulation modes, statistical validation |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Current project status |
 | [CHANGELOG.md](CHANGELOG.md) | Changes per step |
 | [logs/](logs/) | Detailed log of each development step |
