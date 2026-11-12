@@ -10,15 +10,15 @@ Milestone 1 — Playable core game
 None in progress
 
 ## Last completed step
-STEP 08 — Transfers and free agents (2026-11-09)
+STEP 09 — Tactical system (2026-11-12)
 
 ## Next step
-STEP 09 — see docs/ROADMAP.md
+STEP 10 — see docs/ROADMAP.md
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (358/358: 257 unit, 101 integration)
-- Run status: Launches. Creates/migrates the game database at startup, applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`.
+- Tests: PASS (365/365: 261 unit, 104 integration)
+- Run status: Launches. Creates/migrates the game database at startup, applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the database editor (players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine).
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -31,7 +31,7 @@ STEP 09 — see docs/ROADMAP.md
 
 ## Implemented modules
 - [x] Solution structure and build configuration
-- [x] Domain layer (`Ebm.Domain`): 18 entities with strongly typed IDs and validation
+- [x] Domain layer (`Ebm.Domain`): 19 entities with strongly typed IDs and validation
 - [x] Services layer (`Ebm.Services`): `TimeProvider`, data access ports (`IRepository<,>`, `IUnitOfWork`)
 - [x] Persistence layer (`Ebm.Persistence`): EF Core/SQLite context, mappings, migrations, repositories, startup initialiser
 - [x] Data import layer (`Ebm.DataImport`): CSV/JSON import, validation, duplicate detection, import logs
@@ -45,11 +45,12 @@ STEP 09 — see docs/ROADMAP.md
 - [x] Club profile, squad roles, starting five, rotation, roster validation, competition registration (Step 06)
 - [x] Contracts: terms, lifecycle (sign, renew, terminate, options, expiry), free agents, salary calculations and commitments, negotiation (Step 07)
 - [x] Transfer market: search, valuations, fee negotiation, transfers, release clauses, loans and returns, transfer history, AI recruitment (Step 08)
-- [ ] Step 09 onwards … see docs/ROADMAP.md
+- [x] Tactics: offensive/defensive systems and settings, player roles and assignments, selected tactic per club, match-engine access (Step 09)
+- [ ] Step 10 onwards … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261109204206_Transfers`
-- Latest migration: `20261109204206_Transfers` (new `Transfers` table: player movements with kind, fee, contracts, loan end and return dates; 20 tables)
+- Current schema version: `20261112140336_Tactics`
+- Latest migration: `20261112140336_Tactics` (new `Tactics` table: systems, settings, selection flag and JSON player assignments; 21 tables)
 - Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
@@ -90,8 +91,9 @@ STEP 09 — see docs/ROADMAP.md
 35. Market pricing and AI recruitment are pure, deterministic domain code (`TransferNegotiator`, `ClubRecruiter`), parameterised and registered as singletons; `ITransferService` orchestrates them. AI clubs never trade with managed clubs (offers to the user's club come with the career mode).
 36. Limits on moves: fees never take a balance below zero; registration limits (first-team size, foreigners, minimum age, from the club rules and every competition it plays in) block; the wage budget warns the user and binds AI clubs. Only problems the newcomer causes are reported.
 37. `ITransferService.ProcessTransferDatesAsync` is the single "apply the calendar" entry point: loan returns first, then `ProcessContractDatesAsync`. Called at startup (every game day from Step 12).
+38. Tactics (`Tactic`) are club-owned configurations; at most one is selected per club (filtered unique index) and is what the club plays its next match with; no selection = `TeamTactics.Default`. Player assignments are current state in a JSON column without player FK (tactics never block deleting a player); `ITacticsService.GetMatchTacticsAsync` drops assignments of players who left and hands the engine an immutable `TeamTactics`; unassigned players get `TacticalRoles.Suggest`.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`.
 
 ## Known issues
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
@@ -105,6 +107,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Contracts: salaries and performance bonuses are calculated but not paid from the club balance (Steps 12, 27); the wage budget is enforced for AI clubs only (the user gets a warning; Step 27 decides the board's rules); undecided options lapse at expiry (no reminders before Step 12); the editor and the importer do not check overlapping contracts.
 - Transfers: no persisted offers (negotiations answer at once and AI clubs never bid for a managed club's players; pending offers come with the career mode); AI clubs only buy surplus players of other AI clubs and free agents; valuations ignore form and statistics; loans copy the player's salary (no salary sharing, no option to buy) and the player does not negotiate them; a loaned player cannot be bought until recalled; transfer history is not importable (`Transfers` is created by the game only); the loan club's termination of a loan contract does not close the loan (use *Recall*).
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
+- Tactics: the engine's interpretation of systems and settings arrives with Step 10; AI clubs keep the default tactic until Step 12 (AI lineups and tactics). The tactics screen shows enum names (`PickAndRoll`, `Zone23`).
 - Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
 
@@ -128,7 +131,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_08_LOG.md
+logs/STEP_09_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

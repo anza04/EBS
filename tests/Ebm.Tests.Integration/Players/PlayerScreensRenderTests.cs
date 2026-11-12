@@ -33,7 +33,8 @@ public sealed class PlayerScreensRenderTests
             db.Services.GetRequiredService<IPlayerProfileService>(),
             db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
             db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
-            db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>());
+            db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>(),
+            db.Services.GetRequiredService<Ebm.Services.Tactics.ITacticsService>());
         await editor.ReloadAsync();
         var players = editor.Lookups.Players;
         editor.Players.SelectedItem = editor.Players.Items[0];
@@ -121,18 +122,35 @@ public sealed class PlayerScreensRenderTests
         Assert.Equal(14, editor.ClubContracts.Current.Count);
         await market.RunAiWindowCommand.ExecuteAsync(null);
         Assert.False(market.IsError, market.Message);
+
+        // Tactics screen: create a pick-and-roll tactic with a role change, save it and use it for the next match.
+        var tactics = editor.Tactics;
+        tactics.ClubId = club;
+        await tactics.RefreshAsync();
+        Assert.Empty(tactics.Saved);
+        Assert.NotEmpty(tactics.Assignments);
+        tactics.Name = "Pick and roll";
+        tactics.OffensiveSystem = Ebm.Domain.Tactics.OffensiveSystem.PickAndRoll;
+        tactics.Tempo = 5;
+        tactics.DefensiveSystem = Ebm.Domain.Tactics.DefensiveSystem.Zone23;
+        tactics.Assignments[0].Role = Ebm.Domain.Tactics.TacticalRole.ShotCreator;
+        tactics.Assignments[0].MinutesTarget = "32";
+        await tactics.SaveCommand.ExecuteAsync(null);
+        Assert.Equal("Tactic 'Pick and roll' saved.", tactics.Message);
+        Assert.Equal("Next match: Pick and roll", tactics.SelectedText);
+        Assert.Equal(Ebm.Domain.Tactics.TacticalRole.ShotCreator, tactics.Assignments[0].Role);
         Assert.NotEmpty(market.AiReport);
 
         var sizes = RunOnSta(() =>
         {
             // Like App.xaml: the themes are application resources, so each dictionary can use the previous ones.
             var resources = (System.Windows.Application.Current ?? new System.Windows.Application()).Resources;
-            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts", "Transfers" })
+            foreach (var name in new[] { "Shell", "Editor", "Players", "Clubs", "Contracts", "Transfers", "Tactics" })
             {
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Ebm.Desktop;component/Themes/{name}.xaml") });
             }
 
-            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("transfer-market", editor.TransferMarket), ("contracts-editor", editor.Contracts) }
+            return new[] { ("players", (object)editor.Players), ("profile", editor.Profile), ("compare", editor.Comparison), ("club-profile", editor.ClubProfile), ("squad", editor.Squad), ("club-contracts", editor.ClubContracts), ("transfer-market", editor.TransferMarket), ("tactics", editor.Tactics), ("contracts-editor", editor.Contracts) }
                 .Select(screen => Render(screen.Item1, screen.Item2))
                 .ToList();
         });

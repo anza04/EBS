@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261109204206_Transfers`** (Step 08).
+Schema version: **`20261112140336_Tactics`** (Step 09).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -11,6 +11,7 @@ Schema version: **`20261109204206_Transfers`** (Step 08).
 | `20261109171322_ClubsAndRosters` | 06 | Clubs: `City`, `Reputation`, `Balance`, `WageBudget`, `BoardExpectation` (add-column with defaults; `City` copied from the home arena). New `RosterSpots` table |
 | `20261109194813_Contracts` | 07 | Contracts: `PaymentFrequency`, `SigningBonus`, `PerformanceBonuses`, `ReleaseClause`, `ClubOptionUntil`, `PlayerOptionUntil`, `Status`, `TerminationDate`, `TerminationCompensation` (add-column with defaults; existing contracts become `Active` with monthly pay and no extras). Index `ClubId` replaced by (`ClubId`, `EndDate`) |
 | `20261109204206_Transfers` | 08 | New `Transfers` table (create-table only, so the upgrade runs in one transaction). No existing table changes; `Contracts.Status` gains the values `OnLoan` and `Transferred` (text column, no schema change) |
+| `20261112140336_Tactics` | 09 | New `Tactics` table (create-table only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -46,6 +47,7 @@ Season ─┬─< CompetitionParticipant >─ Competition, Club      (club enter
 Club ─┬─< Contract >─ Player | StaffMember (exactly one)
       ├─< PlayerClubHistory >─ Player
       ├─< RosterSpot >─ Player (unique: one squad role per player)
+      ├─< Tactic (assignments as JSON, players by ID without FK)
       └─< Transfer (FromClubId, optional / ToClubId) >─ Player, Contract (ContractId, ParentContractId; optional)
 ```
 
@@ -244,6 +246,22 @@ A player's role in his current club's squad: current state, not history (rules i
 
 A club player without a row is on the bench. Rows of players who left the club are moved or dropped when the squad
 is saved.
+
+### Tactics
+A club's saved tactical configurations (rules in `docs/TACTICS.md`).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId | id | FK Clubs. Unique (`ClubId, Name`); unique filtered index `IX_Tactics_SelectedPerClub` on `ClubId` where `IsSelected = 1` (one selected tactic per club) |
+| Name | text(60) | |
+| OffensiveSystem, DefensiveSystem | text(32) | Enum names |
+| OffenseTempo, OffenseShotSelection, OffenseBallMovement, OffenseSpacing, OffensePickAndRollFrequency | int | 1–5 (domain-checked) |
+| OffenseFocus | text(16) | `Balanced`, `Inside`, `Perimeter`, `KeyPlayers` |
+| DefenseIntensity, DefenseBallPressure, DefenseHelpDefense | int | 1–5 (domain-checked) |
+| DefenseSwitching, DefensePickAndRollCoverage, DefenseRebounding | text(16) | Enum names |
+| IsSelected | bool | |
+| Assignments | json? | Array of `{ PlayerId, Role, ShotPriority, MinutesTarget }`. Current state; player IDs have no foreign key, so tactics never block deleting a player, and assignments of players who left the club are ignored |
 
 ### Fixtures
 | Column | Type | Rules |

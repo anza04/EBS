@@ -717,6 +717,45 @@ namespace Ebm.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Tactics.Tactic", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DefensiveSystem")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OffensiveSystem")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Tactics_SelectedPerClub")
+                        .HasFilter("IsSelected = 1");
+
+                    b.HasIndex("ClubId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Tactics", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Transfers.Transfer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1211,6 +1250,133 @@ namespace Ebm.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("SeasonId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Tactics.Tactic", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("Ebm.Domain.Tactics.DefensiveSettings", "Defense", b1 =>
+                        {
+                            b1.Property<Guid>("TacticId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("BallPressure")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefenseBallPressure");
+
+                            b1.Property<int>("HelpDefense")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefenseHelpDefense");
+
+                            b1.Property<int>("Intensity")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefenseIntensity");
+
+                            b1.Property<string>("PickAndRollCoverage")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("DefensePickAndRollCoverage");
+
+                            b1.Property<string>("Rebounding")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("DefenseRebounding");
+
+                            b1.Property<string>("Switching")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("DefenseSwitching");
+
+                            b1.HasKey("TacticId");
+
+                            b1.ToTable("Tactics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TacticId");
+                        });
+
+                    b.OwnsOne("Ebm.Domain.Tactics.OffensiveSettings", "Offense", b1 =>
+                        {
+                            b1.Property<Guid>("TacticId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("BallMovement")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffenseBallMovement");
+
+                            b1.Property<string>("Focus")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("OffenseFocus");
+
+                            b1.Property<int>("PickAndRollFrequency")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffensePickAndRollFrequency");
+
+                            b1.Property<int>("ShotSelection")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffenseShotSelection");
+
+                            b1.Property<int>("Spacing")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffenseSpacing");
+
+                            b1.Property<int>("Tempo")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffenseTempo");
+
+                            b1.HasKey("TacticId");
+
+                            b1.ToTable("Tactics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TacticId");
+                        });
+
+                    b.OwnsMany("Ebm.Domain.Tactics.TacticalAssignment", "Assignments", b1 =>
+                        {
+                            b1.Property<Guid>("TacticId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<int?>("MinutesTarget");
+
+                            b1.Property<Guid>("PlayerId");
+
+                            b1.Property<string>("Role")
+                                .IsRequired();
+
+                            b1.Property<int>("ShotPriority");
+
+                            b1.HasKey("TacticId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Tactics");
+
+                            b1
+                                .ToJson("Assignments")
+                                .HasColumnType("TEXT");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TacticId");
+                        });
+
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Defense")
+                        .IsRequired();
+
+                    b.Navigation("Offense")
                         .IsRequired();
                 });
 

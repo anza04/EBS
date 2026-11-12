@@ -6,6 +6,7 @@ using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Editing;
 using Ebm.Services.Players;
+using Ebm.Services.Tactics;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(TransferNegotiator.Default);
         services.TryAddSingleton(ClubRecruiter.Default);
         services.TryAddSingleton<ITransferService, TransferService>();
+        services.TryAddSingleton<ITacticsService, TacticsService>();
 
         return services;
     }

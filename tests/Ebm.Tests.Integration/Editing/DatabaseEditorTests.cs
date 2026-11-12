@@ -124,7 +124,8 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
             _db.Services.GetRequiredService<IPlayerProfileService>(),
             _db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
             _db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
-            _db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>());
+            _db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>(),
+            _db.Services.GetRequiredService<Ebm.Services.Tactics.ITacticsService>());
         await vm.ReloadAsync();
 
         Assert.Single(vm.Players.Items);

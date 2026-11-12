@@ -3,7 +3,23 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.8.0] — 2026-11-09 — Step 08: Transfers and free agents
+## [0.9.0] — 2026-11-12 — Step 09: Tactical system
+
+### Added
+- `Tactics` table and `Tactic` entity (`Ebm.Domain.Tactics`): seven offensive systems, six defensive systems,
+  offensive settings (tempo, shot selection, ball movement, spacing, pick-and-roll frequency on a 1–5 scale; focus)
+  and defensive settings (intensity, ball pressure, help defense; switching, pick-and-roll coverage, rebounding).
+- Player tactical roles (ten roles) and assignments (role, shot priority, minutes target); `TacticalRoles` suggests a
+  role from the player's attributes and position.
+- `TeamTactics`: the immutable configuration the match engine reads, with suggested roles for unassigned players.
+- `ITacticsService`: club tactics, create/update, select for the next match, delete, `GetMatchTacticsAsync`.
+- Screen *Tactics*. Documentation `docs/TACTICS.md` (options, settings, roles and how the engine should read them).
+- Tests: tactic rules and role suggestions (unit); tactics service, schema, render of the tactics screen (integration).
+
+### Changed
+- Migration `Tactics` (create-table only). Schema version `20261112140336_Tactics`; 21 tables.
+
+ — 2026-11-09 — Step 08: Transfers and free agents
 
 ### Added
 - `Transfers` table and `Transfer` entity (`Ebm.Domain.Transfers`): the movement history of every player — free-agent
