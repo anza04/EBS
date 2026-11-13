@@ -14,6 +14,8 @@ import uuid
 from datetime import date, timedelta
 from pathlib import Path
 
+import player_ratings
+
 NS = uuid.UUID("5b0f3c8e-6d1a-4f44-9a57-0e5d2f7c1b15")
 SEASON_START, SEASON_END = date(2026, 9, 19), date(2027, 6, 30)
 REGULAR_END = date(2027, 5, 16)  # leaves about six weeks for playoffs
@@ -272,6 +274,9 @@ SQUAD_POSITIONS = ["PG", "SG", "SF", "PF", "C", "PG", "SG", "SF", "PF", "C", "SG
 SQUAD_SIZE = len(SQUAD_POSITIONS)
 CONTRACT_SEASON = date(2026, 7, 1)  # contracts start on 1 July and end on 30 June
 PLAYERS_FILE, CONTRACTS_FILE, HISTORY_FILE = "players-europe-2026-27.csv", "contracts-europe-2026-27.csv", "playerHistory-europe-2026-27.csv"
+# Level, potential, reputation and box-score attributes of real players with statistics (build/player_ratings.py);
+# players without statistics keep the hand estimates of their roster file.
+STAT_RATINGS = player_ratings.rate_rosters(REAL_ROSTERS.values(), ATTRIBUTES, PROFILES)
 
 
 def composition(div, level):
@@ -374,11 +379,12 @@ def generate_squad(club, div, level, factory, clubs_by_country, rnd, players, co
 
 def real_squad(roster, club, clubs_by_name, players, contracts, history):
     """A curated squad: sourced profiles, attributes estimated from level and statistics, estimated contract terms."""
-    ranked = sorted(roster["players"], key=lambda x: -x["level"])
+    rated = {id(x): STAT_RATINGS.get((x["firstName"], x["lastName"], x["dateOfBirth"]), x) for x in roster["players"]}
+    ranked = sorted(roster["players"], key=lambda x: -rated[id(x)]["level"])
     weights = {id(x): max(0.3, 1.6 - i * 0.1) for i, x in enumerate(ranked)}
     wage_pool = club["wageBudget"] * 0.8
     for real in roster["players"]:
-        position, level = real["position"], real["level"]
+        position, level, estimate = real["position"], rated[id(real)]["level"], rated[id(real)]
         birth = date.fromisoformat(real["dateOfBirth"])
         age = CONTRACT_SEASON.year - birth.year
         player = {"id": uid("player", real["firstName"], real["lastName"], real["dateOfBirth"][:4]), "firstName": real["firstName"],
@@ -387,9 +393,9 @@ def real_squad(roster, club, clubs_by_name, players, contracts, history):
                   "position": position, "wingspanCm": ""}
         offsets = PROFILES[position][2]
         for name, category in ATTRIBUTES:
-            player[name] = real["ratings"].get(name, min(95, max(20, level + offsets.get(category, 0))))
+            player[name] = estimate["ratings"].get(name, min(95, max(20, level + offsets.get(category, 0))))
         player["experience"] = min(100, max(1, 5 + (age - 18) * 4 + level // 5))
-        player["reputation"], player["potential"] = real["reputation"], real["potential"]
+        player["reputation"], player["potential"] = estimate["reputation"], estimate["potential"]
         player.update(dataStatus=real.get("dataStatus", "Verified"), attributesStatus="Estimated",
                       source=real.get("source", roster["profileSource"]), secondaryPositions=real.get("secondaryPositions", ""))
         players.append(player)

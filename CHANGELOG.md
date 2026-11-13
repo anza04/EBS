@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.3] — 2026-11-13 — Stat-based ratings for Serie A players
+
+### Changed
+- Level, potential, reputation and box-score attributes of 200 real Serie A players come from their career per-game
+  statistics (`build/player-stats/player-stats-per-game.csv`, `build/player_ratings.py`): Game Score and minutes
+  adjusted by competition strength, recent seasons weighted most, blended with the hand estimates by sample size.
+  The 16 players without statistics keep the hand estimates; generated players are unchanged.
+
 ## [0.16.2] — 2026-11-13 — Real squads: Serie A
 
 ### Added

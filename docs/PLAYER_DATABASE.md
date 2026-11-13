@@ -31,8 +31,8 @@ replaced by Maxima Roma, BC Roma, Scafati and Verona; clubs are ordered by expec
 
 | Club | As of | Players | Sources | Data status |
 |---|---|---|---|---|
-| 15 other Serie A clubs | Wikipedia roster dates, 19 Aug – 2 Nov 2026 (in-season arrivals to 5 Nov) | 216 in total with Cantù (11–16 per club) | it.wikipedia.org *<club> 2026-2027* season pages: name, nationalities, role, birth year, height, weight, arrival date and previous club | Profiles **Estimated** (birth date known to the year only, set to 1 July; weight by position when missing); attributes **Estimated** from club level + role tier (no per-player statistics: RealGM and Proballers refuse automated access); contracts **Estimated** (arrival dates real, salary from the wage budget, end 30 Jun 2027 assumed) |
-| Pallacanestro Cantù | 13 Nov 2026 | 12 current + Christon (left 6 Nov) and Miles (left 13 Nov), so the squad is right on every date from the career start: 12 at the season start, Olisevičius from 13 Oct, Green from 12 Nov | Club player pages (birth date, place, nationality, height, weight, role); it.wikipedia.org *Pallacanestro Cantù 2026-2027* (signings, departures) and *2025-2026* (statistics); FIBA (Okeke's Nigerian nationality); Il Giorno / Sofascore (Udom) | Profiles Verified with source, Christon Unverified (birth date not from a cited source); attributes Estimated from level, role and 2025-26 percentages; contracts Estimated: real start/departure dates, salary from the club's wage budget, end 30 Jun 2027 assumed |
+| 15 other Serie A clubs | Wikipedia roster dates, 19 Aug – 2 Nov 2026 (in-season arrivals to 5 Nov) | 216 in total with Cantù (11–16 per club) | it.wikipedia.org *<club> 2026-2027* season pages: name, nationalities, role, birth year, height, weight, arrival date and previous club | Profiles **Estimated** (birth date known to the year only, set to 1 July; weight by position when missing); attributes **Estimated** from statistics (see *Stat-based ratings*), club level + role tier for the 16 players without statistics; contracts **Estimated** (arrival dates real, salary from the wage budget, end 30 Jun 2027 assumed) |
+| Pallacanestro Cantù | 13 Nov 2026 | 12 current + Christon (left 6 Nov) and Miles (left 13 Nov), so the squad is right on every date from the career start: 12 at the season start, Olisevičius from 13 Oct, Green from 12 Nov | Club player pages (birth date, place, nationality, height, weight, role); it.wikipedia.org *Pallacanestro Cantù 2026-2027* (signings, departures) and *2025-2026* (statistics); FIBA (Okeke's Nigerian nationality); Il Giorno / Sofascore (Udom) | Profiles Verified with source, Christon Unverified (birth date not from a cited source); attributes Estimated from statistics (see *Stat-based ratings*); contracts Estimated: real start/departure dates, salary from the club's wage budget, end 30 Jun 2027 assumed |
 
 Known gaps of the Serie A squads: players who left before the roster date are missing (e.g. Trieste has 9 players at
 the season start); Erick Green appears once (Cantù), Venezia as his past spell; sporting nationality is the first
@@ -40,6 +40,24 @@ listed one (Petrucelli set to Italy). Real squads carry more foreign players tha
 real rule caps the 12-man matchday sheet, the game caps the first team, so these clubs show registration errors
 (the squad model does not yet distinguish registered from matchday players). Player IDs of real players come from
 name and birth year, so a corrected birth date keeps the ID.
+
+**Stat-based ratings.** `build/player-stats/player-stats-per-game.csv` holds the per-game career tables (RealGM,
+supplied by the author) of 200 of the 216 Serie A players: every season, team and competition up to the 2026-27 games
+played by mid-November. `build/player_ratings.py` turns them into level, potential, reputation and attributes; the
+roster files keep the hand estimates (club level + role tier), used as the prior and for the 16 players without
+statistics.
+
+| Output | Method |
+|---|---|
+| Level | Game Score per 40 minutes (shrunk toward replacement level for small samples) × competition strength, 65%; minutes per game × strength, 35%. Scaled to the mean and spread of the hand levels, then blended with the hand level by sample: weight = minutes / (minutes + 400) |
+| Competition strength | Relative to Lega A = 1.0: NBA 1.5, EuroLeague 1.35, ACB and EuroCup 1.1, BCL 0.95, NCAA 0.75, Serie A2 0.7, … (`STRENGTH`); cups, pre-season, summer leagues and youth events are not used |
+| Seasons | Weighted 2026-27 and 2025-26 1.0, 2024-25 0.55, 2023-24 0.3, 2022-23 0.15, older 0.05, and by minutes |
+| Attributes | Shooting (3P%, 3PA rate, FT%, 2P%, FT rate), passing (assists, assist/turnover), steal, block, rebounds and stamina (minutes): position default ± up to 2.5 SD against the same position group (guards, wings, bigs), scaled by the sample weight. Percentages are shrunk toward the league average; a shooting attribute needs 25 three-point or 20 free-throw attempts to replace a hand value. Other attributes keep the hand value or the position default |
+| Potential | Level + 2.5 per year below 27 |
+| Reputation | Half the hand estimate, half the level on the same scale (20 at 42, 72 at 70) plus up to 8 each for NBA and EuroLeague games |
+
+Players are matched by normalised name (accents, suffixes such as Jr., aliases such as Nico/Niccolò Mannion) and
+rejected when the ages in the file do not fit the birth year. Run `python build/generate-europe-dataset.py`.
 
 Known conflicts: Erick Green's birth year (player page 1991, announcement 1992; 1991 used). Between 13 Oct and 5 Nov
 the real squad has seven foreign players, above the LBA limit of six in the game, so the game warns in that period.
