@@ -58,6 +58,7 @@ Errors make the roster invalid; warnings are advice.
 | `TooManyPlayers` ✓ | Error | First team ≤ `maxPlayers` |
 | `MatchdaySquadTooLarge` ✓ | Error | Starters + rotation + bench ≤ `matchdayPlayers` |
 | `TooManyForeignPlayers` ✓ | Error | Foreign first-team players ≤ `maxForeignPlayers` (when set) |
+| `TooManyNonEuPlayers` ✓ | Error | First-team players without an EU/EEA nationality (`Country.IsEuEea`) ≤ `maxNonEuPlayers` (when set) |
 | `TooFewDomesticPlayers` ✓ | Error | Domestic first-team players ≥ `minDomesticPlayers` |
 | `UnderMinimumAge` ✓ | Error | Each first-team player's age ≥ `minAge` (when set) |
 | `DoubtfulStarter` | Warning | Starter is day-to-day |
@@ -80,6 +81,7 @@ Errors make the roster invalid; warnings are advice.
 | `matchdayPlayers` | 12 | 5–`maxPlayers` |
 | `recommendedRotation` | 8 | 5–`matchdayPlayers` |
 | `maxForeignPlayers` | none | 0–`maxPlayers` |
+| `maxNonEuPlayers` | none | 0–`maxPlayers` |
 | `minDomesticPlayers` | 0 | 0–`maxPlayers` |
 | `minAge` | none | 14–40 |
 

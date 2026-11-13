@@ -3,6 +3,21 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.15.0] — 2026-11-13 — Step 15: European country and league expansion
+
+### Added
+- European dataset `data/europe/europe-2026-27.json` (generator `build/generate-europe-dataset.py`): first two
+  divisions of 18 countries — 20 leagues, 35 competitions, 512 fictional placeholder clubs with 2026-27 entries.
+  Country-by-country status in `docs/COUNTRY_REPORT.md`.
+- Competition engine (`CompetitionSeason`): second phases from the first-phase table (`All`/`WithinGroup`/`None`
+  carry-over, optionally by country), play-in for the last two playoff seeds, playoff byes, promotion of 1/2/4
+  playoff places, `registration.countries` for cross-border leagues, `regularSeason.startOffsetDays`. Fixture
+  stages `SecondPhase` and `PlayIn` shown in the career and match centre.
+- EU/EEA nationalities: `Country.IsEuEea` (migration `20261113102815_CountryEuEea`, import field `euEea`) and the
+  squad limit `maxNonEuPlayers`, enforced by roster validation, transfers and AI recruitment.
+- Tests: every European league plays a full season with promotion/relegation (`EuropeDatasetTests`), engine unit
+  tests (`CompetitionSeasonTests`).
+
 ## [0.14.0] — 2026-11-12 — Step 14: Milestone 1 integration and release
 
 ### Added
