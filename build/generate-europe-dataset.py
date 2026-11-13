@@ -417,6 +417,35 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+def write_country(folder, data, players, contracts, history, code, slug):
+    """A single-country dataset: the country's league(s) with their clubs and entries, those clubs' players and
+    contracts, and past spells at those clubs (spells at clubs outside the country are left out). Same IDs as the
+    European dataset; only the countries that clubs and players refer to."""
+    league_ids = {l["id"] for l in data["leagues"] if l.get("country") == code}
+    division_ids = {d["id"] for d in data["divisions"] if d["leagueId"] in league_ids}
+    competitions = [c for c in data["competitions"] if c["divisionId"] in division_ids]
+    competition_ids = {c["id"] for c in competitions}
+    participants = [p for p in data["participants"] if p["competitionId"] in competition_ids]
+    club_ids = {p["clubId"] for p in participants}
+    clubs = [c for c in data["clubs"] if c["id"] in club_ids]
+    own_contracts = [c for c in contracts if c["clubId"] in club_ids]
+    player_ids = {c["playerId"] for c in own_contracts}
+    own_players = [p for p in players if p["id"] in player_ids]
+    spells = [h for h in history if h["playerId"] in player_ids and h["clubId"] in club_ids]
+    codes = {c["country"] for c in clubs} | {p["nationality"] for p in own_players} | {p["secondNationality"] for p in own_players}
+    subset = {"format": data["format"], "version": data["version"],
+              "countries": [c for c in data["countries"] if c["code"] in codes],
+              "clubs": clubs, "leagues": [l for l in data["leagues"] if l["id"] in league_ids],
+              "divisions": [d for d in data["divisions"] if d["id"] in division_ids],
+              "competitions": competitions, "seasons": data["seasons"], "participants": participants}
+    folder.mkdir(exist_ok=True)
+    (folder / f"{slug}-2026-27.json").write_text(json.dumps(subset, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    for prefix, rows in (("players", own_players), ("contracts", own_contracts), ("playerHistory", spells)):
+        write_csv(folder / f"{prefix}-{slug}-2026-27.csv", rows)
+    print(f"{folder}: {len(subset['countries'])} countries, {len(competitions)} competitions, {len(clubs)} clubs, "
+          f"{len(own_players)} players, {len(own_contracts)} contracts, {len(spells)} past club spells")
+
+
 def main():
     rnd = random.Random(15)
     season = {"id": uid("season", "2026-27"), "name": "2026-27", "startDate": SEASON_START.isoformat(), "endDate": SEASON_END.isoformat()}
@@ -492,6 +521,7 @@ def main():
     real = sum(1 for c in data["clubs"] if c["dataStatus"] == "Unverified")
     print(f"{folder}: {len(data['countries'])} countries, {len(data['leagues'])} leagues, {len(data['competitions'])} competitions, "
           f"{len(data['clubs'])} clubs ({real} real), {len(players)} players, {len(contracts)} contracts, {len(history)} past club spells")
+    write_country(folder.parent / "italy", data, players, contracts, history, "ITA", "italy")
 
 
 if __name__ == "__main__":
