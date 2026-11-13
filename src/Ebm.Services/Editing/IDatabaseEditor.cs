@@ -1,4 +1,5 @@
 using Ebm.Domain.Clubs;
+using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
@@ -59,7 +60,11 @@ public sealed record PlayerDraft(
     InjuryStatus InjuryStatus,
     DateOnly? InjuryReturnDate,
     PlayerAttributes Attributes,
-    PlayerTendencies Tendencies);
+    PlayerTendencies Tendencies,
+    CountryId? SecondNationalityId = null,
+    DataStatus ProfileStatus = DataStatus.Unverified,
+    DataStatus AttributesStatus = DataStatus.Unverified,
+    string? Source = null);
 
 /// <summary>Values of a club to create (<paramref name="Id"/> is <c>null</c>) or update. Balance and budget are in whole euros.</summary>
 public sealed record ClubDraft(

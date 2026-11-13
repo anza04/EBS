@@ -60,6 +60,7 @@ public sealed class Player : Entity<PlayerId>
         UpdateProfile(heightCm, PositionSet.Empty, DefaultExperience, DefaultReputation, DefaultPotential);
         UpdateCondition(DefaultFitness, DefaultMorale, InjuryStatus.Healthy, null);
         UpdateTendencies(PlayerTendencies.Suggest(attributes));
+        UpdateDataQuality(DataStatus.Generated, DataStatus.Generated, null);
     }
 
     private Player()
@@ -74,7 +75,23 @@ public sealed class Player : Entity<PlayerId>
 
     public DateOnly DateOfBirth { get; private set; }
 
+    /// <summary>Sporting nationality: decides domestic and foreign-player counts.</summary>
     public CountryId NationalityId { get; private set; }
+
+    /// <summary>A further citizenship (passport), if any; counts for EU/EEA status only. Never equal to <see cref="NationalityId"/>.</summary>
+    public CountryId? SecondNationalityId { get; private set; }
+
+    /// <summary>Every nationality the player holds, sporting nationality first.</summary>
+    public IEnumerable<CountryId> Nationalities => SecondNationalityId is { } second ? [NationalityId, second] : [NationalityId];
+
+    /// <summary>Trust level of the personal details (name, birth date, nationalities, body, positions).</summary>
+    public DataStatus ProfileStatus { get; private set; }
+
+    /// <summary>Trust level of the attributes and tendencies. Game ratings of real players are at best estimates.</summary>
+    public DataStatus AttributesStatus { get; private set; }
+
+    /// <summary>Where the player's information comes from (publication, website, database); required when verified.</summary>
+    public string? Source { get; private set; }
 
     public int HeightCm { get; private set; }
 
@@ -141,6 +158,35 @@ public sealed class Player : Entity<PlayerId>
         WeightKg = Guard.Range(weightKg, MinWeightKg, MaxWeightKg, "Weight (kg)");
         Position = Guard.Defined(position, "Position");
         SecondaryPositions = SecondaryPositions.Without(position);
+        if (SecondNationalityId == nationalityId)
+        {
+            SecondNationalityId = null;
+        }
+    }
+
+    /// <summary>Sets or clears the second citizenship.</summary>
+    public void UpdateSecondNationality(CountryId? secondNationalityId)
+    {
+        if (secondNationalityId == NationalityId)
+        {
+            throw new DomainValidationException("The second nationality must differ from the nationality.");
+        }
+
+        SecondNationalityId = Guard.Optional(secondNationalityId, "Second nationality");
+    }
+
+    /// <summary>Sets the trust level of the profile and of the attributes, and the source (required when either is verified).</summary>
+    public void UpdateDataQuality(DataStatus profileStatus, DataStatus attributesStatus, string? source)
+    {
+        (ProfileStatus, Source) = DataQuality.Check(profileStatus, source, "The player profile");
+        (AttributesStatus, _) = DataQuality.Check(attributesStatus, source, "The player attributes");
+    }
+
+    /// <summary>Whether any of the player's nationalities satisfies <paramref name="predicate"/> (e.g. EU/EEA membership).</summary>
+    public bool HasNationality(Func<CountryId, bool> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+        return Nationalities.Any(predicate);
     }
 
     /// <summary>Changes the basketball profile: wingspan, secondary positions, experience, reputation and potential.</summary>

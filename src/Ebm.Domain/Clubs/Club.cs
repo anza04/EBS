@@ -69,6 +69,11 @@ public sealed class Club : Entity<ClubId>
 
     public BoardExpectation BoardExpectation { get; private set; }
 
+    /// <summary>Whether the club is a real club (unverified or verified details) or a fictional one.</summary>
+    public DataStatus DataStatus { get; private set; }
+
+    public void UpdateDataStatus(DataStatus status) => DataStatus = Guard.Defined(status, "Club data status");
+
     /// <summary>Changes the club's details. The ID, history and contracts are unaffected.</summary>
     public void UpdateDetails(string name, string shortName, CountryId countryId, ArenaId? homeArenaId, int? foundedYear)
     {

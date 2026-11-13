@@ -90,13 +90,19 @@ public sealed partial class PlayerProfileViewModel : ObservableObject
         Details =
         [
             new("Born", $"{Date(p.DateOfBirth)} (age {profile.Age})"),
-            new("Nationality", profile.Nationality),
+            new("Nationality", profile.SecondNationality is { } second ? $"{profile.Nationality} (also {second})" : profile.Nationality),
             new("Height / weight", $"{p.HeightCm} cm / {p.WeightKg} kg"),
             new("Wingspan", $"{p.WingspanCm} cm"),
             new("Secondary positions", p.SecondaryPositions.IsEmpty ? "none" : string.Join(", ", p.SecondaryPositions.Positions.Select(PlayerCatalog.DisplayName))),
             new("Current club", profile.CurrentClub ?? "free agent"),
             new("Salary", contract is null ? "none" : $"€ {contract.AnnualSalary.ToString("N0", CultureInfo.CurrentCulture)} a year"),
             new("Contract status", ContractStatusText(contracts)),
+            new("Market value", $"€ {profile.MarketValue.ToString("N0", CultureInfo.CurrentCulture)} (estimate)"),
+            new("Club history", profile.History is { Count: > 0 } history
+                ? string.Join("; ", history.Select(s => $"{s.Club} {s.Start.Year}–{(s.End is { } end ? end.Year.ToString(CultureInfo.CurrentCulture) : "now")}"))
+                : "none recorded"),
+            new("Data", $"profile {p.ProfileStatus}, attributes {p.AttributesStatus}{(contract is null ? string.Empty : $", contract {contract.TermsStatus}")}"),
+            new("Source", $"{p.Source ?? "none"}{(contract?.Source is { } cs ? $" (contract: {cs})" : string.Empty)}"),
             new("Experience", Number(p.Experience)),
             new("Reputation", Number(p.Reputation)),
             new("Fitness", $"{p.Fitness}%"),

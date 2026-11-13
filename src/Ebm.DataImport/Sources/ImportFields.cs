@@ -19,7 +19,7 @@ internal static class ImportFields
     [
         new(ImportRecordKind.Country, "countries", ["code", "name"], ["id", "euEea"]),
         new(ImportRecordKind.Arena, "arenas", ["name", "city", "country", "capacity"], ["id"]),
-        new(ImportRecordKind.Club, "clubs", ["name", "shortName", "country"], ["id", "homeArenaId", "foundedYear", "city", "reputation", "balance", "wageBudget", "boardExpectation"]),
+        new(ImportRecordKind.Club, "clubs", ["name", "shortName", "country"], ["id", "homeArenaId", "foundedYear", "city", "reputation", "balance", "wageBudget", "boardExpectation", "dataStatus"]),
         new(ImportRecordKind.League, "leagues", ["name", "shortName"], ["id", "country"]),
         new(ImportRecordKind.Division, "divisions", ["leagueId", "name", "level"], ["id"]),
         new(ImportRecordKind.Competition, "competitions", ["name", "shortName", "type"], ["id", "country", "divisionId", "rules"]),
@@ -28,14 +28,16 @@ internal static class ImportFields
         new(
             ImportRecordKind.Player,
             "players",
-            ["firstName", "lastName", "dateOfBirth", "nationality", "heightCm", "weightKg", "position", .. PlayerCatalog.Attributes.Select(PlayerCatalog.FieldName)],
-            ["id", "wingspanCm", "secondaryPositions", "experience", "reputation", "potential", "fitness", "morale", "injuryStatus", "injuryReturnDate",
-             .. PlayerCatalog.Tendencies.Select(PlayerCatalog.FieldName)]),
+            ["firstName", "lastName", "dateOfBirth", "nationality", "heightCm", "weightKg", "position"],
+            ["id", "secondNationality", "wingspanCm", "secondaryPositions", "experience", "reputation", "potential", "fitness", "morale", "injuryStatus",
+             "injuryReturnDate", "dataStatus", "attributesStatus", "source",
+             .. PlayerCatalog.Attributes.Select(PlayerCatalog.FieldName), .. PlayerCatalog.Tendencies.Select(PlayerCatalog.FieldName)]),
         new(
             ImportRecordKind.Contract,
             "contracts",
-            ["clubId", "playerId", "startDate", "endDate", "annualSalary"],
-            ["id", "paymentFrequency", "signingBonus", "performanceBonuses", "releaseClause", "clubOptionUntil", "playerOptionUntil"]),
+            ["clubId", "playerId", "startDate", "endDate"],
+            ["id", "annualSalary", "paymentFrequency", "signingBonus", "performanceBonuses", "releaseClause", "clubOptionUntil", "playerOptionUntil", "dataStatus", "source"]),
+        new(ImportRecordKind.PlayerHistory, "playerHistory", ["playerId", "clubId", "startDate", "endDate"], ["id"]),
     ];
 
     public static Schema For(ImportRecordKind kind) => All.Single(s => s.Kind == kind);

@@ -33,6 +33,7 @@ public sealed class Contract : Entity<ContractId>
         PlayerId = Guard.Optional(playerId, nameof(playerId));
         StaffMemberId = Guard.Optional(staffMemberId, nameof(staffMemberId));
         UpdateTerms(terms);
+        UpdateDataQuality(DataStatus.Generated, null);
     }
 
     private Contract()
@@ -72,6 +73,19 @@ public sealed class Contract : Entity<ContractId>
     public DateOnly? PlayerOptionUntil { get; private set; }
 
     public ContractStatus Status { get; private set; }
+
+    /// <summary>
+    /// Trust level of the terms: contracts made in the game are <see cref="DataStatus.Generated"/>; imported real-world
+    /// contracts are unverified unless a source is cited, and estimated when terms were missing.
+    /// </summary>
+    public DataStatus TermsStatus { get; private set; }
+
+    /// <summary>Where the terms come from; required when verified.</summary>
+    public string? Source { get; private set; }
+
+    /// <summary>Sets the trust level of the terms and their source.</summary>
+    public void UpdateDataQuality(DataStatus termsStatus, string? source) =>
+        (TermsStatus, Source) = DataQuality.Check(termsStatus, source, "The contract terms");
 
     /// <summary>
     /// First day the contract no longer runs because it was terminated or renewed early; <c>null</c> otherwise.

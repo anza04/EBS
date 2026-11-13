@@ -7,6 +7,7 @@ using Ebm.Domain.Countries;
 using Ebm.Domain.Competitions.Engine;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Players;
+using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Data;
 using Ebm.Services.Import;
@@ -29,6 +30,9 @@ internal sealed class ImportSession
         ["C"] = Position.Center,
     };
 
+    /// <summary>Players with the same name born at most this many days apart get a possible-duplicate note (typing errors in dates).</summary>
+    private const int PossibleDuplicateDays = 366;
+
     private readonly ImportMode _mode;
     private EntityStore<Country, CountryId> _countries = null!;
     private EntityStore<Arena, ArenaId> _arenas = null!;
@@ -41,6 +45,10 @@ internal sealed class ImportSession
     private HashSet<(CompetitionId, SeasonId)> _scheduled = null!;
     private EntityStore<Player, PlayerId> _players = null!;
     private EntityStore<Contract, ContractId> _contracts = null!;
+    private EntityStore<PlayerClubHistoryEntry, PlayerClubHistoryEntryId> _spells = null!;
+    private Dictionary<string, List<Player>> _playersByName = null!;
+    private PlayerRatingCalculator _calculator = null!;
+    private ContractNegotiator _salaries = null!;
 
     private ImportSession(ImportMode mode) => _mode = mode;
 
@@ -61,6 +69,10 @@ internal sealed class ImportSession
             .ToHashSet();
         session._players = await Store<Player, PlayerId>(services, DuplicateKeys.Of, p => p.FullName, cancellationToken).ConfigureAwait(false);
         session._contracts = await Store<Contract, ContractId>(services, DuplicateKeys.Of, _ => "contract", cancellationToken).ConfigureAwait(false);
+        session._spells = await Store<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>(services, DuplicateKeys.Of, _ => "club history", cancellationToken).ConfigureAwait(false);
+        session._playersByName = session._players.All.GroupBy(DuplicateKeys.Name).ToDictionary(g => g.Key, g => g.ToList());
+        session._calculator = services.GetRequiredService<PlayerRatingCalculator>();
+        session._salaries = services.GetRequiredService<ContractNegotiator>();
         return session;
     }
 
@@ -80,6 +92,7 @@ internal sealed class ImportSession
             {
                 target.UpdateDetails(c.Name, c.ShortName, c.CountryId, c.HomeArenaId, c.FoundedYear);
                 target.UpdateProfile(c.City, c.Reputation, c.Balance, c.WageBudget, c.BoardExpectation);
+                target.UpdateDataStatus(c.DataStatus);
             }),
         ImportRecordKind.League => Apply(record, _leagues, (f, id) =>
             new League(id, f.Text("name"), f.Text("shortName"), OptionalCountryRef(f, "country")),
@@ -122,20 +135,26 @@ internal sealed class ImportSession
                 target.CompetitionId == p.CompetitionId && target.SeasonId == p.SeasonId && target.ClubId == p.ClubId,
                 "The competition, season and club of an entry cannot be changed. Import it as a new entry."),
             identifyByKey: true),
-        ImportRecordKind.Player => Apply(record, _players, BuildPlayer, (target, p) =>
+        ImportRecordKind.Player => IndexName(Apply(record, _players, BuildPlayer, (target, p) =>
             {
                 target.UpdateDetails(p.FirstName, p.LastName, p.DateOfBirth, p.NationalityId, p.HeightCm, p.WeightKg, p.Position);
+                target.UpdateSecondNationality(p.SecondNationalityId);
+                target.UpdateDataQuality(p.ProfileStatus, p.AttributesStatus, p.Source);
                 target.UpdateAttributes(p.Attributes);
                 target.UpdateProfile(p.WingspanCm, p.SecondaryPositions, p.Experience, p.Reputation, p.Potential);
                 target.UpdateCondition(p.Fitness, p.Morale, p.InjuryStatus, p.InjuryReturnDate);
                 target.UpdateTendencies(p.Tendencies);
-            }),
+            })),
         ImportRecordKind.Contract => Apply(record, _contracts, BuildContract,
             (target, c) =>
             {
                 Immutable(target.ClubId == c.ClubId && target.PlayerId == c.PlayerId, "The club and player of a contract cannot be changed. Import it as a new contract.");
                 target.UpdateTerms(c.Terms);
+                target.UpdateDataQuality(c.TermsStatus, c.Source);
             }),
+        ImportRecordKind.PlayerHistory => Apply(record, _spells, BuildSpell, (target, s) => Immutable(
+                target.PlayerId == s.PlayerId && target.ClubId == s.ClubId && target.StartDate == s.StartDate && target.EndDate == s.EndDate,
+                "A club history entry cannot be changed: history is never rewritten.")),
         _ => throw new ArgumentOutOfRangeException(nameof(record), record.Kind, "Unknown record kind."),
     };
 
@@ -168,17 +187,21 @@ internal sealed class ImportSession
         var reputation = Rating(f, "reputation") ?? Club.DefaultReputation;
         var (balance, wageBudget) = (f.OptionalLong("balance") ?? 0, f.OptionalLong("wageBudget") ?? 0);
         var expectation = f.OptionalEnum("boardExpectation", Club.DefaultBoardExpectation);
+        var status = f.OptionalEnum("dataStatus", DataStatus.Unverified);
 
         var club = new Club(id, name, shortName, country, arena, founded);
         club.UpdateProfile(city, reputation, balance, wageBudget, expectation);
+        club.UpdateDataStatus(status);
         return club;
     }
 
     // Optional terms default to monthly pay, no bonuses, no release clause and no options (docs/IMPORT_FORMATS.md).
+    // A missing salary is estimated from the player and the club; the terms are then marked Estimated (docs/PLAYER_DATABASE.md §3).
     private Contract BuildContract(FieldReader f, ContractId id)
     {
         var (club, player) = (Ref(f, "clubId", _clubs, "club"), Ref(f, "playerId", _players, "player"));
-        var (start, end, salary) = (f.Date("startDate"), f.Date("endDate"), f.Long("annualSalary"));
+        var (start, end, knownSalary) = (f.Date("startDate"), f.Date("endDate"), f.OptionalLong("annualSalary"));
+        var (status, source) = (f.OptionalEnum("dataStatus", DataStatus.Unverified), f.Optional("source"));
         var frequency = f.OptionalEnum("paymentFrequency", PaymentFrequency.Monthly);
         var (signingBonus, releaseClause) = (f.OptionalLong("signingBonus") ?? 0, f.OptionalLong("releaseClause"));
         var (clubOption, playerOption) = (f.OptionalDate("clubOptionUntil"), f.OptionalDate("playerOptionUntil"));
@@ -192,7 +215,45 @@ internal sealed class ImportSession
             f.Errors.Add($"'performanceBonuses': {ex.Message}");
         }
 
-        return Contract.ForPlayer(id, club, player, new ContractTerms(start, end, salary, frequency, signingBonus, bonuses, releaseClause, clubOption, playerOption));
+        var salary = knownSalary ?? 0;
+        if (knownSalary is null && !f.HasErrors)
+        {
+            if (status == DataStatus.Verified)
+            {
+                f.Errors.Add("'annualSalary' is required for a verified contract.");
+            }
+            else
+            {
+                salary = EstimateSalary(_players.Find(player)!, _clubs.Find(club)!, start);
+                status = status == DataStatus.Generated ? status : DataStatus.Estimated;
+                f.Notes.Add($"Salary unknown: estimated at {salary:N0} euros a year; the terms are marked {status}.");
+            }
+        }
+
+        var contract = Contract.ForPlayer(id, club, player, new ContractTerms(start, end, salary, frequency, signingBonus, bonuses, releaseClause, clubOption, playerOption));
+        contract.UpdateDataQuality(status, source);
+        return contract;
+    }
+
+    private long EstimateSalary(Player player, Club club, DateOnly start) =>
+        _salaries.AskingSalary(new NegotiationContext(_calculator.Evaluate(player).Overall, player.Potential, player.Reputation, player.AgeOn(start), club.Reputation));
+
+    // Past club spells only (an end date is required); spells of one player must not overlap.
+    private PlayerClubHistoryEntry BuildSpell(FieldReader f, PlayerClubHistoryEntryId id)
+    {
+        var (player, club) = (Ref(f, "playerId", _players, "player"), Ref(f, "clubId", _clubs, "club"));
+        var (start, end) = (f.Date("startDate"), f.Date("endDate"));
+        var spell = new PlayerClubHistoryEntry(id, player, club, start);
+        spell.Close(end);
+        var overlap = _spells.All.FirstOrDefault(s => s.PlayerId == player && !s.Id.Equals(id) && s.StartDate <= end && (s.EndDate ?? DateOnly.MaxValue) >= start);
+        if (overlap is not null && !f.HasErrors)
+        {
+            throw new DomainValidationException(
+                $"The spell overlaps the player's spell at '{_clubs.Find(overlap.ClubId)?.Name}' from {overlap.StartDate:yyyy-MM-dd}" +
+                (overlap.EndDate is { } e ? $" to {e:yyyy-MM-dd}." : " (still open)."));
+        }
+
+        return spell;
     }
 
     // Optional fields take the defaults of a new player (docs/IMPORT_FORMATS.md); missing tendencies are suggested from the attributes.
@@ -201,7 +262,14 @@ internal sealed class ImportSession
         // Every field is read before the domain rules run, so all field errors of the record are reported together.
         var (firstName, lastName, dateOfBirth, nationality) = (f.Text("firstName"), f.Text("lastName"), f.Date("dateOfBirth"), CountryRef(f, "nationality"));
         var (heightCm, weightKg, position) = (f.Int("heightCm"), f.Int("weightKg"), f.Enum("position", PositionAliases));
-        var attributes = PlayerCatalog.Attributes.ToDictionary(a => a, a => Rating(f, PlayerCatalog.FieldName(a), required: true) ?? Player.MinRating);
+        var known = PlayerCatalog.Attributes
+            .Select(a => (Attribute: a, Value: Rating(f, PlayerCatalog.FieldName(a))))
+            .Where(a => a.Value is not null)
+            .ToDictionary(a => a.Attribute, a => a.Value!.Value);
+        var second = OptionalCountryRef(f, "secondNationality");
+        var profileStatus = f.OptionalEnum("dataStatus", DataStatus.Unverified);
+        var attributesStatus = f.OptionalEnum("attributesStatus", profileStatus == DataStatus.Generated ? DataStatus.Generated : DataStatus.Unverified);
+        var source = f.Optional("source");
         var wingspanCm = f.OptionalInt("wingspanCm") ?? heightCm;
         var secondary = SecondaryPositions(f);
         var experience = Rating(f, "experience") ?? Player.DefaultExperience;
@@ -213,11 +281,47 @@ internal sealed class ImportSession
         var injuryReturnDate = f.OptionalDate("injuryReturnDate");
         var tendencies = PlayerCatalog.Tendencies.ToDictionary(t => t, t => Rating(f, PlayerCatalog.FieldName(t)));
 
-        var player = new Player(id, firstName, lastName, dateOfBirth, nationality, heightCm, weightKg, position, new PlayerAttributes(attributes));
+        var missing = PlayerCatalog.Attributes.Count - known.Count;
+        if (missing > 0)
+        {
+            attributesStatus = attributesStatus == DataStatus.Generated ? attributesStatus : DataStatus.Estimated;
+            f.Notes.Add(missing == PlayerCatalog.Attributes.Count
+                ? $"No attributes given: all estimated from the position and reputation; marked {attributesStatus}."
+                : $"{missing} of {PlayerCatalog.Attributes.Count} attributes missing: estimated from the known ones; marked {attributesStatus}.");
+        }
+
+        var player = new Player(id, firstName, lastName, dateOfBirth, nationality, heightCm, weightKg, position, AttributeEstimator.Complete(known, position, reputation));
+        player.UpdateSecondNationality(second);
+        player.UpdateDataQuality(profileStatus, attributesStatus, source);
         player.UpdateProfile(wingspanCm, secondary, experience, reputation, potential);
         player.UpdateCondition(fitness, morale, injury, injuryReturnDate);
         player.UpdateTendencies(new PlayerTendencies(tendencies.ToDictionary(t => t.Key, t => t.Value ?? PlayerTendencies.Suggest(player.Attributes, t.Key))));
+        foreach (var similar in _playersByName.GetValueOrDefault(DuplicateKeys.Name(player)) ?? [])
+        {
+            if (!similar.Id.Equals(id) && Math.Abs(similar.DateOfBirth.DayNumber - dateOfBirth.DayNumber) <= PossibleDuplicateDays)
+            {
+                f.Notes.Add($"Possible duplicate of '{similar.FullName}' (ID {similar.Id.Value}, born {similar.DateOfBirth:yyyy-MM-dd}): same name, close birth date. Check the sources.");
+            }
+        }
+
         return player;
+    }
+
+    /// <summary>Adds an accepted player to the name index used for possible-duplicate notes.</summary>
+    private ImportRecordResult IndexName(ImportRecordResult result)
+    {
+        if (result.Outcome is ImportOutcome.Added && result.Id is { } id && _players.Find(PlayerId.From(id)) is { } player)
+        {
+            var key = DuplicateKeys.Name(player);
+            if (!_playersByName.TryGetValue(key, out var list))
+            {
+                _playersByName[key] = list = [];
+            }
+
+            list.Add(player);
+        }
+
+        return result;
     }
 
     /// <summary>Position codes or names separated by spaces, commas, semicolons or '|' (<c>SG|SF</c>).</summary>
@@ -264,6 +368,7 @@ internal sealed class ImportSession
             ImportRecordKind.Player => $"{Field("firstName")} {Field("lastName")}".Trim(),
             ImportRecordKind.Country => Field("name") ?? Field("code") ?? string.Empty,
             ImportRecordKind.Contract => "contract",
+            ImportRecordKind.PlayerHistory => "club history",
             ImportRecordKind.Participant => "participant",
             _ => Field("name") ?? string.Empty,
         };
@@ -379,7 +484,7 @@ internal sealed class ImportSession
         if (target is null)
         {
             store.Add(candidate);
-            string[] notes = explicitId is null ? [$"New ID assigned: {candidate.Id.Value}."] : [];
+            string[] notes = explicitId is null ? [$"New ID assigned: {candidate.Id.Value}.", .. reader.Notes] : [.. reader.Notes];
             return Result(record, candidate.Id.Value, label, ImportOutcome.Added, notes);
         }
 
@@ -398,7 +503,7 @@ internal sealed class ImportSession
             return Result(record, target.Id.Value, label, ImportOutcome.Rejected, [ex.Message]);
         }
 
-        return Result(record, target.Id.Value, label, ImportOutcome.Updated, []);
+        return Result(record, target.Id.Value, label, ImportOutcome.Updated, reader.Notes);
     }
 
     private static ImportRecordResult Result(RawRecord record, Guid? id, string label, ImportOutcome outcome, IReadOnlyList<string> messages) =>

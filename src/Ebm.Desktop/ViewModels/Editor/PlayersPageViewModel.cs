@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ebm.Domain.Common;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Players;
 using Ebm.Services.Editing;
@@ -21,6 +22,18 @@ public sealed partial class PlayersPageViewModel : EditorPageViewModel<Player>
 
     [ObservableProperty]
     private CountryId? _nationalityId;
+
+    [ObservableProperty]
+    private CountryId? _secondNationalityId;
+
+    [ObservableProperty]
+    private DataStatus _profileStatus;
+
+    [ObservableProperty]
+    private DataStatus _attributesStatus;
+
+    [ObservableProperty]
+    private string _source = string.Empty;
 
     [ObservableProperty]
     private string _heightCm = string.Empty;
@@ -91,6 +104,10 @@ public sealed partial class PlayersPageViewModel : EditorPageViewModel<Player>
         LastName = item.LastName;
         DateOfBirth = item.DateOfBirth.ToDateTime(TimeOnly.MinValue);
         NationalityId = item.NationalityId;
+        SecondNationalityId = item.SecondNationalityId;
+        ProfileStatus = item.ProfileStatus;
+        AttributesStatus = item.AttributesStatus;
+        Source = item.Source ?? string.Empty;
         HeightCm = Text(item.HeightCm);
         WeightKg = Text(item.WeightKg);
         WingspanCm = Text(item.WingspanCm);
@@ -113,9 +130,10 @@ public sealed partial class PlayersPageViewModel : EditorPageViewModel<Player>
 
     protected override void ClearForm()
     {
-        FirstName = LastName = HeightCm = WeightKg = WingspanCm = string.Empty;
+        FirstName = LastName = HeightCm = WeightKg = WingspanCm = Source = string.Empty;
         DateOfBirth = null;
-        NationalityId = null;
+        NationalityId = SecondNationalityId = null;
+        ProfileStatus = AttributesStatus = DataStatus.Unverified;
         Position = Position.PointGuard;
         foreach (var choice in SecondaryPositions)
         {
@@ -155,7 +173,11 @@ public sealed partial class PlayersPageViewModel : EditorPageViewModel<Player>
             InjuryStatus,
             InjuryReturnDate is { } date ? DateOnly.FromDateTime(date) : null,
             ReadAttributes(),
-            new PlayerTendencies(PlayerCatalog.Tendencies.ToDictionary(t => t, t => ParseInt(Tendencies[(int)t].Value, Tendencies[(int)t].Label))));
+            new PlayerTendencies(PlayerCatalog.Tendencies.ToDictionary(t => t, t => ParseInt(Tendencies[(int)t].Value, Tendencies[(int)t].Label))),
+            SecondNationalityId,
+            ProfileStatus,
+            AttributesStatus,
+            Source);
         return (await Editor.SavePlayerAsync(draft)).Value;
     }
 

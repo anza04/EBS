@@ -92,7 +92,8 @@
       "reputation": 82,
       "balance": 3420000,
       "wageBudget": 7380000,
-      "boardExpectation": "WinTitle"
+      "boardExpectation": "WinTitle",
+      "dataStatus": "Generated"
     },
     {
       "id": "87160b5b-5ce0-585a-a521-6d51e21a390e",
@@ -104,7 +105,8 @@
       "reputation": 78,
       "balance": 3180000,
       "wageBudget": 7020000,
-      "boardExpectation": "ReachPlayoffs"
+      "boardExpectation": "ReachPlayoffs",
+      "dataStatus": "Generated"
     },
     {
       "id": "60a4695c-50a8-5f74-9794-4e254d669c3a",
@@ -116,7 +118,8 @@
       "reputation": 74,
       "balance": 2940000,
       "wageBudget": 6660000,
-      "boardExpectation": "ReachPlayoffs"
+      "boardExpectation": "ReachPlayoffs",
+      "dataStatus": "Generated"
     },
     {
       "id": "ab016e54-1cd0-5dcd-8e30-92a35c42916d",
@@ -128,7 +131,8 @@
       "reputation": 70,
       "balance": 2700000,
       "wageBudget": 6300000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Generated"
     },
     {
       "id": "2abdc667-e89f-57bf-bba2-21d6ca7090c8",
@@ -140,7 +144,8 @@
       "reputation": 66,
       "balance": 2460000,
       "wageBudget": 5940000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Generated"
     },
     {
       "id": "e6c9c05b-8fdc-5f35-bf30-ebb3988bf10f",
@@ -152,7 +157,8 @@
       "reputation": 62,
       "balance": 2220000,
       "wageBudget": 5580000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Generated"
     },
     {
       "id": "a32b466b-1c8d-590f-abc9-5fd3bc423c0a",
@@ -164,7 +170,8 @@
       "reputation": 58,
       "balance": 1980000,
       "wageBudget": 5220000,
-      "boardExpectation": "AvoidRelegation"
+      "boardExpectation": "AvoidRelegation",
+      "dataStatus": "Generated"
     },
     {
       "id": "290c2c80-639e-51d4-b6c1-749cd4dc2108",
@@ -176,7 +183,8 @@
       "reputation": 54,
       "balance": 1740000,
       "wageBudget": 4860000,
-      "boardExpectation": "AvoidRelegation"
+      "boardExpectation": "AvoidRelegation",
+      "dataStatus": "Generated"
     },
     {
       "id": "99a360b5-f7c8-5d83-922d-1b73aac0d805",
@@ -187,7 +195,8 @@
       "reputation": 52,
       "balance": 1620000,
       "wageBudget": 1820000,
-      "boardExpectation": "WinPromotion"
+      "boardExpectation": "WinPromotion",
+      "dataStatus": "Generated"
     },
     {
       "id": "dc633f6b-ed3a-57d6-9a36-14390552a22a",
@@ -198,7 +207,8 @@
       "reputation": 49,
       "balance": 1440000,
       "wageBudget": 1715000,
-      "boardExpectation": "WinPromotion"
+      "boardExpectation": "WinPromotion",
+      "dataStatus": "Generated"
     },
     {
       "id": "1c687aaf-b302-578f-946e-5987755b42f5",
@@ -209,7 +219,8 @@
       "reputation": 46,
       "balance": 1260000,
       "wageBudget": 1610000,
-      "boardExpectation": "ReachPlayoffs"
+      "boardExpectation": "ReachPlayoffs",
+      "dataStatus": "Generated"
     },
     {
       "id": "c25df5cc-cb68-5a1a-b4cb-7920d7aa26bf",
@@ -220,7 +231,8 @@
       "reputation": 43,
       "balance": 1080000,
       "wageBudget": 1505000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Generated"
     },
     {
       "id": "33db7870-ff37-5cfc-b087-4bf4bd4b43c5",
@@ -231,7 +243,8 @@
       "reputation": 40,
       "balance": 900000,
       "wageBudget": 1400000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Generated"
     },
     {
       "id": "0559f6ac-a87b-5826-9eb4-335652cf6fcc",
@@ -242,7 +255,8 @@
       "reputation": 37,
       "balance": 720000,
       "wageBudget": 1295000,
-      "boardExpectation": "AvoidRelegation"
+      "boardExpectation": "AvoidRelegation",
+      "dataStatus": "Generated"
     }
   ],
   "leagues": [
@@ -488,7 +502,8 @@
       "concentration": 78,
       "leadership": 74,
       "consistency": 74,
-      "workRate": 77
+      "workRate": 77,
+      "dataStatus": "Generated"
     },
     {
       "id": "59200e95-d90c-582f-a02c-0847e45b80c1",
@@ -531,7 +546,8 @@
       "concentration": 67,
       "leadership": 67,
       "consistency": 72,
-      "workRate": 72
+      "workRate": 72,
+      "dataStatus": "Generated"
     },
     {
       "id": "26064ea7-9b93-55d1-87aa-3d1ee389b3c8",
@@ -574,7 +590,8 @@
       "concentration": 60,
       "leadership": 59,
       "consistency": 59,
-      "workRate": 56
+      "workRate": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "24b74720-7c67-5938-9569-be098c9d4dce",
@@ -617,7 +634,8 @@
       "concentration": 52,
       "leadership": 54,
       "consistency": 54,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "9dac59ab-26b8-5a05-b462-83410d7aeeac",
@@ -660,7 +678,8 @@
       "concentration": 76,
       "leadership": 75,
       "consistency": 71,
-      "workRate": 71
+      "workRate": 71,
+      "dataStatus": "Generated"
     },
     {
       "id": "3135d6ae-9e02-5258-9aea-64c8970c5be6",
@@ -703,7 +722,8 @@
       "concentration": 55,
       "leadership": 58,
       "consistency": 54,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "e232aa96-482c-5e48-be32-15b227a4ad39",
@@ -746,7 +766,8 @@
       "concentration": 58,
       "leadership": 59,
       "consistency": 66,
-      "workRate": 65
+      "workRate": 65,
+      "dataStatus": "Generated"
     },
     {
       "id": "40295535-5956-5433-a186-83b710f8704b",
@@ -789,7 +810,8 @@
       "concentration": 49,
       "leadership": 49,
       "consistency": 52,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "6e515ebe-c876-5035-b4b5-ef1049d131d8",
@@ -832,7 +854,8 @@
       "concentration": 69,
       "leadership": 69,
       "consistency": 71,
-      "workRate": 65
+      "workRate": 65,
+      "dataStatus": "Generated"
     },
     {
       "id": "9b9ed14c-ae03-524e-8d34-70d5db42a871",
@@ -875,7 +898,8 @@
       "concentration": 70,
       "leadership": 74,
       "consistency": 71,
-      "workRate": 73
+      "workRate": 73,
+      "dataStatus": "Generated"
     },
     {
       "id": "c8554acb-5c7a-5a06-a8b9-249eedd804d3",
@@ -918,7 +942,8 @@
       "concentration": 72,
       "leadership": 71,
       "consistency": 67,
-      "workRate": 66
+      "workRate": 66,
+      "dataStatus": "Generated"
     },
     {
       "id": "0e33d62e-223d-5f7c-a7b3-0b57efc41a8f",
@@ -961,7 +986,8 @@
       "concentration": 49,
       "leadership": 51,
       "consistency": 48,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "4f6591d1-a899-5829-8a99-41a23b25824f",
@@ -1004,7 +1030,8 @@
       "concentration": 57,
       "leadership": 61,
       "consistency": 57,
-      "workRate": 58
+      "workRate": 58,
+      "dataStatus": "Generated"
     },
     {
       "id": "342a2794-6daa-56de-8e6b-1fb34e83ea94",
@@ -1047,7 +1074,8 @@
       "concentration": 39,
       "leadership": 46,
       "consistency": 40,
-      "workRate": 41
+      "workRate": 41,
+      "dataStatus": "Generated"
     },
     {
       "id": "81625f7c-8374-5cd0-a5c6-aec534e8b261",
@@ -1090,7 +1118,8 @@
       "concentration": 44,
       "leadership": 47,
       "consistency": 46,
-      "workRate": 47
+      "workRate": 47,
+      "dataStatus": "Generated"
     },
     {
       "id": "04bcdc0d-e5e0-56a6-9758-f7a713c4398b",
@@ -1133,7 +1162,8 @@
       "concentration": 45,
       "leadership": 46,
       "consistency": 46,
-      "workRate": 42
+      "workRate": 42,
+      "dataStatus": "Generated"
     },
     {
       "id": "6d0d31a8-5c16-5df4-ab52-32c8b4ca40e7",
@@ -1176,7 +1206,8 @@
       "concentration": 53,
       "leadership": 52,
       "consistency": 52,
-      "workRate": 47
+      "workRate": 47,
+      "dataStatus": "Generated"
     },
     {
       "id": "cf90018b-fc06-5ce2-aa91-a919dbe33350",
@@ -1219,7 +1250,8 @@
       "concentration": 47,
       "leadership": 44,
       "consistency": 48,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "cacb4c7f-d334-5f8e-b88a-ceef0bcd1547",
@@ -1262,7 +1294,8 @@
       "concentration": 59,
       "leadership": 56,
       "consistency": 55,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "07caf733-d76a-5371-b651-6fb077be9d49",
@@ -1305,7 +1338,8 @@
       "concentration": 54,
       "leadership": 57,
       "consistency": 54,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "a84cafac-35b1-5324-b53f-9d04fdf7c619",
@@ -1348,7 +1382,8 @@
       "concentration": 51,
       "leadership": 46,
       "consistency": 52,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "ffb333ed-b51f-5785-8507-ed0ba353f97e",
@@ -1391,7 +1426,8 @@
       "concentration": 45,
       "leadership": 42,
       "consistency": 42,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "e225618c-4adf-5ada-a6f3-2ef9f2c9ad4a",
@@ -1434,7 +1470,8 @@
       "concentration": 37,
       "leadership": 40,
       "consistency": 38,
-      "workRate": 36
+      "workRate": 36,
+      "dataStatus": "Generated"
     },
     {
       "id": "aec94fb5-06b7-5822-ba5c-a89282dfd8db",
@@ -1477,7 +1514,8 @@
       "concentration": 64,
       "leadership": 59,
       "consistency": 64,
-      "workRate": 60
+      "workRate": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "98affb49-a072-5d2a-9a6c-b33902858242",
@@ -1519,7 +1557,8 @@
       "leadership": 59,
       "consistency": 63,
       "workRate": 62,
-      "potential": 63
+      "potential": 63,
+      "dataStatus": "Generated"
     },
     {
       "id": "b3bdf7ff-59dd-515a-bce0-8a459252ba95",
@@ -1561,7 +1600,8 @@
       "leadership": 64,
       "consistency": 65,
       "workRate": 62,
-      "potential": 61
+      "potential": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "dbb15dec-bd8c-5866-9e71-3b3df227b1cd",
@@ -1603,7 +1643,8 @@
       "leadership": 59,
       "consistency": 57,
       "workRate": 52,
-      "potential": 62
+      "potential": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "7c81ec80-81d6-5fec-85c5-d3f2f3980916",
@@ -1645,7 +1686,8 @@
       "leadership": 56,
       "consistency": 57,
       "workRate": 54,
-      "potential": 62
+      "potential": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "4e91d979-2a04-55cf-918f-2c65beabf0d6",
@@ -1687,7 +1729,8 @@
       "leadership": 48,
       "consistency": 48,
       "workRate": 43,
-      "potential": 63
+      "potential": 63,
+      "dataStatus": "Generated"
     },
     {
       "id": "d88b5203-69c5-5792-9543-ae8821aad40b",
@@ -1729,7 +1772,8 @@
       "leadership": 43,
       "consistency": 44,
       "workRate": 41,
-      "potential": 56
+      "potential": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "3e574b75-08b5-5569-a3db-7d4b4b26f357",
@@ -1771,7 +1815,8 @@
       "leadership": 44,
       "consistency": 34,
       "workRate": 38,
-      "potential": 60
+      "potential": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "83773b76-e646-5502-a2c7-680d1998791d",
@@ -1813,7 +1858,8 @@
       "leadership": 40,
       "consistency": 41,
       "workRate": 40,
-      "potential": 59
+      "potential": 59,
+      "dataStatus": "Generated"
     },
     {
       "id": "cf866f2e-c79c-5351-bcd9-07bfb586de19",
@@ -1855,7 +1901,8 @@
       "leadership": 32,
       "consistency": 43,
       "workRate": 40,
-      "potential": 80
+      "potential": 80,
+      "dataStatus": "Generated"
     },
     {
       "id": "b7243045-3ea5-5c2b-9236-b7f1d925a80b",
@@ -1897,7 +1944,8 @@
       "leadership": 58,
       "consistency": 58,
       "workRate": 52,
-      "potential": 62
+      "potential": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "7a2ef3a0-4b80-5f88-982f-130ef33e8216",
@@ -1939,7 +1987,8 @@
       "leadership": 60,
       "consistency": 60,
       "workRate": 57,
-      "potential": 55
+      "potential": 55,
+      "dataStatus": "Generated"
     },
     {
       "id": "00513ead-3fb8-5c5d-867f-67eb1d548ca3",
@@ -1981,7 +2030,8 @@
       "leadership": 78,
       "consistency": 78,
       "workRate": 81,
-      "potential": 60
+      "potential": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "cc830eb6-d73a-5e41-b3af-392b4a33fca0",
@@ -2023,7 +2073,8 @@
       "leadership": 59,
       "consistency": 64,
       "workRate": 64,
-      "potential": 78
+      "potential": 78,
+      "dataStatus": "Generated"
     }
   ],
   "contracts": [
@@ -2037,7 +2088,8 @@
       "paymentFrequency": "Monthly",
       "signingBonus": 150000,
       "performanceBonuses": "ReachPlayoffs:25000;LeagueTitle:60000",
-      "releaseClause": 3500000
+      "releaseClause": 3500000,
+      "dataStatus": "Generated"
     },
     {
       "id": "ad0ebba8-a9de-5a8b-81de-8761eccd9bba",
@@ -2046,7 +2098,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 340000,
-      "clubOptionUntil": "2029-06-30"
+      "clubOptionUntil": "2029-06-30",
+      "dataStatus": "Generated"
     },
     {
       "id": "ee1b10ec-4b6c-54df-8d2f-1b30b788a061",
@@ -2056,7 +2109,8 @@
       "endDate": "2028-06-30",
       "annualSalary": 660000,
       "playerOptionUntil": "2029-06-30",
-      "performanceBonuses": "PerGamePlayed:500"
+      "performanceBonuses": "PerGamePlayed:500",
+      "dataStatus": "Generated"
     },
     {
       "id": "b611dcd9-1db7-5e50-a031-7a3d7cfdcfbe",
@@ -2064,7 +2118,8 @@
       "playerId": "24b74720-7c67-5938-9569-be098c9d4dce",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 720000
+      "annualSalary": 720000,
+      "dataStatus": "Generated"
     },
     {
       "id": "e24b12c1-264e-5e69-b8a6-fec1d1a0dae0",
@@ -2072,7 +2127,8 @@
       "playerId": "9dac59ab-26b8-5a05-b462-83410d7aeeac",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 140000
+      "annualSalary": 140000,
+      "dataStatus": "Generated"
     },
     {
       "id": "ea48ff67-5183-55f6-8607-c01f363d6071",
@@ -2080,7 +2136,8 @@
       "playerId": "3135d6ae-9e02-5258-9aea-64c8970c5be6",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 580000
+      "annualSalary": 580000,
+      "dataStatus": "Generated"
     },
     {
       "id": "b277584f-9db9-55f9-a4c2-e914b2c63bd1",
@@ -2088,7 +2145,8 @@
       "playerId": "e232aa96-482c-5e48-be32-15b227a4ad39",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 700000
+      "annualSalary": 700000,
+      "dataStatus": "Generated"
     },
     {
       "id": "daf12f76-eb6c-542e-85d1-655adf8671ff",
@@ -2096,7 +2154,8 @@
       "playerId": "40295535-5956-5433-a186-83b710f8704b",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 480000
+      "annualSalary": 480000,
+      "dataStatus": "Generated"
     },
     {
       "id": "6d33e853-1388-50cb-a38a-88cefc7348aa",
@@ -2104,7 +2163,8 @@
       "playerId": "6e515ebe-c876-5035-b4b5-ef1049d131d8",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 700000
+      "annualSalary": 700000,
+      "dataStatus": "Generated"
     },
     {
       "id": "dc56dd5c-4846-5635-be49-316eac4d8ef1",
@@ -2112,7 +2172,8 @@
       "playerId": "9b9ed14c-ae03-524e-8d34-70d5db42a871",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 320000
+      "annualSalary": 320000,
+      "dataStatus": "Generated"
     },
     {
       "id": "8a67e1ee-6c8e-5d23-847f-2e833d261ac7",
@@ -2120,7 +2181,8 @@
       "playerId": "c8554acb-5c7a-5a06-a8b9-249eedd804d3",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 800000
+      "annualSalary": 800000,
+      "dataStatus": "Generated"
     },
     {
       "id": "5b9a3a85-3fe4-5d3f-9c11-44444071af3a",
@@ -2128,7 +2190,8 @@
       "playerId": "0e33d62e-223d-5f7c-a7b3-0b57efc41a8f",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 460000
+      "annualSalary": 460000,
+      "dataStatus": "Generated"
     },
     {
       "id": "57d26e0d-baeb-5555-a4cd-3cf1e18f2d1c",
@@ -2136,7 +2199,8 @@
       "playerId": "4f6591d1-a899-5829-8a99-41a23b25824f",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 50000
+      "annualSalary": 50000,
+      "dataStatus": "Generated"
     },
     {
       "id": "aa775741-f29c-58fd-8f6a-70741dc0a598",
@@ -2144,7 +2208,8 @@
       "playerId": "342a2794-6daa-56de-8e6b-1fb34e83ea94",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 370000
+      "annualSalary": 370000,
+      "dataStatus": "Generated"
     },
     {
       "id": "7e7bb23e-e4ce-514e-99cb-339f99fde2db",
@@ -2152,7 +2217,8 @@
       "playerId": "81625f7c-8374-5cd0-a5c6-aec534e8b261",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 380000
+      "annualSalary": 380000,
+      "dataStatus": "Generated"
     },
     {
       "id": "3f6c5012-44de-513c-83e5-00ea89721f95",
@@ -2160,7 +2226,8 @@
       "playerId": "04bcdc0d-e5e0-56a6-9758-f7a713c4398b",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 150000
+      "annualSalary": 150000,
+      "dataStatus": "Generated"
     },
     {
       "id": "cc99357c-1d74-59be-84e2-40f07c286753",
@@ -2168,7 +2235,8 @@
       "playerId": "6d0d31a8-5c16-5df4-ab52-32c8b4ca40e7",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 330000
+      "annualSalary": 330000,
+      "dataStatus": "Generated"
     },
     {
       "id": "590869ea-bab9-541b-aff6-aa6baad02e0a",
@@ -2176,7 +2244,8 @@
       "playerId": "cf90018b-fc06-5ce2-aa91-a919dbe33350",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 40000
+      "annualSalary": 40000,
+      "dataStatus": "Generated"
     },
     {
       "id": "72b90579-a19c-5bf4-85db-67c51b5d0867",
@@ -2184,7 +2253,8 @@
       "playerId": "cacb4c7f-d334-5f8e-b88a-ceef0bcd1547",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 380000
+      "annualSalary": 380000,
+      "dataStatus": "Generated"
     },
     {
       "id": "362287e4-e7eb-5a6f-ba62-411fa24975cf",
@@ -2192,7 +2262,8 @@
       "playerId": "07caf733-d76a-5371-b651-6fb077be9d49",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 100000
+      "annualSalary": 100000,
+      "dataStatus": "Generated"
     },
     {
       "id": "fc432e7c-f761-54ea-bd9d-28e206569cdc",
@@ -2200,7 +2271,8 @@
       "playerId": "a84cafac-35b1-5324-b53f-9d04fdf7c619",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 80000
+      "annualSalary": 80000,
+      "dataStatus": "Generated"
     },
     {
       "id": "127889a3-b729-551b-8e0c-ac0adf9ac596",
@@ -2208,7 +2280,8 @@
       "playerId": "ffb333ed-b51f-5785-8507-ed0ba353f97e",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 50000
+      "annualSalary": 50000,
+      "dataStatus": "Generated"
     },
     {
       "id": "e2d60e33-3c22-51f5-a889-3d857f3098dd",
@@ -2216,7 +2289,8 @@
       "playerId": "e225618c-4adf-5ada-a6f3-2ef9f2c9ad4a",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 240000
+      "annualSalary": 240000,
+      "dataStatus": "Generated"
     },
     {
       "id": "67f463a0-8e47-5e78-bdb8-31eb3110b782",
@@ -2224,7 +2298,8 @@
       "playerId": "aec94fb5-06b7-5822-ba5c-a89282dfd8db",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 310000
+      "annualSalary": 310000,
+      "dataStatus": "Generated"
     },
     {
       "id": "eb2f2488-0c92-511d-b728-1c0e38d4cbb3",
@@ -2233,7 +2308,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 290000,
-      "paymentFrequency": "Quarterly"
+      "paymentFrequency": "Quarterly",
+      "dataStatus": "Generated"
     },
     {
       "id": "21bbc014-feeb-5969-b4c9-b69d037b31ac",
@@ -2241,7 +2317,8 @@
       "playerId": "b3bdf7ff-59dd-515a-bce0-8a459252ba95",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 300000
+      "annualSalary": 300000,
+      "dataStatus": "Generated"
     },
     {
       "id": "965c16c5-3004-50a8-a3eb-986346d0be5f",
@@ -2249,7 +2326,8 @@
       "playerId": "dbb15dec-bd8c-5866-9e71-3b3df227b1cd",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 220000
+      "annualSalary": 220000,
+      "dataStatus": "Generated"
     },
     {
       "id": "511f21d1-895f-57fb-adf6-2484cf87e7b4",
@@ -2257,7 +2335,8 @@
       "playerId": "7c81ec80-81d6-5fec-85c5-d3f2f3980916",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 370000
+      "annualSalary": 370000,
+      "dataStatus": "Generated"
     },
     {
       "id": "f699e2b7-3792-5260-b56c-140de2708425",
@@ -2265,7 +2344,8 @@
       "playerId": "4e91d979-2a04-55cf-918f-2c65beabf0d6",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 460000
+      "annualSalary": 460000,
+      "dataStatus": "Generated"
     },
     {
       "id": "02e38e5b-126e-545b-85e8-aa33af6553b9",
@@ -2273,7 +2353,8 @@
       "playerId": "d88b5203-69c5-5792-9543-ae8821aad40b",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 190000
+      "annualSalary": 190000,
+      "dataStatus": "Generated"
     },
     {
       "id": "22eb3662-0732-5842-9bfb-bd5286f00fc3",
@@ -2281,7 +2362,8 @@
       "playerId": "3e574b75-08b5-5569-a3db-7d4b4b26f357",
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
-      "annualSalary": 180000
+      "annualSalary": 180000,
+      "dataStatus": "Generated"
     },
     {
       "id": "d5def1ce-0147-5dcc-8620-c60c7da015ec",
@@ -2289,7 +2371,8 @@
       "playerId": "83773b76-e646-5502-a2c7-680d1998791d",
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
-      "annualSalary": 360000
+      "annualSalary": 360000,
+      "dataStatus": "Generated"
     },
     {
       "id": "52023532-8e01-591e-8226-a50c54920261",
@@ -2297,7 +2380,8 @@
       "playerId": "cf866f2e-c79c-5351-bcd9-07bfb586de19",
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
-      "annualSalary": 330000
+      "annualSalary": 330000,
+      "dataStatus": "Generated"
     }
   ]
 }

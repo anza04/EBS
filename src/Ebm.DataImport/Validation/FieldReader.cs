@@ -26,6 +26,9 @@ internal sealed class FieldReader
 
     public bool HasErrors => Errors.Count > 0;
 
+    /// <summary>Remarks on an accepted record (estimated values, possible duplicates).</summary>
+    public List<string> Notes { get; } = [];
+
     /// <summary>The trimmed value, or <c>null</c> when the field is absent or blank.</summary>
     public string? Optional(string name) =>
         _record.Fields.TryGetValue(name, out var value) && !string.IsNullOrWhiteSpace(value) ? value.Trim() : null;

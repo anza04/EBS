@@ -100,6 +100,20 @@
             <DatePicker SelectedDate="{Binding DateOfBirth}" />
             <TextBlock Text="Nationality" Style="{StaticResource Form.Label}" />
             <ComboBox ItemsSource="{Binding Lookups.Countries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding NationalityId}" />
+            <TextBlock Text="Second nationality (EU/EEA status only)" Style="{StaticResource Form.Label}" />
+            <ComboBox ItemsSource="{Binding Lookups.OptionalCountries}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SecondNationalityId}" />
+            <UniformGrid Columns="2">
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Profile data" Style="{StaticResource Form.Label}" />
+                <ComboBox ItemsSource="{Binding Lookups.DataStatuses}" SelectedItem="{Binding ProfileStatus}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Attribute data" Style="{StaticResource Form.Label}" />
+                <ComboBox ItemsSource="{Binding Lookups.DataStatuses}" SelectedItem="{Binding AttributesStatus}" />
+              </StackPanel>
+            </UniformGrid>
+            <TextBlock Text="Source (required when verified)" Style="{StaticResource Form.Label}" />
+            <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}" />
             <UniformGrid Columns="3">
               <StackPanel Margin="0,0,8,0">
                 <TextBlock Text="Height (cm)" Style="{StaticResource Form.Label}" />

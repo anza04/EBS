@@ -1,4 +1,5 @@
 using Ebm.Domain.Clubs;
+using Ebm.Domain.Common;
 using Ebm.Domain.Countries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -44,6 +45,7 @@ internal sealed class ClubConfiguration : IEntityTypeConfiguration<Club>
         builder.Property(x => x.WageBudget).HasDefaultValue(0L);
         // The sentinel is a value the domain never allows, so EF always writes the expectation; with the CLR default
         // (WinTitle) as sentinel, WinTitle would be replaced by the column default.
+        builder.Property(x => x.DataStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
         builder.Property(x => x.BoardExpectation).HasConversion<string>().HasMaxLength(32)
             .HasDefaultValue(Club.DefaultBoardExpectation).HasSentinel((BoardExpectation)(-1));
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.CountryId);

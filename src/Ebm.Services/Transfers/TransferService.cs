@@ -692,8 +692,8 @@ internal sealed class TransferService : ITransferService
                 .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
         }
 
-        /// <summary>The player's nationality is outside the EU/EEA (non-EU player limits).</summary>
-        public bool IsNonEu(Player player) => _countries.GetValueOrDefault(player.NationalityId)?.IsEuEea != true;
+        /// <summary>None of the player's nationalities is in the EU/EEA (non-EU player limits).</summary>
+        public bool IsNonEu(Player player) => !player.HasNationality(c => _countries.GetValueOrDefault(c)?.IsEuEea == true);
 
         public Data Data { get; }
 

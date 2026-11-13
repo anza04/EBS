@@ -18,16 +18,6 @@ public sealed class PlayerGenerator(int seed)
     public const int MinQuality = 38;
     public const int MaxQuality = 60;
 
-    private static readonly IReadOnlyDictionary<Position, (int Height, int Weight, IReadOnlyDictionary<AttributeCategory, int> Profile)> Profiles =
-        new Dictionary<Position, (int, int, IReadOnlyDictionary<AttributeCategory, int>)>
-        {
-            [Position.PointGuard] = (186, 84, new Dictionary<AttributeCategory, int> { [AttributeCategory.Playmaking] = 10, [AttributeCategory.Rebounding] = -10, [AttributeCategory.Finishing] = -4 }),
-            [Position.ShootingGuard] = (194, 90, new Dictionary<AttributeCategory, int> { [AttributeCategory.Shooting] = 8, [AttributeCategory.Rebounding] = -6 }),
-            [Position.SmallForward] = (200, 96, new Dictionary<AttributeCategory, int>()),
-            [Position.PowerForward] = (205, 104, new Dictionary<AttributeCategory, int> { [AttributeCategory.Rebounding] = 8, [AttributeCategory.Finishing] = 4, [AttributeCategory.Playmaking] = -6 }),
-            [Position.Center] = (211, 112, new Dictionary<AttributeCategory, int> { [AttributeCategory.Rebounding] = 10, [AttributeCategory.Finishing] = 6, [AttributeCategory.Shooting] = -10, [AttributeCategory.Playmaking] = -10 }),
-        };
-
     private readonly Random _random = new(seed);
 
     /// <param name="isTaken">Whether a player with this name and birth date already exists (duplicate rule).</param>
@@ -50,7 +40,7 @@ public sealed class PlayerGenerator(int seed)
         }
         while (isTaken(first, last, birth));
 
-        var (height, weight, profile) = Profiles[position];
+        var (height, weight, profile) = PositionProfile.Of(position);
         var quality = _random.Next(MinQuality, MaxQuality + 1);
         var attributes = new PlayerAttributes(PlayerCatalog.Attributes.ToDictionary(
             a => a,

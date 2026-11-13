@@ -109,6 +109,13 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("CountryId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DataStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unverified");
+
                     b.Property<int?>("FoundedYear")
                         .HasColumnType("INTEGER");
 
@@ -309,6 +316,10 @@ namespace Ebm.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0L);
 
+                    b.Property<string>("Source")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid?>("StaffMemberId")
                         .HasColumnType("TEXT");
 
@@ -329,6 +340,13 @@ namespace Ebm.Persistence.Migrations
 
                     b.Property<DateOnly?>("TerminationDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("TermsStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unverified");
 
                     b.HasKey("Id");
 
@@ -498,6 +516,13 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("AttributesStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unverified");
+
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("TEXT");
 
@@ -552,10 +577,20 @@ namespace Ebm.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(50);
 
+                    b.Property<string>("ProfileStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unverified");
+
                     b.Property<int>("Reputation")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(1);
+
+                    b.Property<Guid?>("SecondNationalityId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SecondaryPositions")
                         .IsRequired()
@@ -563,6 +598,10 @@ namespace Ebm.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasDefaultValue("");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("WeightKg")
                         .HasColumnType("INTEGER");
@@ -575,6 +614,8 @@ namespace Ebm.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NationalityId");
+
+                    b.HasIndex("SecondNationalityId");
 
                     b.HasIndex("LastName", "FirstName");
 
@@ -1108,6 +1149,11 @@ namespace Ebm.Persistence.Migrations
                         .HasForeignKey("NationalityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Countries.Country", null)
+                        .WithMany()
+                        .HasForeignKey("SecondNationalityId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.OwnsOne("Ebm.Domain.Players.PlayerAttributes", "Attributes", b1 =>
                         {

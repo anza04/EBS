@@ -35,6 +35,37 @@ internal static class ClubMembership
     }
 
     /// <summary>
+    /// The players whose current club (<see cref="CurrentClubsAsync"/>, same rule) is <paramref name="clubId"/>, with their
+    /// contracts running at the club. Reads only the club's contracts and spells and those of its candidates, so a squad
+    /// loads in constant time however large the database is (512 clubs, Step 16).
+    /// </summary>
+    public static async Task<(IReadOnlyList<PlayerId> Members, IReadOnlyList<Contract> Contracts)> MembersOfAsync(
+        IServiceProvider services, ClubId clubId, DateOnly date, CancellationToken cancellationToken)
+    {
+        var contracts = services.GetRequiredService<IRepository<Contract, ContractId>>();
+        var history = services.GetRequiredService<IRepository<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>>();
+        var here = (await contracts.ListAsync(c => c.ClubId == clubId && c.PlayerId != null, cancellationToken).ConfigureAwait(false))
+            .Where(c => c.IsRunningOn(date))
+            .ToList();
+        var spellsHere = await history.ListAsync(s => s.ClubId == clubId && s.EndDate == null, cancellationToken).ConfigureAwait(false);
+        List<PlayerId> candidates = [.. here.Select(c => c.PlayerId!.Value).Concat(spellsHere.Select(s => s.PlayerId)).Distinct()];
+        List<PlayerId?> contractCandidates = [.. candidates.Select(p => (PlayerId?)p)];
+
+        var openSpells = (await history.ListAsync(s => s.EndDate == null && candidates.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
+            .ToDictionary(s => s.PlayerId, s => s.ClubId);
+        var latestContract = (await contracts.ListAsync(c => contractCandidates.Contains(c.PlayerId), cancellationToken).ConfigureAwait(false))
+            .Where(c => c.IsRunningOn(date))
+            .OrderBy(c => c.StartDate)
+            .GroupBy(c => c.PlayerId!.Value)
+            .ToDictionary(g => g.Key, g => g.Last().ClubId);
+        List<PlayerId> members =
+        [
+            .. candidates.Where(p => (openSpells.TryGetValue(p, out var spell) ? spell : latestContract.GetValueOrDefault(p)) == clubId),
+        ];
+        return (members, here);
+    }
+
+    /// <summary>
     /// The player joins <paramref name="clubId"/> on <paramref name="date"/>: his open spell (at any club) ends that day,
     /// a new spell starts, and his roster spot moves to the club in <paramref name="role"/>.
     /// </summary>

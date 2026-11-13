@@ -3,6 +3,24 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.0] — 2026-11-13 — Step 16: European player database
+
+### Added
+- Real clubs (240, marked Unverified) in the 17 top divisions of the European dataset; 6,144 generated players with
+  contracts and 1,500 past club spells (`data/europe/*-europe-2026-27.csv`). The European world plays as a career.
+- Data quality: `DataStatus` (Unverified, Verified, Estimated, Generated) on player profile and attributes, contracts
+  and clubs, with a source (required when verified). Migration `20261113110006_PlayerDatabase`.
+- Second nationality (`Player.SecondNationalityId`), counted for EU/EEA status; sporting nationality decides domestic
+  and foreign counts.
+- Import: optional attributes (missing ones estimated, `AttributeEstimator`), optional salary (estimated), statuses
+  and sources, `playerHistory` section, accent-insensitive duplicate keys, possible-duplicate notes.
+- Player profile: second nationality, club history, estimated market value, data status and source; editor fields.
+- Docs: `docs/PLAYER_DATABASE.md` (coverage, sources, data quality, gaps).
+
+### Changed
+- Squads load only their club's contracts and spells (`ClubMembership.MembersOfAsync`), so game days scale to 512 clubs.
+- Italian sample and templates declare their data status.
+
 ## [0.15.0] — 2026-11-13 — Step 15: European country and league expansion
 
 ### Added

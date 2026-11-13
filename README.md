@@ -28,8 +28,9 @@ dotnet run   --project src/Ebm.Desktop
 The main window is the database editor. To load the sample league, open the *Import* tab, choose
 `data\sample\italy-sample.json` and press *Import*; then import `data\sample\italy-squads.json` (squads for every
 club and more free agents) and start a career from the *Career* tab. Copies of the game are kept in *Saved games*.
-CSV templates are in `data\templates`. `data\europe\europe-2026-27.json` holds the leagues of 18 European
-countries (import it into a new game; clubs have no players until Step 16).
+CSV templates are in `data\templates`. `data\europe` holds the leagues of 18 European countries with real
+top-division clubs and generated players: import its four files together into a new game, then start a career
+(`docs/PLAYER_DATABASE.md`).
 
 Windows release: `build/publish.ps1` builds a self-contained executable and a zip (docs/RELEASE.md).
 

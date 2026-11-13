@@ -1,4 +1,5 @@
 using Ebm.Domain.Clubs;
+using Ebm.Domain.Common;
 using Ebm.Domain.Players;
 using Ebm.Hosting;
 using Ebm.Persistence;
@@ -12,7 +13,7 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_CountryEuEea";
+    private const string LatestMigration = "_PlayerDatabase";
 
     private static readonly string[] ExpectedTables =
     [
@@ -100,6 +101,8 @@ public sealed class DatabaseInitializerTests
         Assert.Equal((204, 1, 1, 64), (player.WingspanCm, player.Experience, player.Reputation, player.Potential)); // potential = old mean 64.6
         Assert.Equal((100, 50, InjuryStatus.Healthy), (player.Fitness, player.Morale, player.InjuryStatus));
         Assert.True(player.SecondaryPositions.IsEmpty);
+        Assert.Equal((DataStatus.Unverified, DataStatus.Unverified, null, null), (player.ProfileStatus, player.AttributesStatus, player.Source, player.SecondNationalityId)); // Step 16
+        await Assert.ThrowsAsync<SqliteException>(() => db.ExecuteSqlAsync($"UPDATE Players SET SecondNationalityId = '{Guid.NewGuid()}' WHERE Id = '{id}'"));
         var a = player.Attributes;
         Assert.Equal((70, 60, 60, 60), (a.CloseShot, a.MidRange, a.ThreePoint, a.FreeThrow));
         Assert.Equal((81, 78, 81), (a.Layup, a.Dunk, a.PostMoves));

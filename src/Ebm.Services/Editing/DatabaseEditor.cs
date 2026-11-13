@@ -60,6 +60,8 @@ internal sealed class DatabaseEditor : IDatabaseEditor
         player.UpdateProfile(draft.WingspanCm, draft.SecondaryPositions, draft.Experience, draft.Reputation, draft.Potential);
         player.UpdateCondition(draft.Fitness, draft.Morale, draft.InjuryStatus, draft.InjuryReturnDate);
         player.UpdateTendencies(draft.Tendencies);
+        player.UpdateSecondNationality(draft.SecondNationalityId);
+        player.UpdateDataQuality(draft.ProfileStatus, draft.AttributesStatus, draft.Source);
         return player;
     }
 

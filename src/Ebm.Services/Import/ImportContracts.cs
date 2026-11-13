@@ -42,6 +42,7 @@ public enum ImportRecordKind
     Participant,
     Player,
     Contract,
+    PlayerHistory,
 }
 
 public enum ImportOutcome

@@ -1,2 +1,2 @@
-id,clubId,playerId,startDate,endDate,annualSalary,paymentFrequency,signingBonus,performanceBonuses,releaseClause,clubOptionUntil,playerOptionUntil
-0198a000-0000-7000-8000-000000000007,0198a000-0000-7000-8000-000000000002,0198a000-0000-7000-8000-000000000006,2026-07-01,2028-06-30,150000,Monthly,10000,ReachPlayoffs:15000;LeagueTitle:30000,1500000,2029-06-30,
+id,clubId,playerId,startDate,endDate,annualSalary,paymentFrequency,signingBonus,performanceBonuses,releaseClause,clubOptionUntil,playerOptionUntil,dataStatus,source
+0198a000-0000-7000-8000-000000000007,0198a000-0000-7000-8000-000000000002,0198a000-0000-7000-8000-000000000006,2026-07-01,2028-06-30,150000,Monthly,10000,ReachPlayoffs:15000;LeagueTitle:30000,1500000,2029-06-30,,Unverified,

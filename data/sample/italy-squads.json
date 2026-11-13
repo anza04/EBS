@@ -43,7 +43,8 @@
       "concentration": 64,
       "leadership": 62,
       "consistency": 63,
-      "workRate": 72
+      "workRate": 72,
+      "dataStatus": "Generated"
     },
     {
       "id": "d3f16c4e-4f9a-52f8-98e3-a04f967390f7",
@@ -86,7 +87,8 @@
       "concentration": 68,
       "leadership": 72,
       "consistency": 72,
-      "workRate": 73
+      "workRate": 73,
+      "dataStatus": "Generated"
     },
     {
       "id": "306a3a57-d7f1-5f6e-a86e-3e90e93a91d9",
@@ -129,7 +131,8 @@
       "concentration": 72,
       "leadership": 69,
       "consistency": 73,
-      "workRate": 76
+      "workRate": 76,
+      "dataStatus": "Generated"
     },
     {
       "id": "32e404df-5386-54a3-b151-48255d06bd5a",
@@ -172,7 +175,8 @@
       "concentration": 69,
       "leadership": 74,
       "consistency": 68,
-      "workRate": 70
+      "workRate": 70,
+      "dataStatus": "Generated"
     },
     {
       "id": "72163871-bdad-5029-bfd8-e7af271b2810",
@@ -215,7 +219,8 @@
       "concentration": 76,
       "leadership": 64,
       "consistency": 72,
-      "workRate": 75
+      "workRate": 75,
+      "dataStatus": "Generated"
     },
     {
       "id": "a35ca26c-2b04-5687-bd74-945dee1a6531",
@@ -258,7 +263,8 @@
       "concentration": 52,
       "leadership": 62,
       "consistency": 62,
-      "workRate": 64
+      "workRate": 64,
+      "dataStatus": "Generated"
     },
     {
       "id": "e36cab20-f38c-500d-ad9e-640e93e4499b",
@@ -301,7 +307,8 @@
       "concentration": 55,
       "leadership": 55,
       "consistency": 62,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "16e7470b-ffe4-5e70-9569-6fc26b34e863",
@@ -344,7 +351,8 @@
       "concentration": 64,
       "leadership": 58,
       "consistency": 64,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "29d78f56-783d-5e68-8953-daea3c779f7a",
@@ -387,7 +395,8 @@
       "concentration": 76,
       "leadership": 76,
       "consistency": 76,
-      "workRate": 73
+      "workRate": 73,
+      "dataStatus": "Generated"
     },
     {
       "id": "c30d947e-b079-5210-89b5-b0f15cd654ca",
@@ -430,7 +439,8 @@
       "concentration": 69,
       "leadership": 70,
       "consistency": 60,
-      "workRate": 68
+      "workRate": 68,
+      "dataStatus": "Generated"
     },
     {
       "id": "96a4fc3a-2a4e-5eb2-b51e-090d95198301",
@@ -473,7 +483,8 @@
       "concentration": 71,
       "leadership": 72,
       "consistency": 72,
-      "workRate": 73
+      "workRate": 73,
+      "dataStatus": "Generated"
     },
     {
       "id": "ef5b431a-51d2-55a3-8ff9-fb2255a865cd",
@@ -516,7 +527,8 @@
       "concentration": 65,
       "leadership": 73,
       "consistency": 67,
-      "workRate": 66
+      "workRate": 66,
+      "dataStatus": "Generated"
     },
     {
       "id": "56500b25-f8ac-56bc-8e31-bdf579016419",
@@ -559,7 +571,8 @@
       "concentration": 69,
       "leadership": 61,
       "consistency": 71,
-      "workRate": 72
+      "workRate": 72,
+      "dataStatus": "Generated"
     },
     {
       "id": "418faa45-53d3-57ca-8bbd-308266353e7d",
@@ -602,7 +615,8 @@
       "concentration": 62,
       "leadership": 65,
       "consistency": 52,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "e42e3758-f945-5b77-9f06-471b50f055f6",
@@ -645,7 +659,8 @@
       "concentration": 54,
       "leadership": 62,
       "consistency": 62,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "3c0a885a-d699-5b65-8fb5-c7fa2b477c6d",
@@ -688,7 +703,8 @@
       "concentration": 55,
       "leadership": 64,
       "consistency": 59,
-      "workRate": 58
+      "workRate": 58,
+      "dataStatus": "Generated"
     },
     {
       "id": "71b3eefe-e6f6-593b-b2df-9773bd2bf602",
@@ -731,7 +747,8 @@
       "concentration": 67,
       "leadership": 66,
       "consistency": 68,
-      "workRate": 56
+      "workRate": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "f03daefa-6ae8-5397-9988-d2ec43a26030",
@@ -774,7 +791,8 @@
       "concentration": 75,
       "leadership": 70,
       "consistency": 66,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "72004dcb-9b83-5050-9830-ebab9947ec13",
@@ -817,7 +835,8 @@
       "concentration": 68,
       "leadership": 67,
       "consistency": 64,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "1d86bcec-7776-5130-943b-38b930f9e746",
@@ -860,7 +879,8 @@
       "concentration": 68,
       "leadership": 70,
       "consistency": 63,
-      "workRate": 70
+      "workRate": 70,
+      "dataStatus": "Generated"
     },
     {
       "id": "3bc25a3e-ff2f-56e0-af8d-4204bf35d610",
@@ -903,7 +923,8 @@
       "concentration": 70,
       "leadership": 73,
       "consistency": 64,
-      "workRate": 65
+      "workRate": 65,
+      "dataStatus": "Generated"
     },
     {
       "id": "4ad301fa-2346-5f4d-abb6-628f212e7d8e",
@@ -946,7 +967,8 @@
       "concentration": 50,
       "leadership": 52,
       "consistency": 46,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "3a35f0fd-64da-5617-8ee5-5336f9129613",
@@ -989,7 +1011,8 @@
       "concentration": 61,
       "leadership": 56,
       "consistency": 54,
-      "workRate": 53
+      "workRate": 53,
+      "dataStatus": "Generated"
     },
     {
       "id": "ef2d0d93-4b84-5a64-b82b-6fd6792e0210",
@@ -1032,7 +1055,8 @@
       "concentration": 57,
       "leadership": 53,
       "consistency": 53,
-      "workRate": 56
+      "workRate": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "fd86890b-ccb5-5123-a9a1-8f4f2a9aaaac",
@@ -1075,7 +1099,8 @@
       "concentration": 59,
       "leadership": 56,
       "consistency": 61,
-      "workRate": 56
+      "workRate": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "347439c2-747a-59a1-b49d-13218f6d3d2e",
@@ -1118,7 +1143,8 @@
       "concentration": 65,
       "leadership": 67,
       "consistency": 67,
-      "workRate": 58
+      "workRate": 58,
+      "dataStatus": "Generated"
     },
     {
       "id": "8c2eb334-f729-5cb4-88cf-e7341c72e262",
@@ -1161,7 +1187,8 @@
       "concentration": 69,
       "leadership": 69,
       "consistency": 58,
-      "workRate": 66
+      "workRate": 66,
+      "dataStatus": "Generated"
     },
     {
       "id": "07a5e917-e2a7-54d2-99e7-2680198dce83",
@@ -1204,7 +1231,8 @@
       "concentration": 66,
       "leadership": 56,
       "consistency": 62,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "3de9acaf-7abf-5cbd-a4d5-711a2f38a0a2",
@@ -1247,7 +1275,8 @@
       "concentration": 67,
       "leadership": 65,
       "consistency": 67,
-      "workRate": 64
+      "workRate": 64,
+      "dataStatus": "Generated"
     },
     {
       "id": "1cfe8bcc-f701-540c-8769-e57b3127c45b",
@@ -1290,7 +1319,8 @@
       "concentration": 58,
       "leadership": 50,
       "consistency": 53,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "004eeae5-ad7f-5c4c-9275-aad1bd617b6d",
@@ -1333,7 +1363,8 @@
       "concentration": 59,
       "leadership": 57,
       "consistency": 48,
-      "workRate": 53
+      "workRate": 53,
+      "dataStatus": "Generated"
     },
     {
       "id": "e66aecda-41b6-55eb-aa7f-94be2f2dcf01",
@@ -1376,7 +1407,8 @@
       "concentration": 62,
       "leadership": 62,
       "consistency": 48,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "ebb0c1b7-42e6-5228-b293-6d6fd5eb455c",
@@ -1419,7 +1451,8 @@
       "concentration": 59,
       "leadership": 65,
       "consistency": 52,
-      "workRate": 60
+      "workRate": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "77d92cf4-fe7c-5e87-9b8c-bf9af8ac87cd",
@@ -1462,7 +1495,8 @@
       "concentration": 56,
       "leadership": 63,
       "consistency": 67,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "dc62aa01-28ca-5613-801f-41beccccfa46",
@@ -1505,7 +1539,8 @@
       "concentration": 72,
       "leadership": 61,
       "consistency": 62,
-      "workRate": 67
+      "workRate": 67,
+      "dataStatus": "Generated"
     },
     {
       "id": "b095da64-eead-59c1-a4bd-77dff5fc4640",
@@ -1548,7 +1583,8 @@
       "concentration": 64,
       "leadership": 66,
       "consistency": 61,
-      "workRate": 59
+      "workRate": 59,
+      "dataStatus": "Generated"
     },
     {
       "id": "eee8fec7-6c27-563d-8479-969028f1c1a5",
@@ -1591,7 +1627,8 @@
       "concentration": 59,
       "leadership": 66,
       "consistency": 67,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "3d15636a-6302-5ca3-ae7d-5b15e562a997",
@@ -1634,7 +1671,8 @@
       "concentration": 47,
       "leadership": 48,
       "consistency": 46,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "c53f43d0-e527-565b-91ba-fc224b3f1250",
@@ -1677,7 +1715,8 @@
       "concentration": 58,
       "leadership": 52,
       "consistency": 54,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "5d9fb570-6165-5ffc-b101-feaceb5f766f",
@@ -1720,7 +1759,8 @@
       "concentration": 51,
       "leadership": 57,
       "consistency": 53,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "42e220b1-e3e2-5e8b-b556-7974f3c3ef16",
@@ -1763,7 +1803,8 @@
       "concentration": 62,
       "leadership": 55,
       "consistency": 62,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "7d3be204-2540-581c-917f-ed30e0529c4f",
@@ -1806,7 +1847,8 @@
       "concentration": 66,
       "leadership": 62,
       "consistency": 53,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "ee3ba309-8402-5f62-abb4-64c3a569ea4d",
@@ -1849,7 +1891,8 @@
       "concentration": 60,
       "leadership": 60,
       "consistency": 57,
-      "workRate": 69
+      "workRate": 69,
+      "dataStatus": "Generated"
     },
     {
       "id": "52b0ffac-50f3-5b7b-8f0b-30fd9c2b90b0",
@@ -1892,7 +1935,8 @@
       "concentration": 59,
       "leadership": 66,
       "consistency": 58,
-      "workRate": 66
+      "workRate": 66,
+      "dataStatus": "Generated"
     },
     {
       "id": "917bf449-14c0-50cc-8ebf-981178143407",
@@ -1935,7 +1979,8 @@
       "concentration": 54,
       "leadership": 63,
       "consistency": 62,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "5dcc5c51-9251-5478-874e-e92aeea09f51",
@@ -1978,7 +2023,8 @@
       "concentration": 58,
       "leadership": 57,
       "consistency": 52,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "896060ae-0311-56b1-aaa9-d6ae028684d8",
@@ -2021,7 +2067,8 @@
       "concentration": 43,
       "leadership": 53,
       "consistency": 53,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "edb11f27-d09f-530d-9d44-6879615e28f1",
@@ -2064,7 +2111,8 @@
       "concentration": 45,
       "leadership": 45,
       "consistency": 45,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "cf81ad8a-3b59-50a7-8620-fc036812a0a3",
@@ -2107,7 +2155,8 @@
       "concentration": 62,
       "leadership": 52,
       "consistency": 54,
-      "workRate": 55
+      "workRate": 55,
+      "dataStatus": "Generated"
     },
     {
       "id": "d4c170fb-91e6-58d1-95b9-a9e2963e8414",
@@ -2150,7 +2199,8 @@
       "concentration": 55,
       "leadership": 56,
       "consistency": 61,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "e2fba5d4-b6e9-597d-92fc-ac5e5437a0d6",
@@ -2193,7 +2243,8 @@
       "concentration": 59,
       "leadership": 60,
       "consistency": 67,
-      "workRate": 63
+      "workRate": 63,
+      "dataStatus": "Generated"
     },
     {
       "id": "4a503dcd-9999-5834-9b13-aa576dbdcfc5",
@@ -2236,7 +2287,8 @@
       "concentration": 51,
       "leadership": 59,
       "consistency": 57,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "783ea37c-8e22-5782-b8bd-f8b2ccb51e87",
@@ -2279,7 +2331,8 @@
       "concentration": 57,
       "leadership": 50,
       "consistency": 62,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "e67c14d1-75d0-5355-8aba-0ec6ca3c1b03",
@@ -2322,7 +2375,8 @@
       "concentration": 58,
       "leadership": 52,
       "consistency": 52,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "04e5f0f1-1cb8-5a86-a04d-5b4c8ff82d06",
@@ -2365,7 +2419,8 @@
       "concentration": 55,
       "leadership": 45,
       "consistency": 56,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "e5a02f4c-fe9c-535e-9f26-0b0e22be8ab3",
@@ -2408,7 +2463,8 @@
       "concentration": 47,
       "leadership": 52,
       "consistency": 40,
-      "workRate": 43
+      "workRate": 43,
+      "dataStatus": "Generated"
     },
     {
       "id": "e9f84d16-7465-5fd9-b59c-7ae679ec8e4b",
@@ -2451,7 +2507,8 @@
       "concentration": 53,
       "leadership": 50,
       "consistency": 59,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "e0847e03-a736-5357-9f4a-dde2ab3544c1",
@@ -2494,7 +2551,8 @@
       "concentration": 49,
       "leadership": 50,
       "consistency": 56,
-      "workRate": 60
+      "workRate": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "17e8a530-448b-55ae-a372-b0f2687cc647",
@@ -2537,7 +2595,8 @@
       "concentration": 65,
       "leadership": 56,
       "consistency": 51,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "fdf10655-defd-56b2-93d3-4fba2378a3fe",
@@ -2580,7 +2639,8 @@
       "concentration": 62,
       "leadership": 52,
       "consistency": 58,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "33f92248-384a-5a88-ac64-5955c5c7df0f",
@@ -2623,7 +2683,8 @@
       "concentration": 49,
       "leadership": 56,
       "consistency": 56,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "5776a777-9707-5dfa-bdd5-88e5ec2c44b5",
@@ -2666,7 +2727,8 @@
       "concentration": 54,
       "leadership": 43,
       "consistency": 53,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "886ee441-ba9d-5dc8-9ce8-013a0b2818cf",
@@ -2709,7 +2771,8 @@
       "concentration": 52,
       "leadership": 44,
       "consistency": 39,
-      "workRate": 40
+      "workRate": 40,
+      "dataStatus": "Generated"
     },
     {
       "id": "d5a9bde5-50ec-5108-ac9d-a196e0c5515c",
@@ -2752,7 +2815,8 @@
       "concentration": 48,
       "leadership": 52,
       "consistency": 47,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "72e3c207-018f-502e-b894-d1d8cc89a537",
@@ -2795,7 +2859,8 @@
       "concentration": 51,
       "leadership": 45,
       "consistency": 54,
-      "workRate": 42
+      "workRate": 42,
+      "dataStatus": "Generated"
     },
     {
       "id": "d4b63001-9b36-5ffa-ae26-d82822830d0f",
@@ -2838,7 +2903,8 @@
       "concentration": 47,
       "leadership": 51,
       "consistency": 56,
-      "workRate": 58
+      "workRate": 58,
+      "dataStatus": "Generated"
     },
     {
       "id": "e8459801-1705-5979-8e7b-4bb06cbd3f6a",
@@ -2881,7 +2947,8 @@
       "concentration": 48,
       "leadership": 45,
       "consistency": 45,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "ae02fd19-72f1-51e8-b0f6-48e50145f210",
@@ -2924,7 +2991,8 @@
       "concentration": 48,
       "leadership": 47,
       "consistency": 56,
-      "workRate": 59
+      "workRate": 59,
+      "dataStatus": "Generated"
     },
     {
       "id": "2a8725ae-5eb6-59e2-b4f1-f045fd164e44",
@@ -2967,7 +3035,8 @@
       "concentration": 54,
       "leadership": 58,
       "consistency": 50,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "68219615-8473-544e-8637-9d07140211b0",
@@ -3010,7 +3079,8 @@
       "concentration": 50,
       "leadership": 50,
       "consistency": 52,
-      "workRate": 62
+      "workRate": 62,
+      "dataStatus": "Generated"
     },
     {
       "id": "2ebc6f2e-fad1-592a-9b77-dae51ba3df0b",
@@ -3053,7 +3123,8 @@
       "concentration": 56,
       "leadership": 64,
       "consistency": 62,
-      "workRate": 56
+      "workRate": 56,
+      "dataStatus": "Generated"
     },
     {
       "id": "8de8d1df-fcd4-51bf-834f-44508417dddc",
@@ -3096,7 +3167,8 @@
       "concentration": 56,
       "leadership": 62,
       "consistency": 57,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "10690db3-bced-5e3a-9eea-d08c545ec28b",
@@ -3139,7 +3211,8 @@
       "concentration": 39,
       "leadership": 47,
       "consistency": 48,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "445b2811-cd47-5430-91a1-57f61039755f",
@@ -3182,7 +3255,8 @@
       "concentration": 42,
       "leadership": 42,
       "consistency": 45,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "3e4c8e28-7584-5d3d-a92f-ab40a4dfbc44",
@@ -3225,7 +3299,8 @@
       "concentration": 46,
       "leadership": 47,
       "consistency": 41,
-      "workRate": 45
+      "workRate": 45,
+      "dataStatus": "Generated"
     },
     {
       "id": "f05c655d-2ca6-5bff-b06a-ad40c44b31ee",
@@ -3268,7 +3343,8 @@
       "concentration": 48,
       "leadership": 57,
       "consistency": 50,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "536fd75d-d8de-5c2d-b038-070ae0d7e4df",
@@ -3311,7 +3387,8 @@
       "concentration": 43,
       "leadership": 54,
       "consistency": 46,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "c3961847-81ee-5300-ab92-66f2caa9703d",
@@ -3354,7 +3431,8 @@
       "concentration": 48,
       "leadership": 40,
       "consistency": 49,
-      "workRate": 41
+      "workRate": 41,
+      "dataStatus": "Generated"
     },
     {
       "id": "f32ec14b-510f-5c67-902d-67a97694c1ca",
@@ -3397,7 +3475,8 @@
       "concentration": 54,
       "leadership": 53,
       "consistency": 61,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "4c2a4bb5-f953-523d-8cf3-3d27f6360290",
@@ -3440,7 +3519,8 @@
       "concentration": 57,
       "leadership": 58,
       "consistency": 53,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "e832733c-0ace-5b49-a080-26af0c4acca7",
@@ -3483,7 +3563,8 @@
       "concentration": 48,
       "leadership": 54,
       "consistency": 59,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "e7959670-4191-5c43-b5d7-519c3ec5c818",
@@ -3526,7 +3607,8 @@
       "concentration": 63,
       "leadership": 59,
       "consistency": 54,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "5d006530-e970-5442-9201-bf6dae342efe",
@@ -3569,7 +3651,8 @@
       "concentration": 52,
       "leadership": 62,
       "consistency": 56,
-      "workRate": 55
+      "workRate": 55,
+      "dataStatus": "Generated"
     },
     {
       "id": "bf7cdfaf-fc59-554a-94f7-33afe245ee7b",
@@ -3612,7 +3695,8 @@
       "concentration": 41,
       "leadership": 47,
       "consistency": 40,
-      "workRate": 41
+      "workRate": 41,
+      "dataStatus": "Generated"
     },
     {
       "id": "8ed82948-8915-5001-a3a2-a717c786a38b",
@@ -3655,7 +3739,8 @@
       "concentration": 42,
       "leadership": 45,
       "consistency": 45,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "1407f509-c623-5bbb-adfa-7952fc9db54e",
@@ -3698,7 +3783,8 @@
       "concentration": 45,
       "leadership": 55,
       "consistency": 42,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "96138c19-e3aa-56d6-9f94-b5574050942b",
@@ -3741,7 +3827,8 @@
       "concentration": 43,
       "leadership": 54,
       "consistency": 54,
-      "workRate": 47
+      "workRate": 47,
+      "dataStatus": "Generated"
     },
     {
       "id": "a0244495-df8d-593a-8a5a-81e923487192",
@@ -3784,7 +3871,8 @@
       "concentration": 51,
       "leadership": 49,
       "consistency": 54,
-      "workRate": 40
+      "workRate": 40,
+      "dataStatus": "Generated"
     },
     {
       "id": "bc3c5966-87bb-5961-b3ed-81f35585eefa",
@@ -3827,7 +3915,8 @@
       "concentration": 36,
       "leadership": 45,
       "consistency": 36,
-      "workRate": 37
+      "workRate": 37,
+      "dataStatus": "Generated"
     },
     {
       "id": "7ac3556f-582e-5a50-be99-5c33b5c39a40",
@@ -3870,7 +3959,8 @@
       "concentration": 49,
       "leadership": 58,
       "consistency": 50,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "1a857e33-9f2a-5fe5-bb40-c8f9d0a98069",
@@ -3913,7 +4003,8 @@
       "concentration": 50,
       "leadership": 54,
       "consistency": 52,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "45f1cb60-79c7-5165-8a3c-f28830b95082",
@@ -3956,7 +4047,8 @@
       "concentration": 61,
       "leadership": 53,
       "consistency": 57,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "b7b2b2b8-6734-5265-92d9-ed270fba27a6",
@@ -3999,7 +4091,8 @@
       "concentration": 56,
       "leadership": 51,
       "consistency": 55,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "0a79656e-5133-5a0e-a7da-e089fc127359",
@@ -4042,7 +4135,8 @@
       "concentration": 55,
       "leadership": 58,
       "consistency": 49,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     },
     {
       "id": "b25dc457-0329-52a2-abe0-394213057cb4",
@@ -4085,7 +4179,8 @@
       "concentration": 42,
       "leadership": 44,
       "consistency": 45,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "2062f4a0-0b58-51d1-8470-286680c6e67b",
@@ -4128,7 +4223,8 @@
       "concentration": 48,
       "leadership": 51,
       "consistency": 44,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "40c83aa5-3ec6-584d-ba59-b20b6d539d59",
@@ -4171,7 +4267,8 @@
       "concentration": 44,
       "leadership": 49,
       "consistency": 41,
-      "workRate": 45
+      "workRate": 45,
+      "dataStatus": "Generated"
     },
     {
       "id": "71598d06-0d10-5ecb-969e-c86144174110",
@@ -4214,7 +4311,8 @@
       "concentration": 42,
       "leadership": 41,
       "consistency": 37,
-      "workRate": 43
+      "workRate": 43,
+      "dataStatus": "Generated"
     },
     {
       "id": "b92e0b5b-0f49-596e-89d6-1ce4d3a92389",
@@ -4257,7 +4355,8 @@
       "concentration": 43,
       "leadership": 41,
       "consistency": 45,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "c6fd4816-b1c2-5350-aa4a-b76a3e2bf549",
@@ -4300,7 +4399,8 @@
       "concentration": 45,
       "leadership": 50,
       "consistency": 46,
-      "workRate": 40
+      "workRate": 40,
+      "dataStatus": "Generated"
     },
     {
       "id": "8fd415ed-07f9-5e89-94b7-1d091c9c509c",
@@ -4343,7 +4443,8 @@
       "concentration": 46,
       "leadership": 54,
       "consistency": 51,
-      "workRate": 52
+      "workRate": 52,
+      "dataStatus": "Generated"
     },
     {
       "id": "b5d92dcb-b83f-59b6-9924-33f949c50ee6",
@@ -4386,7 +4487,8 @@
       "concentration": 56,
       "leadership": 58,
       "consistency": 60,
-      "workRate": 60
+      "workRate": 60,
+      "dataStatus": "Generated"
     },
     {
       "id": "e6680aad-9bdd-5c04-893b-4e56e8089e76",
@@ -4429,7 +4531,8 @@
       "concentration": 53,
       "leadership": 53,
       "consistency": 56,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "d41b59de-4760-55d3-a1ac-965f2aef9294",
@@ -4472,7 +4575,8 @@
       "concentration": 52,
       "leadership": 59,
       "consistency": 59,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "10083c9b-b407-5e30-b726-08515dce2de3",
@@ -4515,7 +4619,8 @@
       "concentration": 47,
       "leadership": 59,
       "consistency": 58,
-      "workRate": 53
+      "workRate": 53,
+      "dataStatus": "Generated"
     },
     {
       "id": "160a9316-5801-52c7-8c55-fa9e5c765564",
@@ -4558,7 +4663,8 @@
       "concentration": 38,
       "leadership": 49,
       "consistency": 44,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "2fe8858f-5ad7-58be-8aab-547e0ee1113a",
@@ -4601,7 +4707,8 @@
       "concentration": 46,
       "leadership": 46,
       "consistency": 44,
-      "workRate": 37
+      "workRate": 37,
+      "dataStatus": "Generated"
     },
     {
       "id": "239158a6-c3d4-5067-ab5b-bfceb9d760dd",
@@ -4644,7 +4751,8 @@
       "concentration": 37,
       "leadership": 37,
       "consistency": 35,
-      "workRate": 34
+      "workRate": 34,
+      "dataStatus": "Generated"
     },
     {
       "id": "9b403823-e9e8-5b64-80e1-33fa60d5b0dd",
@@ -4687,7 +4795,8 @@
       "concentration": 37,
       "leadership": 36,
       "consistency": 49,
-      "workRate": 45
+      "workRate": 45,
+      "dataStatus": "Generated"
     },
     {
       "id": "840b3b97-053c-5580-8727-6a3edc546268",
@@ -4730,7 +4839,8 @@
       "concentration": 41,
       "leadership": 37,
       "consistency": 37,
-      "workRate": 38
+      "workRate": 38,
+      "dataStatus": "Generated"
     },
     {
       "id": "2bde1d6b-55a0-5f37-8602-a49877e7c66d",
@@ -4773,7 +4883,8 @@
       "concentration": 32,
       "leadership": 39,
       "consistency": 32,
-      "workRate": 33
+      "workRate": 33,
+      "dataStatus": "Generated"
     },
     {
       "id": "3e70b6a5-183d-5978-8db3-f56bd9b48b7b",
@@ -4816,7 +4927,8 @@
       "concentration": 59,
       "leadership": 54,
       "consistency": 53,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "51e7157e-cd7d-502a-85a9-aca473843330",
@@ -4859,7 +4971,8 @@
       "concentration": 42,
       "leadership": 46,
       "consistency": 52,
-      "workRate": 44
+      "workRate": 44,
+      "dataStatus": "Generated"
     },
     {
       "id": "b03d8bad-5044-57e2-97d0-d0756b672dbf",
@@ -4902,7 +5015,8 @@
       "concentration": 53,
       "leadership": 44,
       "consistency": 44,
-      "workRate": 55
+      "workRate": 55,
+      "dataStatus": "Generated"
     },
     {
       "id": "e819c2a9-0cd7-5846-b291-71ede00f253b",
@@ -4945,7 +5059,8 @@
       "concentration": 52,
       "leadership": 56,
       "consistency": 56,
-      "workRate": 57
+      "workRate": 57,
+      "dataStatus": "Generated"
     },
     {
       "id": "029cfa0a-d537-5eaa-9429-775c0a85ef3a",
@@ -4988,7 +5103,8 @@
       "concentration": 44,
       "leadership": 58,
       "consistency": 47,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "c278715b-18a0-567f-9b3a-d48e75891ea0",
@@ -5031,7 +5147,8 @@
       "concentration": 45,
       "leadership": 34,
       "consistency": 41,
-      "workRate": 39
+      "workRate": 39,
+      "dataStatus": "Generated"
     },
     {
       "id": "a9629b6a-1975-5a14-9587-37d0c0262c56",
@@ -5074,7 +5191,8 @@
       "concentration": 44,
       "leadership": 33,
       "consistency": 38,
-      "workRate": 39
+      "workRate": 39,
+      "dataStatus": "Generated"
     },
     {
       "id": "4a3fa152-11e7-585b-8983-88c16f8cd7e0",
@@ -5117,7 +5235,8 @@
       "concentration": 38,
       "leadership": 39,
       "consistency": 48,
-      "workRate": 37
+      "workRate": 37,
+      "dataStatus": "Generated"
     },
     {
       "id": "bfc24e95-4e9b-55e8-b602-a05f01f0dee9",
@@ -5160,7 +5279,8 @@
       "concentration": 42,
       "leadership": 47,
       "consistency": 39,
-      "workRate": 46
+      "workRate": 46,
+      "dataStatus": "Generated"
     },
     {
       "id": "92bdc501-6f8e-5c2a-aa24-52b3f10ff948",
@@ -5203,7 +5323,8 @@
       "concentration": 47,
       "leadership": 38,
       "consistency": 43,
-      "workRate": 43
+      "workRate": 43,
+      "dataStatus": "Generated"
     },
     {
       "id": "df1336ce-6464-5ceb-8ff0-e37f8e36bc20",
@@ -5246,7 +5367,8 @@
       "concentration": 47,
       "leadership": 45,
       "consistency": 41,
-      "workRate": 37
+      "workRate": 37,
+      "dataStatus": "Generated"
     },
     {
       "id": "2c85e935-01ea-59ea-9413-47cbf21fea3c",
@@ -5289,7 +5411,8 @@
       "concentration": 57,
       "leadership": 53,
       "consistency": 51,
-      "workRate": 48
+      "workRate": 48,
+      "dataStatus": "Generated"
     },
     {
       "id": "a50fb943-5a17-5346-bc0c-a394a26d357e",
@@ -5332,7 +5455,8 @@
       "concentration": 62,
       "leadership": 60,
       "consistency": 54,
-      "workRate": 65
+      "workRate": 65,
+      "dataStatus": "Generated"
     },
     {
       "id": "8e194cd1-0d8c-5786-9d02-4ce021ee308e",
@@ -5375,7 +5499,8 @@
       "concentration": 58,
       "leadership": 45,
       "consistency": 53,
-      "workRate": 50
+      "workRate": 50,
+      "dataStatus": "Generated"
     },
     {
       "id": "c0cd95c6-ba50-5a06-a3f9-77e0728830f7",
@@ -5418,7 +5543,8 @@
       "concentration": 58,
       "leadership": 51,
       "consistency": 61,
-      "workRate": 49
+      "workRate": 49,
+      "dataStatus": "Generated"
     },
     {
       "id": "ab6d0994-1793-5a51-8f4c-1715833dff5c",
@@ -5461,7 +5587,8 @@
       "concentration": 51,
       "leadership": 58,
       "consistency": 62,
-      "workRate": 61
+      "workRate": 61,
+      "dataStatus": "Generated"
     },
     {
       "id": "c1148042-5be4-5a93-838b-ab2d42f54c85",
@@ -5504,7 +5631,8 @@
       "concentration": 62,
       "leadership": 66,
       "consistency": 60,
-      "workRate": 68
+      "workRate": 68,
+      "dataStatus": "Generated"
     },
     {
       "id": "932c25d9-01f5-5dae-9b6a-c58772d2a43b",
@@ -5547,7 +5675,8 @@
       "concentration": 51,
       "leadership": 62,
       "consistency": 61,
-      "workRate": 64
+      "workRate": 64,
+      "dataStatus": "Generated"
     },
     {
       "id": "0b96cb91-e9a0-5d69-aebf-13e3e108d415",
@@ -5590,7 +5719,8 @@
       "concentration": 58,
       "leadership": 57,
       "consistency": 46,
-      "workRate": 51
+      "workRate": 51,
+      "dataStatus": "Generated"
     },
     {
       "id": "5b1bfd3b-4506-52ec-af04-ef2025e13274",
@@ -5633,7 +5763,8 @@
       "concentration": 54,
       "leadership": 48,
       "consistency": 57,
-      "workRate": 43
+      "workRate": 43,
+      "dataStatus": "Generated"
     },
     {
       "id": "2a67fe6c-56c9-5fee-96c9-f44c2fd64267",
@@ -5676,7 +5807,8 @@
       "concentration": 60,
       "leadership": 65,
       "consistency": 66,
-      "workRate": 67
+      "workRate": 67,
+      "dataStatus": "Generated"
     },
     {
       "id": "652996ff-087f-5076-9375-74aef4e45cf8",
@@ -5719,7 +5851,8 @@
       "concentration": 60,
       "leadership": 65,
       "consistency": 58,
-      "workRate": 59
+      "workRate": 59,
+      "dataStatus": "Generated"
     },
     {
       "id": "820cdfc8-efc5-5ac3-a4e2-fc7b3991ff33",
@@ -5762,7 +5895,8 @@
       "concentration": 48,
       "leadership": 47,
       "consistency": 51,
-      "workRate": 54
+      "workRate": 54,
+      "dataStatus": "Generated"
     }
   ],
   "contracts": [
@@ -5773,7 +5907,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 510000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "4758d7d6-3d46-5f8d-a324-a2fd710de39d",
@@ -5782,7 +5917,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 585000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "eca97e0b-c6dd-5f69-a881-d4405bb850c7",
@@ -5791,7 +5927,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 660000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "c0cfec81-20f7-54aa-94ad-d27a3b76fc5a",
@@ -5800,7 +5937,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 660000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "450fe2ae-e135-5551-9fcd-888c8b8d5302",
@@ -5809,7 +5947,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 700000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "15710ecd-56f7-5fda-b5d6-0b2be9d90f77",
@@ -5818,7 +5957,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 275000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "29c5d108-7362-5a43-88b4-2f71c1c6e552",
@@ -5827,7 +5967,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 355000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9be25eba-3d22-5114-84c4-0e18382886a5",
@@ -5836,7 +5977,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 275000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "b0a3ed09-8e66-58de-bac5-257e1cf8e136",
@@ -5845,7 +5987,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 570000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "f1779f14-ec7e-5bc1-8c19-5c3e54c92afd",
@@ -5854,7 +5997,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 420000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "cb9bc556-bcda-53a0-85a5-f48fc8310195",
@@ -5863,7 +6007,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 535000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "295bf723-f51c-59a6-acc2-d76bb71b3c29",
@@ -5872,7 +6017,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 505000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1e69962f-f14c-506d-bf97-79e8a41d8e43",
@@ -5881,7 +6027,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 505000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "ebbe944e-b25d-57a7-a4bc-12b291e6e2e6",
@@ -5890,7 +6037,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 265000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "54c4f6d1-5a29-51c6-96d7-ae7c12fa5776",
@@ -5899,7 +6047,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 205000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "33abc031-cb46-56df-82b9-0f7434f85365",
@@ -5908,7 +6057,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 290000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "144c761f-5b18-54ab-8de7-dc71507f6513",
@@ -5917,7 +6067,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 455000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "a2fb2fe6-70da-5031-a3bf-fc3f578a2909",
@@ -5926,7 +6077,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 635000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "f4bc687b-25f2-5ef8-98a6-a61a6e176317",
@@ -5935,7 +6087,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 425000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "eadea419-8036-58a1-859e-15eec1d32a4d",
@@ -5944,7 +6097,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 455000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "d374dde9-877a-5c94-88a7-7aa602fd8ae0",
@@ -5953,7 +6107,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 595000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5641c4a9-3f2b-5d87-adf3-644e76604d52",
@@ -5962,7 +6117,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 185000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "dc9ffbc9-13f0-5259-82d5-b324babefe73",
@@ -5971,7 +6127,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 280000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3a0f9d73-7a3c-59d6-8ee7-be5053930d99",
@@ -5980,7 +6137,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 280000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "a00f5177-19ee-5fc0-9732-b5f5ed7b590e",
@@ -5989,7 +6147,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 555000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "c209b30a-4735-5c5a-82bb-83eb691c0686",
@@ -5998,7 +6157,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 555000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "fd4aef18-a0e5-5570-9688-99b9754beef6",
@@ -6007,7 +6167,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 600000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "686c6946-df7c-5e64-b70d-d73f4ef52c96",
@@ -6016,7 +6177,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 555000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "38f7d524-d743-5e5e-8960-3f8b67459d81",
@@ -6025,7 +6187,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 600000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3dfad4f6-7c40-517d-9e2f-8cbcfc6824e0",
@@ -6034,7 +6197,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 295000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "e00d4ea7-a8fa-5633-8943-ee1000175244",
@@ -6043,7 +6207,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 325000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5d7160cf-1c29-5973-9600-67a800968d5f",
@@ -6052,7 +6217,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 325000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "f69b2403-9e6c-51ea-bf27-b7a5f232d8b4",
@@ -6061,7 +6227,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 485000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "128ef5ab-c600-5ed4-b857-a32969107840",
@@ -6070,7 +6237,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 570000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5380315d-b620-5fc2-b518-40a576bc0df7",
@@ -6079,7 +6247,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 760000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "86376e2e-1373-5da3-847b-b760868ba88f",
@@ -6088,7 +6257,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 710000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9076fbd7-36bf-5411-bcd7-ded5424766ca",
@@ -6097,7 +6267,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 615000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "f1582b93-919d-51d6-86c2-156b2d51153f",
@@ -6106,7 +6277,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 215000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "e7404577-47aa-544e-bea8-30797b543dc0",
@@ -6115,7 +6287,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 270000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "32256c4e-4b73-5f8b-b4db-e0180731455b",
@@ -6124,7 +6297,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "fe1e4c7f-3b7d-5a59-b36f-5dde06f97e78",
@@ -6133,7 +6307,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 625000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3f6e4e96-b623-5a87-9de4-2e1e9d402992",
@@ -6142,7 +6317,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 495000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "8598fa08-4c0f-5ae2-b6e1-5d720229165d",
@@ -6151,7 +6327,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 675000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9459cbf9-c80a-50ca-bfa8-9fa5c5a1720f",
@@ -6160,7 +6337,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 580000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "c3faca51-ba44-5839-a5fa-5d8bbba0e4a8",
@@ -6169,7 +6347,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 535000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "4db389ee-f881-54f2-bfd6-afc60337dc9c",
@@ -6178,7 +6357,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 245000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "cfecdeb1-74f1-5629-990e-b757d36f255e",
@@ -6187,7 +6367,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 145000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "be3c7ebb-998e-5f2f-9652-1d1ef251e142",
@@ -6196,7 +6377,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "2b8e914a-0670-57ad-82b6-3aeba8f9fdb8",
@@ -6205,7 +6387,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 550000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3d346c13-269e-58ac-93b3-f759e5de2467",
@@ -6214,7 +6397,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 415000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "17f1173b-4de4-502c-ba39-333aa23a2e08",
@@ -6223,7 +6407,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 650000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1a76c2b6-be77-50d4-90cc-8647929fd116",
@@ -6232,7 +6417,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 415000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9e98b15e-1246-5d59-a0a3-d90a01c2809d",
@@ -6241,7 +6427,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 460000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "2c629e41-f3c4-5dea-9ac3-5215014f5613",
@@ -6250,7 +6437,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 265000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "d64c8598-e5d6-54c8-86b7-526e62a0f14b",
@@ -6259,7 +6447,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 265000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1177bd39-b7c2-5ff3-8da7-4c71ac0de68e",
@@ -6268,7 +6457,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 150000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "93201623-a319-5b0c-81dc-3e2846f9988f",
@@ -6277,7 +6467,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 140000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5b376302-db95-5e6e-b557-6bd600ae6e30",
@@ -6286,7 +6477,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 140000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9827d215-d1f3-5c6d-81b6-6e4a3ec06980",
@@ -6295,7 +6487,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 210000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5260c4ae-43e1-55dd-8cc4-dd68d20e5f95",
@@ -6304,7 +6497,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5417b748-88a4-53dd-8040-dd4fd3ab573c",
@@ -6313,7 +6507,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 155000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "b002b5b1-448a-5c9a-adf0-952ca354641d",
@@ -6322,7 +6517,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 85000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1bba46da-7554-52be-a624-2067ce24ab85",
@@ -6331,7 +6527,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 45000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3a11147b-64e6-5864-ae13-45f950b2b958",
@@ -6340,7 +6537,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 45000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "74a91759-27f9-5f10-81ed-de43a4cf5720",
@@ -6349,7 +6547,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 65000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "edc61735-4e87-5a3b-baf8-1401ff0305b0",
@@ -6358,7 +6557,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 100000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "8ac89378-abac-59a1-a151-c30249fd48dc",
@@ -6367,7 +6567,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 65000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "c216e341-4fbb-5832-813b-532577103180",
@@ -6376,7 +6577,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 135000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "da2cc03d-2665-5261-b446-bfd36a1c6f50",
@@ -6385,7 +6587,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 185000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "6a8e484b-faa1-5b9b-9a73-8f39854de953",
@@ -6394,7 +6597,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 185000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "5890546e-9eb0-5284-ab1d-ad164643c4c3",
@@ -6403,7 +6607,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 185000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "12246e0a-05df-5788-84e7-6d51f840eaf9",
@@ -6412,7 +6617,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 150000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "59c84ac0-f010-5062-ac19-94cc16554af6",
@@ -6421,7 +6627,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "ccc9c302-61ef-52ee-b784-fe4523509839",
@@ -6430,7 +6637,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 65000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "987bdf1e-6eee-5afc-bbbb-c7fe9b610166",
@@ -6439,7 +6647,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 65000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "7816efcf-9aef-5fc4-af95-53f1da99090f",
@@ -6448,7 +6657,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 85000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "78f28f25-203f-5d46-9cf4-2e475e840a12",
@@ -6457,7 +6667,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 75000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "cbcfe4dd-a4a5-51f2-95f9-491b71bad6e2",
@@ -6466,7 +6677,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "4e9e3ba0-9246-5e9f-a144-62c2cdb65711",
@@ -6475,7 +6687,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1271b17f-bda2-5a67-ba4c-a6ec0aa14350",
@@ -6484,7 +6697,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 160000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "73f460d8-e4be-5225-b766-37fc115143c2",
@@ -6493,7 +6707,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 130000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "4ccb9881-e4c0-50e2-8478-de57f24af7d3",
@@ -6502,7 +6717,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 175000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "282cbfaf-202f-56cf-91c7-181d4018f9e6",
@@ -6511,7 +6727,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 160000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "820a7a3b-2dec-5c55-8c7c-ec9808d51c1a",
@@ -6520,7 +6737,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "3b471e86-898a-54b8-901d-e78d42038569",
@@ -6529,7 +6747,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 45000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "8ef38459-d4ee-5d1b-880e-1c9e3be28730",
@@ -6538,7 +6757,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 75000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "510c2ccc-8add-5c4f-9e89-1024d278f10c",
@@ -6547,7 +6767,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 75000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9109500a-3ee9-5866-82ff-9ac49af7bbec",
@@ -6556,7 +6777,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 55000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "848c5873-16bb-5a20-a840-e46f014f2b8f",
@@ -6565,7 +6787,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "93777d9e-27c8-5b70-94ed-282738660831",
@@ -6574,7 +6797,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 130000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9f328697-3364-581b-91ba-6b6a7ffaa146",
@@ -6583,7 +6807,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 145000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "d026177a-d262-5803-b858-4d28a41e0d74",
@@ -6592,7 +6817,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 195000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1c513e98-2544-5cf0-b93b-cfe4142c2f5b",
@@ -6601,7 +6827,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 180000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "af2a935a-38ec-593a-957c-0aad3f1f4700",
@@ -6610,7 +6837,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 130000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "fa9a604c-573b-5974-a70b-b2b4b1c513d3",
@@ -6619,7 +6847,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "f74a07da-73d4-5f0f-bb60-7865e11733e9",
@@ -6628,7 +6857,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 65000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "4cdd94c7-520f-59c7-b019-93ec3a5e132d",
@@ -6637,7 +6867,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 55000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9cc118a8-b4d9-5e75-ba1b-feaa68f39c44",
@@ -6646,7 +6877,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "0b0e0a38-ad0e-5ff8-815b-9ccbc0c4b970",
@@ -6655,7 +6887,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "e3b38405-f9f8-5e9c-9fa4-839b0f87c90c",
@@ -6664,7 +6897,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 40000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1a2d8d70-21f3-5da3-9f97-0ec669e02bf1",
@@ -6673,7 +6907,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 115000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1acd2a7b-441f-5edc-adba-91b98b711f8a",
@@ -6682,7 +6917,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "7b2a304d-97fc-5c2a-9bb5-829acae5d3cf",
@@ -6691,7 +6927,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 150000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "e7a539b3-df70-555b-adcb-1af840764a89",
@@ -6700,7 +6937,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 170000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "35228318-8478-55e7-ab0c-69ca5f3b39cd",
@@ -6709,7 +6947,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 170000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "6a31870f-d341-5477-91e4-7592e72c730b",
@@ -6718,7 +6957,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 60000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "b04ba2f0-9a9e-5f00-94db-3431ee3cfc4c",
@@ -6727,7 +6967,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 35000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "143562d8-5775-53af-b1d0-ad2916d1b5f5",
@@ -6736,7 +6977,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "7fab4a08-4674-5936-a29b-b84ebfd8edfa",
@@ -6745,7 +6987,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "982c2dd0-16cf-5fa6-97ea-342108c9786d",
@@ -6754,7 +6997,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "1fbfe0ea-1259-5337-b632-403aac9284ca",
@@ -6763,7 +7007,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "631fd516-1837-574c-a720-d14b3f3bf132",
@@ -6772,7 +7017,8 @@
       "startDate": "2026-07-01",
       "endDate": "2027-06-30",
       "annualSalary": 190000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "53886222-98a1-561e-bd48-b96f0464d43b",
@@ -6781,7 +7027,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 90000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "c63b8308-e656-5cea-b5b9-68601e7aa3d2",
@@ -6790,7 +7037,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 135000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "a034ed2f-4b81-5403-81ce-357acf9aeeaa",
@@ -6799,7 +7047,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 170000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "9c29ebc1-ba69-5874-a321-679f30385fc5",
@@ -6808,7 +7057,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 135000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "08905f14-7dab-52fd-b3f7-911ebe8fa877",
@@ -6817,7 +7067,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "32076ad3-ceb5-52a6-ad2f-2ed25d3c9dad",
@@ -6826,7 +7077,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "43f11f72-d9cb-5b7e-9e4a-d6338fd5c3b8",
@@ -6835,7 +7087,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "cf629bd3-ea2f-5b88-b37d-49a30420d5e9",
@@ -6844,7 +7097,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 50000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "d5a8af85-9daf-574e-bf63-a3ed113fcda4",
@@ -6853,7 +7107,8 @@
       "startDate": "2026-07-01",
       "endDate": "2028-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     },
     {
       "id": "6b00dd08-8bca-5154-aa67-bccb59e927e2",
@@ -6862,7 +7117,8 @@
       "startDate": "2026-07-01",
       "endDate": "2029-06-30",
       "annualSalary": 30000,
-      "paymentFrequency": "Monthly"
+      "paymentFrequency": "Monthly",
+      "dataStatus": "Generated"
     }
   ]
 }

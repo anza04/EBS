@@ -1,14 +1,17 @@
-"""Generates data/europe/europe-2026-27.json: the Step 15 European league dataset.
+"""Generates the European dataset in data/europe: europe-2026-27.json (Step 15: countries, leagues, competitions,
+clubs, entries) and the Step 16 player database (players, contracts and club history as CSV files).
 
 Competition names, division hierarchy, formats, promotion/relegation and registration limits follow the official
-competitions (docs/COUNTRY_REPORT.md lists the verification status). Clubs are fictional placeholders named after
-real cities, until the real-world database of Step 16. Deterministic: the same script always writes the same file
+competitions (docs/COUNTRY_REPORT.md lists the verification status). Top-division clubs are the real clubs, marked
+Unverified; second-division clubs are fictional placeholders named after real cities (Generated). Players are
+fictional (Generated): docs/PLAYER_DATABASE.md. Deterministic: the same script always writes the same files
 (UUID v5 IDs, seeded numbers). Run: python build/generate-europe-dataset.py
 """
+import csv
 import json
 import random
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 NS = uuid.UUID("5b0f3c8e-6d1a-4f44-9a57-0e5d2f7c1b15")
@@ -195,6 +198,163 @@ def board(level, rank, size, div):
     return "WinPromotion" if rank < 3 else ("ReachPlayoffs" if div["po"] and rank < div["po"]["teams"] else "MidTable")
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Step 16: real clubs (top divisions, Unverified) and generated players, contracts and club history (Generated).
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Real clubs of each top division, strongest first ("name|short name|city"); names without sponsors where the club is
+# commonly known without one. Unverified: compiled from 2025-26 knowledge, not checked against 2026-27 registrations.
+REAL_CLUBS = {
+    "Lega Basket Serie A": "Olimpia Milano|MIL|Milano; Virtus Bologna|VBO|Bologna; Reyer Venezia|VEN|Venezia; Aquila Basket Trento|TRE|Trento; Basket Brescia Leonessa|BRE|Brescia; Trapani Shark|TRA|Trapani; Dinamo Sassari|SAS|Sassari; Pallacanestro Reggiana|REG|Reggio Emilia; Derthona Basket|DER|Tortona; Pallacanestro Trieste|TRI|Trieste; Napoli Basket|NAP|Napoli; Pallacanestro Varese|VAR|Varese; Vanoli Basket Cremona|CRE|Cremona; Universo Treviso Basket|TRV|Treviso; Pallacanestro Cantù|CAN|Cantù; APU Udine|UDI|Udine",
+    "Liga Endesa": "Real Madrid|RMB|Madrid; FC Barcelona|FCB|Barcelona; Valencia Basket|VAL|Valencia; Unicaja|UNI|Málaga; Saski Baskonia|BKN|Vitoria-Gasteiz; CB Canarias|CAN|San Cristóbal de La Laguna; CB Gran Canaria|GCA|Las Palmas de Gran Canaria; Club Joventut Badalona|JOV|Badalona; UCAM Murcia CB|MUR|Murcia; CB Breogán|BRE|Lugo; Bàsquet Girona|GIR|Girona; Bàsquet Manresa|MAN|Manresa; Basket Zaragoza|ZAR|Zaragoza; Bilbao Basket|BIL|Bilbao; BC Andorra|AND|Andorra la Vella; Força Lleida|LLE|Lleida; Fundación CB Granada|GRA|Granada; CB San Pablo Burgos|BUR|Burgos",
+    "easyCredit BBL": "FC Bayern München|FCB|München; ALBA Berlin|ALB|Berlin; Ratiopharm Ulm|ULM|Ulm; Telekom Baskets Bonn|BON|Bonn; Würzburg Baskets|WUE|Würzburg; Niners Chemnitz|CHE|Chemnitz; Riesen Ludwigsburg|LUD|Ludwigsburg; Bamberg Baskets|BAM|Bamberg; Rostock Seawolves|ROS|Rostock; Hamburg Towers|HAM|Hamburg; Baskets Oldenburg|OLD|Oldenburg; Academics Heidelberg|HEI|Heidelberg; Mitteldeutscher BC|MBC|Weißenfels; Basketball Löwen Braunschweig|BRA|Braunschweig; Science City Jena|JEN|Jena; Skyliners Frankfurt|FRA|Frankfurt; Rasta Vechta|VEC|Vechta; Gladiators Trier|TRI|Trier",
+    "Betclic ÉLITE": "Paris Basketball|PAR|Paris; AS Monaco Basket|MON|Monaco; ASVEL Lyon-Villeurbanne|ASV|Villeurbanne; JL Bourg|JLB|Bourg-en-Bresse; Nanterre 92|NAN|Nanterre; SIG Strasbourg|SIG|Strasbourg; JDA Dijon|DIJ|Dijon; Cholet Basket|CHO|Cholet; Le Mans Sarthe Basket|MSB|Le Mans; Limoges CSP|CSP|Limoges; BCM Gravelines-Dunkerque|BCM|Gravelines; ESSM Le Portel|ESS|Le Portel; Saint-Quentin Basket-Ball|SQB|Saint-Quentin; Élan Béarnais|EBP|Pau; Boulazac Basket Dordogne|BBD|Boulazac; SLUC Nancy|SLU|Nancy",
+    "Stoiximan GBL": "Olympiacos|OLY|Peiraiás; Panathinaikos|PAO|Athína; AEK Athens|AEK|Athína; PAOK|PAOK|Thessaloníki; Aris Thessaloniki|ARI|Thessaloníki; Peristeri|PER|Peristéri; Promitheas Patras|PRO|Pátra; Kolossos Rhodes|KOL|Rhódos; Maroussi|MAR|Maroússi; Karditsa|KAR|Kardítsa; Panionios|PAN|Néa Smýrni; Lavrio|LAV|Lávrio",
+    "Basketbol Süper Ligi": "Fenerbahçe|FEN|İstanbul; Anadolu Efes|EFS|İstanbul; Beşiktaş|BJK|İstanbul; Galatasaray|GS|İstanbul; Türk Telekom|TTK|Ankara; Bahçeşehir Koleji|BAH|İstanbul; Karşıyaka|KSK|İzmir; Tofaş|TOF|Bursa; Manisa Basket|MAN|Manisa; Aliağa Petkimspor|PET|İzmir; Trabzonspor|TS|Trabzon; Mersinspor|MER|Mersin; Bursaspor|BUR|Bursa; Büyükçekmece Basketbol|BCB|İstanbul; Esenler Erokspor|ERO|İstanbul; Merkezefendi Belediyesi|MRK|Denizli",
+    "Super League Basketball": "London Lions|LON|London; Leicester Riders|LEI|Leicester; Sheffield Sharks|SHE|Sheffield; Cheshire Phoenix|CHE|Ellesmere Port; Bristol Flyers|BRI|Bristol; Caledonia Gladiators|CAL|East Kilbride; Newcastle Eagles|NEW|Newcastle; Manchester Basketball|MAN|Manchester; Surrey Scorchers|SUR|Guildford; Plymouth City Patriots|PLY|Plymouth",
+    "Betsafe-LKL": "Žalgiris Kaunas|ZAL|Kaunas; Rytas Vilnius|RYT|Vilnius; Lietkabelis Panevėžys|LIE|Panevėžys; Neptūnas Klaipėda|NEP|Klaipėda; BC Šiauliai|SIA|Šiauliai; Juventus Utena|JUV|Utena; Wolves Vilnius|WOL|Vilnius; CBet Jonava|JON|Jonava; Gargždai|GAR|Gargždai; Nevėžis Kėdainiai|NEV|Kėdainiai",
+    "Košarkaška liga Srbije": "Crvena zvezda|CZV|Beograd; Partizan|PAR|Beograd; Mega Basket|MEG|Beograd; FMP|FMP|Beograd; Borac Čačak|BOR|Čačak; Spartak Subotica|SPA|Subotica; Zlatibor|ZLA|Čajetina; Sloga Kraljevo|SLO|Kraljevo; Vojvodina|VOJ|Novi Sad; Radnički Kragujevac|RAD|Kragujevac; Metalac Valjevo|MET|Valjevo; Novi Pazar|NPZ|Novi Pazar; Dynamic Beograd|DYN|Beograd; Mladost Zemun|MLA|Beograd; Tamiš Pančevo|TAM|Pančevo; OKK Beograd|OKK|Beograd",
+    "Premijer liga": "Cibona|CIB|Zagreb; KK Zadar|ZAD|Zadar; KK Split|SPL|Split; Cedevita Junior|CED|Zagreb; GKK Šibenik|SIB|Šibenik; Alkar Sinj|ALK|Sinj; Gorica|GOR|Velika Gorica; Dubrava|DUB|Zagreb; KK Osijek|OSI|Osijek; Zabok|ZAB|Zabok; Sonik Puntamika|SON|Zadar; Kvarner Rijeka|KVA|Rijeka",
+    "Liga Nova KBM": "Cedevita Olimpija|OLI|Ljubljana; Krka Novo mesto|KRK|Novo Mesto; Helios Suns|HEL|Domžale; Šentjur|SEN|Šentjur; Ilirija|ILI|Ljubljana; Rogaška|ROG|Rogaška Slatina; Zlatorog Laško|ZLA|Laško; Hopsi Polzela|HOP|Polzela; Triglav Kranj|TRI|Kranj; Terme Olimia Podčetrtek|POD|Podčetrtek",
+    "BNXT League": "Filou Oostende|OOS|Oostende; Antwerp Giants|ANT|Antwerpen; Mons-Hainaut|MON|Mons; Spirou Charleroi|SPI|Charleroi; Liège Basket|LIE|Liège; Kangoeroes Mechelen|KAN|Mechelen; Okapi Aalst|OKA|Aalst; Limburg United|LIM|Hasselt; Brussels Basketball|BRU|Bruxelles; Leuven Bears|LEU|Leuven; ZZ Leiden|ZZL|Leiden; Heroes Den Bosch|HER|Den Bosch; Landstede Hammers|LAN|Zwolle; Donar Groningen|DON|Groningen; Feyenoord Basketball|FEY|Rotterdam; Yoast United|YOA|Bemmel; BAL Weert|BAL|Weert; Den Helder Suns|DHS|Den Helder; Dutch Windmills|DWM|Dordrecht; Aris Leeuwarden|ARL|Leeuwarden",
+    "Liga Betclic": "SL Benfica|SLB|Lisboa; FC Porto|FCP|Porto; Sporting CP|SCP|Lisboa; Imortal Basket|IMO|Albufeira; UD Oliveirense|OLI|Oliveira de Azeméis; Ovarense|OVA|Ovar; Vitória SC|VSC|Guimarães; Esgueira|ESG|Aveiro; Galitos Barreiro|GAL|Barreiro; CD Póvoa|POV|Póvoa de Varzim; Illiabum Clube|ILL|Ílhavo; CA Queluz|QUE|Queluz; SC Braga|BRA|Braga; Lusitânia|LUS|Angra do Heroísmo",
+    "Orlen Basket Liga": "Trefl Sopot|TRE|Sopot; King Szczecin|KIN|Szczecin; Anwil Włocławek|ANW|Włocławek; Legia Warszawa|LEG|Warszawa; Śląsk Wrocław|SLA|Wrocław; Start Lublin|STA|Lublin; Stal Ostrów Wielkopolski|STL|Ostrów Wielkopolski; Arka Gdynia|ARK|Gdynia; Czarni Słupsk|CZA|Słupsk; MKS Dąbrowa Górnicza|MKS|Dąbrowa Górnicza; Spójnia Stargard|SPO|Stargard; Górnik Wałbrzych|GOR|Wałbrzych; Dziki Warszawa|DZI|Warszawa; Zastal Zielona Góra|ZAS|Zielona Góra; Twarde Pierniki Toruń|TOR|Toruń; Kotwica Kołobrzeg|KOT|Kołobrzeg",
+    "Kooperativa NBL": "ERA Nymburk|NYM|Nymburk; BK Opava|OPA|Opava; USK Praha|USK|Praha; BK Pardubice|PAR|Pardubice; BK Děčín|DEC|Děčín; Basket Brno|BRN|Brno; NH Ostrava|OST|Ostrava; BC Kolín|KOL|Kolín; Sluneta Ústí nad Labem|UST|Ústí nad Labem; Hradec Králové|HKR|Hradec Králové; BK Olomoucko|OLO|Prostějov; Svitavy|SVI|Svitavy",
+    "Korisliiga": "Karhu Kauhajoki|KAR|Kauhajoki; Kataja Basket|KAT|Joensuu; Salon Vilpas|VIL|Salo; Helsinki Seagulls|SEA|Helsinki; Tampereen Pyrintö|PYR|Tampere; Kobrat|KOB|Lapua; Bisons Loimaa|BIS|Loimaa; KTP-Basket|KTP|Kotka; Kouvot|KOU|Kouvola; Lahti Basketball|LAH|Lahti; Ura Basket|URA|Kaarina; Tapiolan Honka|HON|Espoo",
+    "Basketligan": "Norrköping Dolphins|NOR|Norrköping; BC Luleå|LUL|Luleå; Borås Basket|BOR|Borås; Södertälje Kings|SOD|Södertälje; Uppsala Basket|UPP|Uppsala; Köping Stars|KOP|Köping; Nässjö Basket|NAS|Nässjö; Jämtland Basket|JAM|Östersund; Umeå BSKT|UME|Umeå; Malbas|MAL|Malmö; Djurgårdens IF|DIF|Stockholm; Alvik Basket|ALV|Stockholm",
+}
+
+# Nationalities without a league in the dataset (foreign players). Code: (name, EU/EEA/CH).
+EXTRA_COUNTRIES = {"USA": ("United States", False)}
+
+# Name pools for generated players ("first names; last names"; '_' joins a multi-word name). Common names only.
+NAMES = {
+    "ITA": "Marco Luca Matteo Andrea Alessandro Davide Simone Federico Lorenzo Riccardo Nicola Stefano Giacomo Tommaso Francesco Gabriele Leonardo Pietro Diego Michele; Rossi Bianchi Ferrari Russo Romano Colombo Ricci Marino Greco Bruno Gallo Conti De_Luca Mancini Costa Giordano Rizzo Lombardi Moretti Barbieri Fontana Santoro Mariani Rinaldi Caruso Ferri Galli Martini Leone Longo",
+    "ESP": "Alejandro Pablo Sergio Javier Daniel Adrián Álvaro Carlos Diego Jorge Marc Pau Iván Rubén Mario Hugo Guillermo Raúl Víctor Alberto; García Fernández González Rodríguez López Martínez Sánchez Pérez Gómez Martín Jiménez Ruiz Hernández Díaz Moreno Muñoz Álvarez Romero Navarro Torres Domínguez Vázquez Ramos Gil Serrano Blanco Molina Morales Suárez Ortega",
+    "GER": "Lukas Jonas Leon Finn Niklas Paul Felix Jan Tim Moritz Maximilian Julian Tobias David Philipp Johannes Simon Fabian Florian Benedikt; Müller Schmidt Schneider Fischer Weber Meyer Wagner Becker Schulz Hoffmann Koch Richter Klein Wolf Schröder Neumann Schwarz Zimmermann Braun Krüger Hofmann Hartmann Lange Schmitt Werner Krause Meier Lehmann Köhler Kaiser",
+    "FRA": "Hugo Lucas Théo Nathan Louis Mathis Enzo Tom Maxime Antoine Thomas Clément Alexandre Baptiste Paul Quentin Romain Julien Yanis Bastien; Martin Bernard Dubois Thomas Robert Richard Petit Durand Leroy Moreau Simon Laurent Lefebvre Michel Garcia David Bertrand Roux Vincent Fournier Morel Girard André Mercier Dupont Lambert Bonnet François Legrand Faure",
+    "GRE": "Georgios Dimitrios Konstantinos Ioannis Nikolaos Panagiotis Vasileios Christos Athanasios Michail Evangelos Spyridon Antonios Ilias Stavros Theodoros Alexandros Emmanouil Charalampos Petros; Papadopoulos Papadakis Nikolaidis Georgiou Karagiannis Vasileiou Dimitriou Konstantinidis Ioannou Pappas Oikonomou Makris Christodoulou Antoniou Anagnostou Theodorou Alexiou Kyriakou Michailidis Panagiotopoulos Stavropoulos Athanasiou Mavridis Karalis Lazaridis Sotiriou Petridis Zervas Raptis Galanis",
+    "TUR": "Mehmet Mustafa Ahmet Ali Hüseyin Hasan İbrahim Emre Burak Can Kerem Yusuf Ömer Furkan Berk Arda Onur Doğukan Sertaç Tolga; Yılmaz Kaya Demir Şahin Çelik Yıldız Yıldırım Öztürk Aydın Özdemir Arslan Doğan Kılıç Aslan Çetin Kara Koç Kurt Özkan Şimşek Polat Erdem Korkmaz Güneş Aksoy Bulut Turan Karaca Ünal Tekin",
+    "GBR": "Oliver Harry George Jack Jacob Charlie Thomas Oscar William James Joshua Alfie Callum Ryan Kyle Jordan Liam Daniel Connor Ethan; Smith Jones Williams Taylor Brown Davies Evans Wilson Thomas Johnson Roberts Robinson Thompson Wright Walker White Edwards Hughes Green Hall Lewis Harris Clarke Patel Jackson Wood Turner Martin Cooper Hill",
+    "LTU": "Lukas Matas Jonas Mantas Tomas Dovydas Paulius Rokas Martynas Arnas Ignas Marius Deividas Justinas Domantas Gytis Karolis Vytautas Laurynas Eimantas; Kazlauskas Jankauskas Petrauskas Stankevičius Vasiliauskas Žukauskas Butkus Paulauskas Urbonas Kavaliauskas Navickas Ramanauskas Savickas Rimkus Baranauskas Sakalauskas Žemaitis Valančius Mockus Lukoševičius Bieliauskas Grigas Adomaitis Jonaitis Kairys Gudaitis Mažeika Norkus Bružas Šimkus",
+    "SRB": "Nikola Stefan Marko Luka Aleksa Lazar Filip Nemanja Miloš Đorđe Vuk Ognjen Dušan Uroš Bogdan Vladimir Strahinja Mihajlo Andrija Petar; Jovanović Petrović Nikolić Marković Đorđević Stojanović Ilić Stanković Pavlović Milošević Popović Kostić Simić Lukić Mitrović Todorović Živković Ristić Kovačević Savić Tomić Đukić Vasić Milovanović Marinković Babić Lazić Radović Janković Stevanović",
+    "CRO": "Luka Ivan Marko Josip Mateo Petar Filip Karlo Ante Dario Mario Tomislav Domagoj Nikola Antonio Matej Roko Lovro Fran Bruno; Horvat Kovačević Babić Marić Jurić Novak Kovačić Knežević Vuković Marković Petrović Matić Tomić Pavlović Božić Blažević Grgić Perić Šarić Radić Lovrić Vidović Perković Bošnjak Pavić Barišić Rukavina Jukić Brkić Šimić",
+    "SLO": "Luka Jan Žiga Nejc Matej Tilen Jaka Anže Gašper Rok Miha Blaž Klemen Aljaž Žan Urban Tim Martin Jure David; Novak Horvat Kovačič Krajnc Zupančič Potočnik Kovač Mlakar Kos Vidmar Golob Turk Kralj Zupan Bizjak Hribar Kozole Korošec Rozman Kotnik Oblak Petek Žagar Kolar Hočevar Košir Koren Klemenčič Zajc Medved",
+    "BEL": "Lucas Noah Arthur Louis Liam Adam Jules Victor Mathis Nathan Thomas Lars Wout Senne Milan Arne Robbe Jens Bram Kobe; Peeters Janssens Maes Jacobs Mertens Willems Claes Goossens Wouters Dubois Lambert Dupont Martens Vermeulen Hermans Leclercq Pauwels Michiels Desmet Smets Cools Verstraeten Aerts Bogaert Lemaire Declercq Wauters Renard Hendrickx Lemmens",
+    "NED": "Daan Sem Lucas Levi Finn Milan Bram Thijs Jesse Ruben Lars Stijn Sven Jasper Tim Koen Niels Luuk Joris Thomas; De_Jong Jansen De_Vries Van_den_Berg Bakker Visser Smit Meijer De_Boer Mulder De_Groot Bos Vos Peters Hendriks Van_Leeuwen Dekker Brouwer De_Wit Dijkstra Smits De_Graaf Van_der_Meer Kok Jacobs Vermeulen Van_den_Broek Willems Schouten Janssen",
+    "POR": "João Francisco Martim Rodrigo Santiago Tomás Afonso Duarte Miguel Gonçalo Diogo Pedro Rafael Tiago Gabriel Bernardo Rúben André Bruno Nuno; Silva Santos Ferreira Pereira Oliveira Costa Rodrigues Martins Jesus Sousa Fernandes Gonçalves Gomes Lopes Marques Alves Almeida Ribeiro Pinto Carvalho Teixeira Moreira Correia Mendes Nunes Soares Vieira Monteiro Cardoso Rocha",
+    "POL": "Jakub Kacper Szymon Filip Jan Antoni Mateusz Bartosz Michał Wojciech Kamil Mikołaj Adam Piotr Łukasz Paweł Tomasz Dawid Krzysztof Igor; Nowak Kowalski Wiśniewski Wójcik Kowalczyk Kamiński Lewandowski Zieliński Szymański Woźniak Dąbrowski Kozłowski Jankowski Mazur Kwiatkowski Krawczyk Piotrowski Grabowski Nowakowski Pawłowski Michalski Nowicki Adamczyk Dudek Zając Wieczorek Jabłoński Król Majewski Olszewski",
+    "CZE": "Jakub Jan Tomáš Matěj Adam Ondřej Vojtěch Lukáš Filip David Martin Petr Michal Daniel Šimon Dominik Patrik Marek Josef Václav; Novák Svoboda Novotný Dvořák Černý Procházka Kučera Veselý Horák Němec Marek Pokorný Pospíšil Hájek Jelínek Král Růžička Beneš Fiala Sedláček Doležal Zeman Kolář Navrátil Čermák Vaněk Urban Blažek Kříž Kovář",
+    "FIN": "Juho Eetu Elias Onni Aleksi Veeti Lauri Joona Niko Mikko Antti Ville Joonas Sami Teemu Jani Oskari Valtteri Tuomas Arttu; Korhonen Virtanen Mäkinen Nieminen Mäkelä Hämäläinen Laine Heikkinen Koskinen Järvinen Lehtonen Lehtinen Saarinen Salminen Heinonen Niemi Heikkilä Kinnunen Salonen Turunen Salo Laitinen Tuominen Rantanen Karjalainen Jokinen Mattila Savolainen Lahtinen Ahonen",
+    "SWE": "William Lucas Liam Elias Hugo Oliver Alexander Noah Adam Filip Oscar Viktor Erik Isak Anton Axel Emil Gustav Albin Linus; Andersson Johansson Karlsson Nilsson Eriksson Larsson Olsson Persson Svensson Gustafsson Pettersson Jonsson Jansson Hansson Bengtsson Jönsson Lindberg Jakobsson Magnusson Olofsson Lindström Lindqvist Lindgren Berg Axelsson Bergström Lundberg Lundgren Mattsson Berglund",
+    "USA": "James Michael Chris Brandon Justin Tyler Jalen Marcus Darius Isaiah Jordan Kevin Malik Trey Andre Devin Jaylen Cameron Terrence Xavier Jamal Elijah Caleb Jarrett Kendall Quentin Myles Damon Reggie Corey; Johnson Williams Brown Jones Davis Miller Wilson Moore Taylor Anderson Thomas Jackson White Harris Martin Thompson Robinson Clark Lewis Walker Allen Young King Wright Scott Green Baker Adams Nelson Carter Mitchell Roberts Turner Phillips Campbell Parker Evans Edwards Collins Stewart Morris Reed Cook Bell Murphy Bailey Cooper Richardson Cox Howard",
+}
+
+# Mirrors Ebm.Domain.Players.PositionProfile and PlayerCatalog (attribute order and categories).
+ATTRIBUTES = [("closeShot", "S"), ("midRange", "S"), ("threePoint", "S"), ("freeThrow", "S"), ("layup", "F"), ("dunk", "F"),
+              ("postMoves", "F"), ("passing", "P"), ("courtVision", "P"), ("ballHandling", "P"), ("decisionMaking", "P"),
+              ("perimeterDefense", "D"), ("interiorDefense", "D"), ("steal", "D"), ("block", "D"), ("defensivePositioning", "D"),
+              ("offensiveRebound", "R"), ("defensiveRebound", "R"), ("speed", "X"), ("strength", "X"), ("vertical", "X"),
+              ("agility", "X"), ("stamina", "X"), ("concentration", "M"), ("leadership", "M"), ("consistency", "M"), ("workRate", "M")]
+PROFILES = {"PG": (186, 84, {"P": 10, "R": -10, "F": -4}), "SG": (194, 90, {"S": 8, "R": -6}), "SF": (200, 96, {}),
+            "PF": (205, 104, {"R": 8, "F": 4, "P": -6}), "C": (211, 112, {"R": 10, "F": 6, "S": -10, "P": -10})}
+SQUAD_POSITIONS = ["PG", "SG", "SF", "PF", "C", "PG", "SG", "SF", "PF", "C", "SG", "PF"]  # starters first
+SQUAD_SIZE = len(SQUAD_POSITIONS)
+CONTRACT_SEASON = date(2026, 7, 1)  # contracts start on 1 July and end on 30 June
+PLAYERS_FILE, CONTRACTS_FILE, HISTORY_FILE = "players-europe-2026-27.csv", "contracts-europe-2026-27.csv", "playerHistory-europe-2026-27.csv"
+
+
+def composition(div, level):
+    """Domestic, EU-foreign and non-EU players of a 12-man squad that satisfies the division's registration limits."""
+    squad = div["squad"] or {}
+    domestic = max(6 if level == 1 else 9, squad.get("minDomesticPlayers", 0))
+    if "maxForeignPlayers" in squad:
+        domestic = max(domestic, SQUAD_SIZE - squad["maxForeignPlayers"])
+    foreign = SQUAD_SIZE - domestic
+    non_eu = min(foreign, squad.get("maxNonEuPlayers", 4 if level == 1 else 2))
+    return domestic, foreign - non_eu, non_eu
+
+
+class PlayerFactory:
+    def __init__(self, rnd, countries):
+        self.rnd = rnd
+        self.eu = [c for c, (_, eu) in countries.items() if eu]
+        self.names = {c: ([n.replace("_", " ") for n in v.split(";")[0].split()], [n.replace("_", " ") for n in v.split(";")[1].split()])
+                      for c, v in NAMES.items()}
+        self.born = {}  # (first, last) -> birth dates: no two players share a name with birth dates within 400 days
+
+    def name(self, nationality):
+        firsts, lasts = self.names[nationality]
+        while True:
+            first, last = self.rnd.choice(firsts), self.rnd.choice(lasts)
+            age = min(35, max(19, int(self.rnd.triangular(19, 35, 26))))
+            birth = date(CONTRACT_SEASON.year - age, 1, 1) + timedelta(days=self.rnd.randint(0, 364))
+            dates = self.born.setdefault((first, last), [])
+            if all(abs((birth - d).days) > 400 for d in dates):
+                dates.append(birth)
+                return first, last, birth
+
+    def create(self, nationality, position, quality, second=None):
+        rnd = self.rnd
+        first, last, birth = self.name(nationality)
+        height, weight, offsets = PROFILES[position]
+        age = CONTRACT_SEASON.year - birth.year
+        player = {"id": uid("player", first, last, birth.isoformat()), "firstName": first, "lastName": last,
+                  "dateOfBirth": birth.isoformat(), "nationality": nationality, "secondNationality": second or "",
+                  "heightCm": height + rnd.randint(-5, 5), "weightKg": weight + rnd.randint(-6, 6), "position": position}
+        player["wingspanCm"] = player["heightCm"] + rnd.randint(0, 9)
+        for name, category in ATTRIBUTES:
+            player[name] = min(95, max(20, quality + offsets.get(category, 0) + rnd.randint(-6, 6)))
+        player["experience"] = min(100, max(1, 5 + (age - 18) * 4 + quality // 5))
+        player["reputation"] = min(100, max(1, quality - 25 + rnd.randint(-4, 4)))
+        player["potential"] = min(95, max(quality, quality + (27 - age) * 2) + rnd.randint(0, 4))
+        player["dataStatus"] = "Generated"
+        return player
+
+
+def add_players(data, clubs_by_country, rnd):
+    """Twelve generated players per club with a contract, and a past club spell for some of them."""
+    countries = {c["code"]: (c["name"], c["euEea"]) for c in data["countries"]}
+    factory = PlayerFactory(rnd, countries)
+    players, contracts, history = [], [], []
+    for club, div, level in data["_club_divisions"]:
+        home = club["country"]
+        domestic, eu_foreign, non_eu = composition(div, level)
+        eu_pool = [c for c in factory.eu if c != home]
+        # Foreign players take the best squad places, as in most European clubs.
+        nationalities = [("SRB" if home != "SRB" and rnd.random() < 0.15 else "USA", None) for _ in range(non_eu)]
+        nationalities += [("USA", rnd.choice(eu_pool)) if rnd.random() < 0.3 else (rnd.choice(eu_pool), None) for _ in range(eu_foreign)]
+        nationalities += [(home, None)] * domestic
+        base = 30 + club["reputation"] * 0.42
+        wage_pool = club["wageBudget"] * 0.8
+        weights = [1.6 - i * 0.1 for i in range(SQUAD_SIZE)]
+        for slot, (position, (nationality, second)) in enumerate(zip(SQUAD_POSITIONS, nationalities)):
+            quality = round(base + 8 - slot * 1.4 + rnd.randint(-3, 3))
+            player = factory.create(nationality, position, quality, second)
+            players.append(player)
+            start = date(CONTRACT_SEASON.year - rnd.choice([0, 0, 1, 2]), 7, 1)
+            end = date(max(CONTRACT_SEASON.year + 1, start.year + rnd.randint(1, 3)), 6, 30)
+            contracts.append({"id": uid("contract", player["id"], start.isoformat()), "clubId": club["id"], "playerId": player["id"],
+                              "startDate": start.isoformat(), "endDate": end.isoformat(),
+                              "annualSalary": int(round(wage_pool * weights[slot] / sum(weights), -3)), "dataStatus": "Generated"})
+            age = CONTRACT_SEASON.year - int(player["dateOfBirth"][:4])
+            former = [c for c in clubs_by_country.get(nationality, []) if c["id"] != club["id"]]
+            if age >= 22 and former and rnd.random() < 0.35:
+                previous = rnd.choice(former)
+                spell_end = start - timedelta(days=1)
+                spell_start = date(spell_end.year - rnd.randint(1, 3), 7, 1)
+                history.append({"id": uid("spell", player["id"], previous["id"], spell_start.isoformat()), "playerId": player["id"],
+                                "clubId": previous["id"], "startDate": spell_start.isoformat(), "endDate": spell_end.isoformat()})
+    return players, contracts, history
+
+
+def write_csv(path, rows):
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def main():
     rnd = random.Random(15)
     season = {"id": uid("season", "2026-27"), "name": "2026-27", "startDate": SEASON_START.isoformat(), "endDate": SEASON_END.isoformat()}
@@ -202,6 +362,9 @@ def main():
             "competitions": [], "seasons": [season], "participants": []}
     for code, (name, eu, _, _) in COUNTRIES.items():
         data["countries"].append({"code": code, "name": name, "euEea": eu})
+    for code, (name, eu) in EXTRA_COUNTRIES.items():
+        data["countries"].append({"code": code, "name": name, "euEea": eu})
+    club_divisions = []
 
     used_cities = {code: 0 for code in COUNTRIES}
     nick_index = 0
@@ -220,6 +383,8 @@ def main():
             data["competitions"].append(competition)
 
             homes = [c for c in (div["countries"] or [country]) for _ in range(div["clubs"] // len(div["countries"] or [country]))]
+            real = [entry.split("|") for entry in REAL_CLUBS[div["name"]].split("; ")] if level == 1 and div["name"] in REAL_CLUBS else None
+            assert real is None or len(real) == div["clubs"], f"{div['name']}: {len(real)} real clubs for {div['clubs']} places"
             for rank, home in enumerate(homes):
                 cities = COUNTRIES[home][3]
                 city = cities[used_cities[home] % len(cities)]
@@ -230,22 +395,41 @@ def main():
                 within = rank if not div["countries"] else rank // len(div["countries"])
                 reputation = max(10, strength - within * 3 + rnd.randint(-2, 2))
                 wage = round(reputation ** 3 * 12 / 1000) * 1000
-                club = {"id": uid("club", home, city, nickname), "name": f"{city} {nickname}",
-                        "shortName": (city[:3] + nickname[:1]).upper(), "country": home, "city": city,
+                if real:
+                    name, short, city = real[rank]
+                    identity = {"id": uid("club", home, name), "name": name, "shortName": short, "country": home, "city": city, "dataStatus": "Unverified"}
+                else:
+                    identity = {"id": uid("club", home, city, nickname), "name": f"{city} {nickname}",
+                                "shortName": (city[:3] + nickname[:1]).upper(), "country": home, "city": city, "dataStatus": "Generated"}
+                club = {**identity,
                         "foundedYear": rnd.randint(1920, 2010), "reputation": reputation,
                         "balance": round(wage * rnd.uniform(0.2, 0.6), -3), "wageBudget": wage,
                         "boardExpectation": board(level, within if not div["countries"] else rank, div["clubs"], div)}
                 data["clubs"].append(club)
+                club_divisions.append((club, div, level))
                 data["participants"].append({"id": uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
                                              "seasonId": season["id"], "clubId": club["id"]})
 
     assert len({c["id"] for c in data["clubs"]}) == len(data["clubs"]), "duplicate club"
     for club in data["clubs"]:
         club["balance"] = int(club["balance"])
-    out = Path(__file__).resolve().parent.parent / "data" / "europe" / "europe-2026-27.json"
-    out.parent.mkdir(exist_ok=True)
-    out.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(f"{out}: {len(data['countries'])} countries, {len(data['leagues'])} leagues, {len(data['competitions'])} competitions, {len(data['clubs'])} clubs")
+    clubs_by_country = {}
+    for club in data["clubs"]:
+        clubs_by_country.setdefault(club["country"], []).append(club)
+    data["_club_divisions"] = club_divisions
+    players, contracts, history = add_players(data, clubs_by_country, random.Random(16))
+    del data["_club_divisions"]
+    assert len({p["id"] for p in players}) == len(players), "duplicate player"
+
+    folder = Path(__file__).resolve().parent.parent / "data" / "europe"
+    folder.mkdir(exist_ok=True)
+    (folder / "europe-2026-27.json").write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    write_csv(folder / PLAYERS_FILE, players)
+    write_csv(folder / CONTRACTS_FILE, contracts)
+    write_csv(folder / HISTORY_FILE, history)
+    real = sum(1 for c in data["clubs"] if c["dataStatus"] == "Unverified")
+    print(f"{folder}: {len(data['countries'])} countries, {len(data['leagues'])} leagues, {len(data['competitions'])} competitions, "
+          f"{len(data['clubs'])} clubs ({real} real), {len(players)} players, {len(contracts)} contracts, {len(history)} past club spells")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
@@ -83,9 +84,48 @@ public static class DuplicateKeys
             contract.StartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
     }
 
-    private static string Normalise(string value) =>
-        string.Join(' ', value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    /// <summary>Same player, club and start date.</summary>
+    public static string Of(PlayerClubHistoryEntry spell)
+    {
+        ArgumentNullException.ThrowIfNull(spell);
+        return Join(spell.PlayerId.ToString(), spell.ClubId.ToString(), spell.StartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>Same first and last name (ignoring accents): candidates for a possible-duplicate warning.</summary>
+    public static string Name(Player player)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+        return Join(Normalise(player.FirstName), Normalise(player.LastName));
+    }
+
+    // Accents and letters without a decomposition are folded, so 'Dončić' in one league's file matches 'Doncic' in another's.
+    private static string Normalise(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        foreach (var c in value.Normalize(NormalizationForm.FormD))
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            builder.Append(char.ToLowerInvariant(c) switch
+            {
+                'ł' => "l",
+                'đ' => "dj",
+                'ø' => "o",
+                'ı' => "i",
+                'ß' => "ss",
+                'æ' => "ae",
+                'œ' => "oe",
+                'þ' => "th",
+                _ => c.ToString(),
+            });
+        }
+
+        return string.Join(' ', builder.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             .ToUpperInvariant();
+    }
 
     private static string Join(params string[] parts) => string.Join('|', parts);
 }

@@ -18,6 +18,9 @@ public interface IPlayerProfileService
 /// <summary>Everything the profile screen shows about one player.</summary>
 /// <param name="CurrentClub">Club of the open club spell, else of the active contract; <c>null</c> for a free agent.</param>
 /// <param name="ActiveContract">The contract running today, if any.</param>
+/// <param name="SecondNationality">Name of the second citizenship, if any.</param>
+/// <param name="MarketValue">Estimated market value in euros (<c>TransferNegotiator.MarketValue</c>); always an estimate.</param>
+/// <param name="History">Club spells, most recent first.</param>
 public sealed record PlayerProfile(
     Player Player,
     string Nationality,
@@ -25,7 +28,13 @@ public sealed record PlayerProfile(
     string? CurrentClub,
     Contract? ActiveContract,
     string? ContractClub,
-    PlayerEvaluation Evaluation);
+    PlayerEvaluation Evaluation,
+    string? SecondNationality = null,
+    long MarketValue = 0,
+    IReadOnlyList<ClubSpell>? History = null);
+
+/// <summary>One club spell of a player; <paramref name="End"/> is <c>null</c> while it is open.</summary>
+public sealed record ClubSpell(string Club, DateOnly Start, DateOnly? End);
 
 /// <summary>One line of a comparison. <paramref name="LeaderIndex"/> marks the single best value, when "higher is better" applies.</summary>
 public sealed record ComparisonRow(string Group, string Label, IReadOnlyList<int> Values, int? LeaderIndex);

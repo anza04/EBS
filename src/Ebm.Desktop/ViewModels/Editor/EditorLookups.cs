@@ -40,6 +40,8 @@ public sealed partial class EditorLookups : ObservableObject
 
     public IReadOnlyList<CompetitionType> CompetitionTypes { get; } = Enum.GetValues<CompetitionType>();
 
+    public IReadOnlyList<Ebm.Domain.Common.DataStatus> DataStatuses { get; } = Enum.GetValues<Ebm.Domain.Common.DataStatus>();
+
     public string CountryName(CountryId? id) => Countries.FirstOrDefault(c => c.Id == id)?.Name ?? string.Empty;
 
     public string ClubName(ClubId id) => Clubs.FirstOrDefault(c => c.Id == id)?.Name ?? string.Empty;

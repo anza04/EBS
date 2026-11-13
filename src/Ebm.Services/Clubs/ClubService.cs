@@ -179,14 +179,11 @@ internal sealed class ClubService : IClubService
                 return null;
             }
 
-            var ids = (await MembersAsync(cancellationToken).ConfigureAwait(false)).Where(m => m.Value == clubId).Select(m => m.Key).ToList();
+            var (ids, running) = await ClubMembership.MembersOfAsync(services, clubId, Today, cancellationToken).ConfigureAwait(false);
             var players = await Repo<Player, PlayerId>().ListAsync(p => ids.Contains(p.Id), cancellationToken).ConfigureAwait(false);
             var spots = (await Repo<RosterSpot, RosterSpotId>().ListAsync(s => s.ClubId == clubId, cancellationToken).ConfigureAwait(false))
                 .ToDictionary(s => s.PlayerId);
-            var contracted = (await RunningContractsAsync(cancellationToken).ConfigureAwait(false))
-                .Where(c => c.ClubId == clubId)
-                .Select(c => c.PlayerId!.Value)
-                .ToHashSet();
+            var contracted = running.Select(c => c.PlayerId!.Value).ToHashSet();
             var countries = (await Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
 
             var roster = players
@@ -204,7 +201,7 @@ internal sealed class ClubService : IClubService
                         RosterRoles.AvailabilityOf(p),
                         contracted.Contains(p.Id),
                         calculator.Evaluate(p),
-                        countries.GetValueOrDefault(p.NationalityId)?.IsEuEea != true);
+                        !p.HasNationality(c => countries.GetValueOrDefault(c)?.IsEuEea == true));
                 })
                 .OrderBy(p => p.Role)
                 .ThenBy(p => p.LineupPosition)

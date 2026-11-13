@@ -28,7 +28,8 @@
       "reputation": 60,
       "balance": 1500000,
       "wageBudget": 4000000,
-      "boardExpectation": "MidTable"
+      "boardExpectation": "MidTable",
+      "dataStatus": "Unverified"
     }
   ],
   "leagues": [
@@ -119,7 +120,11 @@
       "concentration": 65,
       "leadership": 57,
       "consistency": 57,
-      "workRate": 59
+      "workRate": 59,
+      "secondNationality": "",
+      "dataStatus": "Unverified",
+      "attributesStatus": "Estimated",
+      "source": ""
     }
   ],
   "contracts": [
@@ -134,7 +139,9 @@
       "signingBonus": 10000,
       "performanceBonuses": "ReachPlayoffs:15000;LeagueTitle:30000",
       "releaseClause": 1500000,
-      "clubOptionUntil": "2029-06-30"
+      "clubOptionUntil": "2029-06-30",
+      "dataStatus": "Unverified",
+      "source": ""
     }
   ]
 }

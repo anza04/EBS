@@ -4,6 +4,7 @@ using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
+using Ebm.Domain.Transfers;
 using Ebm.Services.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,15 +16,18 @@ internal sealed class PlayerProfileService : IPlayerProfileService
     private readonly IServiceScopeFactory _scopes;
     private readonly PlayerRatingCalculator _calculator;
     private readonly GameClock _time;
+    private readonly TransferNegotiator _market;
 
-    public PlayerProfileService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, GameClock time)
+    public PlayerProfileService(IServiceScopeFactory scopes, PlayerRatingCalculator calculator, GameClock time, TransferNegotiator market)
     {
         ArgumentNullException.ThrowIfNull(scopes);
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(time);
+        ArgumentNullException.ThrowIfNull(market);
         _scopes = scopes;
         _calculator = calculator;
         _time = time;
+        _market = market;
     }
 
     public async Task<PlayerProfile?> GetProfileAsync(PlayerId playerId, CancellationToken cancellationToken = default) =>
@@ -113,7 +117,8 @@ internal sealed class PlayerProfileService : IPlayerProfileService
                 continue;
             }
 
-            var spell = (await spells.ListAsync(s => s.PlayerId == id && s.EndDate == null, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+            var playerSpells = await spells.ListAsync(s => s.PlayerId == id, cancellationToken).ConfigureAwait(false);
+            var spell = playerSpells.FirstOrDefault(s => s.IsCurrent);
             var contract = (await contracts.ListAsync(c => c.PlayerId == id, cancellationToken).ConfigureAwait(false))
                 .Where(c => c.IsRunningOn(today))
                 .OrderByDescending(c => c.StartDate)
@@ -122,6 +127,15 @@ internal sealed class PlayerProfileService : IPlayerProfileService
                 clubId is { } cid ? (await clubs.FindAsync(cid, cancellationToken).ConfigureAwait(false))?.Name : null;
             var contractClub = await ClubName(contract?.ClubId).ConfigureAwait(false);
             var country = await countries.FindAsync(player.NationalityId, cancellationToken).ConfigureAwait(false);
+            var second = player.SecondNationalityId is { } sid ? await countries.FindAsync(sid, cancellationToken).ConfigureAwait(false) : null;
+            var evaluation = _calculator.Evaluate(player);
+            var yearsLeft = contract is null ? 0 : Math.Max(0, (contract.EndDate.DayNumber - today.DayNumber) / 365.25);
+            var value = _market.MarketValue(new ValuationContext(evaluation.Overall, player.Potential, player.Reputation, player.AgeOn(today), yearsLeft));
+            var history = new List<ClubSpell>();
+            foreach (var s in playerSpells.OrderByDescending(s => s.StartDate))
+            {
+                history.Add(new ClubSpell(await ClubName(s.ClubId).ConfigureAwait(false) ?? string.Empty, s.StartDate, s.EndDate));
+            }
 
             result[i] = new PlayerProfile(
                 player,
@@ -130,7 +144,10 @@ internal sealed class PlayerProfileService : IPlayerProfileService
                 await ClubName(spell?.ClubId).ConfigureAwait(false) ?? contractClub,
                 contract,
                 contractClub,
-                _calculator.Evaluate(player));
+                evaluation,
+                second?.Name,
+                value,
+                history);
         }
 
         return result;

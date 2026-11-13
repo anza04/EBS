@@ -1,4 +1,5 @@
 using Ebm.Domain.Clubs;
+using Ebm.Domain.Common;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Players;
@@ -35,6 +36,11 @@ internal sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(x => x.Fitness).HasDefaultValue(Player.DefaultFitness);
         builder.Property(x => x.Morale).HasDefaultValue(Player.DefaultMorale);
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.NationalityId);
+        builder.HasOne<Country>().WithMany().HasForeignKey(x => x.SecondNationalityId);
+        builder.Ignore(x => x.Nationalities);
+        builder.Property(x => x.ProfileStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
+        builder.Property(x => x.AttributesStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
+        builder.Property(x => x.Source).HasMaxLength(DataQuality.SourceMaxLength);
         builder.HasIndex(x => new { x.LastName, x.FirstName });
 
         // Attributes and tendencies live in their own tables (1:1, keyed by PlayerId) and always load with the player.
@@ -110,6 +116,8 @@ internal sealed class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .HasMaxLength(200)
             .HasDefaultValue(PerformanceBonuses.None);
         builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(16).HasDefaultValue(ContractStatus.Active);
+        builder.Property(x => x.TermsStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
+        builder.Property(x => x.Source).HasMaxLength(DataQuality.SourceMaxLength);
         builder.Property(x => x.TerminationCompensation).HasDefaultValue(0L);
         builder.HasIndex(x => new { x.ClubId, x.EndDate });
     }
