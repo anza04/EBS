@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.1] — 2026-11-13 — Real squad: Pallacanestro Cantù
+
+### Added
+- Real Pallacanestro Cantù 2026-27 squad (14 players as of 13 Nov 2026, with departure and signing dates) from the
+  club site, Wikipedia and FIBA: `build/real-rosters/cantu-2026-27.json`, used by the generator instead of the
+  generated players. Profiles Verified (one Unverified), attributes and contract terms Estimated.
+- Countries Latvia and Nigeria; generated players of every other club keep their IDs.
+
 ## [0.16.0] — 2026-11-13 — Step 16: European player database
 
 ### Added

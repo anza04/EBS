@@ -225,7 +225,12 @@ REAL_CLUBS = {
 }
 
 # Nationalities without a league in the dataset (foreign players). Code: (name, EU/EEA/CH).
-EXTRA_COUNTRIES = {"USA": ("United States", False)}
+EXTRA_COUNTRIES = {"USA": ("United States", False), "LVA": ("Latvia", True), "NGA": ("Nigeria", False)}
+
+# Real squads (build/real-rosters/*.json, curated from cited sources) replace a club's generated players. Profiles are
+# Verified when the file cites a source, attributes are always Estimated, contract terms Estimated (docs/PLAYER_DATABASE.md).
+REAL_ROSTERS = {r["club"]: r for r in (json.loads(f.read_text(encoding="utf-8"))
+                                       for f in sorted((Path(__file__).resolve().parent / "real-rosters").glob("*.json")))}
 
 # Name pools for generated players ("first names; last names"; '_' joins a multi-word name). Common names only.
 NAMES = {
@@ -278,7 +283,7 @@ def composition(div, level):
 class PlayerFactory:
     def __init__(self, rnd, countries):
         self.rnd = rnd
-        self.eu = [c for c, (_, eu) in countries.items() if eu]
+        self.eu = [c for c, (_, eu) in countries.items() if eu and c in NAMES]
         self.names = {c: ([n.replace("_", " ") for n in v.split(";")[0].split()], [n.replace("_", " ") for n in v.split(";")[1].split()])
                       for c, v in NAMES.items()}
         self.born = {}  # (first, last) -> birth dates: no two players share a name with birth dates within 400 days
@@ -308,7 +313,7 @@ class PlayerFactory:
         player["experience"] = min(100, max(1, 5 + (age - 18) * 4 + quality // 5))
         player["reputation"] = min(100, max(1, quality - 25 + rnd.randint(-4, 4)))
         player["potential"] = min(95, max(quality, quality + (27 - age) * 2) + rnd.randint(0, 4))
-        player["dataStatus"] = "Generated"
+        player.update(dataStatus="Generated", attributesStatus="", source="", secondaryPositions="")
         return player
 
 
@@ -316,36 +321,82 @@ def add_players(data, clubs_by_country, rnd):
     """Twelve generated players per club with a contract, and a past club spell for some of them."""
     countries = {c["code"]: (c["name"], c["euEea"]) for c in data["countries"]}
     factory = PlayerFactory(rnd, countries)
+    for roster in REAL_ROSTERS.values():  # generated players never share a name and close birth date with a real one
+        for real in roster["players"]:
+            factory.born.setdefault((real["firstName"], real["lastName"]), []).append(date.fromisoformat(real["dateOfBirth"]))
+    clubs_by_name = {c["name"]: c for c in data["clubs"]}
     players, contracts, history = [], [], []
     for club, div, level in data["_club_divisions"]:
-        home = club["country"]
-        domestic, eu_foreign, non_eu = composition(div, level)
-        eu_pool = [c for c in factory.eu if c != home]
-        # Foreign players take the best squad places, as in most European clubs.
-        nationalities = [("SRB" if home != "SRB" and rnd.random() < 0.15 else "USA", None) for _ in range(non_eu)]
-        nationalities += [("USA", rnd.choice(eu_pool)) if rnd.random() < 0.3 else (rnd.choice(eu_pool), None) for _ in range(eu_foreign)]
-        nationalities += [(home, None)] * domestic
-        base = 30 + club["reputation"] * 0.42
-        wage_pool = club["wageBudget"] * 0.8
-        weights = [1.6 - i * 0.1 for i in range(SQUAD_SIZE)]
-        for slot, (position, (nationality, second)) in enumerate(zip(SQUAD_POSITIONS, nationalities)):
-            quality = round(base + 8 - slot * 1.4 + rnd.randint(-3, 3))
-            player = factory.create(nationality, position, quality, second)
-            players.append(player)
-            start = date(CONTRACT_SEASON.year - rnd.choice([0, 0, 1, 2]), 7, 1)
-            end = date(max(CONTRACT_SEASON.year + 1, start.year + rnd.randint(1, 3)), 6, 30)
-            contracts.append({"id": uid("contract", player["id"], start.isoformat()), "clubId": club["id"], "playerId": player["id"],
-                              "startDate": start.isoformat(), "endDate": end.isoformat(),
-                              "annualSalary": int(round(wage_pool * weights[slot] / sum(weights), -3)), "dataStatus": "Generated"})
-            age = CONTRACT_SEASON.year - int(player["dateOfBirth"][:4])
-            former = [c for c in clubs_by_country.get(nationality, []) if c["id"] != club["id"]]
-            if age >= 22 and former and rnd.random() < 0.35:
-                previous = rnd.choice(former)
-                spell_end = start - timedelta(days=1)
-                spell_start = date(spell_end.year - rnd.randint(1, 3), 7, 1)
-                history.append({"id": uid("spell", player["id"], previous["id"], spell_start.isoformat()), "playerId": player["id"],
-                                "clubId": previous["id"], "startDate": spell_start.isoformat(), "endDate": spell_end.isoformat()})
+        if club["name"] in REAL_ROSTERS:
+            # The generated squad is still drawn (and discarded) so every other club's players keep their IDs.
+            generate_squad(club, div, level, factory, clubs_by_country, rnd, [], [], [])
+            real_squad(REAL_ROSTERS[club["name"]], club, clubs_by_name, players, contracts, history)
+        else:
+            generate_squad(club, div, level, factory, clubs_by_country, rnd, players, contracts, history)
     return players, contracts, history
+
+
+def generate_squad(club, div, level, factory, clubs_by_country, rnd, players, contracts, history):
+    """Twelve generated players with contracts for one club, and a past club spell for some of them."""
+    home = club["country"]
+    domestic, eu_foreign, non_eu = composition(div, level)
+    eu_pool = [c for c in factory.eu if c != home]
+    # Foreign players take the best squad places, as in most European clubs.
+    nationalities = [("SRB" if home != "SRB" and rnd.random() < 0.15 else "USA", None) for _ in range(non_eu)]
+    nationalities += [("USA", rnd.choice(eu_pool)) if rnd.random() < 0.3 else (rnd.choice(eu_pool), None) for _ in range(eu_foreign)]
+    nationalities += [(home, None)] * domestic
+    base = 30 + club["reputation"] * 0.42
+    wage_pool = club["wageBudget"] * 0.8
+    weights = [1.6 - i * 0.1 for i in range(SQUAD_SIZE)]
+    for slot, (position, (nationality, second)) in enumerate(zip(SQUAD_POSITIONS, nationalities)):
+        quality = round(base + 8 - slot * 1.4 + rnd.randint(-3, 3))
+        player = factory.create(nationality, position, quality, second)
+        players.append(player)
+        start = date(CONTRACT_SEASON.year - rnd.choice([0, 0, 1, 2]), 7, 1)
+        end = date(max(CONTRACT_SEASON.year + 1, start.year + rnd.randint(1, 3)), 6, 30)
+        contracts.append({"id": uid("contract", player["id"], start.isoformat()), "clubId": club["id"], "playerId": player["id"],
+                          "startDate": start.isoformat(), "endDate": end.isoformat(),
+                          "annualSalary": int(round(wage_pool * weights[slot] / sum(weights), -3)), "dataStatus": "Generated", "source": ""})
+        age = CONTRACT_SEASON.year - int(player["dateOfBirth"][:4])
+        former = [c for c in clubs_by_country.get(nationality, []) if c["id"] != club["id"]]
+        if age >= 22 and former and rnd.random() < 0.35:
+            previous = rnd.choice(former)
+            spell_end = start - timedelta(days=1)
+            spell_start = date(spell_end.year - rnd.randint(1, 3), 7, 1)
+            history.append({"id": uid("spell", player["id"], previous["id"], spell_start.isoformat()), "playerId": player["id"],
+                            "clubId": previous["id"], "startDate": spell_start.isoformat(), "endDate": spell_end.isoformat()})
+
+
+def real_squad(roster, club, clubs_by_name, players, contracts, history):
+    """A curated squad: sourced profiles, attributes estimated from level and statistics, estimated contract terms."""
+    ranked = sorted(roster["players"], key=lambda x: -x["level"])
+    weights = {id(x): 1.6 - i * 0.1 for i, x in enumerate(ranked)}
+    wage_pool = club["wageBudget"] * 0.8
+    for real in roster["players"]:
+        position, level = real["position"], real["level"]
+        birth = date.fromisoformat(real["dateOfBirth"])
+        age = CONTRACT_SEASON.year - birth.year
+        player = {"id": uid("player", real["firstName"], real["lastName"], real["dateOfBirth"]), "firstName": real["firstName"],
+                  "lastName": real["lastName"], "dateOfBirth": real["dateOfBirth"], "nationality": real["nationality"],
+                  "secondNationality": real.get("secondNationality", ""), "heightCm": real["heightCm"], "weightKg": real["weightKg"],
+                  "position": position, "wingspanCm": ""}
+        offsets = PROFILES[position][2]
+        for name, category in ATTRIBUTES:
+            player[name] = real["ratings"].get(name, min(95, max(20, level + offsets.get(category, 0))))
+        player["experience"] = min(100, max(1, 5 + (age - 18) * 4 + level // 5))
+        player["reputation"], player["potential"] = real["reputation"], real["potential"]
+        player.update(dataStatus=real.get("dataStatus", "Verified"), attributesStatus="Estimated",
+                      source=real.get("source", roster["profileSource"]), secondaryPositions=real.get("secondaryPositions", ""))
+        players.append(player)
+        start = real["joined"] or CONTRACT_SEASON.isoformat()
+        contracts.append({"id": uid("contract", player["id"], start), "clubId": club["id"], "playerId": player["id"], "startDate": start,
+                          "endDate": real.get("left", date(CONTRACT_SEASON.year + 1, 6, 30).isoformat()),
+                          "annualSalary": int(round(wage_pool * weights[id(real)] / sum(weights.values()), -3)),
+                          "dataStatus": "Estimated", "source": roster["contractSource"]})
+        for spell in real["history"]:
+            previous = clubs_by_name[spell["club"]]
+            history.append({"id": uid("spell", player["id"], previous["id"], spell["startDate"]), "playerId": player["id"],
+                            "clubId": previous["id"], "startDate": spell["startDate"], "endDate": spell["endDate"]})
 
 
 def write_csv(path, rows):

@@ -11,16 +11,29 @@ Generator: `build/generate-europe-dataset.py`. Files: `data/europe/`. Tests: `Eu
 | Countries | 18 league countries + United States (nationality of foreign players) | as Step 15 |
 | Clubs, top divisions | 240 real clubs in 17 top divisions (BNXT counts as one: 10 Belgian + 10 Dutch) | **Unverified**: compiled from 2025-26 knowledge, not checked against the 2026-27 registrations; names without sponsors where the club is commonly known without one |
 | Clubs, second divisions and NBL / TDM1 / Promotiedivisie | 272 fictional placeholders named after real cities | **Generated**; same IDs as Step 15 |
-| Players | 6,144: 12 per club, every country | **Generated** (fictional names from per-country pools, attributes by club strength and position) |
+| Players | 6,146: 12 generated per club, every country; real squad of Pallacanestro Cantù (14 players, §1.1) | **Generated**, except Cantù: profiles **Verified** (Christon Unverified), attributes **Estimated** |
 | Second nationality | 204 US players with an EU passport (count as EU, sporting nationality stays US) | Generated |
-| Contracts | 6,144: one per player, start 1 July 2024–2026, end 30 June 2027–2029, salaries share 80 % of the club wage budget | **Generated** |
-| Club history | 1,500 past spells (players aged 22+, previous club in their own country) | Generated |
+| Contracts | 6,146: one per player, start 1 July 2024–2026, end 30 June 2027–2029, salaries share 80 % of the club wage budget | **Generated** |
+| Club history | 1,504 past spells (generated: players aged 22+, previous club in their own country; Cantù: 6 sourced spells at clubs in the database, season-level dates) | |
 | Free agents | none in the files: the AI keeps two per club from the first game day (docs/AI_MANAGEMENT.md §7) | |
 
 Squads are built to the registration limits of their division (`maxForeignPlayers`, `maxNonEuPlayers`,
 `minDomesticPlayers`, docs/ROSTER_RULES.md): foreign players take the best squad places.
 
-**Sources.** No licensed player database is used, so no real player is in the files. Real clubs come from the
+### 1.1 Real squads
+
+`build/real-rosters/*.json` holds curated real squads with their sources; the generator uses them instead of the
+club's generated players (it still draws and discards those, so no other ID changes). Each file records the as-of
+date, the sources and the conflicts found.
+
+| Club | As of | Players | Sources | Data status |
+|---|---|---|---|---|
+| Pallacanestro Cantù | 13 Nov 2026 | 12 current + Christon (left 6 Nov) and Miles (left 13 Nov), so the squad is right on every date from the career start: 12 at the season start, Olisevičius from 13 Oct, Green from 12 Nov | Club player pages (birth date, place, nationality, height, weight, role); it.wikipedia.org *Pallacanestro Cantù 2026-2027* (signings, departures) and *2025-2026* (statistics); FIBA (Okeke's Nigerian nationality); Il Giorno / Sofascore (Udom) | Profiles Verified with source, Christon Unverified (birth date not from a cited source); attributes Estimated from level, role and 2025-26 percentages; contracts Estimated: real start/departure dates, salary from the club's wage budget, end 30 Jun 2027 assumed |
+
+Known conflicts: Erick Green's birth year (player page 1991, announcement 1992; 1991 used). Between 13 Oct and 5 Nov
+the real squad has seven foreign players, above the LBA limit of six in the game, so the game warns in that period.
+
+**Sources.** No licensed player database is used; real players come only from curated squads (§1.1). Real clubs come from the
 author's knowledge of the 2025-26 leagues and are marked Unverified. Real players can be added by importing files
 that cite their sources (§3).
 
@@ -70,8 +83,8 @@ Real contract figures are never shown as verified unless the file says so and na
 
 ## 5. Outstanding gaps
 
-1. Real players: needs a licensed or user-supplied source; the import path (statuses, sources, estimates,
-   duplicates) is ready.
+1. Real players for the other 511 clubs: add `build/real-rosters/<club>.json` files (format of the Cantù file) or
+   import sourced files; the statuses, sources, estimates and duplicate checks are ready.
 2. Real clubs of second divisions and of the UK NBL, Belgian TDM1 and Dutch Promotiedivisie.
 3. Verify the 240 real clubs against the 2026-27 registrations (promotions/relegations of 2026, renamed clubs).
 4. Arenas, founding years, budgets and reputations of real clubs are estimates by division and rank.

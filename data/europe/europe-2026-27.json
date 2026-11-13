@@ -96,6 +96,16 @@
    "code": "USA",
    "name": "United States",
    "euEea": false
+  },
+  {
+   "code": "LVA",
+   "name": "Latvia",
+   "euEea": true
+  },
+  {
+   "code": "NGA",
+   "name": "Nigeria",
+   "euEea": false
   }
  ],
  "clubs": [

@@ -55,24 +55,36 @@ public sealed class EuropePlayerDatabaseTests : IAsyncLifetime
         Assert.DoesNotContain(report.Records, r => r.Messages.Any(m => m.StartsWith("Possible duplicate", StringComparison.Ordinal)));
 
         var (clubs, players, contracts, spells) = await LoadAsync();
-        Assert.Equal(6144, players.Count);
+        Assert.Equal(6146, players.Count);
         Assert.Equal(240, clubs.Count(c => c.DataStatus == DataStatus.Unverified));
         Assert.Equal(272, clubs.Count(c => c.DataStatus == DataStatus.Generated));
-        Assert.All(players, p => Assert.Equal((DataStatus.Generated, DataStatus.Generated), (p.ProfileStatus, p.AttributesStatus)));
-        Assert.All(contracts, c => Assert.Equal(DataStatus.Generated, c.TermsStatus));
+        var cantu = clubs.Single(c => c.Name == "Pallacanestro Cantù").Id;
+        var real = contracts.Where(c => c.ClubId == cantu).Select(c => c.PlayerId!.Value).ToHashSet();
+        Assert.All(players.Where(p => !real.Contains(p.Id)), p => Assert.Equal((DataStatus.Generated, DataStatus.Generated), (p.ProfileStatus, p.AttributesStatus)));
+        Assert.All(contracts.Where(c => c.ClubId != cantu), c => Assert.Equal(DataStatus.Generated, c.TermsStatus));
         Assert.Contains(players, p => p.SecondNationalityId is not null);
 
-        // Player-club relationships: one contract per player, running through the season, twelve per club, from every country.
+        // The real Cantù squad (build/real-rosters): sourced profiles, estimated attributes and terms; Christon has no cited birth date.
+        var squad = players.Where(p => real.Contains(p.Id)).ToList();
+        Assert.Equal(14, squad.Count);
+        Assert.All(squad, p => Assert.Equal(DataStatus.Estimated, p.AttributesStatus));
+        Assert.All(squad, p => Assert.NotNull(p.Source));
+        Assert.Equal(["Semaj Christon"], squad.Where(p => p.ProfileStatus == DataStatus.Unverified).Select(p => p.FullName));
+        Assert.All(contracts.Where(c => c.ClubId == cantu), c => Assert.Equal(DataStatus.Estimated, c.TermsStatus));
+        var today = contracts.Where(c => c.ClubId == cantu && c.IsRunningOn(new DateOnly(2026, 11, 13))).Select(c => squad.Single(p => p.Id == c.PlayerId).LastName).Order();
+        Assert.Equal(["Brown", "Flagg", "Gravett", "Gražulis", "Green", "Moraschini", "Moretti", "Okeke", "Olisevičius", "Parravicini", "Udom", "Ventura"], today);
+
+        // Player-club relationships: one contract per player, twelve per club at the season start, from every country.
         var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
         Assert.Equal(players.Count, contracts.Select(c => c.PlayerId).Distinct().Count());
-        Assert.All(contracts, c => Assert.True(c.IsRunningOn(season.StartDate) && c.IsRunningOn(new DateOnly(2027, 6, 30))));
-        Assert.All(contracts.GroupBy(c => c.ClubId), g => Assert.Equal(12, g.Count()));
+        Assert.All(contracts.Where(c => c.ClubId != cantu), c => Assert.True(c.IsRunningOn(season.StartDate) && c.IsRunningOn(new DateOnly(2027, 6, 30))));
+        Assert.All(contracts.Where(c => c.IsRunningOn(season.StartDate)).GroupBy(c => c.ClubId), g => Assert.Equal(12, g.Count()));
         Assert.Equal(clubs.Count, contracts.Select(c => c.ClubId).Distinct().Count());
         Assert.Equal(18, clubs.Where(c => contracts.Any(k => k.ClubId == c.Id)).Select(c => c.CountryId).Distinct().Count());
 
         // History: closed spells at another club, before the current contract.
         var contractOf = contracts.ToDictionary(c => c.PlayerId!.Value);
-        Assert.Equal(1500, spells.Count);
+        Assert.Equal(1504, spells.Count);
         Assert.All(spells, s =>
         {
             Assert.NotNull(s.EndDate);
