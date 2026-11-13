@@ -66,8 +66,13 @@ internal sealed class ImportSession
 
     public ImportRecordResult Process(RawRecord record) => record.Kind switch
     {
-        ImportRecordKind.Country => Apply(record, _countries, (f, id) => new Country(id, f.Text("code"), f.Text("name")),
-            (target, c) => target.Rename(c.Name), identifyByKey: true),
+        ImportRecordKind.Country => Apply(record, _countries, (f, id) => new Country(id, f.Text("code"), f.Text("name"), f.OptionalBool("euEea")),
+            (target, c) =>
+            {
+                target.Rename(c.Name);
+                target.SetEuEea(c.IsEuEea);
+            },
+            identifyByKey: true),
         ImportRecordKind.Arena => Apply(record, _arenas, (f, id) =>
             new Arena(id, f.Text("name"), f.Text("city"), CountryRef(f, "country"), f.Int("capacity")),
             (target, a) => target.UpdateDetails(a.Name, a.City, a.CountryId, a.Capacity)),
@@ -277,7 +282,8 @@ internal sealed class ImportSession
         var registered = seasonEntries.Count(p => p.CompetitionId == participant.CompetitionId && p.ClubId != participant.ClubId);
         var inAnotherLeague = seasonEntries.Any(p => p.ClubId == participant.ClubId && p.CompetitionId != participant.CompetitionId
             && _competitions.Find(p.CompetitionId)?.Type == CompetitionType.League);
-        CompetitionRegistration.Check(competition, _clubs.Find(participant.ClubId)!, registered, inAnotherLeague);
+        var club = _clubs.Find(participant.ClubId)!;
+        CompetitionRegistration.Check(competition, club, registered, inAnotherLeague, _countries.Find(club.CountryId)?.Code);
     }
 
     private CountryId CountryRef(FieldReader f, string name) => OptionalCountryRef(f, name, required: true) ?? default;

@@ -9,11 +9,12 @@ public sealed class Country : Entity<CountryId>
     public const int CodeLength = 3;
     public const int NameMaxLength = 100;
 
-    public Country(CountryId id, string code, string name)
+    public Country(CountryId id, string code, string name, bool isEuEea = false)
         : base(id)
     {
         Code = NormaliseCode(code);
         Rename(name);
+        IsEuEea = isEuEea;
     }
 
     private Country()
@@ -23,6 +24,12 @@ public sealed class Country : Entity<CountryId>
     public string Code { get; private set; } = string.Empty;
 
     public string Name { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Member of the European Union, the European Economic Area or Switzerland: its nationals have free movement of
+    /// workers and do not count against non-EU player limits (<c>maxNonEuPlayers</c>, docs/ROSTER_RULES.md).
+    /// </summary>
+    public bool IsEuEea { get; private set; }
 
     /// <summary>Validates an ISO 3166-1 alpha-3 code and returns it in upper case.</summary>
     /// <exception cref="DomainValidationException">The code is not three ASCII letters.</exception>
@@ -39,4 +46,6 @@ public sealed class Country : Entity<CountryId>
 
     /// <summary>Changes the display name. The code identifies the country in data files and never changes.</summary>
     public void Rename(string name) => Name = Guard.Text(name, "Country name", NameMaxLength);
+
+    public void SetEuEea(bool isEuEea) => IsEuEea = isEuEea;
 }

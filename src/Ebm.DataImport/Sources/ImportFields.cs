@@ -17,7 +17,7 @@ internal static class ImportFields
 
     public static readonly IReadOnlyList<Schema> All =
     [
-        new(ImportRecordKind.Country, "countries", ["code", "name"], ["id"]),
+        new(ImportRecordKind.Country, "countries", ["code", "name"], ["id", "euEea"]),
         new(ImportRecordKind.Arena, "arenas", ["name", "city", "country", "capacity"], ["id"]),
         new(ImportRecordKind.Club, "clubs", ["name", "shortName", "country"], ["id", "homeArenaId", "foundedYear", "city", "reputation", "balance", "wageBudget", "boardExpectation"]),
         new(ImportRecordKind.League, "leagues", ["name", "shortName"], ["id", "country"]),

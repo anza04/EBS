@@ -381,7 +381,7 @@ internal sealed class CareerService(
             var table = await competitions.GetStandingsAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
             string Name(ClubId id) => clubs.TryGetValue(id, out var club) ? club.Name : "?";
             var rules = competition.ParseRules();
-            int[] playoffPlaces = rules.Playoffs is { } p ? [.. Enumerable.Range(p.FromPosition, p.Teams)] : [];
+            int[] playoffPlaces = rules.Playoffs is { } p ? [.. Enumerable.Range(p.FromPosition, p.LastQualifyingPosition - p.FromPosition + 1)] : [];
             var objectives = table.Where(r => clubs.ContainsKey(r.ClubId)).Select(r =>
             {
                 var club = clubs[r.ClubId];

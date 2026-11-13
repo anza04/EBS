@@ -27,7 +27,13 @@ public sealed record FixtureRow(FixtureLine Line)
 {
     public string Date => Line.Fixture.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    public string Round => Line.Fixture.Stage == FixtureStage.Playoffs ? $"PO {Line.Fixture.Round}-{Line.Fixture.GameNumber}" : $"{Line.Fixture.Round}";
+    public string Round => Line.Fixture.Stage switch
+    {
+        FixtureStage.Playoffs => $"PO {Line.Fixture.Round}-{Line.Fixture.GameNumber}",
+        FixtureStage.PlayIn => $"PI {Line.Fixture.Round}",
+        FixtureStage.SecondPhase => $"P2 {Line.Fixture.Round}",
+        _ => $"{Line.Fixture.Round}",
+    };
 
     public string Home => Line.HomeClub;
 

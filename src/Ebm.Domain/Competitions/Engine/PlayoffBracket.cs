@@ -36,15 +36,18 @@ public sealed record PlayoffSeries(
 
 /// <summary>
 /// A fixed single-elimination bracket (no reseeding): 1 v N, 2 v N-1, … placed so the top two seeds can only meet
-/// in the final. Built from the seeds and the games scheduled so far, it reports each series and the games to
+/// in the final; seeds beyond the number of teams are byes for the top seeds. Built from the seeds and the games scheduled so far, it reports each series and the games to
 /// schedule next. Home court pattern: best of 3 = H-A-H, best of 5 = 2-2-1, best of 7 = 2-2-1-1-1.
 /// </summary>
 public sealed class PlayoffBracket
 {
-    private PlayoffBracket(IReadOnlyList<PlayoffSeries> series, ClubId? champion)
+    private readonly IReadOnlyDictionary<ClubId, int> _seedOf;
+
+    private PlayoffBracket(IReadOnlyList<PlayoffSeries> series, ClubId? champion, IReadOnlyDictionary<ClubId, int> seedOf)
     {
         Series = series;
         Champion = champion;
+        _seedOf = seedOf;
     }
 
     /// <summary>Every series whose two clubs are known, round by round.</summary>
@@ -67,17 +70,26 @@ public sealed class PlayoffBracket
 
         var allGames = games.ToList();
         var seedOf = seeds.Select((club, i) => (club, i)).ToDictionary(x => x.club, x => x.i);
-        List<ClubId?> entrants = [.. BracketOrder(rules.Teams).Select(seed => (ClubId?)seeds[seed - 1])];
+
+        // Seeds beyond the number of teams are byes: their opponent goes straight to the next round.
+        List<Slot> entrants = [.. BracketOrder(rules.BracketSize).Select(seed => seed <= seeds.Count ? Slot.Of(seeds[seed - 1]) : Slot.Bye)];
         var series = new List<PlayoffSeries>();
         var used = 0;
         for (var round = 1; round <= rules.Rounds; round++)
         {
-            var winners = new List<ClubId?>();
+            var winners = new List<Slot>();
             for (var i = 0; i < entrants.Count; i += 2)
             {
-                if (entrants[i] is not { } a || entrants[i + 1] is not { } b)
+                var (first, second) = (entrants[i], entrants[i + 1]);
+                if (first.IsBye || second.IsBye)
                 {
-                    winners.Add(null);
+                    winners.Add(first.IsBye ? second : first);
+                    continue;
+                }
+
+                if (first.Club is not { } a || second.Club is not { } b)
+                {
+                    winners.Add(Slot.Pending);
                     continue;
                 }
 
@@ -103,7 +115,7 @@ public sealed class PlayoffBracket
 
                 used += seriesGames.Count;
                 series.Add(current);
-                winners.Add(current.Winner);
+                winners.Add(current.Winner is { } winner ? Slot.Of(winner) : Slot.Pending);
             }
 
             entrants = winners;
@@ -114,7 +126,30 @@ public sealed class PlayoffBracket
             throw new DomainValidationException("A playoff game does not belong to the bracket.");
         }
 
-        return new PlayoffBracket(series, entrants.Single());
+        return new PlayoffBracket(series, entrants.Single().Club, seedOf);
+    }
+
+    /// <summary>
+    /// The clubs of the last rounds of a complete bracket, best first: 1 = the champion, 2 = the finalists,
+    /// 4 = the semi-finalists (the losers ordered by seed). Used for promotion from the playoffs.
+    /// </summary>
+    public IReadOnlyList<ClubId> TopPlaces(int places)
+    {
+        if (Champion is not { } champion)
+        {
+            throw new DomainValidationException("The playoffs are not finished yet.");
+        }
+
+        List<ClubId> result = [champion];
+        var rounds = Series.Count == 0 ? 0 : Series.Max(s => s.Round);
+        for (var round = rounds; result.Count < places && round >= 1; round--)
+        {
+            result.AddRange(Series.Where(s => s.Round == round)
+                .Select(s => s.Winner == s.HigherSeed ? s.LowerSeed : s.HigherSeed)
+                .OrderBy(c => _seedOf[c]));
+        }
+
+        return [.. result.Take(places)];
     }
 
     /// <summary>Games to schedule now: the next game of every undecided series with no game pending.</summary>
@@ -148,4 +183,14 @@ public sealed class PlayoffBracket
         <= 3 => gameNumber % 2 == 1,
         _ => gameNumber <= 2 || (gameNumber > 4 && gameNumber % 2 == 1),
     };
+
+    /// <summary>A bracket position: a known club, a bye, or the winner of a series not decided yet.</summary>
+    private readonly record struct Slot(ClubId? Club, bool IsBye)
+    {
+        public static Slot Bye => new(null, true);
+
+        public static Slot Pending => new(null, false);
+
+        public static Slot Of(ClubId club) => new(club, false);
+    }
 }

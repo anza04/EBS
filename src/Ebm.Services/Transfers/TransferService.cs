@@ -19,7 +19,7 @@ namespace Ebm.Services.Transfers;
 /// </summary>
 internal sealed class TransferService : ITransferService
 {
-    private static readonly RosterIssueCode[] BlockingIssues = [RosterIssueCode.TooManyPlayers, RosterIssueCode.TooManyForeignPlayers, RosterIssueCode.UnderMinimumAge];
+    private static readonly RosterIssueCode[] BlockingIssues = [RosterIssueCode.TooManyPlayers, RosterIssueCode.TooManyForeignPlayers, RosterIssueCode.TooManyNonEuPlayers, RosterIssueCode.UnderMinimumAge];
 
     private readonly IServiceScopeFactory _scopes;
     private readonly PlayerRatingCalculator _calculator;
@@ -358,7 +358,8 @@ internal sealed class TransferService : ITransferService
                     m.AskingSalary,
                     m.IsFreeAgent ? 0 : forSale[m.Player.Id].Fee,
                     m.IsFreeAgent ? null : m.Contract!.ClubId,
-                    m.Player.NationalityId != current.CountryId))
+                    m.Player.NationalityId != current.CountryId,
+                    market.IsNonEu(m.Player)))
                 .ToList();
             var plan = _recruiter.Plan(situation, candidates);
             report.Needs.AddRange(plan.Needs.Select(n => n.Reason));
@@ -468,7 +469,8 @@ internal sealed class TransferService : ITransferService
                 p.Age,
                 market.RunningContractAt(p.Player.Id, club.Id)?.AnnualSalary ?? 0,
                 p.Role,
-                p.IsForeign))
+                p.IsForeign,
+                p.IsNonEu))
             .ToList();
         var rules = SquadRules.Strictest([SquadRules.Default, .. roster.Registrations.Select(r => r.Rules)]);
         return new ClubSituation(club.Id, club.Balance, club.WageBudget, market.WageBills.GetValueOrDefault(club.Id), members, rules);
@@ -489,7 +491,7 @@ internal sealed class TransferService : ITransferService
         var current = roster.Players.Where(p => p.Player.Id != player.Id).Select(p => p.ToMember()).ToList();
         var before = Errors(ClubRoster.Check(current, competitions));
         var after = Errors(ClubRoster.Check(
-            [.. current, new RosterMember(player.Id, player.FullName, joinAs, null, RosterRoles.AvailabilityOf(player), player.NationalityId != club.CountryId, player.AgeOn(market.Today), null, true)],
+            [.. current, new RosterMember(player.Id, player.FullName, joinAs, null, RosterRoles.AvailabilityOf(player), player.NationalityId != club.CountryId, player.AgeOn(market.Today), null, true, market.IsNonEu(player))],
             competitions));
         if (after.FirstOrDefault(e => BlockingIssues.Contains(e.Code)) is { } blocking)
         {
@@ -662,7 +664,7 @@ internal sealed class TransferService : ITransferService
         private readonly Dictionary<PlayerId, List<Contract>> _contracts;
         private readonly Dictionary<PlayerId, ClubId> _members;
         private readonly Dictionary<PlayerId, RosterSpot> _spots;
-        private readonly Dictionary<CountryId, string> _countries;
+        private readonly Dictionary<CountryId, Country> _countries;
 
         private Market(
             TransferService service,
@@ -672,7 +674,7 @@ internal sealed class TransferService : ITransferService
             Dictionary<PlayerId, List<Contract>> contracts,
             Dictionary<PlayerId, ClubId> members,
             Dictionary<PlayerId, RosterSpot> spots,
-            Dictionary<CountryId, string> countries)
+            Dictionary<CountryId, Country> countries)
         {
             _service = service;
             Data = data;
@@ -689,6 +691,9 @@ internal sealed class TransferService : ITransferService
                 .GroupBy(c => c.ClubId)
                 .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
         }
+
+        /// <summary>The player's nationality is outside the EU/EEA (non-EU player limits).</summary>
+        public bool IsNonEu(Player player) => _countries.GetValueOrDefault(player.NationalityId)?.IsEuEea != true;
 
         public Data Data { get; }
 
@@ -713,7 +718,7 @@ internal sealed class TransferService : ITransferService
                 .ToDictionary(g => g.Key, g => g.ToList());
             var members = await ClubMembership.CurrentClubsAsync(services, today, cancellationToken).ConfigureAwait(false);
             var spots = (await data.Repo<RosterSpot, RosterSpotId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(s => s.PlayerId);
-            var countries = (await data.Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
+            var countries = (await data.Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
             return new Market(service, data, players, clubs, contracts, members, spots, countries);
         }
 
@@ -811,7 +816,7 @@ internal sealed class TransferService : ITransferService
                 : _service._fees.Value(context);
             var askingSalary = _service._salaries.AskingSalary(new NegotiationContext(
                 evaluation.Overall, evaluation.PotentialRating, player.Reputation, age, forClub?.Reputation ?? TransferNegotiator.NeutralClubReputation, contract?.AnnualSalary));
-            return new MarketPlayer(player, Today, age, evaluation, _countries.GetValueOrDefault(player.NationalityId) ?? string.Empty, club, contract, parentClub, role, status, valuation, askingSalary);
+            return new MarketPlayer(player, Today, age, evaluation, _countries.GetValueOrDefault(player.NationalityId)?.Name ?? string.Empty, club, contract, parentClub, role, status, valuation, askingSalary);
         }
     }
 }

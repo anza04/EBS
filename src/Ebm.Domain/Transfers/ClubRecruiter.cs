@@ -14,7 +14,8 @@ public sealed record SquadMember(
     int Age,
     long Salary,
     RosterRole Role,
-    bool IsForeign)
+    bool IsForeign,
+    bool IsNonEu = false)
 {
     public bool CanPlay(Position position) => Position == position || SecondaryPositions.Contains(position);
 }
@@ -34,7 +35,8 @@ public sealed record Candidate(
     long AskingSalary,
     long Fee,
     ClubId? FromClubId,
-    bool IsForeign)
+    bool IsForeign,
+    bool IsNonEu = false)
 {
     public bool IsFreeAgent => FromClubId is null;
 
@@ -117,6 +119,17 @@ public sealed class ClubRecruiter
             }
         }
 
+        // Too many non-EU players: the weakest of them go.
+        if (club.Rules.MaxNonEuPlayers is { } maxNonEu)
+        {
+            foreach (var player in team.Where(m => m.IsNonEu).OrderBy(m => m.Overall).Take(Math.Max(0, team.Count(m => m.IsNonEu) - maxNonEu)).ToList())
+            {
+                sales.Add(new PlannedSale(player, $"more than {maxNonEu} non-EU players"));
+                team.Remove(player);
+                wageBill -= player.Salary;
+            }
+        }
+
         // Over the wage budget: the most expensive non-starters go until the bill fits (never below the minimum squad).
         foreach (var expensive in team.Where(m => m.Role != RosterRole.Starter).OrderByDescending(m => m.Salary).ToList())
         {
@@ -184,6 +197,7 @@ public sealed class ClubRecruiter
         var budgetLeft = club.WageBudget - team.Sum(m => m.Salary);
         var count = team.Count;
         var foreign = team.Count(m => m.IsForeign);
+        var nonEu = team.Count(m => m.IsNonEu);
         var taken = new HashSet<PlayerId>();
         var signings = new List<PlannedSigning>();
         var unmet = new List<RosterNeed>();
@@ -201,6 +215,7 @@ public sealed class ClubRecruiter
                 .Where(c => need.Position is not { } position || c.CanPlay(position))
                 .Where(c => c.Fee <= cash && c.AskingSalary <= budgetLeft)
                 .Where(c => !c.IsForeign || club.Rules.MaxForeignPlayers is not { } maxForeign || foreign < maxForeign)
+                .Where(c => !c.IsNonEu || club.Rules.MaxNonEuPlayers is not { } maxNonEu || nonEu < maxNonEu)
                 .ToList();
             var bestFree = eligible.Where(c => c.IsFreeAgent).OrderByDescending(c => c.Overall).ThenBy(c => c.AskingSalary).ThenBy(c => c.Age).FirstOrDefault();
             var bestPaid = eligible.Where(c => !c.IsFreeAgent).OrderByDescending(c => c.Overall).ThenBy(c => c.Fee).ThenBy(c => c.AskingSalary).FirstOrDefault();
@@ -217,6 +232,7 @@ public sealed class ClubRecruiter
             budgetLeft -= pick.AskingSalary;
             count++;
             foreign += pick.IsForeign ? 1 : 0;
+            nonEu += pick.IsNonEu ? 1 : 0;
         }
 
         return new RecruitmentPlan(needs, signings, sales, unmet);

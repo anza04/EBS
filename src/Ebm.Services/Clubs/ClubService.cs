@@ -187,7 +187,7 @@ internal sealed class ClubService : IClubService
                 .Where(c => c.ClubId == clubId)
                 .Select(c => c.PlayerId!.Value)
                 .ToHashSet();
-            var countries = (await Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
+            var countries = (await Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
 
             var roster = players
                 .Select(p =>
@@ -195,7 +195,7 @@ internal sealed class ClubService : IClubService
                     var spot = spots.GetValueOrDefault(p.Id);
                     return new RosterPlayer(
                         p,
-                        countries.GetValueOrDefault(p.NationalityId) ?? string.Empty,
+                        countries.GetValueOrDefault(p.NationalityId)?.Name ?? string.Empty,
                         p.AgeOn(Today),
                         p.NationalityId != club.CountryId,
                         spot?.Role ?? RosterRole.Bench,
@@ -203,7 +203,8 @@ internal sealed class ClubService : IClubService
                         spot?.RotationOrder,
                         RosterRoles.AvailabilityOf(p),
                         contracted.Contains(p.Id),
-                        calculator.Evaluate(p));
+                        calculator.Evaluate(p),
+                        countries.GetValueOrDefault(p.NationalityId)?.IsEuEea != true);
                 })
                 .OrderBy(p => p.Role)
                 .ThenBy(p => p.LineupPosition)

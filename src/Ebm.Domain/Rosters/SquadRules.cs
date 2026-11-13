@@ -33,6 +33,9 @@ public sealed record SquadRules
     /// <summary>Most first-team players whose nationality differs from the club's country; <c>null</c> = no limit.</summary>
     public int? MaxForeignPlayers { get; init; }
 
+    /// <summary>Most first-team players without an EU/EEA nationality (<see cref="Countries.Country.IsEuEea"/>); <c>null</c> = no limit.</summary>
+    public int? MaxNonEuPlayers { get; init; }
+
     /// <summary>Fewest first-team players of the club's nationality.</summary>
     public int MinDomesticPlayers { get; init; }
 
@@ -54,6 +57,7 @@ public sealed record SquadRules
 
         var foreign = all.Where(r => r.MaxForeignPlayers is not null).Select(r => r.MaxForeignPlayers!.Value).ToList();
         var ages = all.Where(r => r.MinAge is not null).Select(r => r.MinAge!.Value).ToList();
+        var nonEu = all.Where(r => r.MaxNonEuPlayers is not null).Select(r => r.MaxNonEuPlayers!.Value).ToList();
         var strictest = new SquadRules
         {
             MinPlayers = all.Max(r => r.MinPlayers),
@@ -61,6 +65,7 @@ public sealed record SquadRules
             MatchdayPlayers = all.Min(r => r.MatchdayPlayers),
             RecommendedRotation = all.Min(r => r.RecommendedRotation),
             MaxForeignPlayers = foreign.Count == 0 ? null : foreign.Min(),
+            MaxNonEuPlayers = nonEu.Count == 0 ? null : nonEu.Min(),
             MinDomesticPlayers = all.Max(r => r.MinDomesticPlayers),
             MinAge = ages.Count == 0 ? null : ages.Max(),
         };
@@ -82,6 +87,11 @@ public sealed record SquadRules
         if (MaxForeignPlayers is { } foreign)
         {
             Guard.Range(foreign, 0, MaxPlayers, $"{prefix}: maxForeignPlayers");
+        }
+
+        if (MaxNonEuPlayers is { } nonEu)
+        {
+            Guard.Range(nonEu, 0, MaxPlayers, $"{prefix}: maxNonEuPlayers");
         }
 
         if (MinAge is { } age)

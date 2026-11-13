@@ -11,6 +11,7 @@ internal sealed class CountryConfiguration : IEntityTypeConfiguration<Country>
     {
         builder.ToTable("Countries");
         builder.Property(x => x.Code).HasMaxLength(Country.CodeLength).IsRequired();
+        builder.Property(x => x.IsEuEea).HasDefaultValue(false);
         builder.Property(x => x.Name).HasMaxLength(Country.NameMaxLength).IsRequired();
         builder.HasIndex(x => x.Code).IsUnique();
     }

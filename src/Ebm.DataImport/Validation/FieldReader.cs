@@ -52,6 +52,10 @@ internal sealed class FieldReader
     public long? OptionalLong(string name) =>
         Parse(name, false, "a whole number", v => long.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : (long?)null);
 
+    /// <summary>Reads an optional true/false value; <paramref name="fallback"/> when the field is empty.</summary>
+    public bool OptionalBool(string name, bool fallback = false) =>
+        Parse(name, false, "true or false", v => bool.TryParse(v, out var r) ? r : (bool?)null) ?? fallback;
+
     /// <summary>Reads an optional enum value; <paramref name="fallback"/> when the field is empty.</summary>
     public TEnum OptionalEnum<TEnum>(string name, TEnum fallback)
         where TEnum : struct, Enum =>

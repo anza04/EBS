@@ -20,7 +20,11 @@ public sealed record StandingRow(int Position, ClubId ClubId, int Played, int Wo
 /// </summary>
 public static class StandingsCalculator
 {
-    public static IReadOnlyList<StandingRow> Calculate(IEnumerable<ClubId> clubs, IEnumerable<GameResult> results, CompetitionRules rules)
+    /// <param name="countGamesAgainstOthers">
+    /// Count results against clubs outside <paramref name="clubs"/> for the listed club (a second-phase group that
+    /// keeps its first-phase record); otherwise such a result is an error.
+    /// </param>
+    public static IReadOnlyList<StandingRow> Calculate(IEnumerable<ClubId> clubs, IEnumerable<GameResult> results, CompetitionRules rules, bool countGamesAgainstOthers = false)
     {
         ArgumentNullException.ThrowIfNull(clubs);
         ArgumentNullException.ThrowIfNull(results);
@@ -30,7 +34,9 @@ public static class StandingsCalculator
         var games = results.ToList();
         foreach (var game in games)
         {
-            if (!tallies.TryGetValue(game.Home, out var home) || !tallies.TryGetValue(game.Away, out var away))
+            var home = tallies.GetValueOrDefault(game.Home);
+            var away = tallies.GetValueOrDefault(game.Away);
+            if ((home is null || away is null) && (!countGamesAgainstOthers || (home is null && away is null)))
             {
                 throw new DomainValidationException("A result involves a club that is not in the competition.");
             }
@@ -40,8 +46,8 @@ public static class StandingsCalculator
                 throw new DomainValidationException("A basketball match cannot end in a draw.");
             }
 
-            home.Add(game.HomeScore, game.AwayScore);
-            away.Add(game.AwayScore, game.HomeScore);
+            home?.Add(game.HomeScore, game.AwayScore);
+            away?.Add(game.AwayScore, game.HomeScore);
         }
 
         foreach (var tally in tallies.Values)

@@ -12,6 +12,8 @@ public enum CompetitionPhase
     /// <summary>No schedule yet: clubs can still be registered.</summary>
     Registration,
     RegularSeason,
+    SecondPhase,
+    PlayIn,
     Playoffs,
     Completed,
 }
@@ -38,16 +40,22 @@ public interface ICompetitionService
     Task RecordResultAsync(FixtureId fixtureId, int homeScore, int awayScore, int overtimes = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Moves the season on: once the regular season is over, schedules the playoffs, then the next game of each
-    /// series and the next round as results come in. Safe to call at any time.
+    /// Moves the season on: once the regular season is over, schedules the second phase, the play-in or the
+    /// playoffs, then the next game of each series and the next round as results come in. Safe to call at any time.
     /// </summary>
     Task<CompetitionProgress> AdvanceAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
     /// <summary>Where the competition season stands, without changing anything.</summary>
     Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
-    /// <summary>The regular-season table, ranked by the rules (points, then tie-breakers).</summary>
+    /// <summary>
+    /// The final table, ranked by the rules (points, then tie-breakers): the regular-season table, or with a second
+    /// phase its groups in order followed by the clubs in no group.
+    /// </summary>
     Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>The second-phase group tables once the regular season is over; empty without a second phase.</summary>
+    Task<IReadOnlyList<GroupTable>> GetGroupTablesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
     /// <summary>Champion, promoted and relegated clubs. Only for a completed season.</summary>
     Task<SeasonOutcome> GetOutcomeAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);

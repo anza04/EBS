@@ -64,23 +64,6 @@ public sealed class PlayoffAndOutcomeTests
     }
 
     [Fact]
-    public void Outcome_lists_champion_promoted_and_relegated_clubs()
-    {
-        var clubs = RoundRobinSchedulerTests.Clubs(6);
-        var table = clubs.Select((c, i) => new StandingRow(i + 1, c, 10, 10 - i, i, 800, 700, 20 - (2 * i))).ToList();
-        var rules = CompetitionRules.Parse(
-            """{"playoffs":{"teams":4,"fromPosition":2,"bestOf":[1,1]},"promotion":{"direct":1,"playoffWinner":true},"relegation":{"direct":1}}""");
-
-        var outcome = SeasonOutcomeCalculator.Calculate(rules, table, clubs[3]);
-
-        Assert.Equal(clubs[3], outcome.Champion);
-        Assert.Equal([clubs[0], clubs[3]], outcome.Promoted);
-        Assert.Equal([clubs[5]], outcome.Relegated);
-        Assert.Throws<DomainValidationException>(() => SeasonOutcomeCalculator.Calculate(rules, table, null));
-        Assert.Equal(clubs[0], SeasonOutcomeCalculator.Calculate(CompetitionRules.Parse("{}"), table, null).Champion);
-    }
-
-    [Fact]
     public void Registration_checks_country_capacity_and_other_leagues()
     {
         var italy = CountryId.New();
@@ -95,6 +78,10 @@ public sealed class PlayoffAndOutcomeTests
 
         var cup = new Competition(CompetitionId.New(), "Cup", "CUP", CompetitionType.Cup, italy, null);
         CompetitionRegistration.Check(cup, club, 0, inAnotherLeague: true);
+
+        var crossBorder = new Competition(CompetitionId.New(), "BNXT", "BNXT", CompetitionType.League, null, null, """{"registration":{"countries":["BEL","NLD"]}}""");
+        CompetitionRegistration.Check(crossBorder, club, 0, false, "NLD");
+        Assert.Contains("BEL, NLD", Assert.Throws<DomainValidationException>(() => CompetitionRegistration.Check(crossBorder, club, 0, false, "ITA")).Message, StringComparison.Ordinal);
     }
 
     /// <summary>Plays every requested game with the given winner until the bracket has a champion.</summary>

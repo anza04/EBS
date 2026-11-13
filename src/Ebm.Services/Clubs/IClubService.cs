@@ -51,7 +51,8 @@ public sealed record RosterPlayer(
     int? RotationOrder,
     PlayerAvailability Availability,
     bool HasContract,
-    PlayerEvaluation Evaluation)
+    PlayerEvaluation Evaluation,
+    bool IsNonEu = false)
 {
     /// <summary>Effective rating at the lineup position for starters, otherwise the overall rating.</summary>
     public int RatingInRole => LineupPosition is { } position ? Evaluation.At(position).EffectiveRating : Evaluation.Overall;
@@ -69,7 +70,8 @@ public sealed record RosterPlayer(
         IsForeign,
         Age,
         lineupPosition is { } position ? Evaluation.At(position).Familiarity : null,
-        HasContract);
+        HasContract,
+        IsNonEu);
 }
 
 /// <summary>A competition the club is entered in this season, and whether its squad meets the competition's registration rules.</summary>

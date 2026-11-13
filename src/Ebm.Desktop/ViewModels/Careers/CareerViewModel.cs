@@ -117,7 +117,13 @@ public sealed partial class CareerViewModel : ObservableObject
             + (state.SeasonComplete ? " · Season complete" : string.Empty);
         NextMatch = state.NextFixture is { } next
             ? $"{(next.Fixture.Date <= state.Today ? "Today" : "Next match")}: {Format(next.Fixture.Date)} · {next.HomeClub} – {next.AwayClub}"
-                + (next.Fixture.Stage == FixtureStage.Playoffs ? $" (playoffs, round {next.Fixture.Round}, game {next.Fixture.GameNumber})" : string.Empty)
+                + next.Fixture.Stage switch
+                {
+                    FixtureStage.Playoffs => $" (playoffs, round {next.Fixture.Round}, game {next.Fixture.GameNumber})",
+                    FixtureStage.PlayIn => $" (play-in, round {next.Fixture.Round})",
+                    FixtureStage.SecondPhase => $" (second phase, round {next.Fixture.Round})",
+                    _ => string.Empty,
+                }
             : state.SeasonComplete ? "The season is over: review it and start the next one." : "No match scheduled.";
         var keepCompetition = SelectedCompetition?.Competition.Id;
         CompetitionsList = state.Competitions;

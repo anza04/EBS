@@ -3,6 +3,7 @@ using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
 using Ebm.Domain.Competitions.Rules;
+using Ebm.Domain.Countries;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Domain.Standings;
@@ -43,16 +44,18 @@ internal sealed class CompetitionService : ICompetitionService
             .Select(c => c.Id)
             .ToHashSet();
         var entered = seasonEntries.Where(p => p.CompetitionId == competitionId).Select(p => p.ClubId).ToHashSet();
+        var countries = Repo<Country, CountryId>(services);
         foreach (var clubId in clubIds)
         {
             var club = await RequireAsync<Club, ClubId>(services, clubId, "club", cancellationToken).ConfigureAwait(false);
+            var code = (await countries.FindAsync(club.CountryId, cancellationToken).ConfigureAwait(false))?.Code;
             if (!entered.Add(clubId))
             {
                 throw new DomainValidationException($"{club.Name} is already entered in {competition.Name}.");
             }
 
             var inAnotherLeague = seasonEntries.Any(p => p.ClubId == clubId && p.CompetitionId != competitionId && leagueIds.Contains(p.CompetitionId));
-            CompetitionRegistration.Check(competition, club, entered.Count - 1, inAnotherLeague);
+            CompetitionRegistration.Check(competition, club, entered.Count - 1, inAnotherLeague, code);
             participants.Add(new CompetitionParticipant(CompetitionParticipantId.New(), competitionId, seasonId, clubId));
         }
 
@@ -72,20 +75,20 @@ internal sealed class CompetitionService : ICompetitionService
 
         if (data.Fixtures.Count > 0)
         {
-            throw new DomainValidationException($"The {data.Season.Name} schedule of {competition.Name} already exists.");
+            throw new DomainValidationException($"The {data.SeasonEntity.Name} schedule of {competition.Name} already exists.");
         }
 
         data.Rules.ValidateForClubs(data.Clubs.Count);
         await CheckDivisionPlacesAsync(services, competition, data.Rules, cancellationToken).ConfigureAwait(false);
 
-        var start = firstRound ?? data.Season.StartDate;
+        var start = firstRound ?? data.SeasonEntity.StartDate.AddDays(data.Rules.RegularSeason.StartOffsetDays);
         var days = data.Rules.RegularSeason.DaysBetweenRounds;
         var games = RoundRobinScheduler.Generate(data.Clubs, data.Rules.RegularSeason.Legs);
         var lastDate = start.AddDays((games.Max(g => g.Round) - 1) * days);
-        if (start < data.Season.StartDate || lastDate > data.Season.EndDate)
+        if (start < data.SeasonEntity.StartDate || lastDate > data.SeasonEntity.EndDate)
         {
             throw new DomainValidationException(
-                $"The schedule ({start:yyyy-MM-dd} to {lastDate:yyyy-MM-dd}) does not fit in season {data.Season.Name}. Change the start date, the season or regularSeason.daysBetweenRounds.");
+                $"The schedule ({start:yyyy-MM-dd} to {lastDate:yyyy-MM-dd}) does not fit in season {data.SeasonEntity.Name}. Change the start date, the season or regularSeason.daysBetweenRounds.");
         }
 
         var fixtures = Repo<Fixture, FixtureId>(services);
@@ -123,7 +126,7 @@ internal sealed class CompetitionService : ICompetitionService
             ? Match.Forfeit(MatchId.New(), fixtureId, homeForfeits: homeScore < awayScore)
             : new Match(MatchId.New(), fixtureId, homeScore, awayScore, overtimes);
         matches.Add(match);
-        if (fixture.Stage == FixtureStage.RegularSeason)
+        if (fixture.Stage is FixtureStage.RegularSeason or FixtureStage.SecondPhase)
         {
             var competition = await RequireAsync<Competition, CompetitionId>(services, fixture.CompetitionId, "competition", cancellationToken).ConfigureAwait(false);
             var rules = competition.ParseRules();
@@ -157,60 +160,87 @@ internal sealed class CompetitionService : ICompetitionService
         using var scope = _scopes.CreateScope();
         var services = scope.ServiceProvider;
         var data = await LoadAsync(services, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        var phase = data.Phase();
-        if (phase != CompetitionPhase.Playoffs)
+        var requests = data.Season.NextGames();
+        var phase = ToPhase(data.Season.Phase);
+        if (requests.Count == 0)
         {
             return new CompetitionProgress(phase, 0);
         }
 
-        var playoffs = data.Rules.Playoffs!;
-        var requests = data.Bracket()!.NextGames();
         var fixtures = Repo<Fixture, FixtureId>(services);
         var latest = data.Fixtures.Max(f => f.Date);
         foreach (var request in requests)
         {
-            var previous = request.GameNumber == 1
-                ? latest
-                : data.Fixtures.Where(f => f.Stage == FixtureStage.Playoffs && f.Round == request.Round && IsPair(f, request.Home, request.Away)).Max(f => f.Date);
             fixtures.Add(new Fixture(
                 FixtureId.New(),
                 competitionId,
                 seasonId,
                 request.Round,
-                previous.AddDays(playoffs.DaysBetweenGames),
+                GameDate(data, request, latest),
                 request.Home,
                 request.Away,
-                FixtureStage.Playoffs,
+                request.Stage,
                 request.GameNumber));
         }
 
         await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return new CompetitionProgress(CompetitionPhase.Playoffs, requests.Count);
+        return new CompetitionProgress(phase, requests.Count);
     }
 
     public async Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
-        return (await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Phase();
+        return ToPhase((await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Season.Phase);
     }
 
     public async Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        return data.Table();
+        return data.Season.FinalTable();
+    }
+
+    public async Task<IReadOnlyList<GroupTable>> GetGroupTablesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
+        return data.Season.GroupTables();
     }
 
     public async Task<SeasonOutcome> GetOutcomeAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        if (data.Phase() != CompetitionPhase.Completed)
+        if (data.Season.Phase != SeasonPhase.Completed)
         {
-            throw new DomainValidationException($"The {data.Season.Name} season of {data.Competition.Name} is not finished yet.");
+            throw new DomainValidationException($"The {data.SeasonEntity.Name} season of {data.Competition.Name} is not finished yet.");
         }
 
-        return SeasonOutcomeCalculator.Calculate(data.Rules, data.Table(), data.Bracket()?.Champion);
+        return data.Season.Outcome();
+    }
+
+    private static CompetitionPhase ToPhase(SeasonPhase phase) => (CompetitionPhase)(int)phase;
+
+    /// <summary>
+    /// Second-phase round r comes r times its interval after the last game; a play-in round or a series opener the
+    /// playoff interval after the last game; later games of a series that interval after the previous game.
+    /// </summary>
+    private static DateOnly GameDate(SeasonData data, SeasonGameRequest request, DateOnly latest)
+    {
+        var rules = data.Rules;
+        if (request.Stage == FixtureStage.SecondPhase)
+        {
+            return latest.AddDays(request.Round * rules.SecondPhase!.DaysBetweenRounds);
+        }
+
+        var days = rules.Playoffs!.DaysBetweenGames;
+        if (request.Stage == FixtureStage.Playoffs && request.GameNumber > 1)
+        {
+            return data.Fixtures.Where(f => f.Stage == FixtureStage.Playoffs && f.Round == request.Round && IsPair(f, request.Home, request.Away))
+                .Max(f => f.Date).AddDays(days);
+        }
+
+        return latest.AddDays(days);
     }
 
     private static bool IsPair(Fixture fixture, ClubId a, ClubId b) =>
@@ -249,11 +279,19 @@ internal sealed class CompetitionService : ICompetitionService
     {
         var competition = await RequireAsync<Competition, CompetitionId>(services, competitionId, "competition", cancellationToken).ConfigureAwait(false);
         var season = await RequireAsync<Season, SeasonId>(services, seasonId, "season", cancellationToken).ConfigureAwait(false);
-        var clubs = (await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
+        var clubIds = (await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
                 .ListAsync(p => p.CompetitionId == competitionId && p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false))
             .Select(p => p.ClubId)
-            .OrderBy(c => c.Value)
             .ToList();
+        var rules = competition.ParseRules();
+        var countryOf = new Dictionary<ClubId, string>();
+        if (rules.SecondPhase?.ByCountry == true)
+        {
+            var clubs = await Repo<Club, ClubId>(services).ListAsync(c => clubIds.Contains(c.Id), cancellationToken).ConfigureAwait(false);
+            var codes = (await Repo<Country, CountryId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Code);
+            countryOf = clubs.ToDictionary(c => c.Id, c => codes.GetValueOrDefault(c.CountryId, string.Empty));
+        }
+
         var fixtures = await Repo<Fixture, FixtureId>(services)
             .ListAsync(f => f.CompetitionId == competitionId && f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
         var fixtureIds = fixtures.Select(f => f.Id).ToList();
@@ -261,7 +299,11 @@ internal sealed class CompetitionService : ICompetitionService
             ? []
             : (await Repo<Match, MatchId>(services).ListAsync(m => fixtureIds.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false))
                 .ToDictionary(m => m.FixtureId);
-        return new SeasonData(competition, season, competition.ParseRules(), clubs, fixtures, results);
+        var games = fixtures.Select(f => results.TryGetValue(f.Id, out var m)
+            ? new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId, m.HomeScore, m.AwayScore)
+            : new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId));
+        var entries = clubIds.ToDictionary(c => c, c => countryOf.GetValueOrDefault(c, string.Empty));
+        return new SeasonData(competition, season, rules, new CompetitionSeason(rules, entries, games), fixtures);
     }
 
     private static Task<TEntity> RequireAsync<TEntity, TId>(IServiceProvider services, TId id, string what, CancellationToken cancellationToken)
@@ -280,47 +322,14 @@ internal sealed class CompetitionService : ICompetitionService
         where TId : struct, IEntityId<TId> =>
         services.GetRequiredService<IRepository<TEntity, TId>>();
 
-    /// <summary>Everything stored about one competition season, with the derived table, bracket and phase.</summary>
+    /// <summary>Everything stored about one competition season, with the engine view of it.</summary>
     private sealed record SeasonData(
         Competition Competition,
-        Season Season,
+        Season SeasonEntity,
         CompetitionRules Rules,
-        IReadOnlyList<ClubId> Clubs,
-        IReadOnlyList<Fixture> Fixtures,
-        IReadOnlyDictionary<FixtureId, Match> Results)
+        CompetitionSeason Season,
+        IReadOnlyList<Fixture> Fixtures)
     {
-        private IEnumerable<Fixture> RegularSeason => Fixtures.Where(f => f.Stage == FixtureStage.RegularSeason);
-
-        public IReadOnlyList<StandingRow> Table() => StandingsCalculator.Calculate(
-            Clubs,
-            RegularSeason
-                .Where(f => Results.ContainsKey(f.Id))
-                .Select(f => new GameResult(f.HomeClubId, f.AwayClubId, Results[f.Id].HomeScore, Results[f.Id].AwayScore)),
-            Rules);
-
-        /// <summary>The playoff bracket, once the regular season is over and the rules have playoffs.</summary>
-        public PlayoffBracket? Bracket()
-        {
-            if (Rules.Playoffs is not { } playoffs || !RegularSeasonOver)
-            {
-                return null;
-            }
-
-            var seeds = Table().Skip(playoffs.FromPosition - 1).Take(playoffs.Teams).Select(r => r.ClubId).ToList();
-            var games = Fixtures
-                .Where(f => f.Stage == FixtureStage.Playoffs)
-                .Select(f => Results.TryGetValue(f.Id, out var m)
-                    ? new PlayoffGame(f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId, m.HomeScore, m.AwayScore)
-                    : new PlayoffGame(f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId));
-            return PlayoffBracket.Build(seeds, playoffs, games);
-        }
-
-        public CompetitionPhase Phase() =>
-            !RegularSeason.Any() ? CompetitionPhase.Registration
-            : !RegularSeasonOver ? CompetitionPhase.RegularSeason
-            : Rules.Playoffs is null || Bracket()!.IsComplete ? CompetitionPhase.Completed
-            : CompetitionPhase.Playoffs;
-
-        private bool RegularSeasonOver => RegularSeason.Any() && RegularSeason.All(f => Results.ContainsKey(f.Id));
+        public IReadOnlyList<ClubId> Clubs => Season.Clubs;
     }
 }

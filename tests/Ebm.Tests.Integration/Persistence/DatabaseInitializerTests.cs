@@ -12,7 +12,7 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_CareerAssistant";
+    private const string LatestMigration = "_CountryEuEea";
 
     private static readonly string[] ExpectedTables =
     [

@@ -6,6 +6,7 @@ namespace Ebm.Domain.Rosters;
 /// <summary>A club player as the roster rules see him, prepared by the caller for a given date.</summary>
 /// <param name="LineupFamiliarity">Familiarity with <paramref name="LineupPosition"/>; <c>null</c> for non-starters.</param>
 /// <param name="HasContract">A contract with the club is running on the validation date.</param>
+/// <param name="IsNonEu">His nationality is outside the EU/EEA (counts against <see cref="SquadRules.MaxNonEuPlayers"/>).</param>
 public sealed record RosterMember(
     PlayerId PlayerId,
     string Name,
@@ -15,7 +16,8 @@ public sealed record RosterMember(
     bool IsForeign,
     int Age,
     PositionFamiliarity? LineupFamiliarity,
-    bool HasContract);
+    bool HasContract,
+    bool IsNonEu = false);
 
 public enum RosterIssueSeverity
 {
@@ -33,6 +35,7 @@ public enum RosterIssueCode
     TooManyPlayers,
     MatchdaySquadTooLarge,
     TooManyForeignPlayers,
+    TooManyNonEuPlayers,
     TooFewDomesticPlayers,
     UnderMinimumAge,
     DoubtfulStarter,
@@ -152,6 +155,12 @@ public static class RosterValidator
         if (rules.MaxForeignPlayers is { } maxForeign && foreign > maxForeign)
         {
             issues.Add(Error(RosterIssueCode.TooManyForeignPlayers, $"The first team has {foreign} foreign players; at most {maxForeign} are allowed."));
+        }
+
+        var nonEu = firstTeam.Count(m => m.IsNonEu);
+        if (rules.MaxNonEuPlayers is { } maxNonEu && nonEu > maxNonEu)
+        {
+            issues.Add(Error(RosterIssueCode.TooManyNonEuPlayers, $"The first team has {nonEu} non-EU players; at most {maxNonEu} are allowed."));
         }
 
         var domestic = firstTeam.Count - foreign;
