@@ -1,0 +1,309 @@
+{
+ "club": "Olimpia Milano",
+ "country": "ITA",
+ "asOf": "2026-08-19",
+ "profileSource": "it.wikipedia.org Pallacanestro Olimpia Milano 2026-2027 (roster as of 2026-08-19); birth date known to the year only",
+ "contractSource": "Arrival dates: it.wikipedia.org Pallacanestro Olimpia Milano 2026-2027; salary and length estimated",
+ "attributeBasis": "Estimated: club level (2026-27 strength) plus a role tier (S star +8, A starter +4, B rotation 0, C bench -5, Y youth -14); no per-player statistics",
+ "notes": [
+  "Profiles are Estimated: Wikipedia gives birth years only (birth date set to 1 July).",
+  "Previous-club spells cover 2025-26 only (start assumed 1 July 2025) and only clubs in the dataset."
+ ],
+ "players": [
+  {
+   "firstName": "Jason",
+   "lastName": "Burnell",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 201,
+   "weightKg": 100,
+   "position": "SF",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "R.J.",
+   "lastName": "Cole",
+   "dateOfBirth": "1999-07-01",
+   "nationality": "USA",
+   "heightCm": 185,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Reyer Venezia",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Moses",
+   "lastName": "Wright",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "USA",
+   "heightCm": 207,
+   "weightKg": 104,
+   "position": "C",
+   "level": 70,
+   "reputation": 72,
+   "potential": 70,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Žalgiris Kaunas",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated",
+   "secondNationality": "MKD"
+  },
+  {
+   "firstName": "Ousmane",
+   "lastName": "Diop",
+   "dateOfBirth": "2000-07-01",
+   "nationality": "SEN",
+   "heightCm": 204,
+   "weightKg": 100,
+   "position": "C",
+   "level": 62,
+   "reputation": 52,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Stefano",
+   "lastName": "Tonut",
+   "dateOfBirth": "1993-07-01",
+   "nationality": "ITA",
+   "heightCm": 194,
+   "weightKg": 100,
+   "position": "SG",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Leandro",
+   "lastName": "Bolmaro",
+   "dateOfBirth": "2000-07-01",
+   "nationality": "ARG",
+   "heightCm": 198,
+   "weightKg": 91,
+   "position": "PG",
+   "level": 70,
+   "reputation": 72,
+   "potential": 70,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated",
+   "secondNationality": "ITA"
+  },
+  {
+   "firstName": "Darius",
+   "lastName": "Thompson",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "USA",
+   "heightCm": 193,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 70,
+   "reputation": 72,
+   "potential": 70,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Valencia Basket",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated",
+   "secondNationality": "ITA"
+  },
+  {
+   "firstName": "Baptiste",
+   "lastName": "Chauveau",
+   "dateOfBirth": "2008-07-01",
+   "nationality": "FRA",
+   "heightCm": 192,
+   "weightKg": 84,
+   "position": "SG",
+   "level": 48,
+   "reputation": 26,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Giampaolo",
+   "lastName": "Ricci",
+   "dateOfBirth": "1991-07-01",
+   "nationality": "ITA",
+   "heightCm": 202,
+   "weightKg": 102,
+   "position": "PF",
+   "level": 62,
+   "reputation": 52,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Diego",
+   "lastName": "Flaccadori",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "ITA",
+   "heightCm": 195,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Devon",
+   "lastName": "Hall",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "USA",
+   "heightCm": 196,
+   "weightKg": 96,
+   "position": "SG",
+   "level": 70,
+   "reputation": 72,
+   "potential": 70,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Fenerbahçe",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Marko",
+   "lastName": "Gudurić",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "SRB",
+   "heightCm": 198,
+   "weightKg": 96,
+   "position": "SF",
+   "level": 70,
+   "reputation": 72,
+   "potential": 70,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Garrison",
+   "lastName": "Mathews",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "USA",
+   "heightCm": 196,
+   "weightKg": 86,
+   "position": "SG",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Alec",
+   "lastName": "Peters",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "USA",
+   "heightCm": 206,
+   "weightKg": 107,
+   "position": "PF",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Olympiacos",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Devin",
+   "lastName": "Booker",
+   "dateOfBirth": "1991-07-01",
+   "nationality": "USA",
+   "heightCm": 205,
+   "weightKg": 113,
+   "position": "C",
+   "level": 66,
+   "reputation": 62,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Nicola",
+   "lastName": "Akele",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "ITA",
+   "heightCm": 203,
+   "weightKg": 96,
+   "position": "SF",
+   "level": 62,
+   "reputation": 52,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Virtus Bologna",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  }
+ ]
+}

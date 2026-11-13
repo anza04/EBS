@@ -205,7 +205,7 @@ def board(level, rank, size, div):
 # Real clubs of each top division, strongest first ("name|short name|city"); names without sponsors where the club is
 # commonly known without one. Unverified: compiled from 2025-26 knowledge, not checked against 2026-27 registrations.
 REAL_CLUBS = {
-    "Lega Basket Serie A": "Olimpia Milano|MIL|Milano; Virtus Bologna|VBO|Bologna; Reyer Venezia|VEN|Venezia; Aquila Basket Trento|TRE|Trento; Basket Brescia Leonessa|BRE|Brescia; Trapani Shark|TRA|Trapani; Dinamo Sassari|SAS|Sassari; Pallacanestro Reggiana|REG|Reggio Emilia; Derthona Basket|DER|Tortona; Pallacanestro Trieste|TRI|Trieste; Napoli Basket|NAP|Napoli; Pallacanestro Varese|VAR|Varese; Vanoli Basket Cremona|CRE|Cremona; Universo Treviso Basket|TRV|Treviso; Pallacanestro Cantù|CAN|Cantù; APU Udine|UDI|Udine",
+    "Lega Basket Serie A": "Virtus Bologna|VBO|Bologna; Olimpia Milano|MIL|Milano; Reyer Venezia|VEN|Venezia; Aquila Basket Trento|TRE|Trento; Derthona Basket|DER|Tortona; Pallacanestro Reggiana|REG|Reggio Emilia; Napoli Basket|NAP|Napoli; Pallacanestro Trieste|TRI|Trieste; Maxima Roma|MRO|Roma; APU Udine|UDI|Udine; Pallacanestro Varese|VAR|Varese; BC Roma|BCR|Roma; Universo Treviso Basket|TRV|Treviso; Pallacanestro Cantù|CAN|Cantù; Scafati Basket|SCA|Scafati; Scaligera Basket Verona|VER|Verona",
     "Liga Endesa": "Real Madrid|RMB|Madrid; FC Barcelona|FCB|Barcelona; Valencia Basket|VAL|Valencia; Unicaja|UNI|Málaga; Saski Baskonia|BKN|Vitoria-Gasteiz; CB Canarias|CAN|San Cristóbal de La Laguna; CB Gran Canaria|GCA|Las Palmas de Gran Canaria; Club Joventut Badalona|JOV|Badalona; UCAM Murcia CB|MUR|Murcia; CB Breogán|BRE|Lugo; Bàsquet Girona|GIR|Girona; Bàsquet Manresa|MAN|Manresa; Basket Zaragoza|ZAR|Zaragoza; Bilbao Basket|BIL|Bilbao; BC Andorra|AND|Andorra la Vella; Força Lleida|LLE|Lleida; Fundación CB Granada|GRA|Granada; CB San Pablo Burgos|BUR|Burgos",
     "easyCredit BBL": "FC Bayern München|FCB|München; ALBA Berlin|ALB|Berlin; Ratiopharm Ulm|ULM|Ulm; Telekom Baskets Bonn|BON|Bonn; Würzburg Baskets|WUE|Würzburg; Niners Chemnitz|CHE|Chemnitz; Riesen Ludwigsburg|LUD|Ludwigsburg; Bamberg Baskets|BAM|Bamberg; Rostock Seawolves|ROS|Rostock; Hamburg Towers|HAM|Hamburg; Baskets Oldenburg|OLD|Oldenburg; Academics Heidelberg|HEI|Heidelberg; Mitteldeutscher BC|MBC|Weißenfels; Basketball Löwen Braunschweig|BRA|Braunschweig; Science City Jena|JEN|Jena; Skyliners Frankfurt|FRA|Frankfurt; Rasta Vechta|VEC|Vechta; Gladiators Trier|TRI|Trier",
     "Betclic ÉLITE": "Paris Basketball|PAR|Paris; AS Monaco Basket|MON|Monaco; ASVEL Lyon-Villeurbanne|ASV|Villeurbanne; JL Bourg|JLB|Bourg-en-Bresse; Nanterre 92|NAN|Nanterre; SIG Strasbourg|SIG|Strasbourg; JDA Dijon|DIJ|Dijon; Cholet Basket|CHO|Cholet; Le Mans Sarthe Basket|MSB|Le Mans; Limoges CSP|CSP|Limoges; BCM Gravelines-Dunkerque|BCM|Gravelines; ESSM Le Portel|ESS|Le Portel; Saint-Quentin Basket-Ball|SQB|Saint-Quentin; Élan Béarnais|EBP|Pau; Boulazac Basket Dordogne|BBD|Boulazac; SLUC Nancy|SLU|Nancy",
@@ -225,7 +225,12 @@ REAL_CLUBS = {
 }
 
 # Nationalities without a league in the dataset (foreign players). Code: (name, EU/EEA/CH).
-EXTRA_COUNTRIES = {"USA": ("United States", False), "LVA": ("Latvia", True), "NGA": ("Nigeria", False)}
+EXTRA_COUNTRIES = {"USA": ("United States", False), "LVA": ("Latvia", True), "NGA": ("Nigeria", False), "MKD": ("North Macedonia", False),
+                   "SEN": ("Senegal", False), "ARG": ("Argentina", False), "CAN": ("Canada", False), "AGO": ("Angola", False),
+                   "MLI": ("Mali", False), "GEO": ("Georgia", False), "CMR": ("Cameroon", False), "CUB": ("Cuba", False),
+                   "BIH": ("Bosnia and Herzegovina", False), "EST": ("Estonia", True), "ARM": ("Armenia", False), "SSD": ("South Sudan", False),
+                   "COL": ("Colombia", False), "AUS": ("Australia", False), "CIV": ("Côte d'Ivoire", False), "COD": ("DR Congo", False),
+                   "MNE": ("Montenegro", False), "PUR": ("Puerto Rico", False), "AUT": ("Austria", True)}
 
 # Real squads (build/real-rosters/*.json, curated from cited sources) replace a club's generated players. Profiles are
 # Verified when the file cites a source, attributes are always Estimated, contract terms Estimated (docs/PLAYER_DATABASE.md).
@@ -370,13 +375,13 @@ def generate_squad(club, div, level, factory, clubs_by_country, rnd, players, co
 def real_squad(roster, club, clubs_by_name, players, contracts, history):
     """A curated squad: sourced profiles, attributes estimated from level and statistics, estimated contract terms."""
     ranked = sorted(roster["players"], key=lambda x: -x["level"])
-    weights = {id(x): 1.6 - i * 0.1 for i, x in enumerate(ranked)}
+    weights = {id(x): max(0.3, 1.6 - i * 0.1) for i, x in enumerate(ranked)}
     wage_pool = club["wageBudget"] * 0.8
     for real in roster["players"]:
         position, level = real["position"], real["level"]
         birth = date.fromisoformat(real["dateOfBirth"])
         age = CONTRACT_SEASON.year - birth.year
-        player = {"id": uid("player", real["firstName"], real["lastName"], real["dateOfBirth"]), "firstName": real["firstName"],
+        player = {"id": uid("player", real["firstName"], real["lastName"], real["dateOfBirth"][:4]), "firstName": real["firstName"],
                   "lastName": real["lastName"], "dateOfBirth": real["dateOfBirth"], "nationality": real["nationality"],
                   "secondNationality": real.get("secondNationality", ""), "heightCm": real["heightCm"], "weightKg": real["weightKg"],
                   "position": position, "wingspanCm": ""}

@@ -1,0 +1,291 @@
+{
+ "club": "Napoli Basket",
+ "country": "ITA",
+ "asOf": "2026-11-02",
+ "profileSource": "it.wikipedia.org Napoli Basket 2026-2027 (roster as of 2026-11-02); birth date known to the year only",
+ "contractSource": "Arrival dates: it.wikipedia.org Napoli Basket 2026-2027; salary and length estimated",
+ "attributeBasis": "Estimated: club level (2026-27 strength) plus a role tier (S star +8, A starter +4, B rotation 0, C bench -5, Y youth -14); no per-player statistics",
+ "notes": [
+  "Profiles are Estimated: Wikipedia gives birth years only (birth date set to 1 July).",
+  "Previous-club spells cover 2025-26 only (start assumed 1 July 2025) and only clubs in the dataset."
+ ],
+ "players": [
+  {
+   "firstName": "Marco",
+   "lastName": "Spissu",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "ITA",
+   "heightCm": 185,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Basket Zaragoza",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Zac",
+   "lastName": "Seljaas",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 201,
+   "weightKg": 94,
+   "position": "SF",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "ASVEL Lyon-Villeurbanne",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Jeff",
+   "lastName": "Dowtin",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 191,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Emanuel",
+   "lastName": "Esposito",
+   "dateOfBirth": "2008-07-01",
+   "nationality": "ITA",
+   "heightCm": 175,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 41,
+   "reputation": 19,
+   "potential": 55,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Vittorio",
+   "lastName": "Ferrara",
+   "dateOfBirth": "2008-07-01",
+   "nationality": "ITA",
+   "heightCm": 198,
+   "weightKg": 101,
+   "position": "PF",
+   "level": 41,
+   "reputation": 19,
+   "potential": 55,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Leonardo",
+   "lastName": "Faggian",
+   "dateOfBirth": "2004-07-01",
+   "nationality": "ITA",
+   "heightCm": 195,
+   "weightKg": 94,
+   "position": "SF",
+   "level": 50,
+   "reputation": 34,
+   "potential": 56,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "John",
+   "lastName": "Petrucelli",
+   "dateOfBirth": "1992-07-01",
+   "nationality": "ITA",
+   "heightCm": 188,
+   "weightKg": 88,
+   "position": "SG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Galatasaray",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated",
+   "secondNationality": "USA"
+  },
+  {
+   "firstName": "Assane",
+   "lastName": "Sankare",
+   "dateOfBirth": "2007-07-01",
+   "nationality": "SEN",
+   "heightCm": 204,
+   "weightKg": 101,
+   "position": "PF",
+   "level": 41,
+   "reputation": 19,
+   "potential": 53,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Jack",
+   "lastName": "White",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "AUS",
+   "heightCm": 201,
+   "weightKg": 94,
+   "position": "SF",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Markel",
+   "lastName": "Brown",
+   "dateOfBirth": "1992-07-01",
+   "nationality": "USA",
+   "heightCm": 189,
+   "weightKg": 88,
+   "position": "SG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Pallacanestro Trieste",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Andrej",
+   "lastName": "Jakimovski",
+   "dateOfBirth": "2001-07-01",
+   "nationality": "MKD",
+   "heightCm": 202,
+   "weightKg": 101,
+   "position": "PF",
+   "level": 55,
+   "reputation": 45,
+   "potential": 55,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Aquila Basket Trento",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Kaleb",
+   "lastName": "Tarczewski",
+   "dateOfBirth": "1993-07-01",
+   "nationality": "USA",
+   "heightCm": 212,
+   "weightKg": 108,
+   "position": "C",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Guglielmo",
+   "lastName": "Caruso",
+   "dateOfBirth": "1999-07-01",
+   "nationality": "ITA",
+   "heightCm": 209,
+   "weightKg": 108,
+   "position": "C",
+   "level": 55,
+   "reputation": 45,
+   "potential": 55,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Leonardo",
+   "lastName": "Totè",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "ITA",
+   "heightCm": 212,
+   "weightKg": 108,
+   "position": "C",
+   "level": 50,
+   "reputation": 34,
+   "potential": 50,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Jahmi'us",
+   "lastName": "Ramsey",
+   "dateOfBirth": "2001-07-01",
+   "nationality": "USA",
+   "heightCm": 191,
+   "weightKg": 88,
+   "position": "SG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "Pallacanestro Trieste",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  }
+ ]
+}

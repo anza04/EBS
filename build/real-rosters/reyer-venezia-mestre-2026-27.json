@@ -1,0 +1,248 @@
+{
+ "club": "Reyer Venezia",
+ "country": "ITA",
+ "asOf": "2026-08-28",
+ "profileSource": "it.wikipedia.org Reyer Venezia Mestre 2026-2027 (roster as of 2026-08-28); birth date known to the year only",
+ "contractSource": "Arrival dates: it.wikipedia.org Reyer Venezia Mestre 2026-2027; salary and length estimated",
+ "attributeBasis": "Estimated: club level (2026-27 strength) plus a role tier (S star +8, A starter +4, B rotation 0, C bench -5, Y youth -14); no per-player statistics",
+ "notes": [
+  "Profiles are Estimated: Wikipedia gives birth years only (birth date set to 1 July).",
+  "Previous-club spells cover 2025-26 only (start assumed 1 July 2025) and only clubs in the dataset."
+ ],
+ "players": [
+  {
+   "firstName": "Amedeo",
+   "lastName": "Tessitori",
+   "dateOfBirth": "1994-07-01",
+   "nationality": "ITA",
+   "heightCm": 207,
+   "weightKg": 107,
+   "position": "C",
+   "level": 62,
+   "reputation": 58,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Ky",
+   "lastName": "Bowman",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 190,
+   "weightKg": 87,
+   "position": "PG",
+   "level": 66,
+   "reputation": 68,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Octavio",
+   "lastName": "Maretto",
+   "dateOfBirth": "2004-07-01",
+   "nationality": "ARG",
+   "heightCm": 197,
+   "weightKg": 88,
+   "position": "SF",
+   "level": 53,
+   "reputation": 37,
+   "potential": 59,
+   "ratings": {},
+   "joined": "2026-07-15",
+   "history": [],
+   "dataStatus": "Estimated",
+   "secondNationality": "ITA"
+  },
+  {
+   "firstName": "Giovanni",
+   "lastName": "De Nicolao",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "ITA",
+   "heightCm": 187,
+   "weightKg": 79,
+   "position": "PG",
+   "level": 58,
+   "reputation": 48,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Leonardo",
+   "lastName": "Candi",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "ITA",
+   "heightCm": 190,
+   "weightKg": 86,
+   "position": "SG",
+   "level": 58,
+   "reputation": 48,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Sir'Jabari",
+   "lastName": "Rice",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "USA",
+   "heightCm": 193,
+   "weightKg": 82,
+   "position": "PG",
+   "level": 62,
+   "reputation": 58,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [
+    {
+     "club": "BC Andorra",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-30"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Enoch",
+   "lastName": "Boakye",
+   "dateOfBirth": "2003-07-01",
+   "nationality": "CAN",
+   "heightCm": 211,
+   "weightKg": 113,
+   "position": "C",
+   "level": 58,
+   "reputation": 48,
+   "potential": 62,
+   "ratings": {},
+   "joined": "2026-07-12",
+   "history": [
+    {
+     "club": "Spirou Charleroi",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-11"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Giga",
+   "lastName": "Janelidze",
+   "dateOfBirth": "1995-07-01",
+   "nationality": "GEO",
+   "heightCm": 201,
+   "weightKg": 100,
+   "position": "PF",
+   "level": 58,
+   "reputation": 48,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Louis",
+   "lastName": "Olinde",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "GER",
+   "heightCm": 205,
+   "weightKg": 96,
+   "position": "PF",
+   "level": 62,
+   "reputation": 58,
+   "potential": 62,
+   "ratings": {},
+   "joined": "2026-07-24",
+   "history": [
+    {
+     "club": "Bàsquet Manresa",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-23"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Jordan",
+   "lastName": "Parks",
+   "dateOfBirth": "1994-07-01",
+   "nationality": "USA",
+   "heightCm": 201,
+   "weightKg": 92,
+   "position": "SF",
+   "level": 62,
+   "reputation": 58,
+   "potential": 62,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Glynn",
+   "lastName": "Watson",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 183,
+   "weightKg": 78,
+   "position": "PG",
+   "level": 62,
+   "reputation": 58,
+   "potential": 62,
+   "ratings": {},
+   "joined": "2026-07-02",
+   "history": [
+    {
+     "club": "ASVEL Lyon-Villeurbanne",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-01"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Kyle",
+   "lastName": "Wiltjer",
+   "dateOfBirth": "1992-07-01",
+   "nationality": "USA",
+   "heightCm": 208,
+   "weightKg": 110,
+   "position": "PF",
+   "level": 66,
+   "reputation": 68,
+   "potential": 66,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated",
+   "secondNationality": "CAN"
+  },
+  {
+   "firstName": "Sasha",
+   "lastName": "Grant",
+   "dateOfBirth": "2002-07-01",
+   "nationality": "ITA",
+   "heightCm": 201,
+   "weightKg": 95,
+   "position": "PF",
+   "level": 53,
+   "reputation": 37,
+   "potential": 55,
+   "ratings": {},
+   "joined": "2026-07-09",
+   "history": [],
+   "dataStatus": "Estimated"
+  }
+ ]
+}

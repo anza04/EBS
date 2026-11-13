@@ -55,17 +55,26 @@ public sealed class EuropePlayerDatabaseTests : IAsyncLifetime
         Assert.DoesNotContain(report.Records, r => r.Messages.Any(m => m.StartsWith("Possible duplicate", StringComparison.Ordinal)));
 
         var (clubs, players, contracts, spells) = await LoadAsync();
-        Assert.Equal(6146, players.Count);
+        Assert.Equal(6168, players.Count);
         Assert.Equal(240, clubs.Count(c => c.DataStatus == DataStatus.Unverified));
         Assert.Equal(272, clubs.Count(c => c.DataStatus == DataStatus.Generated));
-        var cantu = clubs.Single(c => c.Name == "Pallacanestro Cantù").Id;
-        var real = contracts.Where(c => c.ClubId == cantu).Select(c => c.PlayerId!.Value).ToHashSet();
-        Assert.All(players.Where(p => !real.Contains(p.Id)), p => Assert.Equal((DataStatus.Generated, DataStatus.Generated), (p.ProfileStatus, p.AttributesStatus)));
-        Assert.All(contracts.Where(c => c.ClubId != cantu), c => Assert.Equal(DataStatus.Generated, c.TermsStatus));
         Assert.Contains(players, p => p.SecondNationalityId is not null);
 
+        // Real squads (build/real-rosters): all 16 Serie A clubs; every real record cites a source, nothing real is Generated.
+        var real = players.Where(p => p.Source is not null).Select(p => p.Id).ToHashSet();
+        var realClubs = contracts.Where(c => real.Contains(c.PlayerId!.Value)).Select(c => c.ClubId).ToHashSet();
+        Assert.Equal(216, real.Count);
+        Assert.Equal(16, realClubs.Count);
+        Assert.All(players.Where(p => real.Contains(p.Id)), p => Assert.Equal(DataStatus.Estimated, p.AttributesStatus));
+        Assert.All(players.Where(p => real.Contains(p.Id)), p => Assert.NotEqual(DataStatus.Generated, p.ProfileStatus));
+        Assert.All(contracts.Where(c => realClubs.Contains(c.ClubId)), c => Assert.Equal((DataStatus.Estimated, true), (c.TermsStatus, c.Source is not null)));
+        Assert.All(players.Where(p => !real.Contains(p.Id)), p => Assert.Equal((DataStatus.Generated, DataStatus.Generated), (p.ProfileStatus, p.AttributesStatus)));
+        Assert.All(contracts.Where(c => !realClubs.Contains(c.ClubId)), c => Assert.Equal(DataStatus.Generated, c.TermsStatus));
+        var cantu = clubs.Single(c => c.Name == "Pallacanestro Cantù").Id;
+
         // The real Cantù squad (build/real-rosters): sourced profiles, estimated attributes and terms; Christon has no cited birth date.
-        var squad = players.Where(p => real.Contains(p.Id)).ToList();
+        var cantuPlayers = contracts.Where(c => c.ClubId == cantu).Select(c => c.PlayerId!.Value).ToHashSet();
+        var squad = players.Where(p => cantuPlayers.Contains(p.Id)).ToList();
         Assert.Equal(14, squad.Count);
         Assert.All(squad, p => Assert.Equal(DataStatus.Estimated, p.AttributesStatus));
         Assert.All(squad, p => Assert.NotNull(p.Source));
@@ -74,17 +83,19 @@ public sealed class EuropePlayerDatabaseTests : IAsyncLifetime
         var today = contracts.Where(c => c.ClubId == cantu && c.IsRunningOn(new DateOnly(2026, 11, 13))).Select(c => squad.Single(p => p.Id == c.PlayerId).LastName).Order();
         Assert.Equal(["Brown", "Flagg", "Gravett", "Gražulis", "Green", "Moraschini", "Moretti", "Okeke", "Olisevičius", "Parravicini", "Udom", "Ventura"], today);
 
-        // Player-club relationships: one contract per player, twelve per club at the season start, from every country.
+        // Player-club relationships: one contract per player; generated clubs have twelve through the season, real squads at least nine at the start.
         var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
         Assert.Equal(players.Count, contracts.Select(c => c.PlayerId).Distinct().Count());
-        Assert.All(contracts.Where(c => c.ClubId != cantu), c => Assert.True(c.IsRunningOn(season.StartDate) && c.IsRunningOn(new DateOnly(2027, 6, 30))));
-        Assert.All(contracts.Where(c => c.IsRunningOn(season.StartDate)).GroupBy(c => c.ClubId), g => Assert.Equal(12, g.Count()));
+        var generated = contracts.Where(c => !realClubs.Contains(c.ClubId)).ToList();
+        Assert.All(generated, c => Assert.True(c.IsRunningOn(season.StartDate) && c.IsRunningOn(new DateOnly(2027, 6, 30))));
+        Assert.All(generated.GroupBy(c => c.ClubId), g => Assert.Equal(12, g.Count()));
+        Assert.All(contracts.Where(c => realClubs.Contains(c.ClubId) && c.IsRunningOn(season.StartDate)).GroupBy(c => c.ClubId), g => Assert.InRange(g.Count(), 9, 18));
         Assert.Equal(clubs.Count, contracts.Select(c => c.ClubId).Distinct().Count());
         Assert.Equal(18, clubs.Where(c => contracts.Any(k => k.ClubId == c.Id)).Select(c => c.CountryId).Distinct().Count());
 
         // History: closed spells at another club, before the current contract.
         var contractOf = contracts.ToDictionary(c => c.PlayerId!.Value);
-        Assert.Equal(1504, spells.Count);
+        Assert.Equal(1509, spells.Count);
         Assert.All(spells, s =>
         {
             Assert.NotNull(s.EndDate);
@@ -92,10 +103,11 @@ public sealed class EuropePlayerDatabaseTests : IAsyncLifetime
             Assert.True(s.EndDate < contractOf[s.PlayerId].StartDate);
         });
 
-        // Registration limits (foreign, non-EU with second nationalities, domestic) hold for one club of every competition.
+        // Registration limits (foreign, non-EU with second nationalities, domestic) hold for one generated club of every competition
+        // (real squads follow the real rules, which cap the matchday sheet rather than the squad: docs/PLAYER_DATABASE.md §1.1).
         var entries = await _db.ReadAsync(s => s.Repo<CompetitionParticipant, CompetitionParticipantId>().ListAsync());
         var service = _db.Services.GetRequiredService<IClubService>();
-        foreach (var entry in entries.GroupBy(e => e.CompetitionId).Select(g => g.First()))
+        foreach (var entry in entries.Where(e => !realClubs.Contains(e.ClubId)).GroupBy(e => e.CompetitionId).Select(g => g.First()))
         {
             var roster = (await service.GetRosterAsync(entry.ClubId))!;
             Assert.Equal(12, roster.Players.Count);

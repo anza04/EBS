@@ -1,0 +1,208 @@
+{
+ "club": "Pallacanestro Trieste",
+ "country": "ITA",
+ "asOf": "2026-09-24",
+ "profileSource": "it.wikipedia.org Pallacanestro Trieste 2004 2026-2027 (roster as of 2026-09-24); birth date known to the year only",
+ "contractSource": "Arrival dates: it.wikipedia.org Pallacanestro Trieste 2004 2026-2027; salary and length estimated",
+ "attributeBasis": "Estimated: club level (2026-27 strength) plus a role tier (S star +8, A starter +4, B rotation 0, C bench -5, Y youth -14); no per-player statistics",
+ "notes": [
+  "Profiles are Estimated: Wikipedia gives birth years only (birth date set to 1 July).",
+  "Previous-club spells cover 2025-26 only (start assumed 1 July 2025) and only clubs in the dataset."
+ ],
+ "players": [
+  {
+   "firstName": "Colbey",
+   "lastName": "Ross",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "USA",
+   "heightCm": 185,
+   "weightKg": 84,
+   "position": "PG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Abramo",
+   "lastName": "Canka",
+   "dateOfBirth": "2002-07-01",
+   "nationality": "ITA",
+   "heightCm": 201,
+   "weightKg": 90,
+   "position": "SF",
+   "level": 55,
+   "reputation": 45,
+   "potential": 57,
+   "ratings": {},
+   "joined": "2026-08-07",
+   "history": [
+    {
+     "club": "Virtus Bologna",
+     "startDate": "2025-07-01",
+     "endDate": "2026-08-06"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Lodovico",
+   "lastName": "Deangeli",
+   "dateOfBirth": "2000-07-01",
+   "nationality": "ITA",
+   "heightCm": 205,
+   "weightKg": 90,
+   "position": "SF",
+   "level": 50,
+   "reputation": 34,
+   "potential": 50,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Langston",
+   "lastName": "Galloway",
+   "dateOfBirth": "1991-07-01",
+   "nationality": "USA",
+   "heightCm": 188,
+   "weightKg": 91,
+   "position": "SG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": "2026-09-09",
+   "history": [
+    {
+     "club": "Esenler Erokspor",
+     "startDate": "2025-07-01",
+     "endDate": "2026-09-08"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Michele",
+   "lastName": "Ruzzier",
+   "dateOfBirth": "1993-07-01",
+   "nationality": "ITA",
+   "heightCm": 183,
+   "weightKg": 80,
+   "position": "PG",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Emanuele",
+   "lastName": "Martucci",
+   "dateOfBirth": "2007-07-01",
+   "nationality": "ITA",
+   "heightCm": 199,
+   "weightKg": 90,
+   "position": "PF",
+   "level": 41,
+   "reputation": 19,
+   "potential": 53,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Francesco",
+   "lastName": "Candussi",
+   "dateOfBirth": "1994-07-01",
+   "nationality": "ITA",
+   "heightCm": 211,
+   "weightKg": 109,
+   "position": "C",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Davide",
+   "lastName": "Paiano",
+   "dateOfBirth": "2005-07-01",
+   "nationality": "ITA",
+   "heightCm": 199,
+   "weightKg": 94,
+   "position": "SF",
+   "level": 50,
+   "reputation": 34,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Luka",
+   "lastName": "Brajkovic",
+   "dateOfBirth": "1999-07-01",
+   "nationality": "AUT",
+   "heightCm": 208,
+   "weightKg": 113,
+   "position": "C",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": "2026-09-25",
+   "history": [
+    {
+     "club": "Cedevita Olimpija",
+     "startDate": "2025-07-01",
+     "endDate": "2026-09-24"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Lajae",
+   "lastName": "Jones",
+   "dateOfBirth": "2004-07-01",
+   "nationality": "USA",
+   "heightCm": 201,
+   "weightKg": 100,
+   "position": "PF",
+   "level": 55,
+   "reputation": 45,
+   "potential": 61,
+   "ratings": {},
+   "joined": "2026-09-21",
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Sean",
+   "lastName": "McDermott",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "USA",
+   "heightCm": 198,
+   "weightKg": 94,
+   "position": "SF",
+   "level": 59,
+   "reputation": 55,
+   "potential": 59,
+   "ratings": {},
+   "joined": "2026-07-19",
+   "history": [],
+   "dataStatus": "Estimated"
+  }
+ ]
+}

@@ -3,6 +3,17 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.2] — 2026-11-13 — Real squads: Serie A
+
+### Added
+- Real 2026-27 squads of the other 15 Serie A clubs (216 real players with Cantù), from the clubs' Wikipedia season
+  pages: `build/real-rosters/*.json`. Profiles, attributes and contract terms Estimated (birth years only, tier-based
+  levels); 2025-26 previous clubs as history where they are in the dataset; 20 more nationalities.
+
+### Changed
+- Serie A club list matches 2026-27 (Maxima Roma, BC Roma, Scafati, Verona in; Trapani, Brescia, Cremona, Sassari out).
+- Real players' IDs derive from name and birth year (Cantù IDs changed once).
+
 ## [0.16.1] — 2026-11-13 — Real squad: Pallacanestro Cantù
 
 ### Added

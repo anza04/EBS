@@ -1,0 +1,259 @@
+{
+ "club": "Pallacanestro Varese",
+ "country": "ITA",
+ "asOf": "2026-08-23",
+ "profileSource": "it.wikipedia.org Pallacanestro Varese 2026-2027 (roster as of 2026-08-23); birth date known to the year only",
+ "contractSource": "Arrival dates: it.wikipedia.org Pallacanestro Varese 2026-2027; salary and length estimated",
+ "attributeBasis": "Estimated: club level (2026-27 strength) plus a role tier (S star +8, A starter +4, B rotation 0, C bench -5, Y youth -14); no per-player statistics",
+ "notes": [
+  "Profiles are Estimated: Wikipedia gives birth years only (birth date set to 1 July).",
+  "Previous-club spells cover 2025-26 only (start assumed 1 July 2025) and only clubs in the dataset."
+ ],
+ "players": [
+  {
+   "firstName": "Davide",
+   "lastName": "Alviti",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "ITA",
+   "heightCm": 200,
+   "weightKg": 92,
+   "position": "SF",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "David",
+   "lastName": "Duke",
+   "dateOfBirth": "1999-07-01",
+   "nationality": "USA",
+   "heightCm": 193,
+   "weightKg": 93,
+   "position": "SG",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-07-27",
+   "history": [
+    {
+     "club": "Bàsquet Manresa",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-26"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Mauro",
+   "lastName": "Villa",
+   "dateOfBirth": "2004-07-01",
+   "nationality": "ARG",
+   "heightCm": 194,
+   "weightKg": 96,
+   "position": "SG",
+   "level": 54,
+   "reputation": 44,
+   "potential": 60,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated",
+   "secondNationality": "ITA"
+  },
+  {
+   "firstName": "William",
+   "lastName": "McDowell-White",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "AUS",
+   "heightCm": 196,
+   "weightKg": 89,
+   "position": "PG",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-07-07",
+   "history": [
+    {
+     "club": "JL Bourg",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-06"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Amedeo",
+   "lastName": "Della Valle",
+   "dateOfBirth": "1993-07-01",
+   "nationality": "ITA",
+   "heightCm": 194,
+   "weightKg": 90,
+   "position": "SG",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-07-06",
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Stefan",
+   "lastName": "Nikolić",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "SRB",
+   "heightCm": 203,
+   "weightKg": 100,
+   "position": "SF",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-06-23",
+   "history": [
+    {
+     "club": "Reyer Venezia",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-22"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Hunter",
+   "lastName": "Hale",
+   "dateOfBirth": "1997-07-01",
+   "nationality": "USA",
+   "heightCm": 191,
+   "weightKg": 84,
+   "position": "SG",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-06-26",
+   "history": [
+    {
+     "club": "Bahçeşehir Koleji",
+     "startDate": "2025-07-01",
+     "endDate": "2026-06-25"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Matteo",
+   "lastName": "Librizzi",
+   "dateOfBirth": "2002-07-01",
+   "nationality": "ITA",
+   "heightCm": 180,
+   "weightKg": 70,
+   "position": "PG",
+   "level": 54,
+   "reputation": 44,
+   "potential": 56,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Nate",
+   "lastName": "Renfro",
+   "dateOfBirth": "1996-07-01",
+   "nationality": "USA",
+   "heightCm": 203,
+   "weightKg": 93,
+   "position": "C",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Ismaël",
+   "lastName": "Kamagate",
+   "dateOfBirth": "2001-07-01",
+   "nationality": "FRA",
+   "heightCm": 211,
+   "weightKg": 100,
+   "position": "C",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-07-29",
+   "history": [
+    {
+     "club": "Beşiktaş",
+     "startDate": "2025-07-01",
+     "endDate": "2026-07-28"
+    }
+   ],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Isaiah",
+   "lastName": "Roby",
+   "dateOfBirth": "1998-07-01",
+   "nationality": "USA",
+   "heightCm": 203,
+   "weightKg": 104,
+   "position": "PF",
+   "level": 58,
+   "reputation": 54,
+   "potential": 58,
+   "ratings": {},
+   "joined": "2026-07-17",
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Maximilian",
+   "lastName": "Ladurner",
+   "dateOfBirth": "2001-07-01",
+   "nationality": "ITA",
+   "heightCm": 207,
+   "weightKg": 104,
+   "position": "C",
+   "level": 49,
+   "reputation": 33,
+   "potential": 49,
+   "ratings": {},
+   "joined": null,
+   "history": [],
+   "dataStatus": "Estimated"
+  },
+  {
+   "firstName": "Iris",
+   "lastName": "Ikangi",
+   "dateOfBirth": "1994-07-01",
+   "nationality": "ITA",
+   "heightCm": 200,
+   "weightKg": 88,
+   "position": "SF",
+   "level": 54,
+   "reputation": 44,
+   "potential": 54,
+   "ratings": {},
+   "joined": "2026-05-25",
+   "history": [
+    {
+     "club": "APU Udine",
+     "startDate": "2025-07-01",
+     "endDate": "2026-05-24"
+    }
+   ],
+   "dataStatus": "Estimated"
+  }
+ ]
+}
