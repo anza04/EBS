@@ -127,3 +127,52 @@ Import ≈ 15 s. A club's squad now loads only the club's contracts and spells (
 before Step 16 every squad load read every running contract of the database, so a game day without matches took
 about 48 s; it now takes under a second. Starting a career takes about 25 s; the career test (20 days, two
 matchdays, every league) about 3 minutes.
+
+## 7. Real leagues dataset
+
+`data/real-leagues` (generator `build/generate-real-leagues-dataset.py`, ratings `build/realgm_ratings.py`) is a
+standalone dataset of eight real 2026-27 top divisions and their real players. Import its four files together into a
+new game (not with `data/europe` or the samples). Test: `RealLeaguesDatasetTests`.
+
+| Division | Clubs | Players under contract |
+|---|---|---|
+| ABA League (cross-border: SRB, CRO, SLO, MNE, BIH, AUT, SVK, ROU, ARE) | 20 | 338 |
+| Liga Endesa | 18 | 274 |
+| easyCredit BBL | 18 | 265 |
+| Lega Basket Serie A (1 relegation) / Serie A2 (play-off winner promoted) | 16 / 20 | 220 / 263 |
+| Basketbol Süper Ligi | 16 | 249 |
+| Betclic ÉLITE | 16 | 219 |
+| Stoiximan GBL | 14 | 217 |
+
+2,598 players: 2,045 under contract, 553 free agents, 12 generated top-ups. 96 nationalities.
+
+* **Source.** `build/player-stats/europe-profiles.csv` and `europe-stats.csv`, compacted from the author's RealGM export
+  (2,630 players: profile, current team, every season's per-game statistics). Refresh with
+  `python build/generate-real-leagues-dataset.py --source <export.csv>`.
+* **Clubs.** The RealGM 2026-27 league rows fix each division's clubs; `CLUBS` maps RealGM team names to club names.
+  Clubs already in `data/europe` keep their name and ID. Reputation comes from the mean level of the best eight
+  players, scaled to the `data/europe` Serie A reputations (half the slope below the weakest Serie A club); wage budget,
+  balance and board expectation as in `data/europe`. Clubs Unverified.
+* **Serie A.** The curated squads of `build/real-rosters` (§1.1), unchanged. RealGM players matched to them (name, birth
+  year ±1) are not added again; RealGM players at a Serie A club who are not in the curated squads become free agents.
+* **Players.** The current team decides the club. Players at any other team (Israel, Lithuania, NBA, college, youth and
+  reserve teams, Pro B, …) are free agents. Profiles are Verified with the RealGM URL as source, or Estimated when the
+  birth date comes from the age (1 July), or the height or weight is missing (by position / from height). Sporting
+  nationality is the first listed one, the second a further citizenship. RealGM's G, F, GF and FC positions are split
+  by height (with a secondary position). Left out: players without nationality or any age, and people over 40
+  without a season since 2024-25 (staff listed at a club).
+* **Ratings.** As *Stat-based ratings* (§1.1), over the whole population: the composite score is scaled so the Serie A
+  players with curated ratings keep their mean and spread, so these leagues share the `data/europe` scale. Small
+  samples are blended toward the mean of the player's division (free agents: the 25th percentile). Strength, speed and
+  agility move up to ±6 with weight and height against the position's build. Reputation: 20 at level 42, 72 at
+  level 70, plus up to 8 each for NBA and EuroLeague games. Attributes Estimated.
+* **Contracts** Estimated. Start: 1 July of the first season of the current run at the RealGM team (from 2020 at the
+  latest, `Contract.MaxLengthYears`); end 30 June 2027–2029 (2027 from age 32); salary from the club's wage budget by
+  level rank. Squads below twelve get generated players at the level of their weakest player.
+* **History.** Past seasons at clubs of the dataset (exact RealGM team name), one club per season (most games),
+  consecutive seasons merged.
+
+Known gaps: real squads keep their size and nationality mix, so some clubs show registration errors (up to 25 players;
+foreign and non-EU limits); RealGM team names that changed sponsor are not linked to the club, so earlier seasons at
+such a club are missing from the history and the tenure starts later; 47 players without a birth date or any age are
+left out.

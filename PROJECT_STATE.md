@@ -52,7 +52,7 @@ STEP 17 — Domestic cups and additional competitions (docs/ROADMAP.md)
 - [x] AI clubs: line-ups, tactics, renewals, releases, transfer windows, free-agent replenishment, salaries and income, board objectives; multi-season simulation test (Step 13)
 - [x] Milestone 1 release: save files (save, load with upgrade, delete, new game), assistant (holiday) mode, Windows self-contained build with smoke test, acceptance and long-run tests (Step 14)
 - [x] European leagues: first two divisions of 18 countries as data (`data/europe`), second phases, play-in, byes, cross-border leagues, EU/EEA limits (Step 15)
-- [x] European player database: real top-division clubs (Unverified), 6,144 generated players with contracts and history, data status and sources, second nationality, estimated attributes/salaries, cross-league duplicate detection, market value (Step 16)
+- [x] European player database: real top-division clubs (Unverified), 6,144 generated players with contracts and history, data status and sources, second nationality, estimated attributes/salaries, cross-league duplicate detection, market value (Step 16); real leagues dataset: 8 real divisions, 138 clubs, 2,598 real players (`data/real-leagues`)
 - [ ] Step 17 onwards (Milestone 2) … see docs/ROADMAP.md
 
 ## Database

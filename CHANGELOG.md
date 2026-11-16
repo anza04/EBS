@@ -3,6 +3,16 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.4] — 2026-11-16 — Real leagues dataset
+
+### Added
+- `data/real-leagues`: a standalone dataset of eight real 2026-27 divisions (ABA League, Liga Endesa, easyCredit BBL,
+  Betclic ÉLITE, Stoiximan GBL, Basketbol Süper Ligi, Serie A, Serie A2) with 138 real clubs and 2,598 real players
+  from the author's RealGM export (`build/player-stats/europe-*.csv`): 2,045 under contract, 553 free agents. Serie A
+  keeps the curated squads. Ratings from career statistics on the existing Serie A scale (`build/realgm_ratings.py`);
+  contracts estimated from the current run at the club; past spells at the dataset's clubs.
+  Generator: `build/generate-real-leagues-dataset.py`. docs/PLAYER_DATABASE.md §7.
+
 ## [0.16.3] — 2026-11-13 — Stat-based ratings for Serie A players
 
 ### Changed

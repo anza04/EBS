@@ -1,0 +1,3546 @@
+{
+ "format": "ebm-dataset",
+ "version": 1,
+ "countries": [
+  {
+   "code": "AGO",
+   "name": "Angola",
+   "euEea": false
+  },
+  {
+   "code": "ALB",
+   "name": "Albania",
+   "euEea": false
+  },
+  {
+   "code": "ARE",
+   "name": "United Arab Emirates",
+   "euEea": false
+  },
+  {
+   "code": "ARG",
+   "name": "Argentina",
+   "euEea": false
+  },
+  {
+   "code": "ARM",
+   "name": "Armenia",
+   "euEea": false
+  },
+  {
+   "code": "AUS",
+   "name": "Australia",
+   "euEea": false
+  },
+  {
+   "code": "AUT",
+   "name": "Austria",
+   "euEea": true
+  },
+  {
+   "code": "AZE",
+   "name": "Azerbaijan",
+   "euEea": false
+  },
+  {
+   "code": "BEL",
+   "name": "Belgium",
+   "euEea": true
+  },
+  {
+   "code": "BEN",
+   "name": "Benin",
+   "euEea": false
+  },
+  {
+   "code": "BGR",
+   "name": "Bulgaria",
+   "euEea": true
+  },
+  {
+   "code": "BHS",
+   "name": "Bahamas",
+   "euEea": false
+  },
+  {
+   "code": "BIH",
+   "name": "Bosnia and Herzegovina",
+   "euEea": false
+  },
+  {
+   "code": "BLR",
+   "name": "Belarus",
+   "euEea": false
+  },
+  {
+   "code": "BRA",
+   "name": "Brazil",
+   "euEea": false
+  },
+  {
+   "code": "BRB",
+   "name": "Barbados",
+   "euEea": false
+  },
+  {
+   "code": "CAF",
+   "name": "Central African Republic",
+   "euEea": false
+  },
+  {
+   "code": "CAN",
+   "name": "Canada",
+   "euEea": false
+  },
+  {
+   "code": "CHE",
+   "name": "Switzerland",
+   "euEea": true
+  },
+  {
+   "code": "CHL",
+   "name": "Chile",
+   "euEea": false
+  },
+  {
+   "code": "CIV",
+   "name": "Côte d'Ivoire",
+   "euEea": false
+  },
+  {
+   "code": "CMR",
+   "name": "Cameroon",
+   "euEea": false
+  },
+  {
+   "code": "COD",
+   "name": "DR Congo",
+   "euEea": false
+  },
+  {
+   "code": "COG",
+   "name": "Republic of the Congo",
+   "euEea": false
+  },
+  {
+   "code": "COL",
+   "name": "Colombia",
+   "euEea": false
+  },
+  {
+   "code": "COM",
+   "name": "Comoros",
+   "euEea": false
+  },
+  {
+   "code": "CPV",
+   "name": "Cape Verde",
+   "euEea": false
+  },
+  {
+   "code": "CRO",
+   "name": "Croatia",
+   "euEea": true
+  },
+  {
+   "code": "CUB",
+   "name": "Cuba",
+   "euEea": false
+  },
+  {
+   "code": "CYP",
+   "name": "Cyprus",
+   "euEea": true
+  },
+  {
+   "code": "CZE",
+   "name": "Czech Republic",
+   "euEea": true
+  },
+  {
+   "code": "DMA",
+   "name": "Dominica",
+   "euEea": false
+  },
+  {
+   "code": "DNK",
+   "name": "Denmark",
+   "euEea": true
+  },
+  {
+   "code": "DOM",
+   "name": "Dominican Republic",
+   "euEea": false
+  },
+  {
+   "code": "DZA",
+   "name": "Algeria",
+   "euEea": false
+  },
+  {
+   "code": "ERI",
+   "name": "Eritrea",
+   "euEea": false
+  },
+  {
+   "code": "ESP",
+   "name": "Spain",
+   "euEea": true
+  },
+  {
+   "code": "EST",
+   "name": "Estonia",
+   "euEea": true
+  },
+  {
+   "code": "FIN",
+   "name": "Finland",
+   "euEea": true
+  },
+  {
+   "code": "FRA",
+   "name": "France",
+   "euEea": true
+  },
+  {
+   "code": "GAB",
+   "name": "Gabon",
+   "euEea": false
+  },
+  {
+   "code": "GBR",
+   "name": "United Kingdom",
+   "euEea": false
+  },
+  {
+   "code": "GEO",
+   "name": "Georgia",
+   "euEea": false
+  },
+  {
+   "code": "GER",
+   "name": "Germany",
+   "euEea": true
+  },
+  {
+   "code": "GHA",
+   "name": "Ghana",
+   "euEea": false
+  },
+  {
+   "code": "GIN",
+   "name": "Guinea",
+   "euEea": false
+  },
+  {
+   "code": "GMB",
+   "name": "Gambia",
+   "euEea": false
+  },
+  {
+   "code": "GRE",
+   "name": "Greece",
+   "euEea": true
+  },
+  {
+   "code": "HTI",
+   "name": "Haiti",
+   "euEea": false
+  },
+  {
+   "code": "HUN",
+   "name": "Hungary",
+   "euEea": true
+  },
+  {
+   "code": "IRL",
+   "name": "Ireland",
+   "euEea": true
+  },
+  {
+   "code": "IRN",
+   "name": "Iran",
+   "euEea": false
+  },
+  {
+   "code": "ISL",
+   "name": "Iceland",
+   "euEea": true
+  },
+  {
+   "code": "ISR",
+   "name": "Israel",
+   "euEea": false
+  },
+  {
+   "code": "ITA",
+   "name": "Italy",
+   "euEea": true
+  },
+  {
+   "code": "JAM",
+   "name": "Jamaica",
+   "euEea": false
+  },
+  {
+   "code": "JPN",
+   "name": "Japan",
+   "euEea": false
+  },
+  {
+   "code": "LBN",
+   "name": "Lebanon",
+   "euEea": false
+  },
+  {
+   "code": "LTU",
+   "name": "Lithuania",
+   "euEea": true
+  },
+  {
+   "code": "LUX",
+   "name": "Luxembourg",
+   "euEea": true
+  },
+  {
+   "code": "LVA",
+   "name": "Latvia",
+   "euEea": true
+  },
+  {
+   "code": "MDA",
+   "name": "Moldova",
+   "euEea": false
+  },
+  {
+   "code": "MDG",
+   "name": "Madagascar",
+   "euEea": false
+  },
+  {
+   "code": "MEX",
+   "name": "Mexico",
+   "euEea": false
+  },
+  {
+   "code": "MKD",
+   "name": "North Macedonia",
+   "euEea": false
+  },
+  {
+   "code": "MLI",
+   "name": "Mali",
+   "euEea": false
+  },
+  {
+   "code": "MNE",
+   "name": "Montenegro",
+   "euEea": false
+  },
+  {
+   "code": "NED",
+   "name": "Netherlands",
+   "euEea": true
+  },
+  {
+   "code": "NGA",
+   "name": "Nigeria",
+   "euEea": false
+  },
+  {
+   "code": "NOR",
+   "name": "Norway",
+   "euEea": true
+  },
+  {
+   "code": "NZL",
+   "name": "New Zealand",
+   "euEea": false
+  },
+  {
+   "code": "PAN",
+   "name": "Panama",
+   "euEea": false
+  },
+  {
+   "code": "PHL",
+   "name": "Philippines",
+   "euEea": false
+  },
+  {
+   "code": "POL",
+   "name": "Poland",
+   "euEea": true
+  },
+  {
+   "code": "POR",
+   "name": "Portugal",
+   "euEea": true
+  },
+  {
+   "code": "PRY",
+   "name": "Paraguay",
+   "euEea": false
+  },
+  {
+   "code": "PUR",
+   "name": "Puerto Rico",
+   "euEea": false
+  },
+  {
+   "code": "PYF",
+   "name": "French Polynesia",
+   "euEea": true
+  },
+  {
+   "code": "ROU",
+   "name": "Romania",
+   "euEea": true
+  },
+  {
+   "code": "RUS",
+   "name": "Russia",
+   "euEea": false
+  },
+  {
+   "code": "RWA",
+   "name": "Rwanda",
+   "euEea": false
+  },
+  {
+   "code": "SDN",
+   "name": "Sudan",
+   "euEea": false
+  },
+  {
+   "code": "SEN",
+   "name": "Senegal",
+   "euEea": false
+  },
+  {
+   "code": "SLO",
+   "name": "Slovenia",
+   "euEea": true
+  },
+  {
+   "code": "SRB",
+   "name": "Serbia",
+   "euEea": false
+  },
+  {
+   "code": "SSD",
+   "name": "South Sudan",
+   "euEea": false
+  },
+  {
+   "code": "SVK",
+   "name": "Slovakia",
+   "euEea": true
+  },
+  {
+   "code": "SWE",
+   "name": "Sweden",
+   "euEea": true
+  },
+  {
+   "code": "THA",
+   "name": "Thailand",
+   "euEea": false
+  },
+  {
+   "code": "TUR",
+   "name": "Turkey",
+   "euEea": false
+  },
+  {
+   "code": "UGA",
+   "name": "Uganda",
+   "euEea": false
+  },
+  {
+   "code": "UKR",
+   "name": "Ukraine",
+   "euEea": false
+  },
+  {
+   "code": "URY",
+   "name": "Uruguay",
+   "euEea": false
+  },
+  {
+   "code": "USA",
+   "name": "United States",
+   "euEea": false
+  },
+  {
+   "code": "XKX",
+   "name": "Kosovo",
+   "euEea": false
+  },
+  {
+   "code": "ZAF",
+   "name": "South Africa",
+   "euEea": false
+  }
+ ],
+ "clubs": [
+  {
+   "id": "58906046-4cf2-5ced-9b56-08c8ffb48744",
+   "name": "Olimpia Milano",
+   "shortName": "MIL",
+   "country": "ITA",
+   "city": "Milano",
+   "foundedYear": 1940,
+   "reputation": 83,
+   "balance": 3423000,
+   "wageBudget": 6861000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "fc555c51-1939-50ff-9abe-40fceb59a0d8",
+   "name": "Virtus Bologna",
+   "shortName": "VBO",
+   "country": "ITA",
+   "city": "Bologna",
+   "foundedYear": 1921,
+   "reputation": 74,
+   "balance": 1367000,
+   "wageBudget": 4863000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "1e36ee2e-747b-5fa2-b016-5953a3d89479",
+   "name": "Napoli Basket",
+   "shortName": "NAP",
+   "country": "ITA",
+   "city": "Napoli",
+   "foundedYear": 1949,
+   "reputation": 62,
+   "balance": 807000,
+   "wageBudget": 2860000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "bdcaacb2-81e0-5ad4-a723-f62bd175da85",
+   "name": "Reyer Venezia",
+   "shortName": "VEN",
+   "country": "ITA",
+   "city": "Venezia",
+   "foundedYear": 1922,
+   "reputation": 60,
+   "balance": 1141000,
+   "wageBudget": 2592000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ef5dcc39-bb82-5b24-96c3-11835d8163c1",
+   "name": "Pallacanestro Varese",
+   "shortName": "VAR",
+   "country": "ITA",
+   "city": "Varese",
+   "foundedYear": 1973,
+   "reputation": 57,
+   "balance": 495000,
+   "wageBudget": 2222000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "daf81c75-069c-5001-958f-531550aaf96f",
+   "name": "Derthona Basket",
+   "shortName": "DER",
+   "country": "ITA",
+   "city": "Tortona",
+   "foundedYear": 1934,
+   "reputation": 56,
+   "balance": 1076000,
+   "wageBudget": 2107000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c1c8a367-bff2-5b50-b939-cc2fd8d3b413",
+   "name": "Maxima Roma",
+   "shortName": "MRO",
+   "country": "ITA",
+   "city": "Roma",
+   "foundedYear": 1959,
+   "reputation": 56,
+   "balance": 1066000,
+   "wageBudget": 2107000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "8a879bb6-fb8d-55b4-8aab-21fef4045ba9",
+   "name": "BC Roma",
+   "shortName": "BCR",
+   "country": "ITA",
+   "city": "Roma",
+   "foundedYear": 1992,
+   "reputation": 55,
+   "balance": 433000,
+   "wageBudget": 1996000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c8661f49-6dce-51e4-9fbb-744860e4bfa1",
+   "name": "Pallacanestro Reggiana",
+   "shortName": "REG",
+   "country": "ITA",
+   "city": "Reggio Emilia",
+   "foundedYear": 1955,
+   "reputation": 47,
+   "balance": 590000,
+   "wageBudget": 1246000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "d4de63bc-76b9-5c4e-a10f-2486b2e4e3a5",
+   "name": "Pallacanestro Cantù",
+   "shortName": "CAN",
+   "country": "ITA",
+   "city": "Cantù",
+   "foundedYear": 1971,
+   "reputation": 47,
+   "balance": 500000,
+   "wageBudget": 1246000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "9b69e74f-853f-5a93-813b-7e7bc3565420",
+   "name": "Scaligera Basket Verona",
+   "shortName": "VER",
+   "country": "ITA",
+   "city": "Verona",
+   "foundedYear": 1945,
+   "reputation": 47,
+   "balance": 566000,
+   "wageBudget": 1246000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "1e3b8dac-6ab3-5bfe-9f3d-de3b6b50739c",
+   "name": "Universo Treviso Basket",
+   "shortName": "TRV",
+   "country": "ITA",
+   "city": "Treviso",
+   "foundedYear": 1992,
+   "reputation": 42,
+   "balance": 517000,
+   "wageBudget": 889000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6a57c603-04a6-5e84-917d-e7b63bb8e425",
+   "name": "Pallacanestro Trieste",
+   "shortName": "TRI",
+   "country": "ITA",
+   "city": "Trieste",
+   "foundedYear": 1965,
+   "reputation": 41,
+   "balance": 492000,
+   "wageBudget": 827000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "590f22a6-0c29-562a-b759-08b5ea4044c9",
+   "name": "Scafati Basket",
+   "shortName": "SCA",
+   "country": "ITA",
+   "city": "Scafati",
+   "foundedYear": 1982,
+   "reputation": 41,
+   "balance": 301000,
+   "wageBudget": 827000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4896b5a7-f144-57e1-879b-03be1c118232",
+   "name": "Aquila Basket Trento",
+   "shortName": "TRE",
+   "country": "ITA",
+   "city": "Trento",
+   "foundedYear": 2008,
+   "reputation": 38,
+   "balance": 354000,
+   "wageBudget": 658000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "fa865fc6-5b9f-5317-8d09-7cff16abbde0",
+   "name": "APU Udine",
+   "shortName": "UDI",
+   "country": "ITA",
+   "city": "Udine",
+   "foundedYear": 1973,
+   "reputation": 37,
+   "balance": 313000,
+   "wageBudget": 608000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3f8cd190-c128-5a87-ae91-2aa953f29f47",
+   "name": "New Basket Brindisi",
+   "shortName": "BRI",
+   "country": "ITA",
+   "city": "Brindisi",
+   "foundedYear": 1923,
+   "reputation": 28,
+   "balance": 123000,
+   "wageBudget": 263000,
+   "boardExpectation": "WinPromotion",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4518cc2b-84f7-5393-9561-d55cf13fbded",
+   "name": "Dinamo Sassari",
+   "shortName": "SAS",
+   "country": "ITA",
+   "city": "Sassari",
+   "foundedYear": 1948,
+   "reputation": 27,
+   "balance": 61000,
+   "wageBudget": 236000,
+   "boardExpectation": "WinPromotion",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ad2115d2-339c-55fd-91cd-9a960ddd1ba1",
+   "name": "Basket Rimini",
+   "shortName": "RIM",
+   "country": "ITA",
+   "city": "Rimini",
+   "foundedYear": 1947,
+   "reputation": 27,
+   "balance": 104000,
+   "wageBudget": 236000,
+   "boardExpectation": "WinPromotion",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "388c76f8-5440-5eb1-a3b5-1231fddb298d",
+   "name": "Fortitudo Bologna",
+   "shortName": "FOR",
+   "country": "ITA",
+   "city": "Bologna",
+   "foundedYear": 1969,
+   "reputation": 27,
+   "balance": 82000,
+   "wageBudget": 236000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "758c2d3e-4b21-5417-973e-babf162bde41",
+   "name": "Victoria Libertas Pesaro",
+   "shortName": "PES",
+   "country": "ITA",
+   "city": "Pesaro",
+   "foundedYear": 1994,
+   "reputation": 27,
+   "balance": 50000,
+   "wageBudget": 236000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "dc3fb74d-ec43-5e9d-8479-5980f737f6ca",
+   "name": "Pistoia Basket",
+   "shortName": "PIS",
+   "country": "ITA",
+   "city": "Pistoia",
+   "foundedYear": 1957,
+   "reputation": 26,
+   "balance": 113000,
+   "wageBudget": 211000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3f0e7760-c424-5266-919b-06dfa7694960",
+   "name": "Pallacanestro Forlì",
+   "shortName": "FRL",
+   "country": "ITA",
+   "city": "Forlì",
+   "foundedYear": 1988,
+   "reputation": 26,
+   "balance": 53000,
+   "wageBudget": 211000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3260c4df-2568-5a55-b888-94528af36e71",
+   "name": "Scandone Avellino",
+   "shortName": "AVE",
+   "country": "ITA",
+   "city": "Avellino",
+   "foundedYear": 1925,
+   "reputation": 26,
+   "balance": 97000,
+   "wageBudget": 211000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "e7cafc6c-58aa-53c8-9176-e228c6ee9b33",
+   "name": "Benedetto XIV Cento",
+   "shortName": "CEN",
+   "country": "ITA",
+   "city": "Cento",
+   "foundedYear": 1979,
+   "reputation": 25,
+   "balance": 83000,
+   "wageBudget": 188000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c3f1382a-f0bc-5bcf-b394-0272e0e8e766",
+   "name": "Libertas Livorno",
+   "shortName": "LIV",
+   "country": "ITA",
+   "city": "Livorno",
+   "foundedYear": 1991,
+   "reputation": 25,
+   "balance": 61000,
+   "wageBudget": 188000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "27c26b71-7324-5f26-aa60-fbb7d7784bf8",
+   "name": "Urania Milano",
+   "shortName": "URA",
+   "country": "ITA",
+   "city": "Milano",
+   "foundedYear": 1960,
+   "reputation": 25,
+   "balance": 102000,
+   "wageBudget": 188000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b64d759b-8bd3-5a6b-8835-beafd277be4a",
+   "name": "Juvi Cremona",
+   "shortName": "CRE",
+   "country": "ITA",
+   "city": "Cremona",
+   "foundedYear": 1974,
+   "reputation": 24,
+   "balance": 62000,
+   "wageBudget": 166000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6b93683e-a682-54bd-9c83-2dcb0cc09d33",
+   "name": "Basket Mestre",
+   "shortName": "MES",
+   "country": "ITA",
+   "city": "Venezia",
+   "foundedYear": 2008,
+   "reputation": 24,
+   "balance": 47000,
+   "wageBudget": 166000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3f068521-f0da-573e-ae8d-e42801bdc037",
+   "name": "Juvecaserta",
+   "shortName": "CAS",
+   "country": "ITA",
+   "city": "Caserta",
+   "foundedYear": 1952,
+   "reputation": 24,
+   "balance": 46000,
+   "wageBudget": 166000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "cf3b8a60-2610-5429-8c84-f8cafac7e7f1",
+   "name": "Basket Torino",
+   "shortName": "TOR",
+   "country": "ITA",
+   "city": "Torino",
+   "foundedYear": 1999,
+   "reputation": 24,
+   "balance": 59000,
+   "wageBudget": 166000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "425d2a7f-0c86-5b68-9e23-f21b47b5697c",
+   "name": "Vigevano 1955",
+   "shortName": "VIG",
+   "country": "ITA",
+   "city": "Vigevano",
+   "foundedYear": 1974,
+   "reputation": 24,
+   "balance": 74000,
+   "wageBudget": 166000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "66113e7d-c66d-5b3e-89d9-fe243c64a63f",
+   "name": "Real Sebastiani Rieti",
+   "shortName": "RIE",
+   "country": "ITA",
+   "city": "Rieti",
+   "foundedYear": 1939,
+   "reputation": 23,
+   "balance": 33000,
+   "wageBudget": 146000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "151a2746-8788-5e72-9ff1-8d66ba5ccf5f",
+   "name": "UEB Cividale",
+   "shortName": "CIV",
+   "country": "ITA",
+   "city": "Cividale del Friuli",
+   "foundedYear": 1929,
+   "reputation": 23,
+   "balance": 37000,
+   "wageBudget": 146000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "320fc275-86de-5c93-8cfb-fbd40d3f9e6d",
+   "name": "Montecatini Basket",
+   "shortName": "MON",
+   "country": "ITA",
+   "city": "Montecatini Terme",
+   "foundedYear": 1990,
+   "reputation": 22,
+   "balance": 62000,
+   "wageBudget": 128000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "efe181ea-75a0-5e49-b177-a20f2f338dc7",
+   "name": "Talos Ruvo di Puglia",
+   "shortName": "RUV",
+   "country": "ITA",
+   "city": "Ruvo di Puglia",
+   "foundedYear": 1925,
+   "reputation": 21,
+   "balance": 24000,
+   "wageBudget": 111000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "44e7e39a-a823-540e-ad28-4ab6cf975da7",
+   "name": "Real Madrid",
+   "shortName": "RMB",
+   "country": "ESP",
+   "city": "Madrid",
+   "foundedYear": 2006,
+   "reputation": 89,
+   "balance": 2430000,
+   "wageBudget": 8460000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "8a656c5a-6ffe-5d68-8a9e-ff62e34d9356",
+   "name": "Valencia Basket",
+   "shortName": "VAL",
+   "country": "ESP",
+   "city": "Valencia",
+   "foundedYear": 1975,
+   "reputation": 87,
+   "balance": 3465000,
+   "wageBudget": 7902000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "bb9450ad-70f0-5d37-8ba9-45f729e9349d",
+   "name": "FC Barcelona",
+   "shortName": "FCB",
+   "country": "ESP",
+   "city": "Barcelona",
+   "foundedYear": 1927,
+   "reputation": 78,
+   "balance": 3397000,
+   "wageBudget": 5695000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3f0a7260-e2dd-5875-b135-4cd069ab10b9",
+   "name": "CB Canarias",
+   "shortName": "CAN",
+   "country": "ESP",
+   "city": "San Cristóbal de La Laguna",
+   "foundedYear": 1975,
+   "reputation": 76,
+   "balance": 2978000,
+   "wageBudget": 5268000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a0bf0cef-94d8-50dd-8af6-769e6ea1bb5f",
+   "name": "Unicaja",
+   "shortName": "UNI",
+   "country": "ESP",
+   "city": "Málaga",
+   "foundedYear": 2010,
+   "reputation": 72,
+   "balance": 2426000,
+   "wageBudget": 4479000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "aa65fb5c-0979-53c5-990f-676bb955d418",
+   "name": "Saski Baskonia",
+   "shortName": "BKN",
+   "country": "ESP",
+   "city": "Vitoria-Gasteiz",
+   "foundedYear": 1959,
+   "reputation": 69,
+   "balance": 1304000,
+   "wageBudget": 3942000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "7507f16e-7e35-545f-a9b5-7b6ad995dad4",
+   "name": "Club Joventut Badalona",
+   "shortName": "JOV",
+   "country": "ESP",
+   "city": "Badalona",
+   "foundedYear": 1998,
+   "reputation": 66,
+   "balance": 1252000,
+   "wageBudget": 3450000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "33fd3ad7-9712-5334-b0de-76f70ab52827",
+   "name": "Basket Zaragoza",
+   "shortName": "ZAR",
+   "country": "ESP",
+   "city": "Zaragoza",
+   "foundedYear": 1997,
+   "reputation": 61,
+   "balance": 594000,
+   "wageBudget": 2724000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "e4b04672-f779-52c0-a334-32935329a1cf",
+   "name": "Bàsquet Girona",
+   "shortName": "GIR",
+   "country": "ESP",
+   "city": "Girona",
+   "foundedYear": 1961,
+   "reputation": 56,
+   "balance": 776000,
+   "wageBudget": 2107000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "64a0a717-4c28-57b7-ac41-4452485de174",
+   "name": "CB Breogán",
+   "shortName": "BRE",
+   "country": "ESP",
+   "city": "Lugo",
+   "foundedYear": 1983,
+   "reputation": 56,
+   "balance": 807000,
+   "wageBudget": 2107000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6a1d29ee-4794-54e0-a7ef-e55dbe939c37",
+   "name": "Força Lleida",
+   "shortName": "LLE",
+   "country": "ESP",
+   "city": "Lleida",
+   "foundedYear": 1993,
+   "reputation": 56,
+   "balance": 484000,
+   "wageBudget": 2107000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "25416336-b1da-56fd-8b21-65c9ff134d0b",
+   "name": "UCAM Murcia CB",
+   "shortName": "MUR",
+   "country": "ESP",
+   "city": "Murcia",
+   "foundedYear": 1920,
+   "reputation": 52,
+   "balance": 575000,
+   "wageBudget": 1687000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4d53861c-3bde-55b4-ad7f-be3919297e33",
+   "name": "Bilbao Basket",
+   "shortName": "BIL",
+   "country": "ESP",
+   "city": "Bilbao",
+   "foundedYear": 1963,
+   "reputation": 52,
+   "balance": 793000,
+   "wageBudget": 1687000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c8f83b5e-084b-5ecf-875b-230392e87c9d",
+   "name": "Bàsquet Manresa",
+   "shortName": "MAN",
+   "country": "ESP",
+   "city": "Manresa",
+   "foundedYear": 1960,
+   "reputation": 51,
+   "balance": 824000,
+   "wageBudget": 1592000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3c174ca0-419b-553b-a1e5-8dbc04eb4e69",
+   "name": "BC Andorra",
+   "shortName": "AND",
+   "country": "ESP",
+   "city": "Andorra la Vella",
+   "foundedYear": 2002,
+   "reputation": 50,
+   "balance": 877000,
+   "wageBudget": 1500000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "7c309e2b-bbe1-51e1-a38f-e533a6db125b",
+   "name": "CB San Pablo Burgos",
+   "shortName": "BUR",
+   "country": "ESP",
+   "city": "Burgos",
+   "foundedYear": 1978,
+   "reputation": 50,
+   "balance": 707000,
+   "wageBudget": 1500000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "3aa73c6f-3219-58cd-9958-d56a6b44789b",
+   "name": "Obradoiro CAB",
+   "shortName": "OBR",
+   "country": "ESP",
+   "city": "Santiago de Compostela",
+   "foundedYear": 1955,
+   "reputation": 47,
+   "balance": 423000,
+   "wageBudget": 1246000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c7ebae6d-750a-5fe5-b9fe-d01dbd1a0cf0",
+   "name": "Básquet Coruña",
+   "shortName": "COR",
+   "country": "ESP",
+   "city": "A Coruña",
+   "foundedYear": 1997,
+   "reputation": 45,
+   "balance": 558000,
+   "wageBudget": 1094000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "80ac8417-ec92-58de-bf87-50022d5d67ff",
+   "name": "FC Bayern München",
+   "shortName": "FCB",
+   "country": "GER",
+   "city": "München",
+   "foundedYear": 1961,
+   "reputation": 69,
+   "balance": 2228000,
+   "wageBudget": 3942000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c1305f40-2316-55c6-8c43-2d9a647249dd",
+   "name": "ALBA Berlin",
+   "shortName": "ALB",
+   "country": "GER",
+   "city": "Berlin",
+   "foundedYear": 1967,
+   "reputation": 51,
+   "balance": 763000,
+   "wageBudget": 1592000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4eaf54ec-0f2f-578f-b02e-252d81d7ecad",
+   "name": "Niners Chemnitz",
+   "shortName": "CHE",
+   "country": "GER",
+   "city": "Chemnitz",
+   "foundedYear": 1996,
+   "reputation": 45,
+   "balance": 371000,
+   "wageBudget": 1094000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "63f8f07a-1046-5e46-8e4e-c5cfe6942c34",
+   "name": "Ratiopharm Ulm",
+   "shortName": "ULM",
+   "country": "GER",
+   "city": "Ulm",
+   "foundedYear": 1941,
+   "reputation": 41,
+   "balance": 321000,
+   "wageBudget": 827000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c740467f-9815-530b-b259-8f6424dc523d",
+   "name": "Skyliners Frankfurt",
+   "shortName": "FRA",
+   "country": "GER",
+   "city": "Frankfurt",
+   "foundedYear": 1941,
+   "reputation": 41,
+   "balance": 294000,
+   "wageBudget": 827000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4651b193-1947-5802-82bc-653087c90890",
+   "name": "Telekom Baskets Bonn",
+   "shortName": "BON",
+   "country": "GER",
+   "city": "Bonn",
+   "foundedYear": 1938,
+   "reputation": 39,
+   "balance": 152000,
+   "wageBudget": 712000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "62d94b7d-d983-5a61-bd64-03eba3112278",
+   "name": "Gladiators Trier",
+   "shortName": "TRI",
+   "country": "GER",
+   "city": "Trier",
+   "foundedYear": 2010,
+   "reputation": 39,
+   "balance": 155000,
+   "wageBudget": 712000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ce150f11-5639-5d31-b3e1-698c6bd5f40f",
+   "name": "Rasta Vechta",
+   "shortName": "VEC",
+   "country": "GER",
+   "city": "Vechta",
+   "foundedYear": 1977,
+   "reputation": 38,
+   "balance": 281000,
+   "wageBudget": 658000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b6201dbf-d985-5e29-95d1-08ae8e1cf17b",
+   "name": "Rostock Seawolves",
+   "shortName": "ROS",
+   "country": "GER",
+   "city": "Rostock",
+   "foundedYear": 1977,
+   "reputation": 36,
+   "balance": 229000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "84804810-a708-5096-bc70-591a442d0145",
+   "name": "Bamberg Baskets",
+   "shortName": "BAM",
+   "country": "GER",
+   "city": "Bamberg",
+   "foundedYear": 1951,
+   "reputation": 35,
+   "balance": 303000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b276fea7-05dc-52c7-82a5-c39911b040f6",
+   "name": "Baskets Oldenburg",
+   "shortName": "OLD",
+   "country": "GER",
+   "city": "Oldenburg",
+   "foundedYear": 1998,
+   "reputation": 35,
+   "balance": 230000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "d3a077b1-e4a2-5116-8450-75357f37676d",
+   "name": "Mitteldeutscher BC",
+   "shortName": "MBC",
+   "country": "GER",
+   "city": "Weißenfels",
+   "foundedYear": 1996,
+   "reputation": 35,
+   "balance": 271000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ece528d4-27f9-5c7d-b850-2e1b3ce36613",
+   "name": "Riesen Ludwigsburg",
+   "shortName": "LUD",
+   "country": "GER",
+   "city": "Ludwigsburg",
+   "foundedYear": 1974,
+   "reputation": 34,
+   "balance": 184000,
+   "wageBudget": 472000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "af041950-4e9a-5403-be78-077198fbbdf9",
+   "name": "Hamburg Towers",
+   "shortName": "HAM",
+   "country": "GER",
+   "city": "Hamburg",
+   "foundedYear": 1924,
+   "reputation": 33,
+   "balance": 187000,
+   "wageBudget": 431000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "5307422c-29ff-5374-849f-87139cc16cb3",
+   "name": "Würzburg Baskets",
+   "shortName": "WUE",
+   "country": "GER",
+   "city": "Würzburg",
+   "foundedYear": 1980,
+   "reputation": 32,
+   "balance": 207000,
+   "wageBudget": 393000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "620414b7-3c57-51df-a2cc-5a7eaacc14ed",
+   "name": "Basketball Löwen Braunschweig",
+   "shortName": "BRA",
+   "country": "GER",
+   "city": "Braunschweig",
+   "foundedYear": 1978,
+   "reputation": 31,
+   "balance": 76000,
+   "wageBudget": 357000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "06889f11-ea4c-5f6a-8e4d-f772a487bee6",
+   "name": "Phoenix Hagen",
+   "shortName": "HAG",
+   "country": "GER",
+   "city": "Hagen",
+   "foundedYear": 1922,
+   "reputation": 31,
+   "balance": 187000,
+   "wageBudget": 357000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "d1d83d7a-2cc1-58bc-9b01-f05685b24070",
+   "name": "Science City Jena",
+   "shortName": "JEN",
+   "country": "GER",
+   "city": "Jena",
+   "foundedYear": 2009,
+   "reputation": 30,
+   "balance": 71000,
+   "wageBudget": 324000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "1387d220-55b4-53c2-a062-de08c987ccf4",
+   "name": "Paris Basketball",
+   "shortName": "PAR",
+   "country": "FRA",
+   "city": "Paris",
+   "foundedYear": 1993,
+   "reputation": 75,
+   "balance": 2982000,
+   "wageBudget": 5062000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ff22e546-1ad2-5db3-9623-bafd980d5fcf",
+   "name": "ASVEL Lyon-Villeurbanne",
+   "shortName": "ASV",
+   "country": "FRA",
+   "city": "Villeurbanne",
+   "foundedYear": 1952,
+   "reputation": 59,
+   "balance": 655000,
+   "wageBudget": 2465000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "72a18e9f-c7e8-591e-bb2c-6ba0bc0c22ce",
+   "name": "JL Bourg",
+   "shortName": "JLB",
+   "country": "FRA",
+   "city": "Bourg-en-Bresse",
+   "foundedYear": 1952,
+   "reputation": 47,
+   "balance": 395000,
+   "wageBudget": 1246000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "469e1639-5daa-5ee4-8e1e-cf7054886f3b",
+   "name": "JDA Dijon",
+   "shortName": "DIJ",
+   "country": "FRA",
+   "city": "Dijon",
+   "foundedYear": 2002,
+   "reputation": 45,
+   "balance": 612000,
+   "wageBudget": 1094000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "f4a540a8-f91b-56d1-96ca-7f75c26e182a",
+   "name": "BCM Gravelines-Dunkerque",
+   "shortName": "BCM",
+   "country": "FRA",
+   "city": "Gravelines",
+   "foundedYear": 1948,
+   "reputation": 42,
+   "balance": 202000,
+   "wageBudget": 889000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "00722b76-b735-5865-90b4-f0be376e81c0",
+   "name": "Limoges CSP",
+   "shortName": "CSP",
+   "country": "FRA",
+   "city": "Limoges",
+   "foundedYear": 1925,
+   "reputation": 41,
+   "balance": 453000,
+   "wageBudget": 827000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a105aa22-e1a3-563f-b4fc-f7f0654932b7",
+   "name": "Saint-Quentin Basket-Ball",
+   "shortName": "SQB",
+   "country": "FRA",
+   "city": "Saint-Quentin",
+   "foundedYear": 2001,
+   "reputation": 40,
+   "balance": 424000,
+   "wageBudget": 768000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "fd2790d6-a8b4-5b1a-9a5e-98eff5f397ad",
+   "name": "SLUC Nancy",
+   "shortName": "SLU",
+   "country": "FRA",
+   "city": "Nancy",
+   "foundedYear": 1980,
+   "reputation": 39,
+   "balance": 383000,
+   "wageBudget": 712000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a6ceedce-f5e4-5b3d-bf96-0ad5a505fa85",
+   "name": "Nanterre 92",
+   "shortName": "NAN",
+   "country": "FRA",
+   "city": "Nanterre",
+   "foundedYear": 1950,
+   "reputation": 37,
+   "balance": 345000,
+   "wageBudget": 608000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "e93cd551-f2dd-5ef2-97ed-77eea4f42d48",
+   "name": "Cholet Basket",
+   "shortName": "CHO",
+   "country": "FRA",
+   "city": "Cholet",
+   "foundedYear": 1988,
+   "reputation": 36,
+   "balance": 234000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "f761c5a2-0b72-5b92-bf15-4667c5ca890d",
+   "name": "Boulazac Basket Dordogne",
+   "shortName": "BBD",
+   "country": "FRA",
+   "city": "Boulazac",
+   "foundedYear": 2000,
+   "reputation": 36,
+   "balance": 292000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b1cea188-0500-5d91-95f5-459a2c66bd70",
+   "name": "Le Mans Sarthe Basket",
+   "shortName": "MSB",
+   "country": "FRA",
+   "city": "Le Mans",
+   "foundedYear": 1999,
+   "reputation": 36,
+   "balance": 174000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "af681325-758d-5b4f-bb10-7cf40625d4c4",
+   "name": "Élan Chalon",
+   "shortName": "CHA",
+   "country": "FRA",
+   "city": "Chalon-sur-Saône",
+   "foundedYear": 1961,
+   "reputation": 36,
+   "balance": 257000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "64cbdd11-de67-5441-a25c-f0cb7fa0862d",
+   "name": "Élan Béarnais",
+   "shortName": "EBP",
+   "country": "FRA",
+   "city": "Pau",
+   "foundedYear": 1961,
+   "reputation": 35,
+   "balance": 215000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b5fc4732-2f9d-5af1-9ba2-5d303f244605",
+   "name": "SIG Strasbourg",
+   "shortName": "SIG",
+   "country": "FRA",
+   "city": "Strasbourg",
+   "foundedYear": 1967,
+   "reputation": 34,
+   "balance": 169000,
+   "wageBudget": 472000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "5bb0bdc3-005a-513a-84e2-93df6b690007",
+   "name": "Chorale Roanne",
+   "shortName": "ROA",
+   "country": "FRA",
+   "city": "Roanne",
+   "foundedYear": 1932,
+   "reputation": 33,
+   "balance": 105000,
+   "wageBudget": 431000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6fc47f4d-fbb4-5646-8a29-eeb39f459d8c",
+   "name": "Olympiacos",
+   "shortName": "OLY",
+   "country": "GRE",
+   "city": "Peiraiás",
+   "foundedYear": 2000,
+   "reputation": 99,
+   "balance": 3292000,
+   "wageBudget": 11644000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "1ab82576-030c-551b-85e1-757cf0921423",
+   "name": "Panathinaikos",
+   "shortName": "PAO",
+   "country": "GRE",
+   "city": "Athína",
+   "foundedYear": 1939,
+   "reputation": 90,
+   "balance": 2582000,
+   "wageBudget": 8748000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "9177fa29-d981-52ad-a16c-9fd3b4ce3b51",
+   "name": "PAOK",
+   "shortName": "PAOK",
+   "country": "GRE",
+   "city": "Thessaloníki",
+   "foundedYear": 1970,
+   "reputation": 65,
+   "balance": 968000,
+   "wageBudget": 3296000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "9e28dfa0-54fe-5de0-883b-432e1852f2df",
+   "name": "Aris Thessaloniki",
+   "shortName": "ARI",
+   "country": "GRE",
+   "city": "Thessaloníki",
+   "foundedYear": 1999,
+   "reputation": 62,
+   "balance": 1531000,
+   "wageBudget": 2860000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ea490fa6-67f0-55c7-b47e-f537f2556d3f",
+   "name": "AEK Athens",
+   "shortName": "AEK",
+   "country": "GRE",
+   "city": "Athína",
+   "foundedYear": 1951,
+   "reputation": 54,
+   "balance": 756000,
+   "wageBudget": 1890000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ffe6b9ef-a135-5286-a292-a0ec6cb8d749",
+   "name": "Maroussi",
+   "shortName": "MAR",
+   "country": "GRE",
+   "city": "Maroússi",
+   "foundedYear": 1933,
+   "reputation": 46,
+   "balance": 414000,
+   "wageBudget": 1168000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "13800b33-38a6-5fd6-a477-2ac636c5f6f1",
+   "name": "Promitheas Patras",
+   "shortName": "PRO",
+   "country": "GRE",
+   "city": "Pátra",
+   "foundedYear": 1983,
+   "reputation": 41,
+   "balance": 372000,
+   "wageBudget": 827000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "adc03bd2-2ee1-5b04-8e22-20503c4a255b",
+   "name": "Peristeri",
+   "shortName": "PER",
+   "country": "GRE",
+   "city": "Peristéri",
+   "foundedYear": 2005,
+   "reputation": 40,
+   "balance": 251000,
+   "wageBudget": 768000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "08439354-c6b6-527a-9334-8cfde7396ef3",
+   "name": "Kolossos Rhodes",
+   "shortName": "KOL",
+   "country": "GRE",
+   "city": "Rhódos",
+   "foundedYear": 1942,
+   "reputation": 38,
+   "balance": 153000,
+   "wageBudget": 658000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "12b69055-f55c-53a6-a9c1-fb52c39ca80c",
+   "name": "Mykonos Basket",
+   "shortName": "MYK",
+   "country": "GRE",
+   "city": "Mýkonos",
+   "foundedYear": 2003,
+   "reputation": 38,
+   "balance": 149000,
+   "wageBudget": 658000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "8e991e44-ae96-5c14-8615-d10a703b5f28",
+   "name": "Iraklis",
+   "shortName": "IRA",
+   "country": "GRE",
+   "city": "Thessaloníki",
+   "foundedYear": 1939,
+   "reputation": 37,
+   "balance": 347000,
+   "wageBudget": 608000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a3fe4d79-add9-5df2-8d5e-0ea33cfc70c7",
+   "name": "Karditsa",
+   "shortName": "KAR",
+   "country": "GRE",
+   "city": "Kardítsa",
+   "foundedYear": 1950,
+   "reputation": 35,
+   "balance": 112000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "7c877b37-e5da-55f9-8df8-0c10b2faea29",
+   "name": "Vikos Ioannina",
+   "shortName": "VIK",
+   "country": "GRE",
+   "city": "Ioánnina",
+   "foundedYear": 1938,
+   "reputation": 33,
+   "balance": 155000,
+   "wageBudget": 431000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c87d7522-a4f6-5008-8ade-f75068b1cc5b",
+   "name": "Doxa Lefkadas",
+   "shortName": "DOX",
+   "country": "GRE",
+   "city": "Lefkáda",
+   "foundedYear": 1961,
+   "reputation": 30,
+   "balance": 74000,
+   "wageBudget": 324000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "7ba1a2a5-98b0-5edc-adba-a7a6526f738f",
+   "name": "Fenerbahçe",
+   "shortName": "FEN",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 1973,
+   "reputation": 94,
+   "balance": 3114000,
+   "wageBudget": 9967000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "905cf9e7-fe74-5e5b-ac41-81e27af59860",
+   "name": "Anadolu Efes",
+   "shortName": "EFS",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 1920,
+   "reputation": 85,
+   "balance": 2758000,
+   "wageBudget": 7370000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "d9ee527f-b553-5e2a-a662-a14ea0168178",
+   "name": "Beşiktaş",
+   "shortName": "BJK",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 1981,
+   "reputation": 79,
+   "balance": 1700000,
+   "wageBudget": 5916000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "37e0e1ba-7e73-5ddd-aabf-8f57d875dabe",
+   "name": "Bahçeşehir Koleji",
+   "shortName": "BAH",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 2010,
+   "reputation": 73,
+   "balance": 1866000,
+   "wageBudget": 4668000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6f38d98e-467d-5195-b2c1-cef82189ac79",
+   "name": "Esenler Erokspor",
+   "shortName": "ERO",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 1920,
+   "reputation": 63,
+   "balance": 608000,
+   "wageBudget": 3001000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "2b477fd7-e844-5e42-b786-21ab303c8611",
+   "name": "Galatasaray",
+   "shortName": "GS",
+   "country": "TUR",
+   "city": "İstanbul",
+   "foundedYear": 1986,
+   "reputation": 60,
+   "balance": 1466000,
+   "wageBudget": 2592000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "fa6db4aa-96f6-5ceb-8072-1630d7b386d6",
+   "name": "Türk Telekom",
+   "shortName": "TTK",
+   "country": "TUR",
+   "city": "Ankara",
+   "foundedYear": 1989,
+   "reputation": 60,
+   "balance": 1259000,
+   "wageBudget": 2592000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "9f6cb081-f202-5236-85cc-4e24e4e4bcce",
+   "name": "Aliağa Petkimspor",
+   "shortName": "PET",
+   "country": "TUR",
+   "city": "İzmir",
+   "foundedYear": 1984,
+   "reputation": 57,
+   "balance": 536000,
+   "wageBudget": 2222000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "74865e3d-7404-5545-bb4d-6042f094e005",
+   "name": "Balıkesir Basketbol",
+   "shortName": "BAL",
+   "country": "TUR",
+   "city": "Balıkesir",
+   "foundedYear": 1947,
+   "reputation": 57,
+   "balance": 633000,
+   "wageBudget": 2222000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "24319016-c13b-5e3a-91af-ae9c124af7f7",
+   "name": "Trabzonspor",
+   "shortName": "TS",
+   "country": "TUR",
+   "city": "Trabzon",
+   "foundedYear": 1939,
+   "reputation": 56,
+   "balance": 505000,
+   "wageBudget": 2107000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a9871888-2b6a-5a09-a8a6-ca0502688b0e",
+   "name": "Çayırova Belediyesi",
+   "shortName": "CAY",
+   "country": "TUR",
+   "city": "Çayırova",
+   "foundedYear": 1991,
+   "reputation": 53,
+   "balance": 882000,
+   "wageBudget": 1787000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6bba3ec5-ccfe-5460-8868-b6e4330d905a",
+   "name": "Tofaş",
+   "shortName": "TOF",
+   "country": "TUR",
+   "city": "Bursa",
+   "foundedYear": 1958,
+   "reputation": 52,
+   "balance": 363000,
+   "wageBudget": 1687000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "edbcdeae-be5a-59e4-82fd-2ee2f08b8b74",
+   "name": "Karşıyaka",
+   "shortName": "KSK",
+   "country": "TUR",
+   "city": "İzmir",
+   "foundedYear": 1922,
+   "reputation": 47,
+   "balance": 559000,
+   "wageBudget": 1246000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "c60daf87-2a83-5764-b47a-0ddb62709708",
+   "name": "Körfez Spor",
+   "shortName": "KOR",
+   "country": "TUR",
+   "city": "Körfez",
+   "foundedYear": 2007,
+   "reputation": 47,
+   "balance": 612000,
+   "wageBudget": 1246000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "fb8097e0-b113-594c-b3f8-9e995882bab8",
+   "name": "Merkezefendi Belediyesi",
+   "shortName": "MRK",
+   "country": "TUR",
+   "city": "Denizli",
+   "foundedYear": 1971,
+   "reputation": 45,
+   "balance": 291000,
+   "wageBudget": 1094000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "56bf2241-6e3a-505a-b960-a62138a778d3",
+   "name": "Bursaspor",
+   "shortName": "BUR",
+   "country": "TUR",
+   "city": "Bursa",
+   "foundedYear": 1954,
+   "reputation": 45,
+   "balance": 291000,
+   "wageBudget": 1094000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "5181462f-b5ee-5947-aa5e-b22b61e84802",
+   "name": "Dubai Basketball",
+   "shortName": "DUB",
+   "country": "ARE",
+   "city": "Dubai",
+   "foundedYear": 1987,
+   "reputation": 94,
+   "balance": 5921000,
+   "wageBudget": 9967000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ecec1ef9-2692-509e-af85-33159e80b6ac",
+   "name": "Crvena zvezda",
+   "shortName": "CZV",
+   "country": "SRB",
+   "city": "Beograd",
+   "foundedYear": 1923,
+   "reputation": 85,
+   "balance": 1631000,
+   "wageBudget": 7370000,
+   "boardExpectation": "WinTitle",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "28ccc072-dcd0-5f11-b31e-52169abafcf9",
+   "name": "Partizan",
+   "shortName": "PAR",
+   "country": "SRB",
+   "city": "Beograd",
+   "foundedYear": 1950,
+   "reputation": 73,
+   "balance": 1838000,
+   "wageBudget": 4668000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "75801a6f-5987-57d6-80ed-60ad57c8710c",
+   "name": "Budućnost",
+   "shortName": "BUD",
+   "country": "MNE",
+   "city": "Podgorica",
+   "foundedYear": 1934,
+   "reputation": 61,
+   "balance": 999000,
+   "wageBudget": 2724000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "b28d2cd5-2bfe-5ef3-8ec0-11e23f036ba6",
+   "name": "U-BT Cluj-Napoca",
+   "shortName": "CLU",
+   "country": "ROU",
+   "city": "Cluj-Napoca",
+   "foundedYear": 1946,
+   "reputation": 56,
+   "balance": 710000,
+   "wageBudget": 2107000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "ce88cff3-ebec-5612-959f-d9562ed39736",
+   "name": "Cedevita Olimpija",
+   "shortName": "OLI",
+   "country": "SLO",
+   "city": "Ljubljana",
+   "foundedYear": 1937,
+   "reputation": 49,
+   "balance": 413000,
+   "wageBudget": 1412000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "75a71d71-f1b5-53fb-a656-404c157c2c0b",
+   "name": "Ilirija",
+   "shortName": "ILI",
+   "country": "SLO",
+   "city": "Ljubljana",
+   "foundedYear": 2005,
+   "reputation": 42,
+   "balance": 373000,
+   "wageBudget": 889000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "6313ae9f-c355-5615-b2b9-c963ccda9cae",
+   "name": "KK Zadar",
+   "shortName": "ZAD",
+   "country": "CRO",
+   "city": "Zadar",
+   "foundedYear": 1979,
+   "reputation": 40,
+   "balance": 247000,
+   "wageBudget": 768000,
+   "boardExpectation": "ReachPlayoffs",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "bb458652-7390-545c-8de2-11160fcb422e",
+   "name": "Bosna",
+   "shortName": "BOS",
+   "country": "BIH",
+   "city": "Sarajevo",
+   "foundedYear": 1973,
+   "reputation": 39,
+   "balance": 198000,
+   "wageBudget": 712000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "f7263cc5-eb65-5807-84df-992f90922b84",
+   "name": "Spartak Subotica",
+   "shortName": "SPA",
+   "country": "SRB",
+   "city": "Subotica",
+   "foundedYear": 2006,
+   "reputation": 38,
+   "balance": 269000,
+   "wageBudget": 658000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "402e8835-c187-566e-adc4-6c4ae8bd0fad",
+   "name": "Slovan Bratislava",
+   "shortName": "SLV",
+   "country": "SVK",
+   "city": "Bratislava",
+   "foundedYear": 1994,
+   "reputation": 37,
+   "balance": 297000,
+   "wageBudget": 608000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4ff7d076-128d-5289-8457-7c0eb03dfdc0",
+   "name": "Cibona",
+   "shortName": "CIB",
+   "country": "CRO",
+   "city": "Zagreb",
+   "foundedYear": 1942,
+   "reputation": 36,
+   "balance": 185000,
+   "wageBudget": 560000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "0418dd1e-a323-59c9-944b-63d0db523d59",
+   "name": "Krka Novo mesto",
+   "shortName": "KRK",
+   "country": "SLO",
+   "city": "Novo Mesto",
+   "foundedYear": 1996,
+   "reputation": 35,
+   "balance": 155000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "600df565-686d-5612-b689-af7c9f5c3313",
+   "name": "BC Vienna",
+   "shortName": "VIE",
+   "country": "AUT",
+   "city": "Wien",
+   "foundedYear": 1955,
+   "reputation": 35,
+   "balance": 288000,
+   "wageBudget": 514000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "947b1923-afda-5801-a646-96bd875d036a",
+   "name": "Igokea",
+   "shortName": "IGO",
+   "country": "BIH",
+   "city": "Aleksandrovac",
+   "foundedYear": 1957,
+   "reputation": 34,
+   "balance": 278000,
+   "wageBudget": 472000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "1b3cafbb-ee4e-5fdd-849f-31cd4462bcaf",
+   "name": "Borac Čačak",
+   "shortName": "BOR",
+   "country": "SRB",
+   "city": "Čačak",
+   "foundedYear": 1978,
+   "reputation": 34,
+   "balance": 204000,
+   "wageBudget": 472000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "459d1b77-ad0a-58b5-8b95-f4bfa570140a",
+   "name": "Mega Basket",
+   "shortName": "MEG",
+   "country": "SRB",
+   "city": "Beograd",
+   "foundedYear": 1985,
+   "reputation": 33,
+   "balance": 168000,
+   "wageBudget": 431000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "69660b76-13aa-5007-bf93-14568e51d2fc",
+   "name": "SC Derby",
+   "shortName": "SCD",
+   "country": "MNE",
+   "city": "Podgorica",
+   "foundedYear": 1926,
+   "reputation": 33,
+   "balance": 230000,
+   "wageBudget": 431000,
+   "boardExpectation": "MidTable",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "4eef0e27-d773-5fe4-9b53-74606420062d",
+   "name": "HKK Široki",
+   "shortName": "SIR",
+   "country": "BIH",
+   "city": "Široki Brijeg",
+   "foundedYear": 1971,
+   "reputation": 32,
+   "balance": 228000,
+   "wageBudget": 393000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  },
+  {
+   "id": "a140f78d-2fa5-5a6d-b955-fa74bdb33b19",
+   "name": "FMP",
+   "shortName": "FMP",
+   "country": "SRB",
+   "city": "Beograd",
+   "foundedYear": 1925,
+   "reputation": 32,
+   "balance": 88000,
+   "wageBudget": 393000,
+   "boardExpectation": "AvoidRelegation",
+   "dataStatus": "Unverified"
+  }
+ ],
+ "leagues": [
+  {
+   "id": "ab3dd9b2-5110-5ea0-84e9-5d2f6230c071",
+   "name": "Lega Basket",
+   "shortName": "LBA",
+   "country": "ITA"
+  },
+  {
+   "id": "822ab7f4-5c07-5a3b-a8d5-bc32032f3dff",
+   "name": "Asociación de Clubs de Baloncesto",
+   "shortName": "ACB",
+   "country": "ESP"
+  },
+  {
+   "id": "6180d86d-31fe-52a9-9fba-4d280d402679",
+   "name": "Basketball Bundesliga",
+   "shortName": "BBL",
+   "country": "GER"
+  },
+  {
+   "id": "95540213-0529-51e9-8890-f13da557e513",
+   "name": "Ligue Nationale de Basket",
+   "shortName": "LNB",
+   "country": "FRA"
+  },
+  {
+   "id": "42ec3d63-e479-512e-86ff-fb3af624f886",
+   "name": "Hellenic Basketball Clubs Association",
+   "shortName": "ESAKE",
+   "country": "GRE"
+  },
+  {
+   "id": "f840b44d-f719-53eb-b1b2-bf130482a8c0",
+   "name": "Turkish Basketball Federation",
+   "shortName": "TBF",
+   "country": "TUR"
+  },
+  {
+   "id": "7608d6ed-7370-5d7f-bb47-bb856a07867d",
+   "name": "ABA League",
+   "shortName": "ABA"
+  }
+ ],
+ "divisions": [
+  {
+   "id": "c7ceb11e-ade6-5152-8e3b-3ab7f75f6cb8",
+   "leagueId": "ab3dd9b2-5110-5ea0-84e9-5d2f6230c071",
+   "name": "Lega Basket Serie A",
+   "level": 1
+  },
+  {
+   "id": "de295851-e2c6-50ba-80ec-8592ef9dcc12",
+   "leagueId": "ab3dd9b2-5110-5ea0-84e9-5d2f6230c071",
+   "name": "Serie A2",
+   "level": 2
+  },
+  {
+   "id": "c14591f3-60d8-5b66-997c-67e3eae65a92",
+   "leagueId": "822ab7f4-5c07-5a3b-a8d5-bc32032f3dff",
+   "name": "Liga Endesa",
+   "level": 1
+  },
+  {
+   "id": "a501f1fc-c606-5848-99f3-5d8eabc6da09",
+   "leagueId": "6180d86d-31fe-52a9-9fba-4d280d402679",
+   "name": "easyCredit BBL",
+   "level": 1
+  },
+  {
+   "id": "ac3c10c6-1b77-5466-9135-1ee597da6bb2",
+   "leagueId": "95540213-0529-51e9-8890-f13da557e513",
+   "name": "Betclic ÉLITE",
+   "level": 1
+  },
+  {
+   "id": "e3425bb0-ead0-5447-a959-a19b247448de",
+   "leagueId": "42ec3d63-e479-512e-86ff-fb3af624f886",
+   "name": "Stoiximan GBL",
+   "level": 1
+  },
+  {
+   "id": "9e94facd-dce4-52f7-8c3e-49e8ae21aa91",
+   "leagueId": "f840b44d-f719-53eb-b1b2-bf130482a8c0",
+   "name": "Basketbol Süper Ligi",
+   "level": 1
+  },
+  {
+   "id": "de889be8-1928-5f3b-9f83-dbb7f770b672",
+   "leagueId": "7608d6ed-7370-5d7f-bb47-bb856a07867d",
+   "name": "ABA League",
+   "level": 1
+  }
+ ],
+ "competitions": [
+  {
+   "id": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "name": "Lega Basket Serie A",
+   "shortName": "LBA",
+   "type": "League",
+   "divisionId": "c7ceb11e-ade6-5152-8e3b-3ab7f75f6cb8",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16,
+     "squad": {
+      "maxForeignPlayers": 6,
+      "minDomesticPlayers": 5
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      5,
+      5,
+      7
+     ],
+     "daysBetweenGames": 2
+    },
+    "relegation": {
+     "direct": 1
+    }
+   },
+   "country": "ITA"
+  },
+  {
+   "id": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "name": "Serie A2",
+   "shortName": "A2",
+   "type": "League",
+   "divisionId": "de295851-e2c6-50ba-80ec-8592ef9dcc12",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 20,
+     "maxTeams": 20,
+     "squad": {
+      "maxForeignPlayers": 2
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 6,
+     "startOffsetDays": 8
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      5,
+      5,
+      5
+     ],
+     "daysBetweenGames": 2
+    },
+    "promotion": {
+     "playoffWinner": true
+    }
+   },
+   "country": "ITA"
+  },
+  {
+   "id": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "name": "Liga Endesa",
+   "shortName": "ACB",
+   "type": "League",
+   "divisionId": "c14591f3-60d8-5b66-997c-67e3eae65a92",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 18,
+     "maxTeams": 18,
+     "squad": {
+      "maxNonEuPlayers": 2,
+      "minDomesticPlayers": 4
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      3,
+      5,
+      5
+     ],
+     "daysBetweenGames": 2
+    }
+   },
+   "country": "ESP"
+  },
+  {
+   "id": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "name": "easyCredit BBL",
+   "shortName": "BBL",
+   "type": "League",
+   "divisionId": "a501f1fc-c606-5848-99f3-5d8eabc6da09",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 18,
+     "maxTeams": 18,
+     "squad": {
+      "minDomesticPlayers": 6
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      5,
+      5,
+      5
+     ],
+     "daysBetweenGames": 2,
+     "playIn": true
+    }
+   },
+   "country": "GER"
+  },
+  {
+   "id": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "name": "Betclic ÉLITE",
+   "shortName": "ELITE",
+   "type": "League",
+   "divisionId": "ac3c10c6-1b77-5466-9135-1ee597da6bb2",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16,
+     "squad": {
+      "minDomesticPlayers": 4
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      3,
+      5,
+      5
+     ],
+     "daysBetweenGames": 2,
+     "playIn": true
+    }
+   },
+   "country": "FRA"
+  },
+  {
+   "id": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "name": "Stoiximan GBL",
+   "shortName": "GBL",
+   "type": "League",
+   "divisionId": "e3425bb0-ead0-5447-a959-a19b247448de",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 14,
+     "maxTeams": 14,
+     "squad": {
+      "maxForeignPlayers": 6
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      3,
+      5,
+      5
+     ],
+     "daysBetweenGames": 2
+    }
+   },
+   "country": "GRE"
+  },
+  {
+   "id": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "name": "Basketbol Süper Ligi",
+   "shortName": "BSL",
+   "type": "League",
+   "divisionId": "9e94facd-dce4-52f7-8c3e-49e8ae21aa91",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16,
+     "squad": {
+      "maxForeignPlayers": 6
+     }
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 7,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      3,
+      5,
+      7
+     ],
+     "daysBetweenGames": 2
+    }
+   },
+   "country": "TUR"
+  },
+  {
+   "id": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "name": "ABA League",
+   "shortName": "ABA",
+   "type": "League",
+   "divisionId": "de889be8-1928-5f3b-9f83-dbb7f770b672",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 20,
+     "maxTeams": 20,
+     "sameCountry": false,
+     "countries": [
+      "SRB",
+      "CRO",
+      "SLO",
+      "MNE",
+      "BIH",
+      "AUT",
+      "SVK",
+      "ROU",
+      "ARE"
+     ]
+    },
+    "regularSeason": {
+     "legs": 2,
+     "daysBetweenRounds": 6,
+     "startOffsetDays": 7
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "playoffs": {
+     "teams": 8,
+     "bestOf": [
+      3,
+      3,
+      5
+     ],
+     "daysBetweenGames": 2,
+     "playIn": true
+    }
+   }
+  }
+ ],
+ "seasons": [
+  {
+   "id": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "name": "2026-27",
+   "startDate": "2026-09-19",
+   "endDate": "2027-06-30"
+  }
+ ],
+ "participants": [
+  {
+   "id": "f89dfaa7-83f1-5097-ab3f-5f31291c1300",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "58906046-4cf2-5ced-9b56-08c8ffb48744"
+  },
+  {
+   "id": "4d6cf528-56ca-506c-9115-f4367b393f26",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fc555c51-1939-50ff-9abe-40fceb59a0d8"
+  },
+  {
+   "id": "2b1e16a7-ab0f-5304-8b6e-0be2b46acdf9",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1e36ee2e-747b-5fa2-b016-5953a3d89479"
+  },
+  {
+   "id": "8cafc740-4842-59e3-a9b9-bb27c5cf6c5b",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "bdcaacb2-81e0-5ad4-a723-f62bd175da85"
+  },
+  {
+   "id": "1b922b9d-f80d-57e0-bb70-c0dc86b6dd78",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ef5dcc39-bb82-5b24-96c3-11835d8163c1"
+  },
+  {
+   "id": "7e3e2693-66b1-5dec-bad5-f747430432f5",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "daf81c75-069c-5001-958f-531550aaf96f"
+  },
+  {
+   "id": "99e81f90-9995-5147-ab13-a81c7b54d5bf",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c1c8a367-bff2-5b50-b939-cc2fd8d3b413"
+  },
+  {
+   "id": "e7e1b0cc-5eb4-5a99-bfc2-306777adfd65",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "8a879bb6-fb8d-55b4-8aab-21fef4045ba9"
+  },
+  {
+   "id": "acb512e5-0403-54a1-a345-9cfda3686a4e",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c8661f49-6dce-51e4-9fbb-744860e4bfa1"
+  },
+  {
+   "id": "4d76f422-390c-5e8e-808d-10bf1bfcc080",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d4de63bc-76b9-5c4e-a10f-2486b2e4e3a5"
+  },
+  {
+   "id": "a4256783-6347-50f1-b761-1d152c6183e8",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9b69e74f-853f-5a93-813b-7e7bc3565420"
+  },
+  {
+   "id": "8e5607a6-9bbb-5c54-9d22-3bfbc7c33791",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1e3b8dac-6ab3-5bfe-9f3d-de3b6b50739c"
+  },
+  {
+   "id": "48849c84-5aa0-502d-849a-ca91cfb0a2fe",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6a57c603-04a6-5e84-917d-e7b63bb8e425"
+  },
+  {
+   "id": "589b8d65-9795-5a17-a4ec-ddd88928884f",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "590f22a6-0c29-562a-b759-08b5ea4044c9"
+  },
+  {
+   "id": "030b7250-a6cd-5ee9-a60c-c6ee236e1991",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4896b5a7-f144-57e1-879b-03be1c118232"
+  },
+  {
+   "id": "be00e2af-aefc-5b66-acf7-ee2451baab51",
+   "competitionId": "84fd7c2b-a86c-5c61-b79e-69ba7ced6225",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fa865fc6-5b9f-5317-8d09-7cff16abbde0"
+  },
+  {
+   "id": "dcb0595e-279f-5f42-b356-048bd5f63341",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3f8cd190-c128-5a87-ae91-2aa953f29f47"
+  },
+  {
+   "id": "deec363c-cd5e-5f13-a380-bf8f490e867a",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4518cc2b-84f7-5393-9561-d55cf13fbded"
+  },
+  {
+   "id": "dc1ee73f-b927-5fe7-acb1-f2d2cae19f26",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ad2115d2-339c-55fd-91cd-9a960ddd1ba1"
+  },
+  {
+   "id": "6b630b1a-d739-5ac4-afbd-843279d67db4",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "388c76f8-5440-5eb1-a3b5-1231fddb298d"
+  },
+  {
+   "id": "648f0832-bb55-5ec2-9974-59af97fb3b4c",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "758c2d3e-4b21-5417-973e-babf162bde41"
+  },
+  {
+   "id": "cb859448-16a4-5e6d-a63f-ddcb354b359b",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "dc3fb74d-ec43-5e9d-8479-5980f737f6ca"
+  },
+  {
+   "id": "5eb34e84-20f6-5cba-a009-80b9e0c365d3",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3f0e7760-c424-5266-919b-06dfa7694960"
+  },
+  {
+   "id": "61e86d69-08c4-5b46-8fa1-b05b2b790ab5",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3260c4df-2568-5a55-b888-94528af36e71"
+  },
+  {
+   "id": "96fd0c7a-437f-5a63-b854-e34722397a8e",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e7cafc6c-58aa-53c8-9176-e228c6ee9b33"
+  },
+  {
+   "id": "c06e3679-80d2-5db3-9fbb-fc9a481bca02",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c3f1382a-f0bc-5bcf-b394-0272e0e8e766"
+  },
+  {
+   "id": "e5e3424e-5d9e-56c0-aadb-a967e8c9df2a",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "27c26b71-7324-5f26-aa60-fbb7d7784bf8"
+  },
+  {
+   "id": "c9b3a0ea-5dff-5e8f-8cc5-385a56024e7c",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b64d759b-8bd3-5a6b-8835-beafd277be4a"
+  },
+  {
+   "id": "e10cf0a2-d525-591d-bafe-bff111992cc3",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6b93683e-a682-54bd-9c83-2dcb0cc09d33"
+  },
+  {
+   "id": "8a066c14-29be-5ab0-bd72-2a7282fa58b2",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3f068521-f0da-573e-ae8d-e42801bdc037"
+  },
+  {
+   "id": "5295f969-e132-588b-8c8e-b5cf250b0993",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "cf3b8a60-2610-5429-8c84-f8cafac7e7f1"
+  },
+  {
+   "id": "f40c73b6-c8a0-5f98-b7a2-39393021f7cd",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "425d2a7f-0c86-5b68-9e23-f21b47b5697c"
+  },
+  {
+   "id": "4810fa14-4266-5546-8d5c-74a7d8e5df01",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "66113e7d-c66d-5b3e-89d9-fe243c64a63f"
+  },
+  {
+   "id": "041ab6d0-8c66-592f-8734-19b86bcd087e",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "151a2746-8788-5e72-9ff1-8d66ba5ccf5f"
+  },
+  {
+   "id": "b5c4840e-49a6-5b4f-9abf-73c316265848",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "320fc275-86de-5c93-8cfb-fbd40d3f9e6d"
+  },
+  {
+   "id": "da883f83-ada0-514e-84e9-a5a42ca94c76",
+   "competitionId": "eaa1b0eb-17b0-54f0-b6d6-890f58220a20",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "efe181ea-75a0-5e49-b177-a20f2f338dc7"
+  },
+  {
+   "id": "1d48d813-a379-536a-ab1b-82f6b6f08ea1",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "44e7e39a-a823-540e-ad28-4ab6cf975da7"
+  },
+  {
+   "id": "40a4e5eb-87e0-5b7d-908e-a83e8509c7e1",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "8a656c5a-6ffe-5d68-8a9e-ff62e34d9356"
+  },
+  {
+   "id": "e8ae4954-a670-51be-b049-2283f6f96e96",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "bb9450ad-70f0-5d37-8ba9-45f729e9349d"
+  },
+  {
+   "id": "ad04b923-128e-5f31-8fe2-c2308eabdd52",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3f0a7260-e2dd-5875-b135-4cd069ab10b9"
+  },
+  {
+   "id": "46bf8181-c344-5fa6-a63b-03a8b888162c",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a0bf0cef-94d8-50dd-8af6-769e6ea1bb5f"
+  },
+  {
+   "id": "c99efd4f-a75c-5386-a5e5-d6d22033661d",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "aa65fb5c-0979-53c5-990f-676bb955d418"
+  },
+  {
+   "id": "9b020a3a-6236-573d-8832-c3a692546d2d",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7507f16e-7e35-545f-a9b5-7b6ad995dad4"
+  },
+  {
+   "id": "484f861a-d065-527b-a0c7-225936538fee",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "33fd3ad7-9712-5334-b0de-76f70ab52827"
+  },
+  {
+   "id": "93f55342-9a83-54cd-8602-9d452fd20ab3",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e4b04672-f779-52c0-a334-32935329a1cf"
+  },
+  {
+   "id": "68828a6f-95f2-5d81-9e54-46c8ee4bd1b0",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "64a0a717-4c28-57b7-ac41-4452485de174"
+  },
+  {
+   "id": "2cf0f36a-723f-5b3a-aa67-0ad2ca289a05",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6a1d29ee-4794-54e0-a7ef-e55dbe939c37"
+  },
+  {
+   "id": "779d07ef-6b8a-5f01-b8ec-521f6e089313",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "25416336-b1da-56fd-8b21-65c9ff134d0b"
+  },
+  {
+   "id": "e0342cd5-7f4c-5637-aab1-68edd556f882",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4d53861c-3bde-55b4-ad7f-be3919297e33"
+  },
+  {
+   "id": "dbab6f13-e73b-541d-bc18-633a90b0c2b3",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c8f83b5e-084b-5ecf-875b-230392e87c9d"
+  },
+  {
+   "id": "b990ee3e-ff3d-57fb-9425-37c4973c294e",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3c174ca0-419b-553b-a1e5-8dbc04eb4e69"
+  },
+  {
+   "id": "c8605be0-c913-538c-af44-2903f9fd237e",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7c309e2b-bbe1-51e1-a38f-e533a6db125b"
+  },
+  {
+   "id": "8611ef8f-bf10-58d7-9539-7914e82b165d",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3aa73c6f-3219-58cd-9958-d56a6b44789b"
+  },
+  {
+   "id": "73d4f9f7-a5fa-599b-8def-7c1864a4d7d4",
+   "competitionId": "3f3ec2cd-3af0-5945-9582-17d37053a585",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c7ebae6d-750a-5fe5-b9fe-d01dbd1a0cf0"
+  },
+  {
+   "id": "ae2c26cb-5531-58ea-b1fe-61bed8b16c1b",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "80ac8417-ec92-58de-bf87-50022d5d67ff"
+  },
+  {
+   "id": "36add695-ad36-5a20-91e9-de31856316af",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c1305f40-2316-55c6-8c43-2d9a647249dd"
+  },
+  {
+   "id": "236b541c-b478-5719-990f-c73254413b44",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4eaf54ec-0f2f-578f-b02e-252d81d7ecad"
+  },
+  {
+   "id": "1153fb74-faee-5617-92af-39525b41989c",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "63f8f07a-1046-5e46-8e4e-c5cfe6942c34"
+  },
+  {
+   "id": "0ea984b6-a362-5d89-a399-99970ffe8d5b",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c740467f-9815-530b-b259-8f6424dc523d"
+  },
+  {
+   "id": "f26e9199-9001-5e1b-add1-ea91dd02b782",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4651b193-1947-5802-82bc-653087c90890"
+  },
+  {
+   "id": "78916a20-2aa4-5e05-9807-3919fe76553b",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "62d94b7d-d983-5a61-bd64-03eba3112278"
+  },
+  {
+   "id": "ea79947e-d9fe-5fb4-b7c3-96a043dee5f3",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ce150f11-5639-5d31-b3e1-698c6bd5f40f"
+  },
+  {
+   "id": "7deb6bd6-fccb-53b8-80a7-8a9316489d21",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b6201dbf-d985-5e29-95d1-08ae8e1cf17b"
+  },
+  {
+   "id": "5ab285a1-7cba-5135-9304-c1b1e9eedb3a",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "84804810-a708-5096-bc70-591a442d0145"
+  },
+  {
+   "id": "3beea0b1-9df0-5556-afdf-1098a1cdab10",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b276fea7-05dc-52c7-82a5-c39911b040f6"
+  },
+  {
+   "id": "f918b4b4-aeb9-500b-a0b3-4b285e3154eb",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d3a077b1-e4a2-5116-8450-75357f37676d"
+  },
+  {
+   "id": "f69efced-72a6-5bd1-a68a-af784c1cd608",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ece528d4-27f9-5c7d-b850-2e1b3ce36613"
+  },
+  {
+   "id": "0c10b0f3-a4cc-5cdf-821c-8ac3c2f19724",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "af041950-4e9a-5403-be78-077198fbbdf9"
+  },
+  {
+   "id": "0b9b222a-a5d6-53a5-a5fc-79f90261ae12",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "5307422c-29ff-5374-849f-87139cc16cb3"
+  },
+  {
+   "id": "32d4721e-aedb-54b6-82d0-5b1dea03cd5d",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "620414b7-3c57-51df-a2cc-5a7eaacc14ed"
+  },
+  {
+   "id": "1cf5d8fa-75e9-5a96-813b-6d43afe86601",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "06889f11-ea4c-5f6a-8e4d-f772a487bee6"
+  },
+  {
+   "id": "d5d87965-02ea-5369-b107-626f7e590555",
+   "competitionId": "8db0eb41-54f0-52d4-80d0-2d7a762257d9",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d1d83d7a-2cc1-58bc-9b01-f05685b24070"
+  },
+  {
+   "id": "adab8d16-8fed-53fa-b91f-e7c2b2e7700a",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1387d220-55b4-53c2-a062-de08c987ccf4"
+  },
+  {
+   "id": "48a909ed-f197-5f57-b78d-55ff79fe13a4",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ff22e546-1ad2-5db3-9623-bafd980d5fcf"
+  },
+  {
+   "id": "4c0c79d0-ee8c-5a57-af72-8a4b0bebc0ff",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "72a18e9f-c7e8-591e-bb2c-6ba0bc0c22ce"
+  },
+  {
+   "id": "21e8eca9-5c37-53ad-a086-b869362f4067",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "469e1639-5daa-5ee4-8e1e-cf7054886f3b"
+  },
+  {
+   "id": "ffdbb09a-793d-5cff-9858-2073ddad1a21",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f4a540a8-f91b-56d1-96ca-7f75c26e182a"
+  },
+  {
+   "id": "83a1f195-f856-53ac-9a8c-7900c3d0f87a",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "00722b76-b735-5865-90b4-f0be376e81c0"
+  },
+  {
+   "id": "2a001d90-ae00-5cf5-a0a6-ff1e8bb64a78",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a105aa22-e1a3-563f-b4fc-f7f0654932b7"
+  },
+  {
+   "id": "58479c35-f389-5561-893b-93c8b4d10468",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fd2790d6-a8b4-5b1a-9a5e-98eff5f397ad"
+  },
+  {
+   "id": "08f4dd58-fa4d-508f-b519-d6e5fd3d37fe",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a6ceedce-f5e4-5b3d-bf96-0ad5a505fa85"
+  },
+  {
+   "id": "8108d164-6977-5d64-9d27-b799da85cc63",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e93cd551-f2dd-5ef2-97ed-77eea4f42d48"
+  },
+  {
+   "id": "4a90f545-27fd-553c-afcb-8e6b74bef6b2",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f761c5a2-0b72-5b92-bf15-4667c5ca890d"
+  },
+  {
+   "id": "63845608-c131-5609-baf0-089bfdc8eb16",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b1cea188-0500-5d91-95f5-459a2c66bd70"
+  },
+  {
+   "id": "0112630d-c4c2-5beb-ad93-3b4ee68bb629",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "af681325-758d-5b4f-bb10-7cf40625d4c4"
+  },
+  {
+   "id": "8d71e627-7774-5622-b08f-4f36da72155e",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "64cbdd11-de67-5441-a25c-f0cb7fa0862d"
+  },
+  {
+   "id": "7a2e836c-d997-5626-9679-2add8d3bf5e7",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b5fc4732-2f9d-5af1-9ba2-5d303f244605"
+  },
+  {
+   "id": "22117e99-48b5-5a87-a3eb-6a2495a52254",
+   "competitionId": "a63d29c8-5962-5f59-bd6c-a61751a6dc8e",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "5bb0bdc3-005a-513a-84e2-93df6b690007"
+  },
+  {
+   "id": "c1ad62ad-2ec7-50d7-9f23-0c6e1185674f",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6fc47f4d-fbb4-5646-8a29-eeb39f459d8c"
+  },
+  {
+   "id": "333a92ea-372f-5dab-8bad-7bcd5173859b",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1ab82576-030c-551b-85e1-757cf0921423"
+  },
+  {
+   "id": "eaa00a03-4838-514b-9718-febc2378f0e9",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9177fa29-d981-52ad-a16c-9fd3b4ce3b51"
+  },
+  {
+   "id": "5ccc735b-6c54-5c09-8ef3-7667b7a4fc95",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9e28dfa0-54fe-5de0-883b-432e1852f2df"
+  },
+  {
+   "id": "227cb169-9525-5874-9059-3a43fd0201fc",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ea490fa6-67f0-55c7-b47e-f537f2556d3f"
+  },
+  {
+   "id": "76c1a3f9-7dbd-5b93-97d0-586b90600c93",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ffe6b9ef-a135-5286-a292-a0ec6cb8d749"
+  },
+  {
+   "id": "ef323440-0f75-5a3c-8896-294f460eead5",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "13800b33-38a6-5fd6-a477-2ac636c5f6f1"
+  },
+  {
+   "id": "c782c7f3-e94f-5076-a6de-cd5187cf8481",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "adc03bd2-2ee1-5b04-8e22-20503c4a255b"
+  },
+  {
+   "id": "84745106-4f20-5f51-853f-8dee0c59c9d1",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "08439354-c6b6-527a-9334-8cfde7396ef3"
+  },
+  {
+   "id": "b3b8361c-4362-52c9-84de-31e2fde8ce14",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "12b69055-f55c-53a6-a9c1-fb52c39ca80c"
+  },
+  {
+   "id": "74240422-1ddd-5618-a540-5942fce8dd77",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "8e991e44-ae96-5c14-8615-d10a703b5f28"
+  },
+  {
+   "id": "e0ff26fe-3968-5896-8c6c-eb47a9f3ba95",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a3fe4d79-add9-5df2-8d5e-0ea33cfc70c7"
+  },
+  {
+   "id": "ca331219-7a6d-5470-a94b-f85c296cd25b",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7c877b37-e5da-55f9-8df8-0c10b2faea29"
+  },
+  {
+   "id": "fdcc1786-0202-5e11-9259-b57cc977b47b",
+   "competitionId": "37d0ade7-4062-50cb-a2e4-8cda42ff87db",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c87d7522-a4f6-5008-8ade-f75068b1cc5b"
+  },
+  {
+   "id": "cc126509-7b42-5cbf-9558-6a16a53f57d3",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7ba1a2a5-98b0-5edc-adba-a7a6526f738f"
+  },
+  {
+   "id": "879ee441-2714-5a55-8e4b-20108c82a583",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "905cf9e7-fe74-5e5b-ac41-81e27af59860"
+  },
+  {
+   "id": "518f7fdf-7441-56d5-bd86-1c521c5b26c3",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d9ee527f-b553-5e2a-a662-a14ea0168178"
+  },
+  {
+   "id": "cb035a9a-cd87-57ad-9b23-f4458e75a23c",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "37e0e1ba-7e73-5ddd-aabf-8f57d875dabe"
+  },
+  {
+   "id": "102c84e6-5085-5768-adf2-84b4796299e6",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6f38d98e-467d-5195-b2c1-cef82189ac79"
+  },
+  {
+   "id": "0cde4ad0-eb2d-58bd-ac84-b02c04038629",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "2b477fd7-e844-5e42-b786-21ab303c8611"
+  },
+  {
+   "id": "5103a06e-c6aa-5796-b600-a2a3fe7fc6e7",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fa6db4aa-96f6-5ceb-8072-1630d7b386d6"
+  },
+  {
+   "id": "6f8b5d32-c8ac-5a2c-b6f1-bb7df5ff6dbe",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9f6cb081-f202-5236-85cc-4e24e4e4bcce"
+  },
+  {
+   "id": "67f06a5d-15ce-527d-8499-63dd79dd1b98",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "74865e3d-7404-5545-bb4d-6042f094e005"
+  },
+  {
+   "id": "d0a1ef22-7d97-5687-82e1-87593caad7bf",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "24319016-c13b-5e3a-91af-ae9c124af7f7"
+  },
+  {
+   "id": "c26b5e22-6afb-5725-8e6e-8488a1ab4788",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a9871888-2b6a-5a09-a8a6-ca0502688b0e"
+  },
+  {
+   "id": "29555df6-342c-5d6f-b9eb-13a7073e08e2",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6bba3ec5-ccfe-5460-8868-b6e4330d905a"
+  },
+  {
+   "id": "2c3eab72-7983-52ac-adb1-6c9a72add969",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "edbcdeae-be5a-59e4-82fd-2ee2f08b8b74"
+  },
+  {
+   "id": "b3646822-cb37-5aee-bb05-47216821c832",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c60daf87-2a83-5764-b47a-0ddb62709708"
+  },
+  {
+   "id": "2346a940-e944-5ece-8973-65ad2ca1122f",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fb8097e0-b113-594c-b3f8-9e995882bab8"
+  },
+  {
+   "id": "72105b80-abe9-590b-bed7-6807a66eab8f",
+   "competitionId": "9c0ffac7-f00f-5325-897b-6f6aabd51080",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "56bf2241-6e3a-505a-b960-a62138a778d3"
+  },
+  {
+   "id": "3e8f2ede-9928-52e8-9ccd-f03d88e8e566",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "5181462f-b5ee-5947-aa5e-b22b61e84802"
+  },
+  {
+   "id": "d20e6877-fc6b-55c0-8c04-b1377b7c12b6",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ecec1ef9-2692-509e-af85-33159e80b6ac"
+  },
+  {
+   "id": "0ca19370-4794-50dc-ba57-8d912078ccff",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "28ccc072-dcd0-5f11-b31e-52169abafcf9"
+  },
+  {
+   "id": "e83ffb2b-4c88-54a9-9850-1c578fddefa1",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "75801a6f-5987-57d6-80ed-60ad57c8710c"
+  },
+  {
+   "id": "3010b3bc-9fd6-57d4-9839-232417f51ada",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b28d2cd5-2bfe-5ef3-8ec0-11e23f036ba6"
+  },
+  {
+   "id": "5940b91b-099c-53c4-badc-acb3875e0f9c",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ce88cff3-ebec-5612-959f-d9562ed39736"
+  },
+  {
+   "id": "3ccd3c5c-3bbd-5db2-933c-d1b54292e5c2",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "75a71d71-f1b5-53fb-a656-404c157c2c0b"
+  },
+  {
+   "id": "002f7004-ce25-5d86-903e-f5f8956850ba",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6313ae9f-c355-5615-b2b9-c963ccda9cae"
+  },
+  {
+   "id": "05c67a0f-43fb-5eb7-82a4-50d6b5ac2b27",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "bb458652-7390-545c-8de2-11160fcb422e"
+  },
+  {
+   "id": "36554a85-401a-5fba-8246-26c53a785a32",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f7263cc5-eb65-5807-84df-992f90922b84"
+  },
+  {
+   "id": "5abbe358-6fdf-5d1a-9b4d-eb27701159b4",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "402e8835-c187-566e-adc4-6c4ae8bd0fad"
+  },
+  {
+   "id": "dcf55688-8858-5534-99b3-ef4dbaed4b5c",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4ff7d076-128d-5289-8457-7c0eb03dfdc0"
+  },
+  {
+   "id": "d9b55f65-4f83-59c0-874d-613d13409ccf",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "0418dd1e-a323-59c9-944b-63d0db523d59"
+  },
+  {
+   "id": "32790e05-e866-5511-871c-755952f357ed",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "600df565-686d-5612-b689-af7c9f5c3313"
+  },
+  {
+   "id": "d53311ee-da88-55f1-bce0-fab5a10036ea",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "947b1923-afda-5801-a646-96bd875d036a"
+  },
+  {
+   "id": "ef9df903-6a6f-536a-9479-9f3786ed1c0c",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1b3cafbb-ee4e-5fdd-849f-31cd4462bcaf"
+  },
+  {
+   "id": "a367a770-e786-5b28-8730-b7ba8000440c",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "459d1b77-ad0a-58b5-8b95-f4bfa570140a"
+  },
+  {
+   "id": "0abc93d6-4c75-5679-b812-0cc1f9a65160",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "69660b76-13aa-5007-bf93-14568e51d2fc"
+  },
+  {
+   "id": "28fca940-3aeb-514e-9d6e-ed2000ed936b",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4eef0e27-d773-5fe4-9b53-74606420062d"
+  },
+  {
+   "id": "3a7f1ebc-0347-5a4f-abd7-ea36ea345083",
+   "competitionId": "84bac5ac-a0e4-5409-920f-8b6e427fc477",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a140f78d-2fa5-5a6d-b955-fa74bdb33b19"
+  }
+ ]
+}
