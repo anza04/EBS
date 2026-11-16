@@ -35,6 +35,12 @@ public sealed record PlayerValuation(long MarketValue, long AskingFee, long? Rel
     public long BuyNowFee => ReleaseClause is { } clause && clause < AskingFee ? clause : AskingFee;
 }
 
+/// <summary>Extra terms of a loan agreement (docs/TRANSFERS.md §4).</summary>
+/// <param name="Age">The player's age (young players are loaned for their development, so their club pays more of their salary).</param>
+/// <param name="ParentSalaryShare">Percentage of the salary the parent club keeps paying during the loan, 0–100.</param>
+/// <param name="OptionFee">Fee for which the loan club may buy the player during the loan; <c>null</c> without an option.</param>
+public sealed record LoanClauses(int Age, int ParentSalaryShare = 0, long? OptionFee = null);
+
 public enum TransferOutcome
 {
     Accepted,
@@ -83,6 +89,14 @@ public sealed class TransferNegotiator
 
     /// <summary>Loan fee per year of loan, as a share of the market value.</summary>
     public double LoanFeeShare { get; init; } = 0.10;
+
+    /// <summary>Most of the salary a parent club pays during a loan, in percent: for players up to <see cref="DevelopmentAge"/> and older ones.</summary>
+    public int MaxDevelopmentSalaryShare { get; init; } = 50;
+
+    public int MaxSalaryShare { get; init; } = 25;
+
+    /// <summary>Oldest age of a development loan.</summary>
+    public int DevelopmentAge { get; init; } = 23;
 
     /// <summary>Extra asked for a starter (×1.5) and a rotation player (×1.25); an inactive player goes for less (×0.8).</summary>
     public double StarterPremium { get; init; } = 1.5;
@@ -134,7 +148,11 @@ public sealed class TransferNegotiator
     }
 
     /// <summary>The parent club's answer to a loan request for <paramref name="loanYears"/> years at <paramref name="fee"/>.</summary>
-    public TransferResponse EvaluateLoan(PlayerValuation valuation, long fee, double loanYears)
+    /// <remarks>
+    /// With <paramref name="clauses"/>: the parent club pays at most <see cref="MaxParentSalaryShare"/> of the salary
+    /// and grants an option to buy for no less than its transfer price today (<see cref="MinimumOptionFee"/>).
+    /// </remarks>
+    public TransferResponse EvaluateLoan(PlayerValuation valuation, long fee, double loanYears, LoanClauses? clauses = null)
     {
         ArgumentNullException.ThrowIfNull(valuation);
         var asking = Math.Max(1_000, RoundTo(valuation.LoanFeePerYear * Math.Max(0.25, loanYears), 1_000));
@@ -143,8 +161,41 @@ public sealed class TransferNegotiator
             return new(TransferOutcome.Rejected, asking, null, "The club will not loan out a player in its starting five or rotation.");
         }
 
+        if (clauses is not null)
+        {
+            if (clauses.ParentSalaryShare is < 0 or > 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(clauses), "The salary share is a percentage between 0 and 100.");
+            }
+
+            var maxShare = MaxParentSalaryShare(clauses.Age);
+            if (clauses.ParentSalaryShare > maxShare)
+            {
+                return new(TransferOutcome.Rejected, asking, null, $"The club pays at most {maxShare}% of his salary during a loan.");
+            }
+
+            if (clauses.OptionFee is { } option && option < MinimumOptionFee(valuation))
+            {
+                return new(TransferOutcome.Rejected, asking, null, $"The club grants an option to buy for no less than € {MinimumOptionFee(valuation):N0}.");
+            }
+        }
+
         return Answer(asking, fee, "loan fee");
     }
+
+    /// <summary>Most of the salary, in percent, the parent club keeps paying during a loan of a player aged <paramref name="age"/>.</summary>
+    public int MaxParentSalaryShare(int age) => age <= DevelopmentAge ? MaxDevelopmentSalaryShare : MaxSalaryShare;
+
+    /// <summary>Lowest option-to-buy fee the parent club grants: what it would take for him today.</summary>
+    public static long MinimumOptionFee(PlayerValuation valuation)
+    {
+        ArgumentNullException.ThrowIfNull(valuation);
+        return valuation.BuyNowFee;
+    }
+
+    /// <summary>The parent club's share of <paramref name="annualSalary"/> for a loan of <paramref name="loanYears"/>, rounded to € 1,000.</summary>
+    public static long SalaryContribution(long annualSalary, int parentSalaryShare, double loanYears) =>
+        RoundTo(annualSalary * Math.Clamp(parentSalaryShare, 0, 100) / 100.0 * Math.Max(0, loanYears), 1_000);
 
     /// <summary>Years of loan from <paramref name="from"/> to <paramref name="until"/> inclusive.</summary>
     public static double LoanYears(DateOnly from, DateOnly until) => (until.DayNumber - from.DayNumber + 1) / 365.25;

@@ -42,10 +42,13 @@ public interface IContractService
 
     /// <summary>
     /// Ends a player contract from today and pays the settlement: the remaining salary for a release, or
-    /// <paramref name="settlement"/> (default half the remaining salary) for a mutual agreement. The player leaves the
-    /// club and becomes a free agent. Returns the settlement paid.
+    /// <paramref name="settlement"/> for a mutual agreement (a buyout; default the least the player accepts, refused
+    /// below it — <see cref="NegotiateBuyoutAsync"/>). The player leaves the club and becomes a free agent. Returns the settlement paid.
     /// </summary>
     Task<long> TerminateAsync(ContractId contractId, TerminationKind kind, long? settlement = null, CancellationToken cancellationToken = default);
+
+    /// <summary>The player's answer to a buyout of his contract for <paramref name="settlement"/> (docs/CONTRACTS.md §3). Nothing is saved.</summary>
+    Task<BuyoutResponse> NegotiateBuyoutAsync(ContractId contractId, long settlement, CancellationToken cancellationToken = default);
 
     /// <summary>The club takes up (extends to the option date) or declines its option.</summary>
     Task DecideClubOptionAsync(ContractId contractId, bool exercise, CancellationToken cancellationToken = default);
@@ -64,6 +67,11 @@ public interface IContractService
 /// <summary>A contract as the screens show it, on <see cref="Date"/>.</summary>
 /// <param name="Status">Status on the date (an active contract past its end date shows as expired).</param>
 /// <param name="RemainingSalary">Salary still to be paid from the date to the effective end.</param>
+/// <summary>A player's answer to a buyout (mutual termination) of his contract.</summary>
+/// <param name="Minimum">The least settlement he accepts.</param>
+/// <param name="Remaining">The salary still owed to him (the most a settlement can be).</param>
+public sealed record BuyoutResponse(bool IsAccepted, long Minimum, long Remaining, string Message);
+
 public sealed record ContractLine(
     Contract Contract,
     string Player,

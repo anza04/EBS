@@ -61,6 +61,7 @@ Property names are case-insensitive; enum values are text.
 | `registration.maxTeams` | 20 | `minTeams`–40; checked at every registration |
 | `registration.sameCountry` | `true` | Clubs must be from the competition's country (ignored for international competitions) |
 | `registration.countries` | `[]` | ISO alpha-3 codes of the countries whose clubs may enter (cross-border leagues); empty = any |
+| `registration.deadline` | none | `"MM-dd"`: last day on which clubs of the competition may register new players during the season (`docs/TRANSFERS.md` §9). Step 19 |
 | `registration.squad` | club defaults | Player registration limits: `minPlayers`, `maxPlayers`, `matchdayPlayers`, `recommendedRotation`, `maxForeignPlayers`, `maxNonEuPlayers`, `minDomesticPlayers`, `minAge` (`docs/ROSTER_RULES.md` §4) |
 | `regularSeason.legs` | 2 | 1–4 |
 | `regularSeason.daysBetweenRounds` | 7 | 1–30 |

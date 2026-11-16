@@ -19,6 +19,10 @@ import player_ratings
 NS = uuid.UUID("5b0f3c8e-6d1a-4f44-9a57-0e5d2f7c1b15")
 SEASON_START, SEASON_END = date(2026, 9, 19), date(2027, 6, 30)
 REGULAR_END = date(2027, 5, 16)  # leaves about six weeks for playoffs
+# Registration deadlines ("MM-dd", docs/TRANSFERS.md §9). Unverified simplification: top divisions and international
+# competitions close at the end of February, second divisions a month later.
+DEADLINE_TOP = "02-28"
+DEADLINE_LOWER = "03-31"
 TIE = ["HeadToHeadWins", "HeadToHeadPointDifference", "PointDifference", "PointsFor"]
 
 NICKNAMES = ["Comets", "Meteors", "Zenith", "Nova", "Orbit", "Polaris", "Quasar", "Equinox", "Vertex", "Summit",
@@ -269,7 +273,7 @@ def add_international(data):
         cup = {"entry": {"tier": tier, "slots": slots}, "groupStage": groups, "draw": "Bracket", "startOffsetDays": offset,
                "daysBetweenRounds": days, "daysBetweenLegs": 7, "rounds": ko, "rewards": rewards}
         data["competitions"].append({"id": uid("competition", "international", name), "name": name, "shortName": short, "type": "Cup",
-                                     "rules": {"pointsForWin": 2, "pointsForLoss": 1, "registration": {"minTeams": low, "maxTeams": high},
+                                     "rules": {"pointsForWin": 2, "pointsForLoss": 1, "registration": {"minTeams": low, "maxTeams": high, "deadline": DEADLINE_TOP},
                                                "tieBreakers": TIE, "cup": cup}})
 
 
@@ -289,13 +293,13 @@ def second_phase_rounds(second, clubs, countries):
     return max(rounds(max(s * per_country, 2), 2) for s in sizes)
 
 
-def rules(div, offset):
+def rules(div, offset, level=1):
     total = rounds(div["clubs"], div["legs"]) + second_phase_rounds(div["second"], div["clubs"], div["countries"] or [])
     first = SEASON_START.toordinal() + offset
     days = min(7, (REGULAR_END.toordinal() - first) // (total - 1))
     result = {
         "pointsForWin": 2, "pointsForLoss": 1,
-        "registration": {"minTeams": div["clubs"], "maxTeams": div["clubs"]},
+        "registration": {"minTeams": div["clubs"], "maxTeams": div["clubs"], "deadline": DEADLINE_TOP if level == 1 else DEADLINE_LOWER},
         "regularSeason": {"legs": div["legs"], "daysBetweenRounds": days, "startOffsetDays": offset},
         "tieBreakers": TIE,
     }
@@ -593,7 +597,7 @@ def main():
             division_id = uid("division", league_name, str(level))
             data["divisions"].append({"id": division_id, "leagueId": league["id"], "name": div["name"], "level": level})
             competition = {"id": uid("competition", league_name, div["name"]), "name": div["name"], "shortName": div["short"],
-                           "type": "League", "divisionId": division_id, "rules": rules(div, 7 if level == 1 else 8)}
+                           "type": "League", "divisionId": division_id, "rules": rules(div, 7 if level == 1 else 8, level)}
             if country:
                 competition["country"] = country
             data["competitions"].append(competition)

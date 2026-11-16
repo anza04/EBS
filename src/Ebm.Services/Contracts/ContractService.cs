@@ -8,6 +8,7 @@ using Ebm.Domain.Rosters;
 using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Data;
+using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ebm.Services.Contracts;
@@ -123,7 +124,7 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (player, club) = await data.PlayerAndClubAsync(playerId, clubId, cancellationToken).ConfigureAwait(false);
         await CheckFreeAsync(data, player, club, offer, cancellationToken).ConfigureAwait(false);
-        return _negotiator.Evaluate(Context(player, club, data.Today, null), offer);
+        return _negotiator.Evaluate(await ContextAsync(data, player, club, null, cancellationToken).ConfigureAwait(false), offer);
     }
 
     public async Task<NegotiationResponse> NegotiateRenewalAsync(ContractId contractId, ContractTerms offer, CancellationToken cancellationToken = default)
@@ -133,7 +134,7 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
         CheckRenewable(contract, offer, data.Today);
-        return _negotiator.Evaluate(Context(player, club, data.Today, contract.AnnualSalary), offer);
+        return _negotiator.Evaluate(await ContextAsync(data, player, club, contract.AnnualSalary, cancellationToken).ConfigureAwait(false), offer);
     }
 
     public async Task<ContractId> SignAsync(PlayerId playerId, ClubId clubId, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, CancellationToken cancellationToken = default)
@@ -153,13 +154,19 @@ internal sealed class ContractService : IContractService
         }
 
         await CheckFreeAsync(data, player, club, terms, cancellationToken).ConfigureAwait(false);
-        RequireAcceptance(_negotiator.Evaluate(Context(player, club, data.Today, null), terms));
+        RequireAcceptance(_negotiator.Evaluate(await ContextAsync(data, player, club, null, cancellationToken).ConfigureAwait(false), terms));
 
         var contract = Contract.ForPlayer(ContractId.New(), clubId, playerId, terms);
+        var current = (await ClubMembership.CurrentClubsAsync(scope.ServiceProvider, data.Today, cancellationToken).ConfigureAwait(false)).TryGetValue(playerId, out var at) ? at : (ClubId?)null;
+        var joins = contract.IsRunningOn(data.Today) && current != clubId;
+        if (joins)
+        {
+            await ClubSeason.CheckRegistrationAsync(scope.ServiceProvider, club, data.Today, joinAs, cancellationToken).ConfigureAwait(false);
+        }
+
         data.Contracts.Add(contract);
         club.ChangeBalance(-terms.SigningBonus);
-        var current = (await ClubMembership.CurrentClubsAsync(scope.ServiceProvider, data.Today, cancellationToken).ConfigureAwait(false)).TryGetValue(playerId, out var at) ? at : (ClubId?)null;
-        if (contract.IsRunningOn(data.Today) && current != clubId)
+        if (joins)
         {
             await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, clubId, data.Today, joinAs, cancellationToken).ConfigureAwait(false);
         }
@@ -177,7 +184,7 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
         CheckRenewable(contract, terms, data.Today);
-        RequireAcceptance(_negotiator.Evaluate(Context(player, club, data.Today, contract.AnnualSalary), terms));
+        RequireAcceptance(_negotiator.Evaluate(await ContextAsync(data, player, club, contract.AnnualSalary, cancellationToken).ConfigureAwait(false), terms));
 
         contract.Supersede(terms.StartDate);
         var renewal = Contract.ForPlayer(ContractId.New(), contract.ClubId, player.Id, terms);
@@ -199,10 +206,16 @@ internal sealed class ContractService : IContractService
         }
 
         var remaining = SalaryCalculator.RemainingSalary(contract, data.Today);
-        var paid = kind == TerminationKind.ClubRelease ? remaining : settlement ?? remaining / 2;
+        var minimum = MinimumBuyout(data.Today, player, contract, remaining);
+        var paid = kind == TerminationKind.ClubRelease ? remaining : settlement ?? minimum;
         if (paid < 0 || paid > remaining)
         {
             throw new DomainValidationException($"The settlement must be between 0 and the remaining salary (€ {remaining:N0}).");
+        }
+
+        if (paid < minimum)
+        {
+            throw new DomainException($"{player.FullName} refuses the buyout: he wants at least € {minimum:N0} of the € {remaining:N0} still owed to him.");
         }
 
         contract.Terminate(data.Today, paid);
@@ -218,6 +231,29 @@ internal sealed class ContractService : IContractService
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return paid;
     }
+
+    public async Task<BuyoutResponse> NegotiateBuyoutAsync(ContractId contractId, long settlement, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var data = new Data(scope.ServiceProvider, Today);
+        var (contract, player, _) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
+        if (contract.StatusOn(data.Today) != ContractStatus.Active)
+        {
+            throw new DomainValidationException($"The contract is {StatusName(contract.StatusOn(data.Today))}; only an active contract can be bought out.");
+        }
+
+        var remaining = SalaryCalculator.RemainingSalary(contract, data.Today);
+        var minimum = MinimumBuyout(data.Today, player, contract, remaining);
+        return settlement >= minimum && settlement <= remaining
+            ? new BuyoutResponse(true, minimum, remaining, $"{player.FullName} accepts € {settlement:N0} to end his contract.")
+            : settlement > remaining
+                ? new BuyoutResponse(false, minimum, remaining, $"The settlement cannot exceed the remaining salary (€ {remaining:N0}).")
+                : new BuyoutResponse(false, minimum, remaining, $"{player.FullName} wants at least € {minimum:N0} of the € {remaining:N0} still owed to him.");
+    }
+
+    /// <summary>The least settlement the player accepts to leave: a share of what is still owed to him, by how easily he would earn as much elsewhere.</summary>
+    private long MinimumBuyout(DateOnly today, Player player, Contract contract, long remaining) =>
+        _negotiator.MinimumBuyout(Context(player, TransferNegotiator.NeutralClubReputation, today, null), contract.AnnualSalary, remaining);
 
     public async Task DecideClubOptionAsync(ContractId contractId, bool exercise, CancellationToken cancellationToken = default)
     {
@@ -241,7 +277,7 @@ internal sealed class ContractService : IContractService
         using var scope = _scopes.CreateScope();
         var data = new Data(scope.ServiceProvider, Today);
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
-        var exercise = _negotiator.ExercisesPlayerOption(Context(player, club, data.Today, null), contract.AnnualSalary);
+        var exercise = _negotiator.ExercisesPlayerOption(await ContextAsync(data, player, club, null, cancellationToken).ConfigureAwait(false), contract.AnnualSalary);
         if (exercise)
         {
             contract.ExerciseOption(OptionHolder.Player, data.Today);
@@ -320,10 +356,14 @@ internal sealed class ContractService : IContractService
         return expired == 0 && started == 0 ? ContractDateChanges.None : new ContractDateChanges(expired, started, freeAgents);
     }
 
-    private NegotiationContext Context(Player player, Club club, DateOnly today, long? currentSalary)
+    /// <summary>The negotiation with <paramref name="club"/>, priced with its attractiveness (docs/TRANSFERS.md §2).</summary>
+    private async Task<NegotiationContext> ContextAsync(Data data, Player player, Club club, long? currentSalary, CancellationToken cancellationToken) =>
+        Context(player, await ClubSeason.AttractivenessAsync(data.Services, club, data.Today, cancellationToken).ConfigureAwait(false), data.Today, currentSalary);
+
+    private NegotiationContext Context(Player player, int clubReputation, DateOnly today, long? currentSalary)
     {
         var evaluation = _calculator.Evaluate(player);
-        return new NegotiationContext(evaluation.Overall, evaluation.PotentialRating, player.Reputation, player.AgeOn(today), club.Reputation, currentSalary);
+        return new NegotiationContext(evaluation.Overall, evaluation.PotentialRating, player.Reputation, player.AgeOn(today), clubReputation, currentSalary);
     }
 
     /// <summary>Refuses an offer to a player who is under contract (or signed in advance) during the offered period.</summary>
@@ -392,6 +432,8 @@ internal sealed class ContractService : IContractService
     private sealed class Data(IServiceProvider services, DateOnly today)
     {
         public DateOnly Today { get; } = today;
+
+        public IServiceProvider Services => services;
 
         public IRepository<Contract, ContractId> Contracts => Repo<Contract, ContractId>();
 

@@ -19,6 +19,7 @@ internal sealed class TransferConfiguration : IEntityTypeConfiguration<Transfer>
             t.HasCheckConstraint("CK_Transfers_Return", "ReturnedOn IS NULL OR (Kind = 'Loan' AND ReturnedOn > Date)");
         });
         builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(20);
+        builder.Property(x => x.SalaryContribution).HasDefaultValue(0L); // Step 19; no check constraint (decision 21)
         builder.HasOne<Player>().WithMany().HasForeignKey(x => x.PlayerId);
         builder.HasOne<Club>().WithMany().HasForeignKey(x => x.FromClubId);
         builder.HasOne<Club>().WithMany().HasForeignKey(x => x.ToClubId);

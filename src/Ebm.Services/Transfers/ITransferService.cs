@@ -27,7 +27,9 @@ public interface ITransferService
     Task<TransferResponse> NegotiateFeeAsync(PlayerId playerId, ClubId buyerId, long fee, CancellationToken cancellationToken = default);
 
     /// <summary>The parent club's answer to a loan until <paramref name="until"/> for <paramref name="fee"/>. Nothing is saved.</summary>
-    Task<TransferResponse> NegotiateLoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, CancellationToken cancellationToken = default);
+    /// <param name="parentSalaryShare">Percentage of the salary the parent club keeps paying (docs/TRANSFERS.md §4).</param>
+    /// <param name="optionFee">Fee of an option to buy for the borrower; <c>null</c> without one.</param>
+    Task<TransferResponse> NegotiateLoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, int parentSalaryShare = 0, long? optionFee = null, CancellationToken cancellationToken = default);
 
     /// <summary>The player's answer to the contract he would sign with <paramref name="buyerId"/> after a transfer. Nothing is saved.</summary>
     Task<NegotiationResponse> NegotiateContractAsync(PlayerId playerId, ClubId buyerId, ContractTerms terms, CancellationToken cancellationToken = default);
@@ -46,10 +48,25 @@ public interface ITransferService
     /// accept the fee, the borrower pays it and the player's salary meanwhile through a loan contract on the same
     /// terms. The player joins the borrower's squad and goes back when the loan ends (<see cref="ProcessTransferDatesAsync"/>) or is recalled.
     /// </summary>
-    Task<TransferReceipt> LoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, CancellationToken cancellationToken = default);
+    /// <param name="parentSalaryShare">Percentage of the salary the parent club keeps paying, booked as a contribution to the borrower when the loan starts.</param>
+    /// <param name="optionFee">Fee for which the borrower may buy the player during the loan (<see cref="ExerciseOptionAsync"/>); <c>null</c> without an option.</param>
+    Task<TransferReceipt> LoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, int parentSalaryShare = 0, long? optionFee = null, CancellationToken cancellationToken = default);
 
-    /// <summary>The parent club recalls a loaned player today: the loan contract ends, he rejoins his parent club.</summary>
+    /// <summary>
+    /// The parent club recalls a loaned player today: the loan contract ends, he rejoins his parent club, and the
+    /// borrower refunds the unused part of the parent club's salary contribution.
+    /// </summary>
     Task<TransferReceipt> RecallAsync(TransferId loanId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The loan club exercises its option to buy (from the day after the loan started): it pays the option fee, which the
+    /// parent club cannot refuse, and the player must accept <paramref name="terms"/> (starting today). The loan ends,
+    /// the parent contract ends as transferred and the player stays in the borrower's squad.
+    /// </summary>
+    Task<TransferReceipt> ExerciseOptionAsync(TransferId loanId, ContractTerms terms, CancellationToken cancellationToken = default);
+
+    /// <summary>Whether the club may register new players today (registration deadlines, docs/TRANSFERS.md §9).</summary>
+    Task<RegistrationWindow> GetRegistrationWindowAsync(ClubId clubId, CancellationToken cancellationToken = default);
 
     /// <summary>The club's transfer history and its open loans, or <c>null</c> when the club does not exist.</summary>
     Task<ClubTransfers?> GetClubTransfersAsync(ClubId clubId, CancellationToken cancellationToken = default);
@@ -162,13 +179,16 @@ public sealed record TransferLine(Transfer Transfer, string Player, string? From
 
     public long Fee => Transfer.Fee;
 
-    /// <summary>"Free agent", "Transfer", "Release clause", "Loan until yyyy-MM-dd" or "Loan return".</summary>
+    /// <summary>"Free agent", "Transfer", "Release clause", "Option to buy", "Loan until yyyy-MM-dd" (with its option and end) or "Loan return".</summary>
     public string KindText => Transfer.Kind switch
     {
         TransferKind.FreeAgentSigning => "Free agent",
-        TransferKind.Loan => $"Loan until {Transfer.LoanEndDate:yyyy-MM-dd}" + (Transfer.ReturnedOn is { } back ? $" (back {back:yyyy-MM-dd})" : string.Empty),
+        TransferKind.Loan => $"Loan until {Transfer.LoanEndDate:yyyy-MM-dd}"
+            + (Transfer.OptionFee is { } option ? $", option € {option:N0}" : string.Empty)
+            + (Transfer.ReturnedOn is { } back ? $" (ended {back:yyyy-MM-dd})" : string.Empty),
         TransferKind.LoanReturn => "Loan return",
         TransferKind.ReleaseClause => "Release clause",
+        TransferKind.OptionToBuy => "Option to buy",
         _ => "Transfer",
     };
 }

@@ -261,7 +261,7 @@ def main():
             division_id = eu.uid("division", league_name, str(level))
             data["divisions"].append({"id": division_id, "leagueId": league["id"], "name": div["name"], "level": level})
             competition = {"id": eu.uid("competition", league_name, div["name"]), "name": div["name"], "shortName": div["short"],
-                           "type": "League", "divisionId": division_id, "rules": eu.rules(div, 7 if level == 1 else 8),
+                           "type": "League", "divisionId": division_id, "rules": eu.rules(div, 7 if level == 1 else 8, level),
                            **({"country": country} if country else {})}
             data["competitions"].append(competition)
             clubs = [club_identity(e, known) for e in CLUBS[div["name"]].values()]

@@ -1,6 +1,8 @@
 # Transfers and the Player Market
 
-Transfer lifecycle, valuations and fee negotiation, loans, free agents and the AI clubs' recruitment rules (Step 08).
+Transfer lifecycle, valuations and fee negotiation, loans, free agents and the AI clubs' recruitment rules (Step 08);
+the European market — one market for every country, club attractiveness, loan agreements, buyouts, registration
+deadlines and international AI recruitment (Step 19, §9–§10).
 Code: `Ebm.Domain.Transfers`, `Ebm.Services.Transfers.ITransferService`, screen *Transfer market*.
 Contracts themselves are described in `docs/CONTRACTS.md`.
 
@@ -29,6 +31,10 @@ both clubs (*Transfer market* → *Transfer history of your club*). Money is in 
 | `ReleaseClause` | `BuyAsync` | Permanent move for the release clause, which the selling club could not refuse (fee below what it asked) |
 | `Loan` | `LoanAsync` | Temporary move; `ReturnedOn` is set when he goes back |
 | `LoanReturn` | `ProcessTransferDatesAsync`, `RecallAsync` | He went back to his parent club |
+| `OptionToBuy` | `ExerciseOptionAsync` | The loan club bought him for the option fee agreed in the loan (§4) |
+
+Loans also record `SalaryContribution` (the parent club's share of the salary, paid up front) and `OptionFee`
+(the loan club's option to buy, if any); `ReturnedOn` is the day the loan ended, by a return or by the option.
 
 ## 2. Valuation and fee negotiation (`TransferNegotiator`)
 
@@ -69,8 +75,14 @@ that completes the deal (the clause when it is lower than the asking fee); the s
 accept / counter / reject thresholds (`EvaluateLoan`).
 
 **The player's contract** after a transfer is negotiated with the `ContractNegotiator` of Step 07, with his old
-salary as the current salary (he accepts at most a 10% pay cut) and the buyer's reputation
-(`NegotiateContractAsync`). The player does not negotiate a loan: the loan contract copies his salary.
+salary as the current salary (he accepts at most a 10% pay cut) and the buyer's **attractiveness**
+(`NegotiateContractAsync`).
+
+**Club attractiveness (Step 19, `ClubAttractiveness`)** replaces the club reputation in every contract negotiation
+(signings, renewals, transfers, options, asking salaries on the market): reputation plus a bonus for the
+international competition the club plays this season — EuroLeague (tier 1) +10, tier 2 +6, tier 3 +4, tier 4 +2 —
+at most 100. Prestigious clubs pay less (docs/CONTRACTS.md §4), so European clubs sign the same player for up to
+about 2% less per 10 points. Nationality and country play no part in valuations: every player is on one market. The player does not negotiate a loan: the loan contract copies his salary.
 
 ## 3. Permanent transfers (`BuyAsync`)
 
@@ -112,6 +124,14 @@ A loan moves a player temporarily to a **loan club** while his **parent contract
 * **Recall:** the parent club may recall the player from the day after the loan started (`RecallAsync`): the loan
   contract is terminated today without compensation, and the return happens as above with today's date.
 
+**Loan agreements (Step 19).** Two optional clauses, negotiated with the loan fee (`NegotiateLoanAsync`,
+`LoanAsync` with `parentSalaryShare` and `optionFee`; `TransferNegotiator.EvaluateLoan` with `LoanClauses`):
+
+| Clause | Rule |
+|---|---|
+| **Salary share** | The parent club keeps paying a percentage of the salary: at most **50%** for a player aged 23 or less (a development loan), **25%** otherwise; more is rejected. Its share for the whole loan (`salary × share × loan years`, rounded to € 1,000) is paid to the loan club when the loan starts (`SalaryContribution`), so the loan contract keeps the full salary and the wage bills stay simple. The loan club's wage-budget check counts only its own share. On a **recall** the loan club refunds the part for the days left (pro rata); a loan that runs its course or is converted keeps no refund (the option refunds it, below) |
+| **Option to buy** | A fee for which the loan club may buy the player from the day after the loan started until its last day (`ExerciseOptionAsync`). The parent club grants it for no less than its transfer price today (`BuyNowFee`). Exercising it cannot be refused by the parent club; the player must accept the new contract (from today, his parent salary as current salary). The loan contract is terminated, the parent contract ends as `Transferred`, the loan row is closed (`ReturnedOn` = today), an `OptionToBuy` row is written, the option fee (plus the unused salary contribution) moves to the parent club, and the player stays in the loan club's squad without being registered again (no deadline or registration check) |
+
 ## 5. Financial and roster limits
 
 | Limit | Transfers (managed club) | AI clubs |
@@ -120,6 +140,7 @@ A loan moves a player temporarily to a **loan club** while his **parent contract
 | First-team size, foreign players, minimum age (`RosterValidator` errors `TooManyPlayers`, `TooManyForeignPlayers`, `UnderMinimumAge` for the club rules and every competition it plays in) | refused | refused |
 | Wage bill ≤ wage budget | warning in the receipt | refused |
 | Matchday squad of 12 (bench role) | warning | the AI joins as inactive when the matchday squad is full |
+| Registration deadline (§9): no new first-team player after the deadline unless the club is short | refused | the club skips its window |
 
 Only problems the newcomer **causes** are reported: a squad that was already short or had no lineup stays the
 club's business. A player joining the youth squad is not registered, so the size limits do not apply to him.
@@ -138,17 +159,27 @@ the minimum squad. Players on loan at the club and players without a contract ar
 position) — positional needs come first; then the squad is filled to the minimum, then to the target
 (`TargetPlayers` = the matchday squad + 1 = 13 by default), never beyond the maximum.
 
-**Signings (`Plan`)**: for each need, the best eligible candidate: fits the needed position, fee within the cash
-(balance minus a 10% reserve), asking salary within the wage budget left, foreign limit respected. A **free agent is
+**Signings (`Plan`)**: for each need, the best eligible **listed** candidate (a free agent or another club's surplus):
+fits the needed position, fee within the cash (balance minus a 10% reserve), asking salary within the wage budget
+left, foreign and non-EU limits respected. A **free agent is
 preferred** unless a player with a fee is better by more than 5 overall points. Offer: his asking salary, for 3 years
 (age ≤ 24), 1 year (age ≥ 32) or 2 years. Needs nobody affordable can fill are reported as unmet.
+
+**Upgrades (Step 19)**: after its needs, a club may buy **one** player (`MaxUpgrades`) who is not for sale when he
+beats its fifth-best player (the starting level) by at least 4 overall points (`UpgradeMargin`), costs at most half
+the cash left (`UpgradeCashShare`), fits the wage budget left and the foreign limits, and the squad stays within the
+target + 1. Best overall first, then the cheapest. His fee is what his club asks (with the starter or rotation
+premium of §2), so the selling club accepts.
 
 **The transfer window (`ITransferService.RunAiTransferWindowAsync(managedClubs)`)**:
 
 1. Every AI club (every club not managed by the user) lists its surplus for sale at its asking fee.
 2. Clubs shop in turn, highest reputation first, with the market reloaded after each club: candidates are the free
-   agents and the surplus of other AI clubs (**AI clubs never buy from managed clubs**: offers to the user's club
-   wait for the career mode). Free agents are signed through `IContractService.SignAsync`, the others through
+   agents and the surplus of other AI clubs **of every country**, and, for upgrades, players of AI clubs of lower
+   reputation (players move up; each club loses at most one such player per window, and since clubs shop by
+   reputation it can replace him on its own turn). **AI clubs never buy from managed clubs**: offers to the user's
+   club wait for the career mode. A club whose registration deadline has passed skips its turn unless it is short of
+   players, and then fills only up to its minimum. Free agents are signed through `IContractService.SignAsync`, the others through
    `BuyAsync` with the wage budget enforced. Refusals (a limit, a failed negotiation) are recorded, not thrown.
 3. Clubs still over the registration maximum release their weakest players by mutual agreement
    (`IContractService.TerminateAsync`); a club still over its wage budget says so in the report.
@@ -181,10 +212,46 @@ free agent*); the loan form (*Loan until*, fee, *Ask the club*, *Take on loan*);
 * A loan is the only case of two running contracts for one player: the parent one (`OnLoan`) and the loan
   contract. `ClubMembership.CurrentClubsAsync` picks the loan club (latest start, and the open spell).
 
-## 9. For later steps
+## 9. Registration deadlines (Step 19)
+
+A competition may set `registration.deadline` (`"MM-dd"`, docs/COMPETITION_FORMATS.md): the date is the first such
+day from the season's start (a February deadline falls in the second calendar year of the season). For a club the
+**earliest deadline** of the competitions it plays in the current season counts (`RegistrationWindow.On`):
+
+* Until the deadline (inclusive) registrations are open.
+* From the day after the deadline until the day before the season's last day, the club **cannot register new
+  first-team players**: free-agent signings that join today, transfers and loans in are refused
+  (`DomainException` naming the competition and the date the window reopens). Contracts signed in advance (starting
+  later), youth-squad signings, renewals, releases, recalls and options to buy are not registrations and stay possible.
+* **Exception:** a club whose first team is below the minimum its competitions require may still register players up
+  to that minimum (emergency signings), so the calendar never blocks and AI squads are refilled.
+* Registrations reopen on the **last day of the season**, when the career runs the end-of-season transfer window.
+
+`ITransferService.GetRegistrationWindowAsync(club)` reports the window (shown at the top of the market screen).
+Datasets (`data/europe`, `data/real-leagues`, *Unverified* simplification): top divisions and international
+competitions close on 28 February, second divisions on 31 March.
+
+## 10. International transfers and country rules (Step 19)
+
+* **One market.** Search, valuations, negotiations, transfers, loans and free-agent signings ignore borders: any club
+  can deal with any club or free agent of any country. Fees are in euros everywhere; there is no tax, solidarity or
+  training compensation, and no work-permit rule beyond the squad limits below.
+* **Foreign and non-EU status** is decided at the **receiving** club: a player is foreign when his sporting
+  nationality differs from the club's country, and non-EU when none of his nationalities (second nationality
+  included) is in the EU/EEA/Switzerland (decision 51, 54). The same player can be domestic in one league and
+  foreign in another; transfers and loans check the receiving club's limits for every competition it plays.
+* **Country-specific limits** come from each league's `registration.squad` (docs/COUNTRY_REPORT.md lists them):
+  Italy's LBA at most 6 foreign players and at least 5 Italians (Serie A2: 2 foreign); Spain's Liga Endesa at most
+  2 non-EU players and 4 home-grown (domestic) ones; Germany at least 6 Germans; France at least 4 French; Greece's
+  GBL and Turkey's BSL at most 6 foreign (their second divisions 2); the other countries have no limit in the data.
+  International competitions add none. The strictest rule of all of a club's competitions applies.
+* **Cross-border leagues** (ABA, BNXT) keep each club's own country for foreign status.
+* **Deadlines** are per competition (§9); a club in an international competition is bound by the earliest one.
+
+## 11. For later steps
 
 * Career mode (Steps 09–12): persist pending offers to and from the user's club (today an AI club never bids for a
   managed club's players); run `ProcessTransferDatesAsync` every game day; transfer windows as calendar periods.
 * Finances (Step 27): book salaries, enforce the wage budget for the user, amortise fees.
-* Step 13 (AI tuning) and Step 19 (European market): richer valuations (form, statistics, nationality), AI clubs
-  bidding for any player, loan contracts with salary sharing, buy-back clauses and options to buy.
+* Later steps: richer valuations (form, statistics), AI clubs bidding for the user's players (pending offers), AI
+  loans, buy-back clauses, sell-on fees, licences and work permits; deadlines per country from verified sources.

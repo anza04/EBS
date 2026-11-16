@@ -2385,6 +2385,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6,
       "minDomesticPlayers": 5
@@ -2428,6 +2429,7 @@
     "registration": {
      "minTeams": 20,
      "maxTeams": 20,
+     "deadline": "03-31",
      "squad": {
       "maxForeignPlayers": 2
      }
@@ -2470,6 +2472,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "02-28",
      "squad": {
       "maxNonEuPlayers": 2,
       "minDomesticPlayers": 4
@@ -2510,6 +2513,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "02-28",
      "squad": {
       "minDomesticPlayers": 6
      }
@@ -2550,6 +2554,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "minDomesticPlayers": 4
      }
@@ -2590,6 +2595,7 @@
     "registration": {
      "minTeams": 14,
      "maxTeams": 14,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6
      }
@@ -2629,6 +2635,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6
      }
@@ -2668,6 +2675,7 @@
     "registration": {
      "minTeams": 20,
      "maxTeams": 20,
+     "deadline": "02-28",
      "sameCountry": false,
      "countries": [
       "SRB",
@@ -2932,7 +2940,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 20
+     "maxTeams": 20,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -3063,7 +3072,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 20
+     "maxTeams": 20,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -3206,7 +3216,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 24,
-     "maxTeams": 32
+     "maxTeams": 32,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -3408,7 +3419,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 24,
-     "maxTeams": 32
+     "maxTeams": 32,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",

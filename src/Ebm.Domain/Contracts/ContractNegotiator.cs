@@ -139,6 +139,34 @@ public sealed class ContractNegotiator
     public bool ExercisesPlayerOption(NegotiationContext context, long currentSalary) =>
         currentSalary >= AskingSalary(context with { CurrentSalary = null });
 
+    /// <summary>Least share of the remaining salary a player accepts to end his contract by mutual agreement.</summary>
+    public double MinBuyoutShare { get; init; } = 0.3;
+
+    /// <summary>Most share of the remaining salary a player asks to leave (one who would earn much less elsewhere).</summary>
+    public double MaxBuyoutShare { get; init; } = 0.9;
+
+    /// <summary>
+    /// The share of the remaining salary the player asks to agree to a buyout of his contract (docs/CONTRACTS.md §3):
+    /// <see cref="MinBuyoutShare"/> when he would earn at least his salary on the market (an average club,
+    /// <paramref name="context"/> without current salary), rising with the pay cut he would face, at most <see cref="MaxBuyoutShare"/>.
+    /// </summary>
+    public double BuyoutShare(NegotiationContext context, long currentSalary)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        if (currentSalary <= 0)
+        {
+            return MinBuyoutShare;
+        }
+
+        var market = AskingSalary(context with { CurrentSalary = null });
+        var cut = Math.Max(0, 1 - ((double)market / currentSalary));
+        return Math.Clamp(MinBuyoutShare + cut, MinBuyoutShare, MaxBuyoutShare);
+    }
+
+    /// <summary>The least settlement (whole thousands) the player accepts for <paramref name="remainingSalary"/> still owed to him.</summary>
+    public long MinimumBuyout(NegotiationContext context, long currentSalary, long remainingSalary) =>
+        Math.Min(remainingSalary, RoundUpThousands(Math.Max(0, remainingSalary) * BuyoutShare(context, currentSalary)));
+
     // How much the annual value grows per euro of salary (options are a share of the salary).
     private double ScaleOf(ContractTerms offer) =>
         1 + (offer.PlayerOptionUntil is null ? 0 : OptionValue) - (offer.ClubOptionUntil is null ? 0 : OptionValue);

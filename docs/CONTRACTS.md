@@ -91,7 +91,13 @@ its start date, and never runs).
 | Kind | Settlement paid by the club |
 |---|---|
 | `ClubRelease` | The remaining salary in full (§3) |
-| `MutualAgreement` | The agreed amount, 0 to the remaining salary; default half of it |
+| `MutualAgreement` | A **buyout** agreed with the player: at least what he accepts (below), at most the remaining salary; default the least he accepts |
+
+**Contract buyouts (Step 19, `NegotiateBuyoutAsync`).** The player accepts a buyout of at least a share of the salary
+still owed to him (`ContractNegotiator.MinimumBuyout`, rounded up to € 1,000): 30% when he would earn at least his
+current salary on the open market (`AskingSalary` at an average club, reputation 50), plus the pay cut he would face
+(market salary 60% of his salary → 30% + 40% = 70%), at most 90%. A lower settlement is refused. AI clubs releasing
+surplus players pay this minimum.
 
 The club pays the settlement at once. Unless another contract with the club runs today, the player **leaves the
 club**: his club spell ends today, his roster spot is removed, and he is a free agent who can sign anywhere at once.

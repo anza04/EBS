@@ -367,6 +367,27 @@ public sealed partial class ClubContractsViewModel : ObservableObject
         });
     }
 
+    /// <summary>Asks the player what he wants to agree to a buyout of his contract; nothing is signed.</summary>
+    [RelayCommand]
+    private async Task AskBuyoutAsync()
+    {
+        try
+        {
+            var row = SelectedContract ?? throw new DomainValidationException("Select a running contract to buy out.");
+            var answer = await _contracts.NegotiateBuyoutAsync(row.Contract.Id, Money.ParseOptional(Settlement, "Settlement") ?? 0);
+            if (!answer.IsAccepted)
+            {
+                Settlement = answer.Minimum.ToString("N0", CultureInfo.CurrentCulture);
+            }
+
+            Report(answer.IsAccepted ? answer.Message : $"{answer.Message} The settlement is set to the least he accepts.", error: false);
+        }
+        catch (DomainException ex)
+        {
+            Report(ex.Message, error: true);
+        }
+    }
+
     [RelayCommand]
     private Task ExerciseClubOptionAsync() => DecideClubOptionAsync(true);
 

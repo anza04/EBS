@@ -186,9 +186,10 @@ public sealed class ContractServiceTests : IAsyncLifetime
         var contract = (await Contracts.GetPlayerContractsAsync(_world.Player.Id))!.Running!;
         await Assert.ThrowsAsync<DomainValidationException>(() =>
             Contracts.TerminateAsync(contract.Contract.Id, TerminationKind.MutualAgreement, contract.RemainingSalary + 1));
+        var settlement = (await Contracts.NegotiateBuyoutAsync(contract.Contract.Id, 0)).Minimum + 10_000; // the player accepts at least his minimum buyout
 
-        Assert.Equal(100_000, await Contracts.TerminateAsync(contract.Contract.Id, TerminationKind.MutualAgreement, 100_000));
-        Assert.Equal(-100_000, (await ClubAsync(_world.HomeClub.Id)).Balance);
+        Assert.Equal(settlement, await Contracts.TerminateAsync(contract.Contract.Id, TerminationKind.MutualAgreement, settlement));
+        Assert.Equal(-settlement, (await ClubAsync(_world.HomeClub.Id)).Balance);
     }
 
     [Fact]
@@ -295,7 +296,7 @@ public sealed class ContractServiceTests : IAsyncLifetime
             VALUES ('66666666-6666-6666-6666-666666666666', '44444444-4444-4444-4444-444444444444', '55555555-5555-5555-5555-555555555555', '2025-07-01', '2027-06-30', 90000);
             """);
 
-        Assert.EndsWith("_InternationalCompetitions", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        Assert.EndsWith("_LoanAgreements", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
         var c = Assert.Single(await db.ReadAsync(s => s.Repo<Contract, ContractId>().ListAsync()));
         Assert.Equal((ContractStatus.Active, PaymentFrequency.Monthly, 0L, true), (c.Status, c.PaymentFrequency, c.SigningBonus, c.PerformanceBonuses.IsEmpty));
         Assert.Equal(((long?)null, (DateOnly?)null, (DateOnly?)null, 0L), (c.ReleaseClause, c.ClubOptionUntil, c.TerminationDate, c.TerminationCompensation));

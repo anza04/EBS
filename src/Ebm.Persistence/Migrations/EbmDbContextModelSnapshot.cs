@@ -876,6 +876,9 @@ namespace Ebm.Persistence.Migrations
                     b.Property<DateOnly?>("LoanEndDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("OptionFee")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid?>("ParentContractId")
                         .HasColumnType("TEXT");
 
@@ -884,6 +887,11 @@ namespace Ebm.Persistence.Migrations
 
                     b.Property<DateOnly?>("ReturnedOn")
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("SalaryContribution")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L);
 
                     b.Property<Guid>("ToClubId")
                         .HasColumnType("TEXT");

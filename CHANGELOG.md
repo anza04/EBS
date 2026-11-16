@@ -3,6 +3,32 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.19.0] — 2026-11-16 — STEP 19: European transfer market
+
+### Added
+- Registration deadlines: `registration.deadline` ("MM-dd") in competition rules; after the earliest deadline of its
+  competitions a club cannot register new first-team players until the season's last day, unless it is short of
+  players (`RegistrationWindow`, `ITransferService.GetRegistrationWindowAsync`); enforced for free-agent signings,
+  transfers and loans. Datasets: top divisions and international competitions 28 February, second divisions 31 March.
+- Club attractiveness (`ClubAttractiveness`): reputation plus a bonus for the international competition played this
+  season, used in every contract negotiation and asking salary.
+- Loan agreements: parent-club salary share (up to 50% for players aged 23 or less, 25% otherwise, paid up front and
+  refunded pro rata on a recall) and option to buy (at least the club's transfer price;
+  `ITransferService.ExerciseOptionAsync`, transfer kind `OptionToBuy`). Migration `LoanAgreements`:
+  `Transfers.SalaryContribution`, `OptionFee`.
+- Contract buyouts: the player accepts a mutual termination for at least 30–90% of the remaining salary depending on
+  what he would earn elsewhere (`ContractNegotiator.MinimumBuyout`, `IContractService.NegotiateBuyoutAsync`).
+- AI upgrade signings: after its needs, an AI club may buy one player of a lower-reputation AI club of any country who
+  clearly beats its starting five (`ClubRecruiter.MaxUpgrades`, `UpgradeMargin`, `UpgradeCashShare`).
+- Market screen: registration window, loan salary share and option fields, *Exercise the option to buy*; contracts
+  screen: *Ask the player* for a buyout.
+- Documentation: international transfer rules and country-specific limits (docs/TRANSFERS.md §9–§10).
+
+### Changed
+- A mutual-agreement termination without a settlement pays the player's minimum buyout instead of half the
+  remaining salary, and a lower settlement is refused.
+- Loan history text: "(ended …)" instead of "(back …)", with the option fee when there is one.
+
 ## [0.18.0] — 2026-11-16 — STEP 18: International club competitions
 
 ### Added

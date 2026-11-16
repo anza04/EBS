@@ -77,6 +77,8 @@ public sealed record TransferRowView(TransferLine Line)
     public string Fee => Line.Fee == 0 ? "—" : Money.Euros(Line.Fee);
 
     public string LoanEnd => Transfer.LoanEndDate is { } end ? Money.Date(end) : "—";
+
+    public string Option => Transfer.OptionFee is { } option ? Money.Euros(option) : "—";
 }
 
 /// <summary>
@@ -152,6 +154,15 @@ public sealed partial class TransferMarketViewModel : ObservableObject
     private string _loanFee = string.Empty;
 
     [ObservableProperty]
+    private string _loanSalaryShare = string.Empty;
+
+    [ObservableProperty]
+    private string _loanOptionFee = string.Empty;
+
+    [ObservableProperty]
+    private string _registration = string.Empty;
+
+    [ObservableProperty]
     private string? _negotiation;
 
     [ObservableProperty]
@@ -165,6 +176,9 @@ public sealed partial class TransferMarketViewModel : ObservableObject
 
     [ObservableProperty]
     private TransferRowView? _selectedLoan;
+
+    [ObservableProperty]
+    private TransferRowView? _selectedLoanIn;
 
     [ObservableProperty]
     private IReadOnlyList<InfoLine> _aiReport = [];
@@ -222,6 +236,7 @@ public sealed partial class TransferMarketViewModel : ObservableObject
         {
             Title = "Choose your club";
             Date = null;
+            Registration = string.Empty;
             History = LoansOut = LoansIn = [];
         }
         else
@@ -231,6 +246,7 @@ public sealed partial class TransferMarketViewModel : ObservableObject
             History = [.. data.History.Select(l => new TransferRowView(l))];
             LoansOut = [.. data.LoansOut.Select(l => new TransferRowView(l))];
             LoansIn = [.. data.LoansIn.Select(l => new TransferRowView(l))];
+            Registration = (await _transfers.GetRegistrationWindowAsync(data.Club.Id)).Message;
         }
 
         await SearchAsync();
@@ -409,7 +425,8 @@ public sealed partial class TransferMarketViewModel : ObservableObject
         await RunAsync(async () =>
         {
             var row = RequireSelection();
-            var response = await _transfers.NegotiateLoanAsync(row.Player.Id, RequireClub(), RequiredDate(LoanUntil, "Loan end"), Money.ParseOptional(LoanFee, "Loan fee") ?? 0);
+            var response = await _transfers.NegotiateLoanAsync(
+                row.Player.Id, RequireClub(), RequiredDate(LoanUntil, "Loan end"), Money.ParseOptional(LoanFee, "Loan fee") ?? 0, SalaryShare(), Money.ParseOptional(LoanOptionFee, "Option fee"));
             Negotiation = $"{row.Market.Club?.Name}: {response.Message} (It asks about {Money.Euros(response.AskingFee)}.)";
             _loanCounter = response.CounterFee;
             UseLoanCounterCommand.NotifyCanExecuteChanged();
@@ -435,7 +452,9 @@ public sealed partial class TransferMarketViewModel : ObservableObject
         await RunAsync(async () =>
         {
             var row = RequireSelection();
-            var receipt = await _transfers.LoanAsync(row.Player.Id, RequireClub(), RequiredDate(LoanUntil, "Loan end"), Money.ParseOptional(LoanFee, "Loan fee") ?? 0, JoinAs);
+            var receipt = await _transfers.LoanAsync(
+                row.Player.Id, RequireClub(), RequiredDate(LoanUntil, "Loan end"), Money.ParseOptional(LoanFee, "Loan fee") ?? 0, JoinAs,
+                parentSalaryShare: SalaryShare(), optionFee: Money.ParseOptional(LoanOptionFee, "Option fee"));
             return Done(receipt);
         });
     }
@@ -449,6 +468,18 @@ public sealed partial class TransferMarketViewModel : ObservableObject
             var loan = SelectedLoan ?? throw new DomainValidationException("Select one of your players out on loan.");
             var receipt = await _transfers.RecallAsync(loan.Transfer.Id);
             return receipt.Message;
+        });
+    }
+
+    /// <summary>Buys the selected player on loan with you for his option fee, on the contract on the offer form.</summary>
+    [RelayCommand]
+    private async Task ExerciseOptionAsync()
+    {
+        await RunAsync(async () =>
+        {
+            var loan = SelectedLoanIn ?? throw new DomainValidationException("Select one of the players on loan with you.");
+            var receipt = await _transfers.ExerciseOptionAsync(loan.Transfer.Id, Terms());
+            return Done(receipt);
         });
     }
 
@@ -509,6 +540,7 @@ public sealed partial class TransferMarketViewModel : ObservableObject
         LoanUntil = m.Status == MarketStatus.UnderContract && m.ContractEnd is { } end
             ? (end < today.AddYears(1) ? end : today.AddYears(1).AddDays(-1)).ToDateTime(TimeOnly.MinValue)
             : null;
+        LoanSalaryShare = LoanOptionFee = string.Empty;
         LoanFee = m.Status == MarketStatus.UnderContract && m.Valuation.AvailableForLoan ? m.Valuation.LoanFeePerYear.ToString("N0", CultureInfo.CurrentCulture) : string.Empty;
         await Task.CompletedTask;
     }
@@ -550,6 +582,8 @@ public sealed partial class TransferMarketViewModel : ObservableObject
             Money.Parse(OfferSalary, "Annual salary"),
             SigningBonus: Money.ParseOptional(OfferSigningBonus, "Signing bonus") ?? 0);
     }
+
+    private int SalaryShare() => ParseInt(LoanSalaryShare, "Salary share paid by his club") ?? 0;
 
     private MarketRow RequireSelection() => SelectedPlayer ?? throw new DomainValidationException("Select a player in the search results.");
 

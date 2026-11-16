@@ -13,7 +13,7 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_InternationalCompetitions";
+    private const string LatestMigration = "_LoanAgreements";
 
     private static readonly string[] ExpectedTables =
     [

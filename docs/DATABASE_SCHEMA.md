@@ -16,6 +16,7 @@ Schema version: **`20261112154154_CareerAssistant`** (Step 14).
 | `20261112154154_CareerAssistant` | 14 | `Careers.AssistantManages` (add-column, default false) |
 | `20261116135956_CupCompetitions` | 17 | `CompetitionParticipants.Seed` (nullable add-column). New fixture stages `CupGroup` and `Cup` (stored as text, no schema change); `Cup` fixtures use `GameNumber` 1–2 for the legs |
 | `20261116144825_InternationalCompetitions` | 18 | `CompetitionParticipants.PrizeMoney` (long?) and `ReputationGain` (int?): cup rewards paid when the competition ended (nullable add-columns) |
+| `20261116151616_LoanAgreements` | 19 | `Transfers.SalaryContribution` (default 0) and `OptionFee` (long?): loan agreements (add-columns, no check constraint). New kind `OptionToBuy` (text column, no schema change) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -220,7 +221,7 @@ One row per spell of a player at a club.
 `Transfers` table records which spells were loans.
 
 ### Transfers
-One row per player movement: free-agent signing, transfer, loan, loan return (rules in `docs/TRANSFERS.md` §1).
+One row per player movement: free-agent signing, transfer, loan, loan return, option to buy (rules in `docs/TRANSFERS.md` §1).
 
 | Column | Type | Rules |
 |---|---|---|
@@ -228,13 +229,15 @@ One row per player movement: free-agent signing, transfer, loan, loan return (ru
 | PlayerId | id | FK Players. Index (`PlayerId, Date`) |
 | FromClubId | id? | FK Clubs; null = free agent. Index (`FromClubId, Date`). `FromClubId <> ToClubId` |
 | ToClubId | id | FK Clubs. Index (`ToClubId, Date`) |
-| Kind | text(20) | `FreeAgentSigning`, `Transfer`, `ReleaseClause`, `Loan`, `LoanReturn`. Index (`Kind, ReturnedOn`) |
+| Kind | text(20) | `FreeAgentSigning`, `Transfer`, `ReleaseClause`, `Loan`, `LoanReturn`, `OptionToBuy`. Index (`Kind, ReturnedOn`) |
 | Date | date | Day the player joined `ToClubId` |
 | Fee | int | Euros, `>= 0` |
 | ContractId | id? | FK Contracts: the contract signed with `ToClubId` (the loan contract for a loan) |
 | ParentContractId | id? | FK Contracts: for loans and returns, the contract with the parent club |
 | LoanEndDate | date? | Set if and only if `Kind = 'Loan'`; `> Date` (check constraint) |
-| ReturnedOn | date? | Loans only, `> Date` (check constraint); null while the loan is open |
+| ReturnedOn | date? | Loans only, `> Date` (check constraint): the day the loan ended (return or option to buy); null while the loan is open |
+| SalaryContribution | int | Loans: the parent club's share of the salary, paid to the loan club at the start; default 0 (Step 19) |
+| OptionFee | int? | Loans: fee of the loan club's option to buy; null without an option (Step 19) |
 
 Transfers are never deleted (restrict-on-delete on every FK), so a player, club or contract with transfer history
 cannot be removed.

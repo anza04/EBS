@@ -23,6 +23,9 @@ public enum TransferKind
 
     /// <summary>The player went back to his parent club at the end of a loan or when recalled.</summary>
     LoanReturn,
+
+    /// <summary>The loan club exercised its option to buy: permanent move for <see cref="Transfer.OptionFee"/> of the loan, which the parent club could not refuse.</summary>
+    OptionToBuy,
 }
 
 /// <summary>Loan limits shared by contracts and transfers.</summary>
@@ -94,8 +97,14 @@ public sealed class Transfer : Entity<TransferId>
     /// <summary>For loans: the player's last day at the loan club as agreed.</summary>
     public DateOnly? LoanEndDate { get; private set; }
 
-    /// <summary>For loans: the day the player went back to his parent club; <c>null</c> while he is out.</summary>
+    /// <summary>For loans: the day the loan ended (he went back, or the loan club bought him); <c>null</c> while he is out.</summary>
     public DateOnly? ReturnedOn { get; private set; }
+
+    /// <summary>For loans: the parent club's share of his salary during the loan, paid to the loan club when the loan starts (euros).</summary>
+    public long SalaryContribution { get; private set; }
+
+    /// <summary>For loans: the fee for which the loan club may buy him during the loan; <c>null</c> without an option.</summary>
+    public long? OptionFee { get; private set; }
 
     /// <summary>A loan whose player has not gone back yet.</summary>
     public bool IsOpenLoan => Kind == TransferKind.Loan && ReturnedOn is null;
@@ -112,8 +121,26 @@ public sealed class Transfer : Entity<TransferId>
         new(id, playerId, Guard.Required(fromClubId, nameof(fromClubId)), toClubId, viaReleaseClause ? TransferKind.ReleaseClause : TransferKind.Transfer, date, fee, Guard.Required(contractId, nameof(contractId)));
 
     /// <summary>A loan from <paramref name="date"/> to <paramref name="until"/> (last day at the loan club).</summary>
-    public static Transfer OnLoan(TransferId id, PlayerId playerId, ClubId fromClubId, ClubId toClubId, DateOnly date, DateOnly until, long fee, ContractId loanContractId, ContractId parentContractId)
+    /// <param name="salaryContribution">Parent club's share of the salary for the loan, paid to the loan club.</param>
+    /// <param name="optionFee">Fee of the loan club's option to buy, if agreed.</param>
+    public static Transfer OnLoan(
+        TransferId id,
+        PlayerId playerId,
+        ClubId fromClubId,
+        ClubId toClubId,
+        DateOnly date,
+        DateOnly until,
+        long fee,
+        ContractId loanContractId,
+        ContractId parentContractId,
+        long salaryContribution = 0,
+        long? optionFee = null)
     {
+        if (salaryContribution < 0 || salaryContribution > MaxFee || optionFee is < 0 or > MaxFee)
+        {
+            throw new DomainValidationException($"A salary contribution and an option fee must be between 0 and {MaxFee:N0} euros.");
+        }
+
         if (until <= date)
         {
             throw new DomainValidationException("A loan must end after the day it starts.");
@@ -128,8 +155,17 @@ public sealed class Transfer : Entity<TransferId>
         {
             ParentContractId = Guard.Required(parentContractId, nameof(parentContractId)),
             LoanEndDate = until,
+            SalaryContribution = salaryContribution,
+            OptionFee = optionFee,
         };
     }
+
+    /// <summary>The loan club <paramref name="toClubId"/> bought the player from <paramref name="fromClubId"/> by exercising its option.</summary>
+    public static Transfer ByOption(TransferId id, PlayerId playerId, ClubId fromClubId, ClubId toClubId, DateOnly date, long fee, ContractId contractId, ContractId parentContractId) =>
+        new(id, playerId, Guard.Required(fromClubId, nameof(fromClubId)), toClubId, TransferKind.OptionToBuy, date, fee, Guard.Required(contractId, nameof(contractId)))
+        {
+            ParentContractId = Guard.Required(parentContractId, nameof(parentContractId)),
+        };
 
     /// <summary>The player went back from <paramref name="loanClubId"/> to <paramref name="parentClubId"/> on <paramref name="date"/>.</summary>
     public static Transfer LoanReturn(TransferId id, PlayerId playerId, ClubId loanClubId, ClubId parentClubId, DateOnly date, ContractId parentContractId) =>

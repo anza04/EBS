@@ -124,6 +124,8 @@ public sealed record CompetitionRules
         Guard.Range(Registration.MaxTeams, Registration.MinTeams, RegistrationRules.TeamLimit, "Rules: registration.maxTeams");
         Require(Registration.Countries is not null && Registration.Countries.All(c => c is { Length: 3 } && c.All(char.IsAsciiLetter)),
             "registration.countries must list ISO 3166-1 alpha-3 codes");
+        Require(Registration.Deadline is null || RegistrationRules.TryParseDeadline(Registration.Deadline, out _, out _),
+            "registration.deadline must be a month and day \"MM-dd\" (e.g. \"02-28\")");
         Guard.Range(RegularSeason!.Legs, 1, RegularSeasonRules.MaxLegs, "Rules: regularSeason.legs");
         Guard.Range(RegularSeason.DaysBetweenRounds, 1, 30, "Rules: regularSeason.daysBetweenRounds");
         Guard.Range(RegularSeason.StartOffsetDays, 0, RegularSeasonRules.MaxStartOffsetDays, "Rules: regularSeason.startOffsetDays");
@@ -187,6 +189,40 @@ public sealed record RegistrationRules
 
     /// <summary>Player registration limits of each club's squad (docs/ROSTER_RULES.md).</summary>
     public SquadRules Squad { get; init; } = SquadRules.Default;
+
+    /// <summary>
+    /// Last day ("MM-dd") on which clubs may register new players during the season; <c>null</c> = no deadline
+    /// (docs/TRANSFERS.md §9). The date is the first such day from the season's start.
+    /// </summary>
+    public string? Deadline { get; init; }
+
+    /// <summary>The deadline within a season from <paramref name="seasonStart"/> to <paramref name="seasonEnd"/>; <c>null</c> without one (or when the season does not contain it).</summary>
+    public DateOnly? DeadlineIn(DateOnly seasonStart, DateOnly seasonEnd)
+    {
+        if (Deadline is null || !TryParseDeadline(Deadline, out var month, out var day))
+        {
+            return null;
+        }
+
+        for (var year = seasonStart.Year; year <= seasonEnd.Year; year++)
+        {
+            var date = new DateOnly(year, month, Math.Min(day, DateTime.DaysInMonth(year, month)));
+            if (date >= seasonStart && date <= seasonEnd)
+            {
+                return date;
+            }
+        }
+
+        return null;
+    }
+
+    internal static bool TryParseDeadline(string text, out int month, out int day)
+    {
+        month = day = 0;
+        return text is [_, _, '-', _, _]
+            && int.TryParse(text.AsSpan(0, 2), out month) && int.TryParse(text.AsSpan(3, 2), out day)
+            && month is >= 1 and <= 12 && day >= 1 && day <= DateTime.DaysInMonth(2000, month);
+    }
 }
 
 public sealed record RegularSeasonRules

@@ -7212,6 +7212,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6,
       "minDomesticPlayers": 5
@@ -7255,6 +7256,7 @@
     "registration": {
      "minTeams": 20,
      "maxTeams": 20,
+     "deadline": "03-31",
      "squad": {
       "maxForeignPlayers": 2
      }
@@ -7297,6 +7299,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "02-28",
      "squad": {
       "maxNonEuPlayers": 2,
       "minDomesticPlayers": 4
@@ -7340,6 +7343,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "03-31",
      "squad": {
       "maxNonEuPlayers": 2
      }
@@ -7384,6 +7388,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "02-28",
      "squad": {
       "minDomesticPlayers": 6
      }
@@ -7427,6 +7432,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "03-31",
      "squad": {
       "minDomesticPlayers": 6
      }
@@ -7469,6 +7475,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "minDomesticPlayers": 4
      }
@@ -7512,6 +7519,7 @@
     "registration": {
      "minTeams": 18,
      "maxTeams": 18,
+     "deadline": "03-31",
      "squad": {
       "minDomesticPlayers": 4
      }
@@ -7556,6 +7564,7 @@
     "registration": {
      "minTeams": 12,
      "maxTeams": 12,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6
      }
@@ -7598,6 +7607,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "03-31",
      "squad": {
       "maxForeignPlayers": 2
      }
@@ -7639,6 +7649,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6
      }
@@ -7681,6 +7692,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "03-31",
      "squad": {
       "maxForeignPlayers": 2
      }
@@ -7724,7 +7736,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 10,
-     "maxTeams": 10
+     "maxTeams": 10,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 4,
@@ -7760,7 +7773,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 14,
-     "maxTeams": 14
+     "maxTeams": 14,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -7796,7 +7810,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 10,
-     "maxTeams": 10
+     "maxTeams": 10,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 4,
@@ -7835,7 +7850,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 14,
-     "maxTeams": 14
+     "maxTeams": 14,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -7874,7 +7890,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 16
+     "maxTeams": 16,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -7913,7 +7930,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 16
+     "maxTeams": 16,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -7943,7 +7961,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -7982,7 +8001,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8012,7 +8032,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 10,
-     "maxTeams": 10
+     "maxTeams": 10,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8067,7 +8088,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8098,6 +8120,7 @@
     "registration": {
      "minTeams": 20,
      "maxTeams": 20,
+     "deadline": "02-28",
      "sameCountry": false,
      "countries": [
       "BEL",
@@ -8155,7 +8178,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 14,
-     "maxTeams": 14
+     "maxTeams": 14,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8190,7 +8214,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8225,7 +8250,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 14,
-     "maxTeams": 14
+     "maxTeams": 14,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8264,7 +8290,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 16
+     "maxTeams": 16,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8304,7 +8331,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 16
+     "maxTeams": 16,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8343,7 +8371,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 18,
-     "maxTeams": 18
+     "maxTeams": 18,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8382,7 +8411,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 2,
@@ -8438,7 +8468,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 14,
-     "maxTeams": 14
+     "maxTeams": 14,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8468,7 +8499,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 3,
@@ -8507,7 +8539,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -8537,7 +8570,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "02-28"
     },
     "regularSeason": {
      "legs": 3,
@@ -8576,7 +8610,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 12,
-     "maxTeams": 12
+     "maxTeams": 12,
+     "deadline": "03-31"
     },
     "regularSeason": {
      "legs": 2,
@@ -9206,7 +9241,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 20
+     "maxTeams": 20,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -9337,7 +9373,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 16,
-     "maxTeams": 20
+     "maxTeams": 20,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -9480,7 +9517,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 24,
-     "maxTeams": 32
+     "maxTeams": 32,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",
@@ -9682,7 +9720,8 @@
     "pointsForLoss": 1,
     "registration": {
      "minTeams": 24,
-     "maxTeams": 32
+     "maxTeams": 32,
+     "deadline": "02-28"
     },
     "tieBreakers": [
      "HeadToHeadWins",

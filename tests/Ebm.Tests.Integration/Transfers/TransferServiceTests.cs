@@ -235,7 +235,7 @@ public sealed class TransferServiceTests : IAsyncLifetime
         Assert.Equal((Home, RosterRole.Bench), ((await SpotsAsync(Mario)).Single().ClubId, (await SpotsAsync(Mario)).Single().Role));
         Assert.Equal(300_000, (await Contracts.GetClubContractsAsync(Home))!.Commitments.WageBill);
         var history = await Market.GetPlayerTransfersAsync(Mario);
-        Assert.Equal(["Loan return", $"Loan until 2027-06-30 (back 2027-07-01)"], history.Select(l => l.KindText));
+        Assert.Equal(["Loan return", $"Loan until 2027-06-30 (ended 2027-07-01)"], history.Select(l => l.KindText));
         Assert.Empty((await Market.GetClubTransfersAsync(Home))!.LoansOut);
         Assert.Equal(TransferDateChanges.None, await Market.ProcessTransferDatesAsync()); // idempotent
     }

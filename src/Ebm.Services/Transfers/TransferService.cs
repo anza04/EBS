@@ -111,14 +111,15 @@ internal sealed class TransferService : ITransferService
         return _fees.EvaluateFee(listing.Valuation, fee);
     }
 
-    public async Task<TransferResponse> NegotiateLoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, CancellationToken cancellationToken = default)
+    public async Task<TransferResponse> NegotiateLoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, int parentSalaryShare = 0, long? optionFee = null, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var market = await Market.LoadAsync(this, scope.ServiceProvider, Today, cancellationToken).ConfigureAwait(false);
         var (_, _, listing) = await market.ForSaleAsync(playerId, borrowerId, cancellationToken).ConfigureAwait(false);
         CheckFee(fee);
+        CheckLoanClauses(parentSalaryShare, optionFee);
         CheckLoanDates(market, listing, until);
-        return _fees.EvaluateLoan(listing.Valuation, fee, TransferNegotiator.LoanYears(market.Today, until));
+        return _fees.EvaluateLoan(listing.Valuation, fee, TransferNegotiator.LoanYears(market.Today, until), new LoanClauses(listing.Age, parentSalaryShare, optionFee));
     }
 
     public async Task<NegotiationResponse> NegotiateContractAsync(PlayerId playerId, ClubId buyerId, ContractTerms terms, CancellationToken cancellationToken = default)
@@ -127,7 +128,7 @@ internal sealed class TransferService : ITransferService
         using var scope = _scopes.CreateScope();
         var market = await Market.LoadAsync(this, scope.ServiceProvider, Today, cancellationToken).ConfigureAwait(false);
         var (player, buyer, listing) = await market.ForSaleAsync(playerId, buyerId, cancellationToken).ConfigureAwait(false);
-        return _salaries.Evaluate(Context(player, buyer, market.Today, listing.Contract!.AnnualSalary), terms);
+        return _salaries.Evaluate(Context(market, player, buyer, listing.Contract!.AnnualSalary), terms);
     }
 
     public async Task<TransferReceipt> BuyAsync(PlayerId playerId, ClubId buyerId, long fee, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, CancellationToken cancellationToken = default)
@@ -153,7 +154,7 @@ internal sealed class TransferService : ITransferService
             throw new DomainException($"{seller.Name} refuses: {feeAnswer.Message}");
         }
 
-        var playerAnswer = _salaries.Evaluate(Context(player, buyer, today, contract.AnnualSalary), terms);
+        var playerAnswer = _salaries.Evaluate(Context(market, player, buyer, contract.AnnualSalary), terms);
         if (!playerAnswer.IsAccepted)
         {
             throw new DomainException($"{player.FullName} refuses the contract: {playerAnswer.Message}");
@@ -181,10 +182,11 @@ internal sealed class TransferService : ITransferService
             $" on € {terms.AnnualSalary:N0} a year until {terms.EndDate:yyyy-MM-dd}.");
     }
 
-    public async Task<TransferReceipt> LoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, CancellationToken cancellationToken = default)
+    public async Task<TransferReceipt> LoanAsync(PlayerId playerId, ClubId borrowerId, DateOnly until, long fee, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, int parentSalaryShare = 0, long? optionFee = null, CancellationToken cancellationToken = default)
     {
         CheckJoinRole(joinAs);
         CheckFee(fee);
+        CheckLoanClauses(parentSalaryShare, optionFee);
         using var scope = _scopes.CreateScope();
         var market = await Market.LoadAsync(this, scope.ServiceProvider, Today, cancellationToken).ConfigureAwait(false);
         var today = market.Today;
@@ -192,21 +194,30 @@ internal sealed class TransferService : ITransferService
         var contract = listing.Contract!;
         var parent = market.Clubs[contract.ClubId];
         CheckLoanDates(market, listing, until);
-        var answer = _fees.EvaluateLoan(listing.Valuation, fee, TransferNegotiator.LoanYears(today, until));
+        var years = TransferNegotiator.LoanYears(today, until);
+        var answer = _fees.EvaluateLoan(listing.Valuation, fee, years, new LoanClauses(listing.Age, parentSalaryShare, optionFee));
         if (!answer.IsAccepted)
         {
             throw new DomainException($"{parent.Name} refuses: {answer.Message}");
         }
 
-        var warnings = await CheckLimitsAsync(market, borrower, player, joinAs, fee, contract.AnnualSalary, enforceWageBudget, cancellationToken).ConfigureAwait(false);
+        // The parent club's share of the salary is paid to the borrower up front; the borrower's wage bill counts the rest.
+        var contribution = TransferNegotiator.SalaryContribution(contract.AnnualSalary, parentSalaryShare, years);
+        if (contribution - fee > parent.Balance)
+        {
+            throw new DomainException($"{parent.Name} cannot pay its salary contribution of € {contribution:N0}: its balance is € {parent.Balance:N0}.");
+        }
+
+        var netSalary = contract.AnnualSalary - (contract.AnnualSalary * parentSalaryShare / 100);
+        var warnings = await CheckLimitsAsync(market, borrower, player, joinAs, fee, netSalary, enforceWageBudget, cancellationToken).ConfigureAwait(false);
 
         contract.SendOnLoan(today, until);
         var loanContract = Contract.ForPlayer(ContractId.New(), borrowerId, playerId, new ContractTerms(today, until, contract.AnnualSalary, contract.PaymentFrequency));
         market.Data.Contracts.Add(loanContract);
-        parent.ChangeBalance(fee);
-        borrower.ChangeBalance(-fee);
+        parent.ChangeBalance(fee - contribution);
+        borrower.ChangeBalance(contribution - fee);
         await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, borrowerId, today, joinAs, cancellationToken).ConfigureAwait(false);
-        var loan = Transfer.OnLoan(TransferId.New(), playerId, parent.Id, borrowerId, today, until, fee, loanContract.Id, contract.Id);
+        var loan = Transfer.OnLoan(TransferId.New(), playerId, parent.Id, borrowerId, today, until, fee, loanContract.Id, contract.Id, contribution, optionFee);
         market.Data.Transfers.Add(loan);
         await market.Data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return new TransferReceipt(
@@ -215,7 +226,9 @@ internal sealed class TransferService : ITransferService
             fee,
             loanContract.Id,
             warnings,
-            $"{player.FullName} joins {borrower.Name} on loan from {parent.Name} until {until:yyyy-MM-dd} for € {fee:N0}; {borrower.Name} pays his salary of € {contract.AnnualSalary:N0} a year meanwhile.");
+            $"{player.FullName} joins {borrower.Name} on loan from {parent.Name} until {until:yyyy-MM-dd} for € {fee:N0}; {borrower.Name} pays his salary of € {contract.AnnualSalary:N0} a year meanwhile" +
+            (contribution > 0 ? $", {parent.Name} contributes € {contribution:N0}" : string.Empty) +
+            (optionFee is { } option ? $"; option to buy for € {option:N0}" : string.Empty) + ".");
     }
 
     public async Task<TransferReceipt> RecallAsync(TransferId loanId, CancellationToken cancellationToken = default)
@@ -236,8 +249,103 @@ internal sealed class TransferService : ITransferService
 
         var returnDay = data.Today <= loan.LoanEndDate!.Value ? data.Today : loan.LoanEndDate.Value.AddDays(1);
         var (back, player, parentClub) = await ReturnLoanAsync(scope.ServiceProvider, data, loan, returnDay, cancellationToken).ConfigureAwait(false);
+
+        // The borrower refunds the parent club's contribution for the days it no longer pays him.
+        var unused = UnusedContribution(loan, returnDay);
+        if (unused > 0 && await data.Clubs.FindAsync(loan.ToClubId, cancellationToken).ConfigureAwait(false) is { } borrower)
+        {
+            borrower.ChangeBalance(-unused);
+            parentClub.ChangeBalance(unused);
+        }
+
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
-        return new TransferReceipt(back.Id, TransferKind.LoanReturn, 0, null, [], $"{player.FullName} is back at {parentClub.Name} from {returnDay:yyyy-MM-dd}.");
+        return new TransferReceipt(
+            back.Id,
+            TransferKind.LoanReturn,
+            0,
+            null,
+            [],
+            $"{player.FullName} is back at {parentClub.Name} from {returnDay:yyyy-MM-dd}." + (unused > 0 ? $" The loan club refunds € {unused:N0} of the salary contribution." : string.Empty));
+    }
+
+    public async Task<TransferReceipt> ExerciseOptionAsync(TransferId loanId, ContractTerms terms, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(terms);
+        using var scope = _scopes.CreateScope();
+        var market = await Market.LoadAsync(this, scope.ServiceProvider, Today, cancellationToken).ConfigureAwait(false);
+        var today = market.Today;
+        var loan = await market.Data.Transfers.FindAsync(loanId, cancellationToken).ConfigureAwait(false)
+            ?? throw new DomainException("The loan no longer exists in the database.");
+        if (!loan.IsOpenLoan || loan.OptionFee is not { } fee)
+        {
+            throw new DomainValidationException("Only an open loan with an option to buy can be converted.");
+        }
+
+        if (today <= loan.Date || today > loan.LoanEndDate!.Value)
+        {
+            throw new DomainValidationException($"The option can be exercised from the day after the loan started until its last day ({loan.LoanEndDate:yyyy-MM-dd}).");
+        }
+
+        if (terms.StartDate != today)
+        {
+            throw new DomainValidationException($"A transfer takes effect today: the new contract must start on {today:yyyy-MM-dd}.");
+        }
+
+        var player = market.PlayerById[loan.PlayerId];
+        var buyer = market.Clubs[loan.ToClubId];
+        var seller = market.Clubs[loan.FromClubId!.Value];
+        var parent = market.ContractsOf(player.Id).First(c => c.Id == loan.ParentContractId);
+        var loanContract = market.ContractsOf(player.Id).FirstOrDefault(c => c.Id == loan.ContractId);
+        CheckUpcoming(market, player, terms.EndDate, "the new contract must end before that");
+        var playerAnswer = _salaries.Evaluate(Context(market, player, buyer, parent.AnnualSalary), terms);
+        if (!playerAnswer.IsAccepted)
+        {
+            throw new DomainException($"{player.FullName} refuses the contract: {playerAnswer.Message}");
+        }
+
+        // He is registered with the borrower already: only the money and the wage budget change.
+        var cash = fee + terms.SigningBonus;
+        if (cash > buyer.Balance)
+        {
+            throw new DomainException($"{buyer.Name} cannot pay € {cash:N0}: its balance is € {buyer.Balance:N0}.");
+        }
+
+        List<string> warnings = [];
+        var bill = market.WageBills.GetValueOrDefault(buyer.Id) - (loanContract?.AnnualSalary ?? 0) + terms.AnnualSalary;
+        if (bill > buyer.WageBudget)
+        {
+            warnings.Add($"The wage bill of {buyer.Name} becomes € {bill:N0}, € {bill - buyer.WageBudget:N0} over its wage budget.");
+        }
+
+        var unused = UnusedContribution(loan, today);
+        if (loanContract is { Status: ContractStatus.Active })
+        {
+            loanContract.Terminate(today, 0);
+        }
+
+        parent.ReturnFromLoan();
+        parent.Transfer(today);
+        loan.Return(today);
+        var signed = Contract.ForPlayer(ContractId.New(), buyer.Id, player.Id, terms);
+        market.Data.Contracts.Add(signed);
+        seller.ChangeBalance(fee + unused);
+        buyer.ChangeBalance(-(cash + unused));
+        var transfer = Transfer.ByOption(TransferId.New(), player.Id, seller.Id, buyer.Id, today, fee, signed.Id, parent.Id);
+        market.Data.Transfers.Add(transfer);
+        await market.Data.SaveAsync(cancellationToken).ConfigureAwait(false);
+        return new TransferReceipt(
+            transfer.Id,
+            TransferKind.OptionToBuy,
+            fee,
+            signed.Id,
+            warnings,
+            $"{buyer.Name} exercises its option: {player.FullName} joins from {seller.Name} for € {fee:N0} on € {terms.AnnualSalary:N0} a year until {terms.EndDate:yyyy-MM-dd}.");
+    }
+
+    public async Task<RegistrationWindow> GetRegistrationWindowAsync(ClubId clubId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        return (await ClubSeason.RegistrationAsync(scope.ServiceProvider, clubId, Today, cancellationToken).ConfigureAwait(false)).Window;
     }
 
     public async Task<ClubTransfers?> GetClubTransfersAsync(ClubId clubId, CancellationToken cancellationToken = default)
@@ -295,6 +403,7 @@ internal sealed class TransferService : ITransferService
         var managed = managedClubs.ToHashSet();
         var reports = new Dictionary<ClubId, (Club Club, List<string> Needs, List<string> Actions, int Transactions)>();
         var taken = new HashSet<PlayerId>();
+        var raided = new HashSet<ClubId>(); // clubs that already sold an unlisted player this window
 
         // The surplus every AI club puts up for sale, priced by its own club.
         var forSale = new Dictionary<PlayerId, (ClubId From, long Fee)>();
@@ -343,25 +452,40 @@ internal sealed class TransferService : ITransferService
 
             var current = market.Clubs[club.Id];
             var situation = Situation(market, current, roster);
+            RegistrationWindow window;
+            using (var scope = _scopes.CreateScope())
+            {
+                window = (await ClubSeason.RegistrationAsync(scope.ServiceProvider, club.Id, today, cancellationToken).ConfigureAwait(false)).Window;
+            }
+
+            if (!window.Allows(situation.FirstTeam.Count + 1, situation.Rules.MinPlayers))
+            {
+                report.Actions.Add(window.Message);
+                continue;
+            }
+
+            // Free agents and listed players of any country; unlisted players of AI clubs of lower reputation for upgrades.
             var candidates = market.Players
                 .Where(p => !taken.Contains(p.Id))
                 .Select(p => market.Describe(p, current))
-                .Where(m => m.Status == MarketStatus.FreeAgent || (forSale.TryGetValue(m.Player.Id, out var sale) && sale.From == m.Contract?.ClubId && m.Contract.IsRunningOn(today)))
                 .Where(m => m.Club?.Id != club.Id)
-                .Select(m => new Candidate(
-                    m.Player.Id,
-                    m.Player.FullName,
-                    m.Player.Position,
-                    m.Player.SecondaryPositions,
-                    m.Overall,
-                    m.Age,
-                    m.AskingSalary,
-                    m.IsFreeAgent ? 0 : forSale[m.Player.Id].Fee,
-                    m.IsFreeAgent ? null : m.Contract!.ClubId,
-                    m.Player.NationalityId != current.CountryId,
-                    market.IsNonEu(m.Player)))
+                .Select(m => (Market: m, Listed: m.Status == MarketStatus.FreeAgent || (forSale.TryGetValue(m.Player.Id, out var sale) && sale.From == m.Contract?.ClubId && m.Contract.IsRunningOn(today))))
+                .Where(c => c.Listed || IsUpgradeTarget(c.Market, current))
+                .Select(c => new Candidate(
+                    c.Market.Player.Id,
+                    c.Market.Player.FullName,
+                    c.Market.Player.Position,
+                    c.Market.Player.SecondaryPositions,
+                    c.Market.Overall,
+                    c.Market.Age,
+                    c.Market.AskingSalary,
+                    c.Market.IsFreeAgent ? 0 : forSale.TryGetValue(c.Market.Player.Id, out var listed) ? listed.Fee : c.Market.Valuation.BuyNowFee,
+                    c.Market.IsFreeAgent ? null : c.Market.Contract!.ClubId,
+                    Market.IsForeignAt(c.Market.Player, current),
+                    market.IsNonEu(c.Market.Player),
+                    c.Listed))
                 .ToList();
-            var plan = _recruiter.Plan(situation, candidates);
+            var plan = _recruiter.Plan(window.IsOpen ? situation : situation with { Rules = situation.Rules with { MaxPlayers = situation.Rules.MinPlayers } }, candidates);
             report.Needs.AddRange(plan.Needs.Select(n => n.Reason));
             var active = roster.Players.Count(p => p.Role.IsActive());
             foreach (var signing in plan.Signings)
@@ -386,6 +510,11 @@ internal sealed class TransferService : ITransferService
 
                     taken.Add(candidate.PlayerId);
                     forSale.Remove(candidate.PlayerId);
+                    if (!candidate.Listed && candidate.FromClubId is { } from)
+                    {
+                        raided.Add(from);
+                    }
+
                     report.Transactions++;
                     active += joinAs == RosterRole.Bench ? 1 : 0;
                 }
@@ -454,6 +583,16 @@ internal sealed class TransferService : ITransferService
         }
 
         return new TransferWindowReport(today, [.. aiClubs.Select(c => reports[c.Id]).Select(r => new ClubWindowReport(r.Club, r.Needs, r.Actions, r.Transactions))]);
+
+        // An AI club bids for players it was not offered only at AI clubs of lower reputation (players move up), with
+        // their own running contract, and at most one such sale per club and window.
+        bool IsUpgradeTarget(MarketPlayer m, Club buyer) =>
+            m.Status == MarketStatus.UnderContract
+            && m.Contract is { Status: ContractStatus.Active } contract && contract.IsRunningOn(today)
+            && contract.ClubId == m.Club?.Id
+            && !managed.Contains(contract.ClubId)
+            && !raided.Contains(contract.ClubId)
+            && m.Club.Reputation < buyer.Reputation;
     }
 
     private ClubSituation Situation(Market market, Club club, ClubRoster roster)
@@ -483,6 +622,8 @@ internal sealed class TransferService : ITransferService
         {
             throw new DomainException($"{club.Name} cannot pay € {cash:N0}: its balance is € {club.Balance:N0}.");
         }
+
+        await ClubSeason.CheckRegistrationAsync(market.Data.Services, club, market.Today, joinAs, cancellationToken).ConfigureAwait(false);
 
         // Only the problems the newcomer causes count: a squad that was already short or had no lineup stays the club's business.
         var roster = await _clubs.GetRosterAsync(club.Id, cancellationToken).ConfigureAwait(false)
@@ -567,10 +708,10 @@ internal sealed class TransferService : ITransferService
         return (back, player, parentClub);
     }
 
-    private NegotiationContext Context(Player player, Club club, DateOnly today, long? currentSalary)
+    private NegotiationContext Context(Market market, Player player, Club club, long? currentSalary)
     {
         var evaluation = _calculator.Evaluate(player);
-        return new NegotiationContext(evaluation.Overall, evaluation.PotentialRating, player.Reputation, player.AgeOn(today), club.Reputation, currentSalary);
+        return new NegotiationContext(evaluation.Overall, evaluation.PotentialRating, player.Reputation, player.AgeOn(market.Today), market.Attractiveness(club), currentSalary);
     }
 
     private static void CheckLoanDates(Market market, MarketPlayer listing, DateOnly until)
@@ -600,6 +741,27 @@ internal sealed class TransferService : ITransferService
         }
     }
 
+    /// <summary>The part of the parent club's salary contribution for the days from <paramref name="endDay"/> to the agreed end of the loan.</summary>
+    private static long UnusedContribution(Transfer loan, DateOnly endDay)
+    {
+        var total = loan.LoanEndDate!.Value.DayNumber - loan.Date.DayNumber + 1;
+        var unusedDays = Math.Max(0, loan.LoanEndDate.Value.DayNumber - endDay.DayNumber + 1);
+        return loan.SalaryContribution * unusedDays / total;
+    }
+
+    private static void CheckLoanClauses(int parentSalaryShare, long? optionFee)
+    {
+        if (parentSalaryShare is < 0 or > 100)
+        {
+            throw new DomainValidationException("The parent club's salary share is a percentage between 0 and 100.");
+        }
+
+        if (optionFee is { } option)
+        {
+            CheckFee(option);
+        }
+    }
+
     private static void CheckFee(long fee)
     {
         if (fee < 0 || fee > Transfer.MaxFee)
@@ -620,6 +782,8 @@ internal sealed class TransferService : ITransferService
     private sealed class Data(IServiceProvider services, DateOnly today)
     {
         public DateOnly Today { get; } = today;
+
+        public IServiceProvider Services => services;
 
         public IRepository<Transfer, TransferId> Transfers => Repo<Transfer, TransferId>();
 
@@ -665,6 +829,7 @@ internal sealed class TransferService : ITransferService
         private readonly Dictionary<PlayerId, ClubId> _members;
         private readonly Dictionary<PlayerId, RosterSpot> _spots;
         private readonly Dictionary<CountryId, Country> _countries;
+        private readonly Dictionary<ClubId, int> _tiers;
 
         private Market(
             TransferService service,
@@ -674,7 +839,8 @@ internal sealed class TransferService : ITransferService
             Dictionary<PlayerId, List<Contract>> contracts,
             Dictionary<PlayerId, ClubId> members,
             Dictionary<PlayerId, RosterSpot> spots,
-            Dictionary<CountryId, Country> countries)
+            Dictionary<CountryId, Country> countries,
+            Dictionary<ClubId, int> tiers)
         {
             _service = service;
             Data = data;
@@ -685,12 +851,19 @@ internal sealed class TransferService : ITransferService
             _members = members;
             _spots = spots;
             _countries = countries;
+            _tiers = tiers;
             WageBills = contracts.Values
                 .SelectMany(c => c)
                 .Where(c => c.IsRunningOn(data.Today) && c.Status != ContractStatus.OnLoan)
                 .GroupBy(c => c.ClubId)
                 .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
         }
+
+        /// <summary>The club's attractiveness to players: reputation plus its international competition (<see cref="ClubAttractiveness"/>).</summary>
+        public int Attractiveness(Club club) => ClubAttractiveness.Of(club.Reputation, _tiers.TryGetValue(club.Id, out var tier) ? tier : null);
+
+        /// <summary>The club's country differs from the player's (sporting) nationality.</summary>
+        public static bool IsForeignAt(Player player, Club club) => player.NationalityId != club.CountryId;
 
         /// <summary>None of the player's nationalities is in the EU/EEA (non-EU player limits).</summary>
         public bool IsNonEu(Player player) => !player.HasNationality(c => _countries.GetValueOrDefault(c)?.IsEuEea == true);
@@ -719,7 +892,8 @@ internal sealed class TransferService : ITransferService
             var members = await ClubMembership.CurrentClubsAsync(services, today, cancellationToken).ConfigureAwait(false);
             var spots = (await data.Repo<RosterSpot, RosterSpotId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(s => s.PlayerId);
             var countries = (await data.Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
-            return new Market(service, data, players, clubs, contracts, members, spots, countries);
+            var tiers = await ClubSeason.InternationalTiersAsync(services, today, cancellationToken).ConfigureAwait(false);
+            return new Market(service, data, players, clubs, contracts, members, spots, countries, tiers);
         }
 
         public IReadOnlyList<Contract> ContractsOf(PlayerId playerId) => _contracts.GetValueOrDefault(playerId) ?? [];
@@ -815,7 +989,7 @@ internal sealed class TransferService : ITransferService
                 ? new PlayerValuation(_service._fees.MarketValue(context), 0, null, false, 0)
                 : _service._fees.Value(context);
             var askingSalary = _service._salaries.AskingSalary(new NegotiationContext(
-                evaluation.Overall, evaluation.PotentialRating, player.Reputation, age, forClub?.Reputation ?? TransferNegotiator.NeutralClubReputation, contract?.AnnualSalary));
+                evaluation.Overall, evaluation.PotentialRating, player.Reputation, age, forClub is null ? TransferNegotiator.NeutralClubReputation : Attractiveness(forClub), contract?.AnnualSalary));
             return new MarketPlayer(player, Today, age, evaluation, _countries.GetValueOrDefault(player.NationalityId)?.Name ?? string.Empty, club, contract, parentClub, role, status, valuation, askingSalary);
         }
     }

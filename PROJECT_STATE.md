@@ -10,15 +10,15 @@ Milestone 2 — Complete European basketball ecosystem (Milestone 1 completed, r
 None in progress
 
 ## Last completed step
-STEP 18 — International club competitions (2026-11-16)
+STEP 19 — European transfer market (2026-11-16)
 
 ## Next step
-STEP 19 — European transfer market (docs/ROADMAP.md)
+STEP 20 — Scouting and player evaluation (docs/ROADMAP.md)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
 - Tests: unit PASS (351/351); integration: Step 18 targeted tests PASS (33/33); full integration run pending since Step 17 (was 117/117)
-- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
+- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -55,11 +55,12 @@ STEP 19 — European transfer market (docs/ROADMAP.md)
 - [x] European player database: real top-division clubs (Unverified), 6,144 generated players with contracts and history, data status and sources, second nationality, estimated attributes/salaries, cross-league duplicate detection, market value (Step 16); real leagues dataset: 8 real divisions, 138 clubs, 2,598 real players (`data/real-leagues`)
 - [x] Domestic cups: knockout rounds, single games and two-legged ties, group stages, bracket/seeded/open draws, seeding, qualification from a league table, finals, cup history; career integration and cup view; cups for 17 countries in the datasets (Step 17)
 - [x] International club competitions: EuroLeague, EuroCup, BCL, FIBA Europe Cup; season-by-season qualification by tier, league phases, neutral Final Fours, prize money and reputation rewards, calendar conflict detection (Step 18)
-- [ ] Step 19 onwards (Milestone 2) … see docs/ROADMAP.md
+- [x] European transfer market: one market across countries, club attractiveness (international competitions), loan agreements (salary share, option to buy), contract buyouts, registration deadlines, AI upgrade signings across borders; international rules documented (Step 19)
+- [ ] Step 20 onwards (Milestone 2) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261116144825_InternationalCompetitions`
-- Latest migration: `20261116144825_InternationalCompetitions` (`CompetitionParticipants.PrizeMoney`, `ReputationGain`; 22 tables)
+- Current schema version: `20261116151616_LoanAgreements`
+- Latest migration: `20261116151616_LoanAgreements` (`Transfers.SalaryContribution`, `OptionFee`; 22 tables)
 - Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. `data/europe/` (generated by `build/generate-europe-dataset.py`; import all four files into a new game): 18 countries + 23 player nationalities, 20 leagues, 56 competitions (35 leagues, 17 domestic cups, `docs/CUP_FORMATS.md` §4, 4 international competitions, `docs/INTERNATIONAL_COMPETITIONS.md` §4), 512 clubs (240 real, Unverified), 6,168 players (generated, plus real squads of all 16 Serie A clubs from `build/real-rosters`), 6,168 contracts, 1,509 past spells (`docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`). Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
@@ -126,6 +127,10 @@ STEP 19 — European transfer market (docs/ROADMAP.md)
 61. International competitions are cups without a country and with `cup.entry` slots, run by the same engine. They qualify every season (career start, next season) from the previous season's champions, final tables and cup winners (first season: reputation), filled by tier; a club plays one international competition per season. Entries are not carried over.
 62. Every fixture created after the league regular seasons (cups, international games, league second phases, play-ins, playoffs) moves to the first day on which neither club plays; `GetCalendarConflictsAsync` reports any remaining clash.
 63. Cup rewards are paid once, when the cup ends, and recorded on the entry (`PrizeMoney`, `ReputationGain`); neutral-venue rounds are a rules flag read by the match service.
+64. One market for every country: nationality only decides foreign/non-EU status at the receiving club. Contract negotiations use the club's attractiveness (`ClubAttractiveness`: reputation + international tier bonus), never the bare reputation.
+65. Registration deadlines are competition rules (`registration.deadline`); the earliest deadline of a club's current competitions closes new first-team registrations until the season's last day, except up to the squad minimum (`RegistrationWindow`, `ClubSeason.CheckRegistrationAsync`, shared by contracts and transfers).
+66. A loan's parent salary share is paid up front as `Transfers.SalaryContribution` (refunded pro rata on recall), so loan contracts keep the full salary and wage bills keep skipping `OnLoan` contracts. An option to buy converts the loan without a new registration.
+67. A mutual termination is a buyout the player must accept (`ContractNegotiator.MinimumBuyout`); the default settlement is his minimum.
 
 Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`, `docs/INTERNATIONAL_COMPETITIONS.md`.
 
@@ -143,7 +148,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players, player contracts and past club spells only (see `docs/IMPORT_FORMATS.md` §7); squad roles are set in the game.
 - The squad screen's *Add a player to the squad* (`AssignPlayerAsync`) still moves a player without a contract (squad tool); the game flow signs through *Club contracts*. Board expectations and finances are stored but not used by any game system yet (Steps 12, 27).
 - Contracts: salaries and performance bonuses are calculated but not paid from the club balance (Steps 12, 27); the wage budget is enforced for AI clubs only (the user gets a warning; Step 27 decides the board's rules); undecided options lapse at expiry (no reminders before Step 12); the editor and the importer do not check overlapping contracts.
-- Transfers: no persisted offers (negotiations answer at once and AI clubs never bid for a managed club's players; pending offers come with the career mode); AI clubs only buy surplus players of other AI clubs and free agents; valuations ignore form and statistics; loans copy the player's salary (no salary sharing, no option to buy) and the player does not negotiate them; a loaned player cannot be bought until recalled; transfer history is not importable (`Transfers` is created by the game only); the loan club's termination of a loan contract does not close the loan (use *Recall*).
+- Transfers: no persisted offers (negotiations answer at once and AI clubs never bid for a managed club's players; pending offers come with the career mode); AI clubs buy free agents, other AI clubs' surplus and one upgrade per window from lower-reputation AI clubs; AI clubs make no loans; registration deadlines in the datasets are an unverified simplification (28 Feb / 31 Mar); valuations ignore form and statistics; loans copy the player's salary (the parent's share is a lump-sum contribution) and the player does not negotiate them; no buy-back or sell-on clauses; a loaned player cannot be bought until recalled; transfer history is not importable (`Transfers` is created by the game only); the loan club's termination of a loan contract does not close the loan (use *Recall*).
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
 - Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike/intentional fouls or held balls; fitness, morale and injuries are not changed by matches yet (Steps 12, 22); box scores store whole minutes; play-by-play, energy and plus-minus are not stored (only box scores), so past matches show box scores and team stats only; an unfinished live match is lost when the application closes.
 - Tactics: the tactics screen shows enum names (`PickAndRoll`, `Zone23`).
@@ -170,7 +175,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_18_LOG.md
+logs/STEP_19_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

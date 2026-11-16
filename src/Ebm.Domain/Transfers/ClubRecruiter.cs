@@ -25,6 +25,7 @@ public sealed record SquadMember(
 /// <param name="Fee">Transfer fee his club asks; 0 for a free agent.</param>
 /// <param name="FromClubId">His current club; <c>null</c> for a free agent.</param>
 /// <param name="IsForeign">Whether he counts as foreign at the recruiting club.</param>
+/// <param name="Listed">His club put him up for sale (or he is a free agent); unlisted players are only bought as upgrades.</param>
 public sealed record Candidate(
     PlayerId PlayerId,
     string Name,
@@ -36,7 +37,8 @@ public sealed record Candidate(
     long Fee,
     ClubId? FromClubId,
     bool IsForeign,
-    bool IsNonEu = false)
+    bool IsNonEu = false,
+    bool Listed = true)
 {
     public bool IsFreeAgent => FromClubId is null;
 
@@ -84,6 +86,15 @@ public sealed class ClubRecruiter
 
     /// <summary>Share of the balance a club keeps back from transfer fees.</summary>
     public double CashReserve { get; init; } = 0.10;
+
+    /// <summary>Upgrade signings per window: players better than the starting five bought even without a roster gap.</summary>
+    public int MaxUpgrades { get; init; } = 1;
+
+    /// <summary>An upgrade must beat the club's fifth-best player by at least this many overall points.</summary>
+    public int UpgradeMargin { get; init; } = 4;
+
+    /// <summary>Share of the cash left after the needs that an upgrade may cost.</summary>
+    public double UpgradeCashShare { get; init; } = 0.5;
 
     /// <summary>Players the club wants in its first team when it is below the registration maximum: the matchday squad plus one.</summary>
     public int TargetPlayers(SquadRules rules)
@@ -211,7 +222,7 @@ public sealed class ClubRecruiter
             }
 
             var eligible = candidates
-                .Where(c => !taken.Contains(c.PlayerId) && c.FromClubId != club.ClubId)
+                .Where(c => c.Listed && !taken.Contains(c.PlayerId) && c.FromClubId != club.ClubId)
                 .Where(c => need.Position is not { } position || c.CanPlay(position))
                 .Where(c => c.Fee <= cash && c.AskingSalary <= budgetLeft)
                 .Where(c => !c.IsForeign || club.Rules.MaxForeignPlayers is not { } maxForeign || foreign < maxForeign)
@@ -228,6 +239,32 @@ public sealed class ClubRecruiter
 
             taken.Add(pick.PlayerId);
             signings.Add(new PlannedSigning(pick, pick.AskingSalary, ContractYears(pick.Age), need.Reason));
+            cash -= pick.Fee;
+            budgetLeft -= pick.AskingSalary;
+            count++;
+            foreign += pick.IsForeign ? 1 : 0;
+            nonEu += pick.IsNonEu ? 1 : 0;
+        }
+
+        // Upgrades: a club with money left buys a player clearly better than its starting five, listed or not.
+        for (var i = 0; i < MaxUpgrades && count < Math.Min(club.Rules.MaxPlayers, TargetPlayers(club.Rules) + 1); i++)
+        {
+            var level = team.Select(m => m.Overall).Concat(signings.Select(s => s.Candidate.Overall)).OrderByDescending(o => o).Skip(SquadRules.Starters - 1).FirstOrDefault();
+            var budget = (long)(Math.Max(0, cash) * UpgradeCashShare);
+            var pick = candidates
+                .Where(c => !taken.Contains(c.PlayerId) && c.FromClubId != club.ClubId && c.Overall >= level + UpgradeMargin)
+                .Where(c => c.Fee <= budget && c.AskingSalary <= budgetLeft)
+                .Where(c => !c.IsForeign || club.Rules.MaxForeignPlayers is not { } maxForeign || foreign < maxForeign)
+                .Where(c => !c.IsNonEu || club.Rules.MaxNonEuPlayers is not { } maxNonEu || nonEu < maxNonEu)
+                .OrderByDescending(c => c.Overall).ThenBy(c => c.Fee).ThenBy(c => c.AskingSalary).ThenBy(c => c.PlayerId.Value)
+                .FirstOrDefault();
+            if (pick is null)
+            {
+                break;
+            }
+
+            taken.Add(pick.PlayerId);
+            signings.Add(new PlannedSigning(pick, pick.AskingSalary, ContractYears(pick.Age), $"upgrade: {pick.Overall} overall against a starting level of {level}"));
             cash -= pick.Fee;
             budgetLeft -= pick.AskingSalary;
             count++;

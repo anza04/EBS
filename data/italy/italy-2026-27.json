@@ -673,6 +673,7 @@
     "registration": {
      "minTeams": 16,
      "maxTeams": 16,
+     "deadline": "02-28",
      "squad": {
       "maxForeignPlayers": 6,
       "minDomesticPlayers": 5
@@ -716,6 +717,7 @@
     "registration": {
      "minTeams": 20,
      "maxTeams": 20,
+     "deadline": "03-31",
      "squad": {
       "maxForeignPlayers": 2
      }

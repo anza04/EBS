@@ -14,6 +14,7 @@
         <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="260" HorizontalAlignment="Left" />
         <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" Margin="20,0,0,0" />
       </DockPanel>
+      <TextBlock DockPanel.Dock="Top" Text="{Binding Registration}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,0,0,8" />
       <TextBlock DockPanel.Dock="Bottom" Text="{Binding Message}" Style="{StaticResource Text.Status}" TextWrapping="Wrap" Margin="0,12,0,0" />
       <Grid>
         <Grid.ColumnDefinitions>
@@ -130,6 +131,10 @@
                       <ColumnDefinition Width="12" />
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
                     <StackPanel>
                       <TextBlock Text="Loan until" Style="{StaticResource Form.Label}" />
                       <DatePicker SelectedDate="{Binding LoanUntil}" />
@@ -138,8 +143,16 @@
                       <TextBlock Text="Loan fee (€)" Style="{StaticResource Form.Label}" />
                       <TextBox Text="{Binding LoanFee, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
+                    <StackPanel Grid.Row="1" Margin="0,6,0,0">
+                      <TextBlock Text="Salary share paid by his club (%)" Style="{StaticResource Form.Label}" />
+                      <TextBox Text="{Binding LoanSalaryShare, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,6,0,0">
+                      <TextBlock Text="Option to buy (€, optional)" Style="{StaticResource Form.Label}" />
+                      <TextBox Text="{Binding LoanOptionFee, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
                   </Grid>
-                  <TextBlock Text="Your club pays his salary while he is with you; he goes back when the loan ends or when his club recalls him." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                  <TextBlock Text="Your club pays his salary while he is with you (less the share his club keeps paying, up to 50% for players aged 23 or less, 25% otherwise); he goes back when the loan ends or when his club recalls him. An option to buy costs at least what his club asks today." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
                   <WrapPanel Margin="0,10,0,0">
                     <Button Content="Ask the club" Command="{Binding AskLoanCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
                     <Button Content="Use its counter" Command="{Binding UseLoanCounterCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
@@ -162,13 +175,16 @@
                 </DataGrid>
                 <Button Content="Recall the selected player" Command="{Binding RecallCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" />
                 <TextBlock Text="Players on loan with you" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
-                <DataGrid ItemsSource="{Binding LoansIn}" Style="{StaticResource Editor.Grid}" MaxHeight="140">
+                <DataGrid ItemsSource="{Binding LoansIn}" SelectedItem="{Binding SelectedLoanIn}" Style="{StaticResource Editor.Grid}" MaxHeight="140">
                   <DataGrid.Columns>
                     <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
                     <DataGridTextColumn Header="From" Binding="{Binding From}" Width="120" />
                     <DataGridTextColumn Header="Until" Binding="{Binding LoanEnd}" Width="85" />
+                    <DataGridTextColumn Header="Option" Binding="{Binding Option}" Width="95" />
                   </DataGrid.Columns>
                 </DataGrid>
+                <Button Content="Exercise the option to buy" Command="{Binding ExerciseOptionCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                        ToolTip="Buys the selected player for his option fee, on the salary, end date and signing bonus of the offer form." />
               </StackPanel>
             </Border>
 
