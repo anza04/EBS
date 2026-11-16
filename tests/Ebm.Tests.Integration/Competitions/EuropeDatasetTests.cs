@@ -37,9 +37,11 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
         var report = await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([DatasetFile], new ImportOptions());
         Assert.True(report.Committed);
         var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
-        var competitions = await _db.ReadAsync(s => s.Repo<Competition, CompetitionId>().ListAsync());
+        var all = await _db.ReadAsync(s => s.Repo<Competition, CompetitionId>().ListAsync());
+        var competitions = all.Where(c => c.Type == CompetitionType.League).ToList();
         var divisions = (await _db.ReadAsync(s => s.Repo<Division, DivisionId>().ListAsync())).ToDictionary(d => d.Id);
         Assert.Equal(35, competitions.Count);
+        Assert.Equal(17, all.Count(c => c.Type == CompetitionType.Cup));
         Assert.Equal(18, competitions.Select(c => c.CountryId).OfType<object>().Distinct().Count());
 
         var finished = new List<(Division Division, IReadOnlyList<ClubId> Clubs, SeasonOutcome Outcome)>();
