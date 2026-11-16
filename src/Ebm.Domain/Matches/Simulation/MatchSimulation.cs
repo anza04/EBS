@@ -31,11 +31,15 @@ public sealed partial class MatchSimulation
     /// <summary>Home − away margin that also forces overtime (second leg with the aggregate level).</summary>
     private readonly int _overtimeMargin;
 
+    /// <summary>No home advantage (a neutral venue).</summary>
+    private readonly bool _neutral;
+
     public MatchSimulation(MatchSetup setup, SimulationMode mode = SimulationMode.Instant, PlayerRatingCalculator? calculator = null)
     {
         ArgumentNullException.ThrowIfNull(setup);
         _rules = setup.MatchRules;
         _overtimeMargin = setup.OvertimeMargin;
+        _neutral = setup.NeutralVenue;
         setup.Home.Validate(_rules);
         setup.Away.Validate(_rules);
         if (setup.Home.Players.Select(p => p.Player.Id).Intersect(setup.Away.Players.Select(p => p.Player.Id)).Any())

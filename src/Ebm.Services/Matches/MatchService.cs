@@ -73,33 +73,38 @@ internal sealed class MatchService(
             throw new DomainValidationException("This fixture has already been played.");
         }
 
-        var setup = new MatchSetup(preview.Home, preview.Away, seed ?? Random.Shared.Next())
-        {
-            OvertimeMargin = await OvertimeMarginAsync(preview.Fixture, cancellationToken).ConfigureAwait(false),
-        };
+        var (margin, neutral) = await CupSetupAsync(preview.Fixture, cancellationToken).ConfigureAwait(false);
+        var setup = new MatchSetup(preview.Home, preview.Away, seed ?? Random.Shared.Next()) { OvertimeMargin = margin, NeutralVenue = neutral };
         return new MatchSession(preview.Fixture, preview.Competition, new MatchSimulation(setup, mode, calculator));
     }
 
     /// <summary>
-    /// The second leg of a cup tie goes to overtime while the aggregate is level: the home − away margin equal to the
-    /// first-leg margin of today's away side (docs/CUP_FORMATS.md). 0 for every other game.
+    /// Cup knockout games: the second leg of a tie goes to overtime while the aggregate is level (the home − away
+    /// margin equal to the first-leg margin of today's away side, docs/CUP_FORMATS.md), and a round of the rules
+    /// marked neutral has no home advantage. (0, false) for every other game.
     /// </summary>
-    private async Task<int> OvertimeMarginAsync(Fixture fixture, CancellationToken cancellationToken)
+    private async Task<(int Margin, bool Neutral)> CupSetupAsync(Fixture fixture, CancellationToken cancellationToken)
     {
-        if (fixture.Stage != FixtureStage.Cup || fixture.GameNumber != 2)
+        if (fixture.Stage != FixtureStage.Cup)
         {
-            return 0;
+            return (0, false);
         }
 
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
+        if (fixture.GameNumber != 2)
+        {
+            var rounds = (await Repo<Competition, CompetitionId>(s).FindAsync(fixture.CompetitionId, cancellationToken).ConfigureAwait(false))?.ParseRules().Cup?.Rounds;
+            return (0, rounds is not null && fixture.Round <= rounds.Count && rounds[fixture.Round - 1].Neutral);
+        }
+
         var first = (await Repo<Fixture, FixtureId>(s).ListAsync(
                 f => f.CompetitionId == fixture.CompetitionId && f.SeasonId == fixture.SeasonId && f.Stage == FixtureStage.Cup && f.Round == fixture.Round
                     && f.GameNumber == 1 && f.HomeClubId == fixture.AwayClubId && f.AwayClubId == fixture.HomeClubId,
                 cancellationToken).ConfigureAwait(false)).SingleOrDefault();
         var result = first is null ? null
             : (await Repo<Match, MatchId>(s).ListAsync(m => m.FixtureId == first.Id, cancellationToken).ConfigureAwait(false)).SingleOrDefault();
-        return result is null ? 0 : result.HomeScore - result.AwayScore;
+        return (result is null ? 0 : result.HomeScore - result.AwayScore, false);
     }
 
     public async Task<MatchId> SaveAsync(MatchSession session, CancellationToken cancellationToken = default) =>
@@ -118,8 +123,8 @@ internal sealed class MatchService(
         var away = await TrySheetAsync(fixture.AwayClubId, cancellationToken).ConfigureAwait(false);
         if (home is not null && away is not null)
         {
-            var margin = await OvertimeMarginAsync(fixture, cancellationToken).ConfigureAwait(false);
-            var simulation = new MatchSimulation(new MatchSetup(home, away, seed ?? Random.Shared.Next()) { OvertimeMargin = margin }, SimulationMode.Instant, calculator);
+            var (margin, neutral) = await CupSetupAsync(fixture, cancellationToken).ConfigureAwait(false);
+            var simulation = new MatchSimulation(new MatchSetup(home, away, seed ?? Random.Shared.Next()) { OvertimeMargin = margin, NeutralVenue = neutral }, SimulationMode.Instant, calculator);
             simulation.RunToEnd();
             return await SaveCoreAsync(new MatchSession(fixture, competition, simulation), cancellationToken).ConfigureAwait(false);
         }

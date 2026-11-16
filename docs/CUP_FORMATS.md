@@ -12,8 +12,10 @@ League formats: `docs/COMPETITION_FORMATS.md`.
 | Single games | `legs: 1` (default). Hosted by the better seed, or the weaker one with `host: "LowerSeed"` |
 | Two-legged ties | `legs: 2`: the weaker seed hosts leg 1, the better seed leg 2; decided on aggregate. Leg 2 goes to overtime while the aggregate is level (`MatchSetup.OvertimeMargin`), so it always has a winner. A level aggregate after a forfeit or an edited result goes to the winner of leg 2 |
 | Byes | When fewer clubs than `2^rounds` enter, the top seeds go straight to round 2. Byes only in the first round: more than half the bracket must play it |
-| Group stage | `groupStage`: `groups` (1–8), `legs`, `advance` (top N per group), `daysBetweenRounds`. Pots of as many seeds as groups, one club of each pot per group. Qualifiers enter the knockout ordered by group finish, then group (A1, B1, …, A2, B2, …), so in a bracket each group winner meets another group's runner-up |
+| Group stage | `groupStage`: `groups` (1–8, up to 20 clubs each: one group can be a whole league phase), `legs`, `advance` (top N per group), `daysBetweenRounds`. Pots of as many seeds as groups, one club of each pot per group. Qualifiers enter the knockout ordered by group finish, then group (A1, B1, …, A2, B2, …), so in a bracket each group winner meets another group's runner-up |
 | Draw | `Bracket`: fixed bracket by seed (1 v 8, 4 v 5, 2 v 7, 3 v 6; groups serpentine), no randomness. `Seeded` (default): each round the better half of the seeds is drawn against the other half. `Open`: any pairing. Draws are random but reproducible: the seed comes from the competition and season IDs (`CupSeason.DrawSeed`), so a draw never changes once made |
+| Neutral venue | `rounds[].neutral: true` (single games only): no home advantage, e.g. a Final Four (Step 18) |
+| Rewards | `rewards`: prize money and reputation paid when the cup is over (docs/INTERNATIONAL_COMPETITIONS.md §2) |
 | Seeding | Stored on `CompetitionParticipants.Seed` (1 = best) when the cup is drawn. Qualified clubs: their table position. Entered clubs: division level of their league this season (no league last), then club reputation, then ID |
 | Qualification | `qualification`: `level`, `positions`, `afterRound`: the top N of the country's league at that division level, from the regular-season table counting rounds up to `afterRound` only (e.g. a Final Eight at the halfway point). Drawn as soon as those rounds are played; such cups cannot take clubs by hand and start again from the table every season |
 | Finals | The last round. Final Eight / Final Four weekends: give the round a short `daysAfter` |
@@ -55,7 +57,7 @@ League formats: `docs/COMPETITION_FORMATS.md`.
 
 Validation: a cup section only on a `Cup` competition; no playoffs, second phase, promotion or relegation with it;
 the clubs reaching the knockout (entered, qualified or `groups × advance`) must be more than half of and at most
-`2^rounds`; groups need at least `advance + 1` and at most 8 clubs each. A `Cup` competition without a `cup` section
+`2^rounds`; groups need at least `advance + 1` and at most 20 clubs each. A `Cup` competition without a `cup` section
 (older data) is never scheduled.
 
 ## 3. Running a cup (`ICompetitionService`)
@@ -102,10 +104,11 @@ keeps its format-less "Italian Cup" (tests configure it).
 
 ## 5. Limitations
 
-- No neutral venues: Final Eight/Four games are hosted by the better seed (home advantage applies).
+- Domestic Final Eights/Fours in the datasets are still hosted by the better seed (rounds can be made `neutral` since Step 18).
 - Legs are never drawn: like every engine game, a level first leg goes to overtime (FIBA allows a drawn first leg).
 - Qualification only from the current season's table of the cup's own country; no entry by previous-season
   position, cup holders, host clubs, lower-division entrants joining in later rounds, or supercups.
 - No reseeding inside a bracket draw; seeded and open draws are made again every round.
-- A cup game moved by the clash rule can land after a later-scheduled league playoff game on the same day only if
-  the playoff game was created afterwards (playoff dates do not avoid cup games); the club then plays twice that day.
+- (Fixed in Step 18) League playoff, play-in and second-phase games now also avoid days with other fixtures.
+
+International competitions (Step 18, `cup.entry`): docs/INTERNATIONAL_COMPETITIONS.md.

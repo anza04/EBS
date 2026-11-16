@@ -204,6 +204,12 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("CompetitionId")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("PrizeMoney")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ReputationGain")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("SeasonId")
                         .HasColumnType("TEXT");
 

@@ -216,6 +216,63 @@ def add_cups(data, season, division_clubs):
                 data["participants"].append({"id": uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
                                              "seasonId": season["id"], "clubId": club["id"]})
 
+def neutral(r):
+    return {**r, "neutral": True}
+
+
+def league(country, clubs):
+    return {"type": "League", "countries": [country], "clubs": clubs}
+
+
+FILL = {"type": "Reputation", "clubs": 0}  # wildcards by reputation until the competition is full
+
+# International club competitions (Step 18, docs/INTERNATIONAL_COMPETITIONS.md), 2025-26 formats simplified to the
+# engine, unverified: (name, short name, tier, (min, max) clubs, entry slots, group stage, knockout rounds,
+# start offset, days between group rounds, rewards). Clubs qualify every season from the previous season's
+# tables (the first season: club reputation); a club plays one of them only (the lowest tier).
+INTERNATIONAL = [
+    ("Turkish Airlines EuroLeague", "EL", 1, (16, 20),
+     [{"type": "Holder"}, {"type": "Winner", "competition": "EC"}, league("ESP", 3), league("TUR", 2), league("GRE", 2),
+      league("ITA", 2), league("FRA", 2), league("SRB", 2), league("GER", 1), league("LTU", 1), FILL],
+     {"groups": 1, "legs": 2, "advance": 8, "daysBetweenRounds": 6},
+     [cup_round("Playoffs", legs=2, after=7), neutral(cup_round("Semi-finals", after=10)), neutral(cup_round("Final", after=2))], 11, 6,
+     {"entry": 1_000_000, "win": 50_000, "knockout": 300_000, "winner": 2_000_000, "runnerUp": 1_000_000,
+      "reputationKnockout": 1, "reputationWinner": 3, "reputationRunnerUp": 2}),
+    ("BKT EuroCup", "EC", 2, (16, 20),
+     [{"type": "Holder"}, league("ESP", 2), league("ITA", 2), league("GER", 2), league("FRA", 2), league("TUR", 2),
+      league("GRE", 1), league("LTU", 1), league("SRB", 1), league("SLO", 1), league("POL", 1), FILL],
+     {"groups": 2, "legs": 2, "advance": 6, "daysBetweenRounds": 7},
+     [cup_round("Eighth-finals", after=14), cup_round("Quarter-finals", after=7), cup_round("Semi-finals", after=7), cup_round("Final", legs=2, after=7)], 12, 7,
+     {"entry": 400_000, "win": 20_000, "knockout": 100_000, "winner": 800_000, "runnerUp": 400_000,
+      "reputationKnockout": 1, "reputationWinner": 2, "reputationRunnerUp": 1}),
+    ("Basketball Champions League", "BCL", 3, (24, 32),
+     [{"type": "Holder"}] + [league(c, 2) for c in ("ESP", "ITA", "GER", "FRA", "TUR", "GRE")]
+     + [league(c, 1) for c in ("LTU", "SRB", "CRO", "SLO", "BEL", "NED", "POR", "POL", "CZE", "FIN", "SWE", "GBR")] + [FILL],
+     {"groups": 8, "legs": 2, "advance": 2, "daysBetweenRounds": 7},
+     [cup_round("Round of 16", legs=2, after=28), cup_round("Quarter-finals", legs=2, after=14),
+      neutral(cup_round("Semi-finals", after=21)), neutral(cup_round("Final", after=2))], 10, 7,
+     {"entry": 150_000, "win": 10_000, "knockout": 50_000, "winner": 1_000_000, "runnerUp": 500_000,
+      "reputationKnockout": 1, "reputationWinner": 2, "reputationRunnerUp": 1}),
+    ("FIBA Europe Cup", "FEC", 4, (24, 32),
+     [{"type": "Holder"}] + [league(c, 1) for c in ("ESP", "ITA", "GER", "FRA", "TUR", "GRE", "LTU", "SRB", "CRO", "SLO",
+                                                    "BEL", "NED", "POR", "POL", "CZE", "FIN", "SWE", "GBR")] + [FILL],
+     {"groups": 8, "legs": 2, "advance": 2, "daysBetweenRounds": 7},
+     [cup_round("Round of 16", legs=2, after=21), cup_round("Quarter-finals", legs=2, after=14), cup_round("Semi-finals", legs=2, after=14),
+      cup_round("Final", legs=2, after=14)], 9, 7,
+     {"entry": 50_000, "win": 5_000, "knockout": 20_000, "winner": 300_000, "runnerUp": 150_000, "reputationWinner": 1}),
+]
+
+
+def add_international(data):
+    """Adds the international competitions; their clubs are qualified by the game every season (no entries here)."""
+    for name, short, tier, (low, high), slots, groups, ko, offset, days, rewards in INTERNATIONAL:
+        cup = {"entry": {"tier": tier, "slots": slots}, "groupStage": groups, "draw": "Bracket", "startOffsetDays": offset,
+               "daysBetweenRounds": days, "daysBetweenLegs": 7, "rounds": ko, "rewards": rewards}
+        data["competitions"].append({"id": uid("competition", "international", name), "name": name, "shortName": short, "type": "Cup",
+                                     "rules": {"pointsForWin": 2, "pointsForLoss": 1, "registration": {"minTeams": low, "maxTeams": high},
+                                               "tieBreakers": TIE, "cup": cup}})
+
+
 def uid(*parts):
     return str(uuid.uuid5(NS, "|".join(parts)))
 
@@ -571,6 +628,7 @@ def main():
                                              "seasonId": season["id"], "clubId": club["id"]})
 
     add_cups(data, season, division_clubs)
+    add_international(data)
     assert len({c["id"] for c in data["clubs"]}) == len(data["clubs"]), "duplicate club"
     for club in data["clubs"]:
         club["balance"] = int(club["balance"])

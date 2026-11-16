@@ -37,6 +37,9 @@ public sealed record CupView(
     ClubId? Winner,
     ClubId? RunnerUp);
 
+/// <summary>A club with more than one fixture on the same day (a calendar clash between competitions).</summary>
+public sealed record CalendarConflict(ClubId ClubId, DateOnly Date, IReadOnlyList<FixtureId> Fixtures);
+
 /// <summary>One season of a competition's history: the champion (cup winner) and runner-up once it is completed.</summary>
 public sealed record CompetitionHistoryEntry(Season Season, CompetitionPhase Phase, ClubId? Champion, ClubId? RunnerUp);
 
@@ -86,4 +89,15 @@ public interface ICompetitionService
 
     /// <summary>Every season of a competition with entries, oldest first, with its champion and runner-up when completed.</summary>
     Task<IReadOnlyList<CompetitionHistoryEntry>> GetHistoryAsync(CompetitionId competitionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Enters the season's qualified clubs in every international competition (a cup with <c>cup.entry</c> slots,
+    /// docs/INTERNATIONAL_COMPETITIONS.md) from the previous season's tables and winners, or from club reputation
+    /// when there is no finished previous season; hand entries are kept, drawn competitions left alone. Returns the
+    /// clubs entered. Safe to call again: full competitions take nobody.
+    /// </summary>
+    Task<int> QualifyAsync(SeasonId seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>Every club that has two or more fixtures on one day of the season, across all competitions.</summary>
+    Task<IReadOnlyList<CalendarConflict>> GetCalendarConflictsAsync(SeasonId seasonId, CancellationToken cancellationToken = default);
 }

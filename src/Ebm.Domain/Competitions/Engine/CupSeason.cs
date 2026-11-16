@@ -26,6 +26,12 @@ public sealed record CupTie(int Round, string RoundName, int Legs, ClubId First,
     public ClubId? Loser => Winner is { } winner ? (winner == First ? Second : First) : null;
 }
 
+/// <summary>What a club earns from a cup season: prize money (euros) and reputation points.</summary>
+public sealed record CupReward(long Prize, int Reputation)
+{
+    public static readonly CupReward None = new(0, 0);
+}
+
 /// <summary>
 /// One season of a cup, derived from its rules, the seeds stored by the draw and the games: optional group stage,
 /// then knockout rounds (byes for the top seeds in the first round when the bracket is not full). Pure and
@@ -135,6 +141,28 @@ public sealed class CupSeason
         Phase == SeasonPhase.Completed
             ? new SeasonOutcome(Winner!.Value, [], [], RunnerUp)
             : throw new DomainValidationException("The cup is not over yet.");
+
+    /// <summary>The prize money and reputation a club earns from a completed cup (<see cref="CupRules.Rewards"/>); zero without rewards.</summary>
+    public CupReward Reward(ClubId club)
+    {
+        if (Phase != SeasonPhase.Completed)
+        {
+            throw new DomainValidationException("The cup is not over yet.");
+        }
+
+        if (_cup.Rewards is not { } rewards || !Seeds.Contains(club))
+        {
+            return CupReward.None;
+        }
+
+        var wins = _games.Count(g => g.Winner == club);
+        var knockout = _cup.GroupStage is not null && (Byes.Contains(club) || Ties().Any(t => t.First == club || t.Second == club));
+        var winner = Winner == club;
+        var runnerUp = RunnerUp == club;
+        return new CupReward(
+            rewards.Entry + (wins * rewards.Win) + (knockout ? rewards.Knockout : 0) + (winner ? rewards.Winner : 0) + (runnerUp ? rewards.RunnerUp : 0),
+            rewards.ReputationEntry + (knockout ? rewards.ReputationKnockout : 0) + (winner ? rewards.ReputationWinner : 0) + (runnerUp ? rewards.ReputationRunnerUp : 0));
+    }
 
     /// <summary>A stable draw seed for one competition season (the same IDs always give the same draws).</summary>
     public static int DrawSeed(Guid competition, Guid season)

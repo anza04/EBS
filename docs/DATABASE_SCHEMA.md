@@ -15,6 +15,7 @@ Schema version: **`20261112154154_CareerAssistant`** (Step 14).
 | `20261112144630_Careers` | 12 | New `Careers` table; `Matches.IsForfeit` (add-column, default false) |
 | `20261112154154_CareerAssistant` | 14 | `Careers.AssistantManages` (add-column, default false) |
 | `20261116135956_CupCompetitions` | 17 | `CompetitionParticipants.Seed` (nullable add-column). New fixture stages `CupGroup` and `Cup` (stored as text, no schema change); `Cup` fixtures use `GameNumber` 1–2 for the legs |
+| `20261116144825_InternationalCompetitions` | 18 | `CompetitionParticipants.PrizeMoney` (long?) and `ReputationGain` (int?): cup rewards paid when the competition ended (nullable add-columns) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -108,6 +109,8 @@ A club's entry in a competition for a season. This is how a club takes part in s
 | Id | id | PK |
 | CompetitionId / SeasonId / ClubId | id | FKs. **Unique** (`CompetitionId, SeasonId, ClubId`). Index (`ClubId, SeasonId`) |
 | Seed | int? | A cup's seed (1 = best), set by the draw (Step 17); null in leagues and before the draw |
+| PrizeMoney | long? | Cup prize money paid when the competition ended (Step 18); null = not paid yet, no rewards paid or a league |
+| ReputationGain | int? | Reputation points gained with the prize money (0–100) |
 
 ### Arenas
 | Column | Type | Rules |

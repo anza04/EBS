@@ -325,6 +325,7 @@ def main():
             data["participants"].append({"id": eu.uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
                                          "seasonId": season["id"], "clubId": club["id"]})
     eu.add_cups(data, season, {div["name"]: clubs for div, _, _, clubs in divisions})
+    eu.add_international(data)
     clubs_by_id = {c["id"]: c for c in data["clubs"]}
     club_ids = set(clubs_by_id)
 

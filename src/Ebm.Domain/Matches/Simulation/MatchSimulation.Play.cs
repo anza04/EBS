@@ -477,7 +477,7 @@ public sealed partial class MatchSimulation
         p -= (100 - shooter.Energy) * 0.0012;
         p += defender is null ? 0 : (100 - defender.Energy) * 0.0006;
         p += shooter.Form;
-        p += off.Side == TeamSide.Home ? 0.015 : 0;
+        p += off.Side == TeamSide.Home && !_neutral ? 0.015 : 0;
         p += 0.05 * (5 - def.OnCourt.Count());
         p += fastBreak && type == ShotType.Rim ? 0.12 : 0;
         p -= lastShot && _clock < 3 ? 0.1 : 0;

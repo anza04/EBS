@@ -41,7 +41,7 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
         var competitions = all.Where(c => c.Type == CompetitionType.League).ToList();
         var divisions = (await _db.ReadAsync(s => s.Repo<Division, DivisionId>().ListAsync())).ToDictionary(d => d.Id);
         Assert.Equal(35, competitions.Count);
-        Assert.Equal(17, all.Count(c => c.Type == CompetitionType.Cup));
+        Assert.Equal(21, all.Count(c => c.Type == CompetitionType.Cup));
         Assert.Equal(18, competitions.Select(c => c.CountryId).OfType<object>().Distinct().Count());
 
         var finished = new List<(Division Division, IReadOnlyList<ClubId> Clubs, SeasonOutcome Outcome)>();
@@ -76,6 +76,34 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
             Assert.All(league, f => Assert.Equal(f.Clubs.Count, next[f.Division.Level].Count));
             Assert.Equal(league.Sum(f => f.Clubs.Count), next.Values.SelectMany(c => c).Distinct().Count());
         }
+    }
+
+    [Fact]
+    public async Task The_international_competitions_qualify_distinct_clubs_and_are_drawn_on_free_days()
+    {
+        Assert.True((await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([DatasetFile], new ImportOptions())).Committed);
+        var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
+        var all = await _db.ReadAsync(s => s.Repo<Competition, CompetitionId>().ListAsync());
+        foreach (var league in all.Where(c => c.Type == CompetitionType.League))
+        {
+            await Service.GenerateScheduleAsync(league.Id, season.Id);
+        }
+
+        var international = all.Where(c => c.ParseRules().Cup?.Entry is not null).OrderBy(c => c.ParseRules().Cup!.Entry!.Tier).ToList();
+        Assert.Equal(["EL", "EC", "BCL", "FEC"], international.Select(c => c.ShortName));
+        Assert.Equal(104, await Service.QualifyAsync(season.Id));
+
+        var entries = await _db.ReadAsync(s => s.Repo<CompetitionParticipant, CompetitionParticipantId>().ListAsync(p => p.SeasonId == season.Id));
+        var clubs = international.Select(c => entries.Where(p => p.CompetitionId == c.Id).Select(p => p.ClubId).ToList()).ToList();
+        Assert.Equal([20, 20, 32, 32], clubs.Select(c => c.Count));
+        Assert.Equal(104, clubs.SelectMany(c => c).Distinct().Count());
+        foreach (var competition in international)
+        {
+            await Service.GenerateScheduleAsync(competition.Id, season.Id);
+            Assert.All(await FixturesAsync(competition, season), f => Assert.InRange(f.Date, season.StartDate, season.EndDate));
+        }
+
+        Assert.Empty(await Service.GetCalendarConflictsAsync(season.Id));
     }
 
     private async Task<List<Fixture>> FixturesAsync(Competition competition, Season season) =>

@@ -168,5 +168,8 @@ public sealed record MatchSetup(TeamSheet Home, TeamSheet Away, int Seed, MatchR
     /// </summary>
     public int OvertimeMargin { get; init; }
 
+    /// <summary>A neutral venue (a Final Four): the home side gets no home advantage.</summary>
+    public bool NeutralVenue { get; init; }
+
     public TeamSheet Sheet(TeamSide side) => side == TeamSide.Home ? Home : Away;
 }

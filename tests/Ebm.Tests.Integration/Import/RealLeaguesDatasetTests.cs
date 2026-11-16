@@ -45,7 +45,8 @@ public sealed class RealLeaguesDatasetTests : IAsyncLifetime
         var players = await _db.ReadAsync(s => s.Repo<Player, PlayerId>().ListAsync());
         var contracts = await _db.ReadAsync(s => s.Repo<Contract, ContractId>().ListAsync());
         Assert.Equal(138, clubs.Count);
-        Assert.Equal(8, competitions.Count);
+        Assert.Equal(8, competitions.Count(c => c.Type == CompetitionType.League));
+        Assert.Equal(6 + 4, competitions.Count(c => c.Type == CompetitionType.Cup)); // domestic cups (Step 17), international (Step 18)
         Assert.Equal(File.ReadLines(files[1]).Count() - 1, players.Count);
         var contracted = contracts.Select(c => c.PlayerId).ToHashSet();
         Assert.InRange(players.Count(p => !contracted.Contains(p.Id)), 400, 700); // free agents

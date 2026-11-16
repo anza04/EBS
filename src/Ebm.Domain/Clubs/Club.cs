@@ -101,6 +101,9 @@ public sealed class Club : Entity<ClubId>
         Balance = balance;
     }
 
+    /// <summary>Adds (or removes) reputation points, kept within <see cref="MinReputation"/> and <see cref="MaxReputation"/>.</summary>
+    public void ChangeReputation(int points) => Reputation = Math.Clamp(Reputation + points, MinReputation, MaxReputation);
+
     /// <summary>Changes city, reputation, finances and board expectation.</summary>
     public void UpdateProfile(string? city, int reputation, long balance, long wageBudget, BoardExpectation boardExpectation)
     {

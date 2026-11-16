@@ -77,6 +77,7 @@ internal sealed class CareerService(
             throw new DomainValidationException($"The club does not play in a league of season {season.Name}.");
         }
 
+        await competitions.QualifyAsync(season.Id, cancellationToken).ConfigureAwait(false);
         await ScheduleLeaguesAsync(season.Id, null, cancellationToken).ConfigureAwait(false);
         var career = new Career(CareerId.New(), managerName, clubId, season.Id, season.StartDate.AddDays(-PreseasonDays));
         using (var scope = scopes.CreateScope())
@@ -264,7 +265,7 @@ internal sealed class CareerService(
 
             var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListAsync(p => p.SeasonId == current.Id, cancellationToken).ConfigureAwait(false);
             var qualifying = (await Repo<Competition, CompetitionId>(s).ListAsync(c => c.Type == CompetitionType.Cup, cancellationToken).ConfigureAwait(false))
-                .Where(c => c.ParseRules().Cup?.Qualification is not null)
+                .Where(c => c.ParseRules().Cup is { } cup && (cup.Qualification is not null || cup.Entry is not null))
                 .Select(c => c.Id)
                 .ToHashSet();
             nextEntries = entries.Where(e => !qualifying.Contains(e.CompetitionId))
@@ -307,6 +308,8 @@ internal sealed class CareerService(
             }
         }
 
+        // International competitions qualify their clubs from the season just finished.
+        await competitions.QualifyAsync(next.Id, cancellationToken).ConfigureAwait(false);
         await ScheduleLeaguesAsync(next.Id, id => next.StartDate.AddDays(firstRoundOffsets.GetValueOrDefault(id)), cancellationToken).ConfigureAwait(false);
         await management.SetObjectivesAsync(next.Id, cancellationToken).ConfigureAwait(false);
         using (var scope = scopes.CreateScope())

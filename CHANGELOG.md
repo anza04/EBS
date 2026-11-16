@@ -3,6 +3,27 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.18.0] — 2026-11-16 — STEP 18: International club competitions
+
+### Added
+- International competitions: cups without a country with a `cup.entry` block (docs/INTERNATIONAL_COMPETITIONS.md).
+  Season-by-season qualification by slots (title holder, another competition's winner, best clubs of each country's
+  league by last season's champion and final table, reputation wildcards), filled by tier so a club plays one
+  international competition; pure engine `InternationalQualification`; `ICompetitionService.QualifyAsync`.
+- EuroLeague, EuroCup, Basketball Champions League and FIBA Europe Cup in `data/europe` and `data/real-leagues`
+  (formats simplified, unverified): league phases, groups, two-legged ties, Final Fours.
+- Neutral-venue rounds (`rounds[].neutral`, `MatchSetup.NeutralVenue`: no home advantage).
+- Cup rewards (`cup.rewards`): prize money to the club balance and reputation, paid once when the cup ends
+  (`CupSeason.Reward`, `Club.ChangeReputation`).
+- `ICompetitionService.GetCalendarConflictsAsync`: clubs with two fixtures on one day.
+- Career: international competitions qualify when a career starts and for every next season.
+- Migration `InternationalCompetitions`: `CompetitionParticipants.PrizeMoney`, `ReputationGain`.
+
+### Changed
+- A cup group can hold up to 20 clubs (a whole league phase).
+- League second-phase, play-in and playoff games move to a day on which neither club has another fixture (fixes the
+  Step 17 cup/playoff same-day clash).
+
 ## [0.17.0] — 2026-11-16 — STEP 17: Domestic cups
 
 ### Added

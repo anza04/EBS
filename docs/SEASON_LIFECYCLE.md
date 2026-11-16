@@ -72,5 +72,5 @@ box scores, all kept per season.
 
 ## 7. Not in this step
 
-Fitness, morale and injuries do not change (Step 22). Since Step 17 game days also play and advance cups (docs/CUP_FORMATS.md §3). Step 13 added the AI clubs,
+Fitness, morale and injuries do not change (Step 22). Since Step 17 game days also play and advance cups (docs/CUP_FORMATS.md §3). Since Step 18 international competitions qualify their clubs when a career starts and at the start of every next season, and pay their rewards when they end (docs/INTERNATIONAL_COMPETITIONS.md §2). Step 13 added the AI clubs,
 salaries and income to the game day (docs/AI_MANAGEMENT.md §1).

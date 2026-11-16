@@ -9195,6 +9195,682 @@
      ]
     }
    }
+  },
+  {
+   "id": "99419d54-794f-5ce0-91a2-d4c2f4154d78",
+   "name": "Turkish Airlines EuroLeague",
+   "shortName": "EL",
+   "type": "Cup",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 20
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "cup": {
+     "entry": {
+      "tier": 1,
+      "slots": [
+       {
+        "type": "Holder"
+       },
+       {
+        "type": "Winner",
+        "competition": "EC"
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ESP"
+        ],
+        "clubs": 3
+       },
+       {
+        "type": "League",
+        "countries": [
+         "TUR"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GRE"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ITA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FRA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SRB"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GER"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "LTU"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "Reputation",
+        "clubs": 0
+       }
+      ]
+     },
+     "groupStage": {
+      "groups": 1,
+      "legs": 2,
+      "advance": 8,
+      "daysBetweenRounds": 6
+     },
+     "draw": "Bracket",
+     "startOffsetDays": 11,
+     "daysBetweenRounds": 6,
+     "daysBetweenLegs": 7,
+     "rounds": [
+      {
+       "name": "Playoffs",
+       "legs": 2,
+       "daysAfter": 7
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 10,
+       "neutral": true
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2,
+       "neutral": true
+      }
+     ],
+     "rewards": {
+      "entry": 1000000,
+      "win": 50000,
+      "knockout": 300000,
+      "winner": 2000000,
+      "runnerUp": 1000000,
+      "reputationKnockout": 1,
+      "reputationWinner": 3,
+      "reputationRunnerUp": 2
+     }
+    }
+   }
+  },
+  {
+   "id": "7621ac71-0125-5856-a1ee-56c553d15f6d",
+   "name": "BKT EuroCup",
+   "shortName": "EC",
+   "type": "Cup",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 20
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "cup": {
+     "entry": {
+      "tier": 2,
+      "slots": [
+       {
+        "type": "Holder"
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ESP"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ITA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GER"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FRA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "TUR"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GRE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "LTU"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SRB"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SLO"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "POL"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "Reputation",
+        "clubs": 0
+       }
+      ]
+     },
+     "groupStage": {
+      "groups": 2,
+      "legs": 2,
+      "advance": 6,
+      "daysBetweenRounds": 7
+     },
+     "draw": "Bracket",
+     "startOffsetDays": 12,
+     "daysBetweenRounds": 7,
+     "daysBetweenLegs": 7,
+     "rounds": [
+      {
+       "name": "Eighth-finals",
+       "daysAfter": 14
+      },
+      {
+       "name": "Quarter-finals",
+       "daysAfter": 7
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 7
+      },
+      {
+       "name": "Final",
+       "legs": 2,
+       "daysAfter": 7
+      }
+     ],
+     "rewards": {
+      "entry": 400000,
+      "win": 20000,
+      "knockout": 100000,
+      "winner": 800000,
+      "runnerUp": 400000,
+      "reputationKnockout": 1,
+      "reputationWinner": 2,
+      "reputationRunnerUp": 1
+     }
+    }
+   }
+  },
+  {
+   "id": "1c2cbe7b-060d-5e59-a963-05123cbc06d4",
+   "name": "Basketball Champions League",
+   "shortName": "BCL",
+   "type": "Cup",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 24,
+     "maxTeams": 32
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "cup": {
+     "entry": {
+      "tier": 3,
+      "slots": [
+       {
+        "type": "Holder"
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ESP"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ITA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GER"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FRA"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "TUR"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GRE"
+        ],
+        "clubs": 2
+       },
+       {
+        "type": "League",
+        "countries": [
+         "LTU"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SRB"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "CRO"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SLO"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "BEL"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "NED"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "POR"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "POL"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "CZE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FIN"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SWE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GBR"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "Reputation",
+        "clubs": 0
+       }
+      ]
+     },
+     "groupStage": {
+      "groups": 8,
+      "legs": 2,
+      "advance": 2,
+      "daysBetweenRounds": 7
+     },
+     "draw": "Bracket",
+     "startOffsetDays": 10,
+     "daysBetweenRounds": 7,
+     "daysBetweenLegs": 7,
+     "rounds": [
+      {
+       "name": "Round of 16",
+       "legs": 2,
+       "daysAfter": 28
+      },
+      {
+       "name": "Quarter-finals",
+       "legs": 2,
+       "daysAfter": 14
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 21,
+       "neutral": true
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2,
+       "neutral": true
+      }
+     ],
+     "rewards": {
+      "entry": 150000,
+      "win": 10000,
+      "knockout": 50000,
+      "winner": 1000000,
+      "runnerUp": 500000,
+      "reputationKnockout": 1,
+      "reputationWinner": 2,
+      "reputationRunnerUp": 1
+     }
+    }
+   }
+  },
+  {
+   "id": "b2e15ed4-e446-5950-a1e4-16cf578b757a",
+   "name": "FIBA Europe Cup",
+   "shortName": "FEC",
+   "type": "Cup",
+   "rules": {
+    "pointsForWin": 2,
+    "pointsForLoss": 1,
+    "registration": {
+     "minTeams": 24,
+     "maxTeams": 32
+    },
+    "tieBreakers": [
+     "HeadToHeadWins",
+     "HeadToHeadPointDifference",
+     "PointDifference",
+     "PointsFor"
+    ],
+    "cup": {
+     "entry": {
+      "tier": 4,
+      "slots": [
+       {
+        "type": "Holder"
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ESP"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "ITA"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GER"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FRA"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "TUR"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GRE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "LTU"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SRB"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "CRO"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SLO"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "BEL"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "NED"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "POR"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "POL"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "CZE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "FIN"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "SWE"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "League",
+        "countries": [
+         "GBR"
+        ],
+        "clubs": 1
+       },
+       {
+        "type": "Reputation",
+        "clubs": 0
+       }
+      ]
+     },
+     "groupStage": {
+      "groups": 8,
+      "legs": 2,
+      "advance": 2,
+      "daysBetweenRounds": 7
+     },
+     "draw": "Bracket",
+     "startOffsetDays": 9,
+     "daysBetweenRounds": 7,
+     "daysBetweenLegs": 7,
+     "rounds": [
+      {
+       "name": "Round of 16",
+       "legs": 2,
+       "daysAfter": 21
+      },
+      {
+       "name": "Quarter-finals",
+       "legs": 2,
+       "daysAfter": 14
+      },
+      {
+       "name": "Semi-finals",
+       "legs": 2,
+       "daysAfter": 14
+      },
+      {
+       "name": "Final",
+       "legs": 2,
+       "daysAfter": 14
+      }
+     ],
+     "rewards": {
+      "entry": 50000,
+      "win": 5000,
+      "knockout": 20000,
+      "winner": 300000,
+      "runnerUp": 150000,
+      "reputationWinner": 1
+     }
+    }
+   }
   }
  ],
  "seasons": [

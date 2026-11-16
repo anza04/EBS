@@ -49,6 +49,9 @@ internal sealed class CompetitionService : ICompetitionService
             .Select(c => c.Id)
             .ToHashSet();
         var entered = seasonEntries.Where(p => p.CompetitionId == competitionId).Select(p => p.ClubId).ToHashSet();
+        var otherInternational = competition.ParseRules().Cup?.Entry is null
+            ? []
+            : (await EntryCompetitionsAsync(services, cancellationToken).ConfigureAwait(false)).Select(c => c.Id).Where(id => id != competitionId).ToHashSet();
         var countries = Repo<Country, CountryId>(services);
         foreach (var clubId in clubIds)
         {
@@ -57,6 +60,11 @@ internal sealed class CompetitionService : ICompetitionService
             if (!entered.Add(clubId))
             {
                 throw new DomainValidationException($"{club.Name} is already entered in {competition.Name}.");
+            }
+
+            if (seasonEntries.Any(p => p.ClubId == clubId && otherInternational.Contains(p.CompetitionId)))
+            {
+                throw new DomainValidationException($"{club.Name} already plays another international competition this season.");
             }
 
             var inAnotherLeague = seasonEntries.Any(p => p.ClubId == clubId && p.CompetitionId != competitionId && leagueIds.Contains(p.CompetitionId));
@@ -184,22 +192,9 @@ internal sealed class CompetitionService : ICompetitionService
             return new CompetitionProgress(phase, 0);
         }
 
-        var fixtures = Repo<Fixture, FixtureId>(services);
+        // Like cup games, second-phase, play-in and playoff games move to a day on which neither club plays elsewhere.
         var latest = data.Fixtures.Max(f => f.Date);
-        foreach (var request in requests)
-        {
-            fixtures.Add(new Fixture(
-                FixtureId.New(),
-                competitionId,
-                seasonId,
-                request.Round,
-                GameDate(data, request, latest),
-                request.Home,
-                request.Away,
-                request.Stage,
-                request.GameNumber));
-        }
-
+        await AddFixturesAsync(services, data, requests, request => GameDate(data, request, latest), cancellationToken).ConfigureAwait(false);
         await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return new CompetitionProgress(phase, requests.Count);
     }
@@ -265,6 +260,116 @@ internal sealed class CompetitionService : ICompetitionService
 
         return history;
     }
+
+    public async Task<int> QualifyAsync(SeasonId seasonId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var services = scope.ServiceProvider;
+        var season = await RequireAsync<Season, SeasonId>(services, seasonId, "season", cancellationToken).ConfigureAwait(false);
+        var international = await EntryCompetitionsAsync(services, cancellationToken).ConfigureAwait(false);
+        if (international.Count == 0)
+        {
+            return 0;
+        }
+
+        var participants = Repo<CompetitionParticipant, CompetitionParticipantId>(services);
+        var entries = await participants.ListAsync(p => p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        var previous = (await Repo<Season, SeasonId>(services).ListAsync(x => x.StartDate < season.StartDate, cancellationToken).ConfigureAwait(false))
+            .OrderByDescending(x => x.StartDate).FirstOrDefault();
+        var previousEntries = previous is null ? [] : await participants.ListAsync(p => p.SeasonId == previous.Id, cancellationToken).ConfigureAwait(false);
+        var clubs = (await Repo<Club, ClubId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+        var codes = (await Repo<Country, CountryId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Code.ToUpperInvariant());
+        string CountryOf(ClubId club) => clubs.TryGetValue(club, out var c) ? codes.GetValueOrDefault(c.CountryId, string.Empty) : string.Empty;
+        int Reputation(ClubId club) => clubs.TryGetValue(club, out var c) ? c.Reputation : 0;
+        var levels = (await Repo<Division, DivisionId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(d => d.Id, d => d.Level);
+        var competitions = await Repo<Competition, CompetitionId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false);
+        var leagueLevel = competitions.Where(c => c.Type == CompetitionType.League && c.DivisionId is { } d && levels.ContainsKey(d))
+            .ToDictionary(c => c.Id, c => levels[c.DivisionId!.Value]);
+
+        // Rankings per country and level: last season's champion and final table, else this season's clubs by reputation;
+        // a country with clubs in several leagues of one level ranks the stronger league (mean reputation) first.
+        var ranked = new List<(string Country, int Level, double Strength, int Order, ClubId Club)>();
+        foreach (var (leagueId, level) in leagueLevel.OrderBy(l => l.Key.Value))
+        {
+            List<ClubId> order;
+            if (previous is not null && previousEntries.Any(p => p.CompetitionId == leagueId)
+                && await LoadAsync(services, leagueId, previous.Id, cancellationToken).ConfigureAwait(false) is { Phase: SeasonPhase.Completed } last)
+            {
+                var champion = last.Season.Outcome().Champion;
+                order = [champion, .. last.Season.FinalTable().Select(r => r.ClubId).Where(c => c != champion)];
+            }
+            else
+            {
+                order = [.. entries.Where(p => p.CompetitionId == leagueId).Select(p => p.ClubId).OrderByDescending(Reputation).ThenBy(c => c.Value)];
+            }
+
+            var strength = order.Count == 0 ? 0 : order.Average(c => (double)Reputation(c));
+            ranked.AddRange(order.Select((club, i) => (CountryOf(club), level, strength, i, club)));
+        }
+
+        var rankings = ranked.GroupBy(r => (r.Country, r.Level)).ToDictionary(
+            g => g.Key,
+            g => (IReadOnlyList<ClubId>)[.. g.OrderByDescending(r => r.Strength).ThenBy(r => r.Order).Select(r => r.Club).Distinct()]);
+        var playing = entries.Where(p => leagueLevel.ContainsKey(p.CompetitionId))
+            .GroupBy(p => p.ClubId)
+            .Select(g => new QualifyingClub(g.Key, CountryOf(g.Key), g.Min(p => leagueLevel[p.CompetitionId]), Reputation(g.Key)))
+            .ToList();
+        var winners = new Dictionary<string, ClubId>(StringComparer.OrdinalIgnoreCase);
+        if (previous is not null)
+        {
+            foreach (var cup in competitions.Where(c => c.Type == CompetitionType.Cup && previousEntries.Any(p => p.CompetitionId == c.Id)).OrderBy(c => c.Id.Value))
+            {
+                var last = await LoadAsync(services, cup.Id, previous.Id, cancellationToken).ConfigureAwait(false);
+                if (last.Cup is { Phase: SeasonPhase.Completed } played)
+                {
+                    winners.TryAdd(cup.ShortName, played.Winner!.Value);
+                }
+            }
+        }
+
+        var fixtures = await Repo<Fixture, FixtureId>(services).ListAsync(f => f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        var candidates = international.Select(c =>
+        {
+            var rules = c.ParseRules();
+            List<ClubId> entered = [.. entries.Where(p => p.CompetitionId == c.Id).Select(p => p.ClubId)];
+            var drawn = fixtures.Any(f => f.CompetitionId == c.Id);
+            return new EntryCompetition(c.Id, c.ShortName, rules.Cup!.Entry!, drawn ? entered.Count : rules.Registration.MaxTeams, entered, rules.Registration.Countries);
+        }).ToList();
+        var selection = InternationalQualification.Select(candidates, new QualificationSources(rankings, winners, playing));
+        var added = 0;
+        foreach (var competition in international)
+        {
+            var count = entries.Count(p => p.CompetitionId == competition.Id);
+            foreach (var clubId in selection[competition.Id])
+            {
+                CompetitionRegistration.Check(competition, clubs[clubId], count++, false, CountryOf(clubId));
+                participants.Add(new CompetitionParticipant(CompetitionParticipantId.New(), competition.Id, seasonId, clubId));
+                added++;
+            }
+        }
+
+        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return added;
+    }
+
+    public async Task<IReadOnlyList<CalendarConflict>> GetCalendarConflictsAsync(SeasonId seasonId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var fixtures = await Repo<Fixture, FixtureId>(scope.ServiceProvider).ListAsync(f => f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        return
+        [
+            .. fixtures.SelectMany(f => new[] { (Club: f.HomeClubId, f.Date, Fixture: f), (Club: f.AwayClubId, f.Date, Fixture: f) })
+                .GroupBy(x => (x.Club, x.Date))
+                .Where(g => g.Count() > 1)
+                .OrderBy(g => g.Key.Date).ThenBy(g => g.Key.Club.Value)
+                .Select(g => new CalendarConflict(g.Key.Club, g.Key.Date, [.. g.Select(x => x.Fixture.Id)])),
+        ];
+    }
+
+    /// <summary>Cups that qualify their clubs by entry slots (international competitions).</summary>
+    private static async Task<List<Competition>> EntryCompetitionsAsync(IServiceProvider services, CancellationToken cancellationToken) =>
+        [.. (await Repo<Competition, CompetitionId>(services).ListAsync(c => c.Type == CompetitionType.Cup, cancellationToken).ConfigureAwait(false))
+            .Where(c => c.ParseRules().Cup?.Entry is not null)];
 
     /// <summary>
     /// The cup draw: seeds the clubs (qualified from the league table, or the entered clubs by division level, then
@@ -365,6 +470,11 @@ internal sealed class CompetitionService : ICompetitionService
 
         var requests = cup.NextGames();
         var phase = ToPhase(cup.Phase);
+        if (phase == CompetitionPhase.Completed)
+        {
+            await PayRewardsAsync(services, data, cancellationToken).ConfigureAwait(false);
+        }
+
         if (requests.Count == 0)
         {
             return new CompetitionProgress(phase, 0);
@@ -378,6 +488,36 @@ internal sealed class CompetitionService : ICompetitionService
         await AddFixturesAsync(services, data, requests, DateOf, cancellationToken).ConfigureAwait(false);
         await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return new CompetitionProgress(phase, requests.Count);
+    }
+
+    /// <summary>Pays the rewards of a completed cup (prize money to the balance, reputation) to every entry not yet paid.</summary>
+    private static async Task PayRewardsAsync(IServiceProvider services, SeasonData data, CancellationToken cancellationToken)
+    {
+        if (data.Rules.Cup!.Rewards is null)
+        {
+            return;
+        }
+
+        var unpaid = await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
+            .ListAsync(p => p.CompetitionId == data.Competition.Id && p.SeasonId == data.SeasonEntity.Id && p.PrizeMoney == null, cancellationToken).ConfigureAwait(false);
+        if (unpaid.Count == 0)
+        {
+            return;
+        }
+
+        var clubs = Repo<Club, ClubId>(services);
+        foreach (var entry in unpaid)
+        {
+            var reward = data.Cup!.Reward(entry.ClubId);
+            entry.RecordReward(reward.Prize, reward.Reputation);
+            if (await clubs.FindAsync(entry.ClubId, cancellationToken).ConfigureAwait(false) is { } club)
+            {
+                club.ChangeBalance(reward.Prize);
+                club.ChangeReputation(reward.Reputation);
+            }
+        }
+
+        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Adds the fixtures, each moved on to the first day from its planned date on which neither club has another game.</summary>
