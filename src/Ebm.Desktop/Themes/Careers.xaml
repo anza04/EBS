@@ -63,6 +63,13 @@
                 <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="120" />
               </DataGrid.Columns>
             </DataGrid>
+            <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding CupLines}" Style="{StaticResource Editor.Grid}" Height="170" Margin="0,8,0,0"
+                      Visibility="{Binding HasCup, Converter={StaticResource Careers.Visible}}">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Cup" Binding="{Binding Date}" Width="110" />
+                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
             <DataGrid ItemsSource="{Binding Standings}" Style="{StaticResource Editor.Grid}">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="30" />

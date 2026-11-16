@@ -104,7 +104,7 @@ internal sealed class CareerService(
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
-            leagues = [.. (await LeagueCompetitionsAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false)).Values];
+            leagues = [.. (await SeasonCompetitionsAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false)).Values];
             var unplayed = await UnplayedFixturesAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false);
             if (!career.AssistantManages && unplayed.Any(f => f.Date <= today && IsClubFixture(f, career.ClubId)))
             {
@@ -263,7 +263,12 @@ internal sealed class CareerService(
             }
 
             var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListAsync(p => p.SeasonId == current.Id, cancellationToken).ConfigureAwait(false);
-            nextEntries = entries.GroupBy(e => e.CompetitionId).ToDictionary(g => g.Key, g => g.Select(e => e.ClubId).ToList());
+            var qualifying = (await Repo<Competition, CompetitionId>(s).ListAsync(c => c.Type == CompetitionType.Cup, cancellationToken).ConfigureAwait(false))
+                .Where(c => c.ParseRules().Cup?.Qualification is not null)
+                .Select(c => c.Id)
+                .ToHashSet();
+            nextEntries = entries.Where(e => !qualifying.Contains(e.CompetitionId))
+                .GroupBy(e => e.CompetitionId).ToDictionary(g => g.Key, g => g.Select(e => e.ClubId).ToList());
 
             // Promotion and relegation between the divisions of each league.
             var leagues = await LeagueCompetitionsAsync(s, current.Id, cancellationToken).ConfigureAwait(false);
@@ -370,13 +375,25 @@ internal sealed class CareerService(
         {
             var s = scope.ServiceProvider;
             season = (await Repo<Season, SeasonId>(s).FindAsync(seasonId, cancellationToken).ConfigureAwait(false))!;
-            leagues = [.. (await LeagueCompetitionsAsync(s, seasonId, cancellationToken).ConfigureAwait(false)).Values.OrderBy(c => c.Name)];
+            leagues = [.. (await SeasonCompetitionsAsync(s, seasonId, cancellationToken).ConfigureAwait(false)).Values.OrderBy(c => c.Type).ThenBy(c => c.Name)];
             clubs = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
         }
 
         var reviews = new List<CompetitionReview>();
         foreach (var competition in leagues)
         {
+            if (competition.Type == CompetitionType.Cup)
+            {
+                // A cup counts once it has been played; its winner and finalist, no table or objectives.
+                if (await competitions.GetPhaseAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false) == CompetitionPhase.Completed)
+                {
+                    var cup = await competitions.GetOutcomeAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
+                    reviews.Add(new CompetitionReview(competition, clubs.TryGetValue(cup.Champion, out var w) ? w.Name : "?", [], [], null, []));
+                }
+
+                continue;
+            }
+
             var outcome = await competitions.GetOutcomeAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
             var table = await competitions.GetStandingsAsync(competition.Id, seasonId, cancellationToken).ConfigureAwait(false);
             string Name(ClubId id) => clubs.TryGetValue(id, out var club) ? club.Name : "?";
@@ -412,7 +429,7 @@ internal sealed class CareerService(
             var s = scope.ServiceProvider;
             club = (await Repo<Club, ClubId>(s).FindAsync(career.ClubId, cancellationToken).ConfigureAwait(false))!;
             season = (await Repo<Season, SeasonId>(s).FindAsync(career.SeasonId, cancellationToken).ConfigureAwait(false))!;
-            leagues = [.. (await LeagueCompetitionsAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false)).Values.OrderBy(c => c.Name)];
+            leagues = [.. (await SeasonCompetitionsAsync(s, career.SeasonId, cancellationToken).ConfigureAwait(false)).Values.OrderBy(c => c.Type).ThenBy(c => c.Name)];
             entered = [.. (await Repo<CompetitionParticipant, CompetitionParticipantId>(s)
                     .ListAsync(p => p.SeasonId == career.SeasonId && p.ClubId == career.ClubId, cancellationToken).ConfigureAwait(false))
                 .Select(p => p.CompetitionId)];
@@ -508,6 +525,20 @@ internal sealed class CareerService(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Competitions the calendar runs in the season: leagues and cups with clubs entered, and cups that qualify
+    /// their clubs from a league table (drawn once the qualification is decided).
+    /// </summary>
+    private static async Task<IReadOnlyDictionary<CompetitionId, Competition>> SeasonCompetitionsAsync(IServiceProvider s, SeasonId seasonId, CancellationToken cancellationToken)
+    {
+        var ids = (await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListAsync(p => p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false))
+            .Select(p => p.CompetitionId)
+            .ToHashSet();
+        return (await Repo<Competition, CompetitionId>(s).ListAsync(c => c.Type == CompetitionType.League || c.Type == CompetitionType.Cup, cancellationToken).ConfigureAwait(false))
+            .Where(c => c.Type == CompetitionType.League ? ids.Contains(c.Id) : c.ParseRules().Cup is { } cup && (ids.Contains(c.Id) || cup.Qualification is not null))
+            .ToDictionary(c => c.Id);
     }
 
     /// <summary>League competitions with clubs entered in the season.</summary>

@@ -10,15 +10,15 @@ Milestone 2 — Complete European basketball ecosystem (Milestone 1 completed, r
 None in progress
 
 ## Last completed step
-STEP 16 — European player database expansion (2026-11-13)
+STEP 17 — Domestic cups and additional competitions (2026-11-16)
 
 ## Next step
-STEP 17 — Domestic cups and additional competitions (docs/ROADMAP.md)
+STEP 18 — International club competitions (docs/ROADMAP.md)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: PASS (434/434: 317 unit, 117 integration)
-- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
+- Tests: unit PASS (338/338); integration: cup tests PASS, full run pending after Step 17 (was 117/117)
+- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine (leagues and cups) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market and AI recruitment as `ITransferService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -53,12 +53,13 @@ STEP 17 — Domestic cups and additional competitions (docs/ROADMAP.md)
 - [x] Milestone 1 release: save files (save, load with upgrade, delete, new game), assistant (holiday) mode, Windows self-contained build with smoke test, acceptance and long-run tests (Step 14)
 - [x] European leagues: first two divisions of 18 countries as data (`data/europe`), second phases, play-in, byes, cross-border leagues, EU/EEA limits (Step 15)
 - [x] European player database: real top-division clubs (Unverified), 6,144 generated players with contracts and history, data status and sources, second nationality, estimated attributes/salaries, cross-league duplicate detection, market value (Step 16); real leagues dataset: 8 real divisions, 138 clubs, 2,598 real players (`data/real-leagues`)
-- [ ] Step 17 onwards (Milestone 2) … see docs/ROADMAP.md
+- [x] Domestic cups: knockout rounds, single games and two-legged ties, group stages, bracket/seeded/open draws, seeding, qualification from a league table, finals, cup history; career integration and cup view; cups for 17 countries in the datasets (Step 17)
+- [ ] Step 18 onwards (Milestone 2) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261113110006_PlayerDatabase`
-- Latest migration: `20261113110006_PlayerDatabase` (`Players.SecondNationalityId/ProfileStatus/AttributesStatus/Source`, `Contracts.TermsStatus/Source`, `Clubs.DataStatus`; 22 tables)
-- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. `data/europe/` (generated by `build/generate-europe-dataset.py`; import all four files into a new game): 18 countries + 23 player nationalities, 20 leagues, 35 competitions, 512 clubs (240 real, Unverified), 6,168 players (generated, plus real squads of all 16 Serie A clubs from `build/real-rosters`), 6,168 contracts, 1,509 past spells (`docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`). Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
+- Current schema version: `20261116135956_CupCompetitions`
+- Latest migration: `20261116135956_CupCompetitions` (`CompetitionParticipants.Seed`; fixture stages `CupGroup`/`Cup` need no schema change; 22 tables)
+- Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. `data/europe/` (generated by `build/generate-europe-dataset.py`; import all four files into a new game): 18 countries + 23 player nationalities, 20 leagues, 52 competitions (35 leagues, 17 domestic cups, `docs/CUP_FORMATS.md` §4), 512 clubs (240 real, Unverified), 6,168 players (generated, plus real squads of all 16 Serie A clubs from `build/real-rosters`), 6,168 contracts, 1,509 past spells (`docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`). Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
 1. Layered architecture with inward-only dependencies (Domain ← Services ← Persistence/DataImport ← Hosting ← Desktop). Enforced by architecture tests.
@@ -117,8 +118,12 @@ STEP 17 — Domestic cups and additional competitions (docs/ROADMAP.md)
 54. `NationalityId` is the sporting nationality (domestic/foreign counts); `SecondNationalityId` is a further citizenship counted only for EU/EEA status (`Player.HasNationality`).
 55. Duplicate keys fold accents and common transliterations (`DuplicateKeys.Normalise`); same name with birth dates ≤ 366 days apart is accepted with a possible-duplicate note. Imported club history is closed, non-overlapping spells and is never rewritten.
 56. A squad loads only its club's contracts and spells (`ClubMembership.MembersOfAsync`, same rule as `CurrentClubsAsync`); per-club reads must not scan the whole database.
+57. Cups are `Cup` competitions with a `cup` rules section, run by the pure `CupSeason` (docs/CUP_FORMATS.md). The draw stores each club's seed on its `CompetitionParticipants` row; groups and ties are derived from the seeds, the rules and a draw seed fixed by the competition and season IDs, so a draw never changes once made and the fixtures are its record. Knockout games are `Cup` fixtures with `GameNumber` = leg.
+58. Cup games are scheduled on the first day from their planned date on which neither club has another fixture; a cup's next round is scheduled when all ties of the current one are decided.
+59. Two-legged ties never end level: the second leg goes to overtime while the aggregate is level (`MatchSetup.OvertimeMargin`); a level aggregate after a forfeit or an edit goes to the winner of the second leg.
+60. Qualification cups take their clubs from the country's league table after a given round and are drawn again every season (entries not carried over); other cups keep their entries like leagues.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`.
 
 ## Known issues
 - AI: no youth intake or retirement (generated free agents keep the market supplied); placeholder income, so balances drift up (Step 27); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
@@ -126,7 +131,8 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
 - Experience, reputation, potential, fitness, morale and injury are stored and edited but not yet changed by the game (Steps 12, 21, 22). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
 - Player import files in the old 8-rating format are no longer accepted.
-- Only league competitions can be scheduled; cups/knockout formats come in Step 17. No relegation playoffs, two-legged ties, reseeding or mid-season entrants (see `docs/COMPETITION_FORMATS.md` §2, `docs/COUNTRY_REPORT.md` §3).
+- Leagues and cups can be scheduled; `Tournament` competitions cannot. No relegation playoffs, two-legged ties inside league playoffs, reseeding or mid-season entrants (see `docs/COMPETITION_FORMATS.md` §2, `docs/COUNTRY_REPORT.md` §3).
+- Cups: no neutral venues (Final Eight/Four at the better seed), legs are never drawn, qualification only from the current table of the cup's own country (no previous-season seeding, holders, hosts, late-entering lower-division clubs or supercups); cup formats are unverified simplifications; cup runs are not in the club history (use `ICompetitionService.GetHistoryAsync`); league playoff dates do not avoid already scheduled cup games (`docs/CUP_FORMATS.md` §5).
 - European dataset: players are fictional except the 16 Serie A squads (`build/real-rosters`; birth dates to the year; attributes estimated from career statistics for 200 players, `build/player_ratings.py`; real squads exceed the game's first-team foreign limit, which the real LBA applies to the matchday sheet); second divisions and NBL/TDM1/Promotiedivisie clubs are placeholders; the 240 real clubs are unverified for 2026-27; most formats on a 2025-26 basis (`docs/PLAYER_DATABASE.md` §5, `docs/COUNTRY_REPORT.md`).
 - Competition UI: the match centre shows schedules and results and can create a regular-season schedule; standings are on the *Career* screen; playoffs advance automatically with the career calendar.
 - Import covers countries, arenas, clubs, leagues, divisions, competitions, seasons, participants, players, player contracts and past club spells only (see `docs/IMPORT_FORMATS.md` §7); squad roles are set in the game.
@@ -159,7 +165,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_16_LOG.md
+logs/STEP_17_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

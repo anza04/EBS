@@ -149,6 +149,73 @@ LEAGUES = [
 ]
 
 
+
+def cup_round(name, legs=1, after=None):
+    r = {"name": name}
+    if legs != 1:
+        r["legs"] = legs
+    if after:
+        r["daysAfter"] = after
+    return r
+
+
+QF, SF, F = cup_round("Quarter-finals"), cup_round("Semi-finals"), cup_round("Final")
+FINAL_EIGHT = [cup_round("Quarter-finals"), cup_round("Semi-finals", after=2), cup_round("Final", after=1)]
+FINAL_FOUR = [cup_round("Semi-finals", after=35), cup_round("Final", after=2)]
+
+# Domestic cups (Step 17), 2025-26 formats simplified to the engine (docs/CUP_FORMATS.md §4, unverified):
+# entry ("table", positions, after_round) = the top of the country's top division at that round (a Final Eight at
+# the halfway point); ("clubs", division) = every club of the division from the cup's country. Final Eights and
+# Final Fours are played on consecutive days at the better seed (no neutral venues). Sweden has no domestic cup.
+CUPS = [
+    ("ITA", "Coppa Italia Frecciarossa", "COPPA", ("table", 8, 15), dict(draw="Bracket", rounds=FINAL_EIGHT, offset=145)),
+    ("ESP", "Copa del Rey", "COPA", ("table", 8, 17), dict(draw="Bracket", rounds=FINAL_EIGHT, offset=145)),
+    ("GER", "BBL-Pokal", "POKAL", ("table", 16, 4), dict(rounds=[cup_round("Round of 16"), QF] + FINAL_FOUR, offset=35, days=42)),
+    ("FRA", "Coupe de France", "CDF", ("clubs", "Betclic ÉLITE"), dict(draw="Open", host="LowerSeed", rounds=[cup_round("Round of 16"), QF] + FINAL_FOUR, offset=70, days=35)),
+    ("GRE", "Greek Cup", "CUP", ("clubs", "Stoiximan GBL"), dict(rounds=[cup_round("Round of 16"), QF] + FINAL_FOUR, offset=60, days=35)),
+    ("TUR", "Turkish Cup", "CUP", ("clubs", "Basketbol Süper Ligi"),
+     dict(draw="Bracket", groups={"groups": 4, "legs": 1, "advance": 2, "daysBetweenRounds": 14},
+          rounds=[cup_round("Quarter-finals", after=60), cup_round("Semi-finals", after=2), cup_round("Final", after=1)], offset=40)),
+    ("GBR", "SLB Cup", "CUP", ("clubs", "Super League Basketball"),
+     dict(draw="Bracket", groups={"groups": 2, "legs": 1, "advance": 2, "daysBetweenRounds": 7},
+          rounds=[cup_round("Semi-finals", legs=2, after=21), cup_round("Final", after=28)], offset=30)),
+    ("LTU", "Karaliaus Mindaugo taurė", "KMT", ("clubs", "Betsafe-LKL"), dict(rounds=[cup_round("First round"), cup_round("Quarter-finals", legs=2)] + FINAL_FOUR, offset=50, days=28)),
+    ("SRB", "Kup Radivoja Koraća", "KRK", ("table", 8, 15), dict(draw="Bracket", rounds=FINAL_EIGHT, offset=145)),
+    ("CRO", "Kup Krešimira Ćosića", "KKC", ("clubs", "Premijer liga"), dict(rounds=[cup_round("First round"), QF] + FINAL_FOUR, offset=50, days=35)),
+    ("SLO", "Pokal Spar", "POKAL", ("table", 8, 9), dict(draw="Bracket", rounds=FINAL_EIGHT, offset=145)),
+    ("BEL", "Beker van België", "CUP", ("clubs", "BNXT League"), dict(rounds=[cup_round("First round"), QF, cup_round("Semi-finals", legs=2), cup_round("Final", after=35)], offset=50, days=35)),
+    ("NED", "NBB Beker", "CUP", ("clubs", "BNXT League"), dict(rounds=[cup_round("First round"), QF] + FINAL_FOUR, offset=50, days=35)),
+    ("POR", "Taça de Portugal", "TAÇA", ("clubs", "Liga Betclic"), dict(draw="Open", host="LowerSeed", rounds=[cup_round("First round"), QF] + FINAL_FOUR, offset=50, days=35)),
+    ("POL", "Puchar Polski", "PP", ("table", 8, 15), dict(draw="Bracket", rounds=FINAL_EIGHT, offset=145)),
+    ("CZE", "Český pohár", "CP", ("clubs", "Kooperativa NBL"), dict(rounds=[cup_round("First round"), QF] + FINAL_FOUR, offset=50, days=35)),
+    ("FIN", "Suomen cup", "CUP", ("clubs", "Korisliiga"), dict(rounds=[cup_round("First round"), QF] + FINAL_FOUR, offset=50, days=35)),
+]
+
+
+def add_cups(data, season, division_clubs):
+    """Adds the domestic cups whose source division is in the dataset; division_clubs: division name -> club records."""
+    top = {country: divs[0]["name"] for _, _, country, divs in LEAGUES if country}
+    for country, name, short, entry, fmt in CUPS:
+        source = top.get(country) if entry[0] == "table" else entry[1]
+        if source not in division_clubs:
+            continue
+        cup = {"draw": fmt.get("draw", "Seeded"), "startOffsetDays": fmt["offset"], "daysBetweenRounds": fmt.get("days", 1), "rounds": fmt["rounds"]}
+        if fmt.get("host"):
+            cup["host"] = fmt["host"]
+        if fmt.get("groups"):
+            cup["groupStage"] = fmt["groups"]
+        clubs = [c for c in division_clubs[source] if c["country"] == country]
+        teams = entry[1] if entry[0] == "table" else len(clubs)
+        if entry[0] == "table":
+            cup["qualification"] = {"level": 1, "positions": entry[1], "afterRound": entry[2]}
+        competition = {"id": uid("competition", "cup", country, name), "name": name, "shortName": short, "type": "Cup", "country": country,
+                       "rules": {"registration": {"minTeams": teams, "maxTeams": teams}, "cup": cup}}
+        data["competitions"].append(competition)
+        if entry[0] == "clubs":
+            for club in clubs:
+                data["participants"].append({"id": uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
+                                             "seasonId": season["id"], "clubId": club["id"]})
+
 def uid(*parts):
     return str(uuid.uuid5(NS, "|".join(parts)))
 
@@ -423,7 +490,7 @@ def write_country(folder, data, players, contracts, history, code, slug):
     European dataset; only the countries that clubs and players refer to."""
     league_ids = {l["id"] for l in data["leagues"] if l.get("country") == code}
     division_ids = {d["id"] for d in data["divisions"] if d["leagueId"] in league_ids}
-    competitions = [c for c in data["competitions"] if c["divisionId"] in division_ids]
+    competitions = [c for c in data["competitions"] if c.get("divisionId") in division_ids or (c["type"] == "Cup" and c.get("country") == code)]
     competition_ids = {c["id"] for c in competitions}
     participants = [p for p in data["participants"] if p["competitionId"] in competition_ids]
     club_ids = {p["clubId"] for p in participants}
@@ -456,6 +523,7 @@ def main():
     for code, (name, eu) in EXTRA_COUNTRIES.items():
         data["countries"].append({"code": code, "name": name, "euEea": eu})
     club_divisions = []
+    division_clubs = {}
 
     used_cities = {code: 0 for code in COUNTRIES}
     nick_index = 0
@@ -498,9 +566,11 @@ def main():
                         "boardExpectation": board(level, within if not div["countries"] else rank, div["clubs"], div)}
                 data["clubs"].append(club)
                 club_divisions.append((club, div, level))
+                division_clubs.setdefault(div["name"], []).append(club)
                 data["participants"].append({"id": uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
                                              "seasonId": season["id"], "clubId": club["id"]})
 
+    add_cups(data, season, division_clubs)
     assert len({c["id"] for c in data["clubs"]}) == len(data["clubs"]), "duplicate club"
     for club in data["clubs"]:
         club["balance"] = int(club["balance"])

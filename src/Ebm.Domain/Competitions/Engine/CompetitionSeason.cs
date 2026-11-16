@@ -15,6 +15,12 @@ public enum SeasonPhase
     PlayIn,
     Playoffs,
     Completed,
+
+    /// <summary>A cup's group stage.</summary>
+    GroupStage,
+
+    /// <summary>A cup's knockout rounds.</summary>
+    Knockout,
 }
 
 /// <summary>A scheduled game of a competition season; the scores are <c>null</c> until it is played.</summary>
@@ -99,6 +105,17 @@ public sealed class CompetitionSeason
     /// <summary>The regular-season table.</summary>
     public IReadOnlyList<StandingRow> FirstPhaseTable() =>
         _firstPhase ??= StandingsCalculator.Calculate(Clubs, Played(FixtureStage.RegularSeason), _rules);
+
+    /// <summary>The regular-season table counting rounds up to <paramref name="round"/> only (cup qualification).</summary>
+    public IReadOnlyList<StandingRow> TableAfterRound(int round) =>
+        StandingsCalculator.Calculate(Clubs, Stage(FixtureStage.RegularSeason).Where(g => g.Round <= round && g.IsPlayed).Select(g => g.Result), _rules);
+
+    /// <summary>Whether every regular-season game up to <paramref name="round"/> exists and has been played.</summary>
+    public bool RoundsPlayed(int round)
+    {
+        var games = Stage(FixtureStage.RegularSeason).ToList();
+        return games.Count > 0 && games.Max(g => g.Round) >= round && games.Where(g => g.Round <= round).All(g => g.IsPlayed);
+    }
 
     /// <summary>The second-phase groups once the regular season is over (empty without a second phase).</summary>
     public IReadOnlyList<GroupTable> GroupTables()
@@ -225,6 +242,7 @@ public sealed class CompetitionSeason
         _rules.ValidateForClubs(table.Count);
         var bracket = Bracket();
         var champion = bracket?.Champion ?? table[0].ClubId;
+        var runnerUp = bracket is not null ? bracket.TopPlaces(2)[1] : table[1].ClubId;
         List<ClubId> promoted = [.. table.Take(_rules.Promotion.Direct).Select(r => r.ClubId)];
         if (_rules.Promotion.PlayoffPromotions > 0)
         {
@@ -232,7 +250,7 @@ public sealed class CompetitionSeason
         }
 
         var relegated = table.TakeLast(_rules.Relegation.Direct).Select(r => r.ClubId).ToList();
-        return new SeasonOutcome(champion, promoted, relegated);
+        return new SeasonOutcome(champion, promoted, relegated, runnerUp);
     }
 
     /// <summary>Whether the final table can no longer change (every table game played).</summary>

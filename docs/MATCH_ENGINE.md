@@ -142,6 +142,9 @@ scores in one transaction), `PlayAsync` (instant), `GetReportAsync` (stored box 
 rotation (in order) and bench, leaves out injured, inactive and youth players (unless fewer than five remain) and fills
 missing starting positions with the best available player, so clubs without squad roles can play.
 
+The second leg of a two-legged cup tie sets `MatchSetup.OvertimeMargin` to the first-leg margin, so it goes to overtime
+while the aggregate is level as well as when the score is level (docs/CUP_FORMATS.md §1).
+
 The same setup and seed give the same match. Box scores store whole minutes (rounded); the engine keeps seconds.
 
 ## 7. Statistical validation

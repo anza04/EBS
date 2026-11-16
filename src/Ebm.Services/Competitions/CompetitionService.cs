@@ -37,6 +37,11 @@ internal sealed class CompetitionService : ICompetitionService
             throw new DomainValidationException($"Registration for {competition.Name} is closed: the schedule has been generated.");
         }
 
+        if (competition.ParseRules().Cup?.Qualification is { } qualification)
+        {
+            throw new DomainValidationException($"{competition.Name} takes the top {qualification.Positions} clubs of its league table: clubs cannot be entered by hand.");
+        }
+
         var participants = Repo<CompetitionParticipant, CompetitionParticipantId>(services);
         var seasonEntries = await participants.ListAsync(p => p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
         var leagueIds = (await Repo<Competition, CompetitionId>(services)
@@ -68,9 +73,16 @@ internal sealed class CompetitionService : ICompetitionService
         var services = scope.ServiceProvider;
         var data = await LoadAsync(services, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
         var competition = data.Competition;
+        if (competition.Type == CompetitionType.Cup && data.Cup is not null)
+        {
+            return await DrawAsync(services, data, required: true, cancellationToken).ConfigureAwait(false);
+        }
+
         if (competition.Type != CompetitionType.League)
         {
-            throw new DomainValidationException($"{competition.Name} is a {competition.Type.ToString().ToLowerInvariant()}: only league competitions can be scheduled.");
+            throw new DomainValidationException(competition.Type == CompetitionType.Cup
+                ? $"{competition.Name} has no cup format yet: add a cup section to its rules (docs/CUP_FORMATS.md)."
+                : $"{competition.Name} is a {competition.Type.ToString().ToLowerInvariant()}: only leagues and cups can be scheduled.");
         }
 
         if (data.Fixtures.Count > 0)
@@ -160,6 +172,11 @@ internal sealed class CompetitionService : ICompetitionService
         using var scope = _scopes.CreateScope();
         var services = scope.ServiceProvider;
         var data = await LoadAsync(services, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
+        if (data.Cup is not null)
+        {
+            return await AdvanceCupAsync(services, data, cancellationToken).ConfigureAwait(false);
+        }
+
         var requests = data.Season.NextGames();
         var phase = ToPhase(data.Season.Phase);
         if (requests.Count == 0)
@@ -190,33 +207,234 @@ internal sealed class CompetitionService : ICompetitionService
     public async Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
-        return ToPhase((await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Season.Phase);
+        return ToPhase((await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Phase);
     }
 
     public async Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        return data.Season.FinalTable();
+        return data.Cup is null ? data.Season.FinalTable() : [];
     }
 
     public async Task<IReadOnlyList<GroupTable>> GetGroupTablesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        return data.Season.GroupTables();
+        return data.Cup?.GroupTables() ?? data.Season.GroupTables();
     }
 
     public async Task<SeasonOutcome> GetOutcomeAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
         var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
-        if (data.Season.Phase != SeasonPhase.Completed)
+        if (data.Phase != SeasonPhase.Completed)
         {
             throw new DomainValidationException($"The {data.SeasonEntity.Name} season of {data.Competition.Name} is not finished yet.");
         }
 
-        return data.Season.Outcome();
+        return data.Cup?.Outcome() ?? data.Season.Outcome();
+    }
+
+    public async Task<CupView> GetCupAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var data = await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false);
+        var cup = data.Cup ?? throw new DomainValidationException($"{data.Competition.Name} is not a cup with a cup format.");
+        return new CupView(ToPhase(cup.Phase), cup.Seeds, cup.GroupTables(), cup.Byes, cup.Ties(), cup.Winner, cup.RunnerUp);
+    }
+
+    public async Task<IReadOnlyList<CompetitionHistoryEntry>> GetHistoryAsync(CompetitionId competitionId, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var services = scope.ServiceProvider;
+        await RequireAsync<Competition, CompetitionId>(services, competitionId, "competition", cancellationToken).ConfigureAwait(false);
+        var seasonIds = (await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
+                .ListAsync(p => p.CompetitionId == competitionId, cancellationToken).ConfigureAwait(false))
+            .Select(p => p.SeasonId)
+            .ToHashSet();
+        var seasons = (await Repo<Season, SeasonId>(services).ListAsync(x => seasonIds.Contains(x.Id), cancellationToken).ConfigureAwait(false))
+            .OrderBy(x => x.StartDate);
+        var history = new List<CompetitionHistoryEntry>();
+        foreach (var season in seasons)
+        {
+            var data = await LoadAsync(services, competitionId, season.Id, cancellationToken).ConfigureAwait(false);
+            var outcome = data.Phase == SeasonPhase.Completed ? data.Cup?.Outcome() ?? data.Season.Outcome() : null;
+            history.Add(new CompetitionHistoryEntry(season, ToPhase(data.Phase), outcome?.Champion, outcome?.RunnerUp));
+        }
+
+        return history;
+    }
+
+    /// <summary>
+    /// The cup draw: seeds the clubs (qualified from the league table, or the entered clubs by division level, then
+    /// reputation), stores the seeds and schedules the group stage or the first round. When the draw is not possible
+    /// yet it throws if <paramref name="required"/>, else it does nothing.
+    /// </summary>
+    private static async Task<CompetitionProgress> DrawAsync(IServiceProvider services, SeasonData data, bool required, CancellationToken cancellationToken)
+    {
+        var competition = data.Competition;
+        var season = data.SeasonEntity;
+        var cup = data.Rules.Cup!;
+        CompetitionProgress Fail(string message) => required
+            ? throw new DomainValidationException(message)
+            : new CompetitionProgress(CompetitionPhase.Registration, 0);
+
+        if (data.Cup!.IsDrawn)
+        {
+            return Fail($"The {season.Name} draw of {competition.Name} has already been made.");
+        }
+
+        var participants = Repo<CompetitionParticipant, CompetitionParticipantId>(services);
+        var entries = (await participants.ListAsync(p => p.CompetitionId == competition.Id && p.SeasonId == season.Id, cancellationToken).ConfigureAwait(false)).ToList();
+        var start = season.StartDate.AddDays(cup.StartOffsetDays);
+        List<ClubId> seeds;
+        if (cup.Qualification is { } qualification)
+        {
+            var source = await QualifyingLeagueAsync(services, competition, qualification.Level, season.Id, cancellationToken).ConfigureAwait(false);
+            if (source is null)
+            {
+                return Fail($"{competition.Name} takes its clubs from the level {qualification.Level} division of its country, which has no league with entries in {season.Name}.");
+            }
+
+            var league = await LoadAsync(services, source.Id, season.Id, cancellationToken).ConfigureAwait(false);
+            if (!league.Season.RoundsPlayed(qualification.AfterRound))
+            {
+                return Fail($"{competition.Name} is drawn once round {qualification.AfterRound} of {source.Name} has been played.");
+            }
+
+            seeds = [.. league.Season.TableAfterRound(qualification.AfterRound).Take(qualification.Positions).Select(r => r.ClubId)];
+            if (seeds.Count < qualification.Positions || entries.Any(e => !seeds.Contains(e.ClubId)))
+            {
+                return Fail($"{competition.Name} needs the top {qualification.Positions} clubs of {source.Name}, and only those.");
+            }
+
+            var lastQualifying = league.Fixtures.Where(f => f.Stage == FixtureStage.RegularSeason && f.Round <= qualification.AfterRound).Max(f => f.Date);
+            start = lastQualifying >= start ? lastQualifying.AddDays(1) : start;
+            var countries = Repo<Country, CountryId>(services);
+            foreach (var clubId in seeds.Where(c => entries.All(e => e.ClubId != c)))
+            {
+                var club = await RequireAsync<Club, ClubId>(services, clubId, "club", cancellationToken).ConfigureAwait(false);
+                var code = (await countries.FindAsync(club.CountryId, cancellationToken).ConfigureAwait(false))?.Code;
+                CompetitionRegistration.Check(competition, club, entries.Count, false, code);
+                var entry = new CompetitionParticipant(CompetitionParticipantId.New(), competition.Id, season.Id, clubId);
+                participants.Add(entry);
+                entries.Add(entry);
+            }
+        }
+        else
+        {
+            seeds = await RankEntriesAsync(services, entries, season.Id, cancellationToken).ConfigureAwait(false);
+        }
+
+        try
+        {
+            data.Rules.ValidateForClubs(seeds.Count);
+        }
+        catch (DomainValidationException) when (!required)
+        {
+            return Fail(string.Empty);
+        }
+
+        for (var i = 0; i < seeds.Count; i++)
+        {
+            entries.Single(e => e.ClubId == seeds[i]).SetSeed(i + 1);
+        }
+
+        var requests = new CupSeason(data.Rules, seeds, [], data.DrawSeed).NextGames();
+        DateOnly DateOf(SeasonGameRequest request) =>
+            request.Stage == FixtureStage.CupGroup ? start.AddDays((request.Round - 1) * cup.GroupStage!.DaysBetweenRounds) : start;
+        if (requests.Max(DateOf) > season.EndDate)
+        {
+            return Fail($"The {competition.Name} games starting {start:yyyy-MM-dd} do not fit in season {season.Name}. Change cup.startOffsetDays.");
+        }
+
+        await AddFixturesAsync(services, data, requests, DateOf, cancellationToken).ConfigureAwait(false);
+        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return new CompetitionProgress(cup.GroupStage is null ? CompetitionPhase.Knockout : CompetitionPhase.GroupStage, requests.Count);
+    }
+
+    /// <summary>Draws the cup when possible, then schedules the next round (the round interval after the cup's last game) and second legs.</summary>
+    private static async Task<CompetitionProgress> AdvanceCupAsync(IServiceProvider services, SeasonData data, CancellationToken cancellationToken)
+    {
+        var cup = data.Cup!;
+        if (!cup.IsDrawn)
+        {
+            return await DrawAsync(services, data, required: false, cancellationToken).ConfigureAwait(false);
+        }
+
+        var requests = cup.NextGames();
+        var phase = ToPhase(cup.Phase);
+        if (requests.Count == 0)
+        {
+            return new CompetitionProgress(phase, 0);
+        }
+
+        var rules = data.Rules.Cup!;
+        var latest = data.Fixtures.Max(f => f.Date);
+        DateOnly DateOf(SeasonGameRequest request) => request.GameNumber == 2
+            ? data.Fixtures.Single(f => f.Stage == FixtureStage.Cup && f.Round == request.Round && f.GameNumber == 1 && IsPair(f, request.Home, request.Away)).Date.AddDays(rules.DaysBetweenLegs)
+            : latest.AddDays(rules.Rounds[request.Round - 1].DaysAfter ?? rules.DaysBetweenRounds);
+        await AddFixturesAsync(services, data, requests, DateOf, cancellationToken).ConfigureAwait(false);
+        await services.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return new CompetitionProgress(phase, requests.Count);
+    }
+
+    /// <summary>Adds the fixtures, each moved on to the first day from its planned date on which neither club has another game.</summary>
+    private static async Task AddFixturesAsync(IServiceProvider services, SeasonData data, IReadOnlyList<SeasonGameRequest> requests, Func<SeasonGameRequest, DateOnly> dateOf, CancellationToken cancellationToken)
+    {
+        var seasonId = data.SeasonEntity.Id;
+        var clubIds = requests.SelectMany(r => new[] { r.Home, r.Away }).Distinct().ToList();
+        var fixtures = Repo<Fixture, FixtureId>(services);
+        var busy = (await fixtures.ListAsync(f => f.SeasonId == seasonId && (clubIds.Contains(f.HomeClubId) || clubIds.Contains(f.AwayClubId)), cancellationToken).ConfigureAwait(false))
+            .SelectMany(f => new[] { (f.HomeClubId, f.Date), (f.AwayClubId, f.Date) })
+            .ToHashSet();
+        foreach (var request in requests)
+        {
+            var date = dateOf(request);
+            while (busy.Contains((request.Home, date)) || busy.Contains((request.Away, date)))
+            {
+                date = date.AddDays(1);
+            }
+
+            busy.Add((request.Home, date));
+            busy.Add((request.Away, date));
+            fixtures.Add(new Fixture(FixtureId.New(), data.Competition.Id, seasonId, request.Round, date, request.Home, request.Away, request.Stage, request.GameNumber));
+        }
+    }
+
+    /// <summary>The league competition of the cup's country at division level <paramref name="level"/> with entries in the season.</summary>
+    private static async Task<Competition?> QualifyingLeagueAsync(IServiceProvider services, Competition cup, int level, SeasonId seasonId, CancellationToken cancellationToken)
+    {
+        if (cup.CountryId is not { } countryId)
+        {
+            return null;
+        }
+
+        var divisions = (await Repo<Division, DivisionId>(services).ListAsync(d => d.Level == level, cancellationToken).ConfigureAwait(false)).Select(d => d.Id).ToList();
+        var leagues = await Repo<Competition, CompetitionId>(services)
+            .ListAsync(c => c.Type == CompetitionType.League && c.CountryId == countryId && c.DivisionId != null && divisions.Contains(c.DivisionId.Value), cancellationToken).ConfigureAwait(false);
+        var entered = (await Repo<CompetitionParticipant, CompetitionParticipantId>(services).ListAsync(p => p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false))
+            .Select(p => p.CompetitionId)
+            .ToHashSet();
+        return leagues.Where(c => entered.Contains(c.Id)).OrderBy(c => c.Id.Value).FirstOrDefault();
+    }
+
+    /// <summary>Entered clubs best first: by the division level of their league this season (no league last), then reputation.</summary>
+    private static async Task<List<ClubId>> RankEntriesAsync(IServiceProvider services, IReadOnlyList<CompetitionParticipant> entries, SeasonId seasonId, CancellationToken cancellationToken)
+    {
+        var ids = entries.Select(e => e.ClubId).ToList();
+        var clubs = await Repo<Club, ClubId>(services).ListAsync(c => ids.Contains(c.Id), cancellationToken).ConfigureAwait(false);
+        var leagueEntries = await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
+            .ListAsync(p => p.SeasonId == seasonId && ids.Contains(p.ClubId), cancellationToken).ConfigureAwait(false);
+        var leagues = (await Repo<Competition, CompetitionId>(services).ListAsync(c => c.Type == CompetitionType.League && c.DivisionId != null, cancellationToken).ConfigureAwait(false))
+            .ToDictionary(c => c.Id, c => c.DivisionId!.Value);
+        var levels = (await Repo<Division, DivisionId>(services).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(d => d.Id, d => d.Level);
+        int Level(ClubId club) => leagueEntries.Where(p => p.ClubId == club && leagues.ContainsKey(p.CompetitionId))
+            .Select(p => levels.GetValueOrDefault(leagues[p.CompetitionId], int.MaxValue))
+            .DefaultIfEmpty(int.MaxValue)
+            .Min();
+        return [.. clubs.OrderBy(c => Level(c.Id)).ThenByDescending(c => c.Reputation).ThenBy(c => c.Id.Value).Select(c => c.Id)];
     }
 
     private static CompetitionPhase ToPhase(SeasonPhase phase) => (CompetitionPhase)(int)phase;
@@ -279,10 +497,9 @@ internal sealed class CompetitionService : ICompetitionService
     {
         var competition = await RequireAsync<Competition, CompetitionId>(services, competitionId, "competition", cancellationToken).ConfigureAwait(false);
         var season = await RequireAsync<Season, SeasonId>(services, seasonId, "season", cancellationToken).ConfigureAwait(false);
-        var clubIds = (await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
-                .ListAsync(p => p.CompetitionId == competitionId && p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false))
-            .Select(p => p.ClubId)
-            .ToList();
+        var participants = await Repo<CompetitionParticipant, CompetitionParticipantId>(services)
+            .ListAsync(p => p.CompetitionId == competitionId && p.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        var clubIds = participants.Select(p => p.ClubId).ToList();
         var rules = competition.ParseRules();
         var countryOf = new Dictionary<ClubId, string>();
         if (rules.SecondPhase?.ByCountry == true)
@@ -301,9 +518,13 @@ internal sealed class CompetitionService : ICompetitionService
                 .ToDictionary(m => m.FixtureId);
         var games = fixtures.Select(f => results.TryGetValue(f.Id, out var m)
             ? new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId, m.HomeScore, m.AwayScore)
-            : new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId));
+            : new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId)).ToList();
         var entries = clubIds.ToDictionary(c => c, c => countryOf.GetValueOrDefault(c, string.Empty));
-        return new SeasonData(competition, season, rules, new CompetitionSeason(rules, entries, games), fixtures);
+        var drawSeed = CupSeason.DrawSeed(competitionId.Value, seasonId.Value);
+        var cup = competition.Type == CompetitionType.Cup && rules.Cup is not null
+            ? new CupSeason(rules, [.. participants.Where(p => p.Seed is not null).OrderBy(p => p.Seed).Select(p => p.ClubId)], games, drawSeed)
+            : null;
+        return new SeasonData(competition, season, rules, new CompetitionSeason(rules, entries, games), fixtures, cup, drawSeed);
     }
 
     private static Task<TEntity> RequireAsync<TEntity, TId>(IServiceProvider services, TId id, string what, CancellationToken cancellationToken)
@@ -328,8 +549,12 @@ internal sealed class CompetitionService : ICompetitionService
         Season SeasonEntity,
         CompetitionRules Rules,
         CompetitionSeason Season,
-        IReadOnlyList<Fixture> Fixtures)
+        IReadOnlyList<Fixture> Fixtures,
+        CupSeason? Cup,
+        int DrawSeed)
     {
         public IReadOnlyList<ClubId> Clubs => Season.Clubs;
+
+        public SeasonPhase Phase => Cup?.Phase ?? Season.Phase;
     }
 }

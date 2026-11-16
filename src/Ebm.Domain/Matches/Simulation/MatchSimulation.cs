@@ -28,10 +28,14 @@ public sealed partial class MatchSimulation
     private int _possessions;
     private bool _endedByDefault;
 
+    /// <summary>Home − away margin that also forces overtime (second leg with the aggregate level).</summary>
+    private readonly int _overtimeMargin;
+
     public MatchSimulation(MatchSetup setup, SimulationMode mode = SimulationMode.Instant, PlayerRatingCalculator? calculator = null)
     {
         ArgumentNullException.ThrowIfNull(setup);
         _rules = setup.MatchRules;
+        _overtimeMargin = setup.OvertimeMargin;
         setup.Home.Validate(_rules);
         setup.Away.Validate(_rules);
         if (setup.Home.Players.Select(p => p.Player.Id).Intersect(setup.Away.Players.Select(p => p.Player.Id)).Any())

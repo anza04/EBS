@@ -8594,6 +8594,607 @@
     }
    },
    "country": "SWE"
+  },
+  {
+   "id": "fe9d182b-7705-5798-946b-8747e691c086",
+   "name": "Coppa Italia Frecciarossa",
+   "shortName": "COPPA",
+   "type": "Cup",
+   "country": "ITA",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 15
+     }
+    }
+   }
+  },
+  {
+   "id": "396f6973-75b5-5b17-b360-21b9648906e5",
+   "name": "Copa del Rey",
+   "shortName": "COPA",
+   "type": "Cup",
+   "country": "ESP",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 17
+     }
+    }
+   }
+  },
+  {
+   "id": "267f75cc-0e0b-5ac8-a639-937ae23a004e",
+   "name": "BBL-Pokal",
+   "shortName": "POKAL",
+   "type": "Cup",
+   "country": "GER",
+   "rules": {
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 35,
+     "daysBetweenRounds": 42,
+     "rounds": [
+      {
+       "name": "Round of 16"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 16,
+      "afterRound": 4
+     }
+    }
+   }
+  },
+  {
+   "id": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "name": "Coupe de France",
+   "shortName": "CDF",
+   "type": "Cup",
+   "country": "FRA",
+   "rules": {
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16
+    },
+    "cup": {
+     "draw": "Open",
+     "startOffsetDays": 70,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "Round of 16"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ],
+     "host": "LowerSeed"
+    }
+   }
+  },
+  {
+   "id": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "name": "Greek Cup",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "GRE",
+   "rules": {
+    "registration": {
+     "minTeams": 12,
+     "maxTeams": 12
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 60,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "Round of 16"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "name": "Turkish Cup",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "TUR",
+   "rules": {
+    "registration": {
+     "minTeams": 16,
+     "maxTeams": 16
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 40,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals",
+       "daysAfter": 60
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "groupStage": {
+      "groups": 4,
+      "legs": 1,
+      "advance": 2,
+      "daysBetweenRounds": 14
+     }
+    }
+   }
+  },
+  {
+   "id": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "name": "SLB Cup",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "GBR",
+   "rules": {
+    "registration": {
+     "minTeams": 10,
+     "maxTeams": 10
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 30,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Semi-finals",
+       "legs": 2,
+       "daysAfter": 21
+      },
+      {
+       "name": "Final",
+       "daysAfter": 28
+      }
+     ],
+     "groupStage": {
+      "groups": 2,
+      "legs": 1,
+      "advance": 2,
+      "daysBetweenRounds": 7
+     }
+    }
+   }
+  },
+  {
+   "id": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "name": "Karaliaus Mindaugo taurė",
+   "shortName": "KMT",
+   "type": "Cup",
+   "country": "LTU",
+   "rules": {
+    "registration": {
+     "minTeams": 10,
+     "maxTeams": 10
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 28,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals",
+       "legs": 2
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "17920007-a4f8-544c-8a9d-b011b2518651",
+   "name": "Kup Radivoja Koraća",
+   "shortName": "KRK",
+   "type": "Cup",
+   "country": "SRB",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 15
+     }
+    }
+   }
+  },
+  {
+   "id": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "name": "Kup Krešimira Ćosića",
+   "shortName": "KKC",
+   "type": "Cup",
+   "country": "CRO",
+   "rules": {
+    "registration": {
+     "minTeams": 12,
+     "maxTeams": 12
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "69249ac7-03ba-5758-b4f1-606f6bf03882",
+   "name": "Pokal Spar",
+   "shortName": "POKAL",
+   "type": "Cup",
+   "country": "SLO",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 9
+     }
+    }
+   }
+  },
+  {
+   "id": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "name": "Beker van België",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "BEL",
+   "rules": {
+    "registration": {
+     "minTeams": 10,
+     "maxTeams": 10
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "legs": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 35
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "name": "NBB Beker",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "NED",
+   "rules": {
+    "registration": {
+     "minTeams": 10,
+     "maxTeams": 10
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "name": "Taça de Portugal",
+   "shortName": "TAÇA",
+   "type": "Cup",
+   "country": "POR",
+   "rules": {
+    "registration": {
+     "minTeams": 14,
+     "maxTeams": 14
+    },
+    "cup": {
+     "draw": "Open",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ],
+     "host": "LowerSeed"
+    }
+   }
+  },
+  {
+   "id": "d5ad03d5-a5ba-581c-8a02-4e542bbda11b",
+   "name": "Puchar Polski",
+   "shortName": "PP",
+   "type": "Cup",
+   "country": "POL",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 15
+     }
+    }
+   }
+  },
+  {
+   "id": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "name": "Český pohár",
+   "shortName": "CP",
+   "type": "Cup",
+   "country": "CZE",
+   "rules": {
+    "registration": {
+     "minTeams": 12,
+     "maxTeams": 12
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "name": "Suomen cup",
+   "shortName": "CUP",
+   "type": "Cup",
+   "country": "FIN",
+   "rules": {
+    "registration": {
+     "minTeams": 12,
+     "maxTeams": 12
+    },
+    "cup": {
+     "draw": "Seeded",
+     "startOffsetDays": 50,
+     "daysBetweenRounds": 35,
+     "rounds": [
+      {
+       "name": "First round"
+      },
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 35
+      },
+      {
+       "name": "Final",
+       "daysAfter": 2
+      }
+     ]
+    }
+   }
   }
  ],
  "seasons": [
@@ -11676,6 +12277,810 @@
    "competitionId": "293f4109-286c-5847-8ea7-16e5e9be4787",
    "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
    "clubId": "79d80a66-9e35-5ed4-8462-ed9f811bf397"
+  },
+  {
+   "id": "4400b22d-4907-5892-bcdf-fbd4988b656d",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1387d220-55b4-53c2-a062-de08c987ccf4"
+  },
+  {
+   "id": "652f6ec9-2f5b-52a1-a787-47372abb9ba1",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "59774264-e7c6-5038-8f0e-e88d32a98c7e"
+  },
+  {
+   "id": "5608cd37-c9ca-58fc-a5fe-4c2a47457abf",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ff22e546-1ad2-5db3-9623-bafd980d5fcf"
+  },
+  {
+   "id": "ec1ec901-481a-5c57-ab92-f83cdc4a72a8",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "72a18e9f-c7e8-591e-bb2c-6ba0bc0c22ce"
+  },
+  {
+   "id": "cafb95ca-9b5e-57c9-b6ef-07e1cdf99154",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a6ceedce-f5e4-5b3d-bf96-0ad5a505fa85"
+  },
+  {
+   "id": "4e38a08a-fa7f-59b1-8fbe-5a60948de9e6",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b5fc4732-2f9d-5af1-9ba2-5d303f244605"
+  },
+  {
+   "id": "3f1aa470-e2a1-59af-9d6b-11a9b0dd58c9",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "469e1639-5daa-5ee4-8e1e-cf7054886f3b"
+  },
+  {
+   "id": "4dc9d6b0-8c4c-55c2-8963-268220578b84",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e93cd551-f2dd-5ef2-97ed-77eea4f42d48"
+  },
+  {
+   "id": "67dcbb00-efb7-5ce0-b41c-35e6c1c1e4e3",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b1cea188-0500-5d91-95f5-459a2c66bd70"
+  },
+  {
+   "id": "98a6b2d2-826b-5d63-91b0-ac655a8fd553",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "00722b76-b735-5865-90b4-f0be376e81c0"
+  },
+  {
+   "id": "41e3cccf-f16e-51ce-81c1-48663e209a78",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f4a540a8-f91b-56d1-96ca-7f75c26e182a"
+  },
+  {
+   "id": "9ff972a3-66a2-5e70-996f-b2fda731c1ef",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "05204571-71f0-54cf-b9d2-71c52d5ef2ae"
+  },
+  {
+   "id": "4d5a991d-9380-5499-8215-43c05906d789",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a105aa22-e1a3-563f-b4fc-f7f0654932b7"
+  },
+  {
+   "id": "6e392622-e8d6-5743-9fa9-3c5cbda546d8",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "64cbdd11-de67-5441-a25c-f0cb7fa0862d"
+  },
+  {
+   "id": "f9d3d0f0-a378-50ad-b28d-cdeb4863fc5f",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f761c5a2-0b72-5b92-bf15-4667c5ca890d"
+  },
+  {
+   "id": "9926f156-2b65-5bae-9f12-b9c649378ccd",
+   "competitionId": "b191e3d4-4d68-5563-a3c6-d8259679a6e4",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fd2790d6-a8b4-5b1a-9a5e-98eff5f397ad"
+  },
+  {
+   "id": "566225ae-6434-5079-a7ae-2af14a9472df",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6fc47f4d-fbb4-5646-8a29-eeb39f459d8c"
+  },
+  {
+   "id": "45e48bfb-c0bf-5d2a-99ac-617c12969bd9",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1ab82576-030c-551b-85e1-757cf0921423"
+  },
+  {
+   "id": "a0399620-2de9-5856-806a-e0a4773893f4",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ea490fa6-67f0-55c7-b47e-f537f2556d3f"
+  },
+  {
+   "id": "537ec255-bf9b-5bf5-82f7-50af3c40c868",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9177fa29-d981-52ad-a16c-9fd3b4ce3b51"
+  },
+  {
+   "id": "858d402c-a412-5fb8-a1eb-a3760287e45b",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9e28dfa0-54fe-5de0-883b-432e1852f2df"
+  },
+  {
+   "id": "5c55cf9b-2772-595f-ab78-3d76a28ea734",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "adc03bd2-2ee1-5b04-8e22-20503c4a255b"
+  },
+  {
+   "id": "81933dbb-86ea-5ecc-b6c3-32574b65a65c",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "13800b33-38a6-5fd6-a477-2ac636c5f6f1"
+  },
+  {
+   "id": "9e0022b1-2783-5096-84a7-887688f0f320",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "08439354-c6b6-527a-9334-8cfde7396ef3"
+  },
+  {
+   "id": "3f2ae402-bbf4-58f2-bc1d-6cf69c7e8eb8",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ffe6b9ef-a135-5286-a292-a0ec6cb8d749"
+  },
+  {
+   "id": "68175120-bf85-5f92-9c99-f5076a527821",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a3fe4d79-add9-5df2-8d5e-0ea33cfc70c7"
+  },
+  {
+   "id": "467f828b-d5ca-5bbf-8bbb-82e7141fe396",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "afd6d693-9e24-591f-af9d-2dd9ded4307d"
+  },
+  {
+   "id": "b1d16c5d-0910-5b16-949d-483981cb4c67",
+   "competitionId": "5340ceba-6274-5a4a-a7c5-9b097a5e8570",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "02b3b432-79b5-5541-b91c-783caf9dd87b"
+  },
+  {
+   "id": "aab01e30-a294-531a-8369-01e760c3ff97",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7ba1a2a5-98b0-5edc-adba-a7a6526f738f"
+  },
+  {
+   "id": "c172f1a0-1e43-5454-a222-379cc73fc856",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "905cf9e7-fe74-5e5b-ac41-81e27af59860"
+  },
+  {
+   "id": "c19b1684-7a5e-5caf-a923-24a2202700f3",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d9ee527f-b553-5e2a-a662-a14ea0168178"
+  },
+  {
+   "id": "81b367c8-5fde-5a9d-a2f6-0f0f12e21cca",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "2b477fd7-e844-5e42-b786-21ab303c8611"
+  },
+  {
+   "id": "6d167a3a-bff0-5c53-b6ba-696318c845c1",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fa6db4aa-96f6-5ceb-8072-1630d7b386d6"
+  },
+  {
+   "id": "e69280ee-a4b9-5686-b125-d75c688aa923",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "37e0e1ba-7e73-5ddd-aabf-8f57d875dabe"
+  },
+  {
+   "id": "a91fcf34-ebb7-5029-92da-2ed589ac6793",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "edbcdeae-be5a-59e4-82fd-2ee2f08b8b74"
+  },
+  {
+   "id": "f00f7398-18ec-52ec-bd3c-2b9454f63fb4",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6bba3ec5-ccfe-5460-8868-b6e4330d905a"
+  },
+  {
+   "id": "8630f679-5b3f-561f-9edd-aeae468bae09",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "551ed563-d1e6-5f21-b32b-79e94ad8ae9d"
+  },
+  {
+   "id": "3179b3f0-fa73-5b6f-827a-fcbbff09753b",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9f6cb081-f202-5236-85cc-4e24e4e4bcce"
+  },
+  {
+   "id": "81edecfb-633a-524b-94e0-8a499b4d5d7a",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "24319016-c13b-5e3a-91af-ae9c124af7f7"
+  },
+  {
+   "id": "70a3d97a-79e4-5e55-b8fe-13cf497fa1a2",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "532ee077-0aab-5c56-9e01-e1a66c522436"
+  },
+  {
+   "id": "2682daab-69bb-53fb-bb29-645286191af0",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "56bf2241-6e3a-505a-b960-a62138a778d3"
+  },
+  {
+   "id": "842fbc17-c6b1-5eae-b0c1-78075ea3ba5f",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "248b7395-5372-5607-96df-f5fa141c74a9"
+  },
+  {
+   "id": "26aed6f2-7cd8-5a3a-8dfb-0980ecb69a1a",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6f38d98e-467d-5195-b2c1-cef82189ac79"
+  },
+  {
+   "id": "c1e2f895-4f72-5d32-9a1b-ea885e6ced7e",
+   "competitionId": "14cd8e6c-1128-5b53-b95f-b8469091b170",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fb8097e0-b113-594c-b3f8-9e995882bab8"
+  },
+  {
+   "id": "078f556a-0c8d-55dc-a1cd-019f1ba96b54",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1c6ecf06-8a0b-5109-bc8c-cc8506a2a1f6"
+  },
+  {
+   "id": "17879379-d565-5ea2-999d-ce5f4db96fa1",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "835b044f-85b4-5d67-b32a-516c5ad0f5de"
+  },
+  {
+   "id": "8432ac60-d87e-5387-8295-573a76048a1e",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "05edef29-b09f-5b5e-82f2-635b45a79714"
+  },
+  {
+   "id": "539a75b6-8aac-54c8-ac05-ad5a5aecbeb6",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a2baa181-9d80-5992-a66f-8a79578bd54d"
+  },
+  {
+   "id": "c4fa112f-afde-53b6-9e02-bb0993b04e03",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "588666e8-9a48-5291-b58a-67ab1f1c1ad0"
+  },
+  {
+   "id": "ed07e122-871d-57a6-98e6-657b8fc91b32",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d920f5b3-d7a3-5b89-b670-b902a6920858"
+  },
+  {
+   "id": "61b0a592-6522-53b6-8d45-981b1393b1e8",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "989814cb-7a38-573b-ab79-740442cb8ae6"
+  },
+  {
+   "id": "1b354beb-f694-5d52-8538-f913ac9c98fb",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "fc5d7420-cc3a-58a2-87c0-b1cbe70971c7"
+  },
+  {
+   "id": "a9327de7-f51c-58de-9497-0db0e69ca82f",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ea825438-718c-5fef-9a6a-61c2a637dcd7"
+  },
+  {
+   "id": "ab8eb652-89c7-54f2-b0d1-3e63b4d6011f",
+   "competitionId": "b4928f09-27ec-5ba1-b0e5-2b3ae4526f5b",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "643a573f-351c-5f17-9593-bc37545ce24c"
+  },
+  {
+   "id": "4b5bda5c-276f-54ea-846a-706965e560f3",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1b87a7b9-7c8c-5a1b-a952-cff41b437a41"
+  },
+  {
+   "id": "1410dc32-fcf1-53bf-b76e-34797c2b6fe5",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "521f4d67-f55d-54f5-90c8-f778fda1699d"
+  },
+  {
+   "id": "cfe1efa9-19a2-5fa7-9b29-7241927f37d2",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "bbd84729-0bb0-51dc-ab02-f03d5c3c87b5"
+  },
+  {
+   "id": "6f8a740f-e09c-5c6e-88e1-00ca106277a3",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "784d3a1d-dc6c-5a56-8919-78108a547088"
+  },
+  {
+   "id": "ad9b4ae7-d269-58fd-bbed-e11007c871c3",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6eed86e8-13ab-5623-9a99-5401319861d1"
+  },
+  {
+   "id": "24bb9432-e708-555f-9150-b8cd8b7b0f69",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d1025779-1dcd-5423-8a31-3c57ebd3f777"
+  },
+  {
+   "id": "4284fbcd-6c45-501a-b28c-9907585333e2",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9738ee11-dbfa-5c09-9a5c-61f25c98927b"
+  },
+  {
+   "id": "93bea262-1cf6-56fe-b78f-fba32c16270c",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c43cf0cd-cd8f-554f-9080-0c990d8fbf18"
+  },
+  {
+   "id": "aaa8ba71-933e-50b4-800c-99280d3e5640",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "abdcdfe7-06f3-5f6f-b38c-c1ae7d0597fd"
+  },
+  {
+   "id": "9f10b713-a02b-5b03-a047-04fe0fcbb0d9",
+   "competitionId": "061a8cef-61e3-57bc-850d-8487d1e0db76",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "992690d3-4af7-5896-bfcc-40c3e0be81e9"
+  },
+  {
+   "id": "d7710f0a-d51b-5704-bfd7-4e6865a8359f",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4ff7d076-128d-5289-8457-7c0eb03dfdc0"
+  },
+  {
+   "id": "9d3c9478-f423-5e79-bcc6-40ff38bf1719",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6313ae9f-c355-5615-b2b9-c963ccda9cae"
+  },
+  {
+   "id": "c2a22381-9f6a-5e2d-a2db-81a1180dc2e1",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "2286cc65-b45f-5e25-99f4-11e107f38e60"
+  },
+  {
+   "id": "781d152f-aa3a-501b-b4f0-cb760835ea6a",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "33341b63-c4de-5ffa-a666-91ce6f817350"
+  },
+  {
+   "id": "5c6afb5c-8252-504d-adce-0ee3ceccc93e",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "87ae2df8-de8d-534f-a868-561a9dc36958"
+  },
+  {
+   "id": "8098ab5e-31f7-5199-a15c-d556354e0cd6",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e6d83670-ab35-5749-8c13-6cab027b320f"
+  },
+  {
+   "id": "f868eeed-10dd-5f5a-af59-1b1a93d67c19",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ad6f1cc2-2cf1-51c5-8dd5-57ecbe4ea77f"
+  },
+  {
+   "id": "33c9ca7a-c796-5a77-b7be-6209aa6fb2b1",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "028d5fad-0a4b-5fde-8c80-341784fb362e"
+  },
+  {
+   "id": "b0e4271c-0323-5e37-b351-d31ec8348ebe",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3af5e287-4dd0-5be1-bc38-bddf4857ffa0"
+  },
+  {
+   "id": "61cd9b42-dd83-5af5-ad34-d1f69ce7d993",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1605d446-ab49-5a94-9348-8152d1ed7216"
+  },
+  {
+   "id": "1257948b-7a6d-5b36-8538-545e6b58a878",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "8fc0eb1e-39c8-5463-9611-b66bd2301c29"
+  },
+  {
+   "id": "bf0f8eed-9026-54e6-b23f-876dd6a8972e",
+   "competitionId": "9aa33666-cc41-5dad-a43b-1b5042d676ef",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "88b5f4d7-3a2f-5354-8ff7-869cfe52b186"
+  },
+  {
+   "id": "a01a2dba-d593-506a-a5e3-79f2f216c54f",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "beea5edc-fd3f-549a-b8ae-b1206587e6ee"
+  },
+  {
+   "id": "8d18af6e-aa21-52b1-981c-7aec41b04d5b",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "248694b5-3b02-5031-a8b0-1602463aca93"
+  },
+  {
+   "id": "f6f969af-1b81-5f2d-bfda-7c8e5f12069c",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3ed1d495-25c4-57fe-9786-f9eae2e8aed8"
+  },
+  {
+   "id": "8397afbb-8250-5295-8bd8-2f727c2f0bac",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "08748fcb-144b-5f5c-8611-437a1a59e6ce"
+  },
+  {
+   "id": "9882db27-d84f-5edb-8300-76a250a462e5",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "61a4dd9f-fe1b-5974-9317-73e877f1f43a"
+  },
+  {
+   "id": "9ae1987d-1bde-5589-bd3a-e9fc93dc575b",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f76f6cf5-eb93-508d-b2f8-7ba733ba2fad"
+  },
+  {
+   "id": "87d1d2c8-a315-5e55-ac15-f37d992c74a6",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "328a9388-310b-5287-8384-c1434f3f12e4"
+  },
+  {
+   "id": "34f5c851-5276-5601-a09c-127038aa5643",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "bdabff50-ef82-5579-ac76-b5db4ff56864"
+  },
+  {
+   "id": "21bb6687-3cab-57f0-8b79-b3afe1d3ada6",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c8d4b4ed-8601-575a-b935-1fd5588445fd"
+  },
+  {
+   "id": "f2fa72dc-f151-5eac-96fc-d0963bd7ca0e",
+   "competitionId": "38a61d54-c4d8-5170-8401-17137302f6cf",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "462880a9-ff54-590b-851a-aba07d066cdb"
+  },
+  {
+   "id": "2d4e6720-a1f0-5c22-a3cf-20126773ae5c",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ae81b53c-01e6-5d77-be03-bedb9bbdc98d"
+  },
+  {
+   "id": "855f6722-0cac-52e8-835d-59649b8859d4",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "77a414f7-722a-560e-97ca-b8362ce13d6f"
+  },
+  {
+   "id": "d1e9a8e2-6cd1-5846-921e-0e2c785527f0",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "004a8425-0129-5cd6-88e4-de925cb2124e"
+  },
+  {
+   "id": "ba2f131b-f3eb-567f-b60f-59b035af0ae8",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "47f86f0e-8e08-5d8d-b5ee-9576d720af6b"
+  },
+  {
+   "id": "ba993ec4-062c-5fe6-b426-05a44de2b521",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "956ffa94-7a0d-5864-909f-d057aa65bc23"
+  },
+  {
+   "id": "01dc4c0e-ddad-5289-875e-187d734d79ea",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ced736e4-c635-58ce-a732-0fbb65006ec3"
+  },
+  {
+   "id": "af7ef500-6403-51a2-88e5-08764e688209",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "9a2504c7-7116-5155-a65b-b741fa397c7d"
+  },
+  {
+   "id": "9f21ea24-1ac8-52d4-a2fd-631ea8feb440",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ab87f623-7c8f-5196-a1c4-b574bebec6b0"
+  },
+  {
+   "id": "3fa385b0-7ae5-55d6-9170-941af55a0cc3",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "1691b617-5c80-55e1-9f1e-7cc175937080"
+  },
+  {
+   "id": "9dd1a082-9d3e-5fc0-806d-99e1bd2e0430",
+   "competitionId": "4b422d32-2561-50f5-8d99-08936f7a91e3",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e65931ad-729c-55c6-9374-44c646ca008c"
+  },
+  {
+   "id": "07ff56e6-8a98-50db-8c3a-98d0200bcf56",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "3c481459-838f-5fea-8b36-250174b63788"
+  },
+  {
+   "id": "b5924954-cc5a-5552-84af-45058282470d",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b2ade640-fe29-5ba6-8e85-5673c98e3476"
+  },
+  {
+   "id": "63130849-4666-5340-a288-df9ab40f0459",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "11b29a0d-462a-5380-835b-10b3a4de36fb"
+  },
+  {
+   "id": "9b16ec92-7e60-50f9-9d27-31e8a2c8d1a6",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "c5b24bf8-e4f3-56d4-bc58-40aef872edc9"
+  },
+  {
+   "id": "413f2dfd-3f0a-5b3b-9515-e234e5267392",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "248a4a60-07cd-5915-98ae-bb4ba6a9308e"
+  },
+  {
+   "id": "6d7f815d-e970-56cf-924f-2c761f071746",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "6339fb3a-7ee7-52b4-a50e-3a0eec1d0bd2"
+  },
+  {
+   "id": "c901e942-0ecc-5651-bd61-6040de18f26f",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "23fb3b1e-3e01-5088-b744-0785fe109d03"
+  },
+  {
+   "id": "32c9998e-5d74-53dd-8361-fe7b4eae1071",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4780764c-2c40-51c1-9dab-844cf67d4ce3"
+  },
+  {
+   "id": "88147ae4-17f2-5125-a770-2dfb8405fe60",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7142b290-7440-5698-bf6b-efc016ef911d"
+  },
+  {
+   "id": "c091d0cf-7399-548b-8ea0-3de19d1f429f",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "d5a2c7c2-4533-5ff4-b5fe-51e1b63acab4"
+  },
+  {
+   "id": "7bdb130f-a1a2-53ff-b64b-d70c7d16f595",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "273781b3-b4e1-5665-8b16-5156e67c83a5"
+  },
+  {
+   "id": "48c3c2ee-bb01-5f65-bdad-2acf89a12a3d",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "98c5c60c-739d-5e4b-b8d3-8900416c617f"
+  },
+  {
+   "id": "505f5b27-d999-5e27-ac64-a9968950b342",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "08105f97-ea69-589a-883c-9a1ea522ff6f"
+  },
+  {
+   "id": "5d42c1b9-bb0f-50bc-83ae-107e70232793",
+   "competitionId": "b985f2ed-98dc-5956-a55e-e1fae7593743",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "b04c8643-0879-53bd-b26c-e48ba3366a5f"
+  },
+  {
+   "id": "a11a7bc0-2041-5f88-a38e-1f488b42a5f6",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "76cc38fc-ea28-5120-af0a-668371cf7d1f"
+  },
+  {
+   "id": "d48202f5-fc3c-5cd4-93fa-733d3bbfbf43",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "701d6055-38e0-5a30-8f92-820c96b59622"
+  },
+  {
+   "id": "8c344815-c276-5f55-ad5d-3f0724bbe9a2",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "4b676ae6-f236-5c40-88fa-1ee35119a1dc"
+  },
+  {
+   "id": "0a4a6b8f-36b4-5108-bba0-d1e70938696a",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "f17cf1e1-8570-54f0-8af8-fb708b1a37aa"
+  },
+  {
+   "id": "0d8453d1-391f-56e2-8618-cb84e3c5581f",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a0986d31-7e21-581e-8e5a-0ec246f3b555"
+  },
+  {
+   "id": "3f0174d1-c2ba-5e19-b1be-7760970abbd8",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "74065dc4-d1f1-5673-a9a7-faf27079eeab"
+  },
+  {
+   "id": "07def3fd-65aa-53a1-a72d-6f6df229b07b",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "baa04f62-b473-570e-943c-ab630ba40dc9"
+  },
+  {
+   "id": "1537be30-f2a8-518c-8c73-b7cc14d47ef1",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "0b0768eb-955c-593a-af35-9f7b1b6b7884"
+  },
+  {
+   "id": "6d8ef357-bbea-5fe3-9413-79a8ccc05d48",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "a11f7b29-7d4a-5ae5-a5e7-418e94abbec6"
+  },
+  {
+   "id": "e3adba83-1745-5608-b3c0-7b77a7433e72",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "ed5ff37d-1f20-5fa5-8d35-97d48284d83b"
+  },
+  {
+   "id": "29d4853b-c21b-5aba-b46c-edc9e4fd6a57",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "21c6daa4-20af-5713-b6b7-bdf5e2d64476"
+  },
+  {
+   "id": "72df4f14-08d6-56bb-ac15-958e5a3470fb",
+   "competitionId": "bcd3f9c7-c0e3-5d24-98a2-ab4bf230ceb6",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e104438f-e80d-5896-b00c-d6cd59c20ff8"
+  },
+  {
+   "id": "4696a5c0-a20c-587e-b1bf-9159bcc85705",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "5e19d906-c08d-5c63-8156-f77ed3a656ef"
+  },
+  {
+   "id": "838349bc-d307-55e5-8142-268fe7acba35",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "7611b487-6862-5e0a-bb4e-55f3c07849f8"
+  },
+  {
+   "id": "ca56f91d-11e7-5dac-ba50-e2b6c24174f4",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "80758ae2-580f-5f37-8815-c197a88af174"
+  },
+  {
+   "id": "7a065a80-07b0-578a-88fd-c7360a498921",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "2cff5e4f-fd40-5902-8aba-463085a0a51e"
+  },
+  {
+   "id": "af4d977a-3fc8-5f87-aee8-8f7af8d2b991",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "67c8d212-7049-5440-8159-020f0cad53b0"
+  },
+  {
+   "id": "e5ca29de-7898-50c0-aa86-586988bbdfcd",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "34e17f44-c5b1-58bb-b06b-5ea18ddd1b00"
+  },
+  {
+   "id": "fe8c86a5-7792-5640-856c-231d8c031a82",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "150a9a04-ceac-53e9-9bce-e571e4ce6401"
+  },
+  {
+   "id": "038bd94b-3680-5aab-9a08-5125367ce69c",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "e24cb049-d94b-5d4c-b7c9-ba08a5aa12d3"
+  },
+  {
+   "id": "378cbf14-2d98-562e-907c-a4b53a97304b",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "5da6bd01-f7a0-5e9c-907e-72acbd9983ba"
+  },
+  {
+   "id": "ade65bd8-4f2f-563b-90bb-d778b74730a0",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "61807f69-55f4-569b-a51b-84f86514709f"
+  },
+  {
+   "id": "88c3762c-fce7-581b-b17c-6c096db46479",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "81182f1f-c896-51be-b195-5ef4adbee5fd"
+  },
+  {
+   "id": "109778e7-b7b4-5964-b8db-141fe1ccec8f",
+   "competitionId": "56a7fb8c-f126-5b16-91d7-f66fe56b80c1",
+   "seasonId": "79ae2189-110c-59d5-9c09-92a5e8ce9918",
+   "clubId": "21b962c7-66fa-5f7f-9175-1c7ed8eedd10"
   }
  ]
 }

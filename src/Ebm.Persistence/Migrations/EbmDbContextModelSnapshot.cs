@@ -207,6 +207,9 @@ namespace Ebm.Persistence.Migrations
                     b.Property<Guid>("SeasonId")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("Seed")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SeasonId");

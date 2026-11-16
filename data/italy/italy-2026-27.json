@@ -745,6 +745,42 @@
     }
    },
    "country": "ITA"
+  },
+  {
+   "id": "fe9d182b-7705-5798-946b-8747e691c086",
+   "name": "Coppa Italia Frecciarossa",
+   "shortName": "COPPA",
+   "type": "Cup",
+   "country": "ITA",
+   "rules": {
+    "registration": {
+     "minTeams": 8,
+     "maxTeams": 8
+    },
+    "cup": {
+     "draw": "Bracket",
+     "startOffsetDays": 145,
+     "daysBetweenRounds": 1,
+     "rounds": [
+      {
+       "name": "Quarter-finals"
+      },
+      {
+       "name": "Semi-finals",
+       "daysAfter": 2
+      },
+      {
+       "name": "Final",
+       "daysAfter": 1
+      }
+     ],
+     "qualification": {
+      "level": 1,
+      "positions": 8,
+      "afterRound": 15
+     }
+    }
+   }
   }
  ],
  "seasons": [

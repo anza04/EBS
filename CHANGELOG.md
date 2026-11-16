@@ -3,6 +3,22 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.17.0] — 2026-11-16 — STEP 17: Domestic cups
+
+### Added
+- Cup competitions (`cup` section of the competition rules, docs/CUP_FORMATS.md): knockout rounds of single games or
+  two-legged ties on aggregate, byes for the top seeds, group stages, bracket/seeded/open draws (reproducible),
+  seeding, qualification from a league table after a given round (Final Eight/Four), per-round dates and finals.
+- Pure engine `CupSeason`; `ICompetitionService` draws cups (`GenerateScheduleAsync`/`AdvanceAsync`), schedules each
+  game on a day its clubs are free, and adds `GetCupAsync` and `GetHistoryAsync` (champion and runner-up per season,
+  leagues too). `SeasonOutcome.RunnerUp`.
+- Second legs go to overtime while the aggregate is level (`MatchSetup.OvertimeMargin`).
+- Career: game days play and advance cups, the season ends when they are finished, the review lists cup winners,
+  qualification cups are drawn again every season. Career screen: cup groups, ties, byes, winner and past winners.
+- Domestic cups for 17 countries in `data/europe` (Sweden has none), the Coppa Italia in `data/italy` and the cups of
+  the countries in `data/real-leagues`.
+- Migration `CupCompetitions`: `CompetitionParticipants.Seed`; fixture stages `CupGroup` and `Cup`.
+
 ## [0.16.4] — 2026-11-16 — Real leagues dataset
 
 ### Added

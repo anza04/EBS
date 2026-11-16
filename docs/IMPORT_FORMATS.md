@@ -69,7 +69,7 @@ Both folders are copied next to the executable (`data\…`) and the import file 
 | | `type`* | `Type` | `League`, `Cup` or `Tournament` |
 | | `country` | `CountryId` | Country code; empty for international |
 | | `divisionId` | `DivisionId` | Division ID, for league championships |
-| | `rules` | `RulesJson` | Competition rules object (schema: `docs/COMPETITION_FORMATS.md`); default `{}`. In CSV, quote it: `"{""pointsForWin"":2}"` |
+| | `rules` | `RulesJson` | Competition rules object (schema: `docs/COMPETITION_FORMATS.md`, cups `docs/CUP_FORMATS.md`); default `{}`. In CSV, quote it: `"{""pointsForWin"":2}"` |
 | `seasons` | `id`, `name`* (≤ 20, unique) | `Season` | e.g. `2026-27` |
 | | `startDate`*, `endDate`* | | End after start |
 | `participants` | `id` | `CompetitionParticipant` | A club's entry in a competition season |

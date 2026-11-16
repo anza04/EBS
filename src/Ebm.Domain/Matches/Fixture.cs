@@ -16,12 +16,18 @@ public enum FixtureStage
 
     /// <summary>Single games deciding the last two playoff seeds (round 1: two games, round 2: one).</summary>
     PlayIn,
+
+    /// <summary>A cup's group stage (round robin within each group).</summary>
+    CupGroup,
+
+    /// <summary>A cup's knockout rounds; the game number is the leg (1 or 2).</summary>
+    Cup,
 }
 
 /// <summary>A scheduled game between two clubs in a competition season. Its result is a <see cref="Match"/>.</summary>
 /// <remarks>
 /// <see cref="Round"/> counts within the stage (regular-season round, or playoff round 1 = first round);
-/// <see cref="GameNumber"/> is the game within a playoff series and always 1 in the regular season.
+/// <see cref="GameNumber"/> is the game within a playoff series, the leg of a cup tie, and 1 otherwise.
 /// </remarks>
 public sealed class Fixture : Entity<FixtureId>
 {
@@ -47,7 +53,7 @@ public sealed class Fixture : Entity<FixtureId>
         HomeClubId = Guard.Required(homeClubId, nameof(homeClubId));
         AwayClubId = Guard.Required(awayClubId, nameof(awayClubId));
         Stage = Guard.Defined(stage, "Fixture stage");
-        GameNumber = Guard.Range(gameNumber, 1, stage == FixtureStage.Playoffs ? MaxGameNumber : 1, "Game number");
+        GameNumber = Guard.Range(gameNumber, 1, stage switch { FixtureStage.Playoffs => MaxGameNumber, FixtureStage.Cup => 2, _ => 1 }, "Game number");
         if (homeClubId == awayClubId)
         {
             throw new DomainValidationException("A club cannot play against itself.");

@@ -59,4 +59,4 @@ Kingdom (`Country.IsEuEea`).
 
 1. Real players and the remaining real clubs (`docs/PLAYER_DATABASE.md` §5).
 2. Verify the *2025-26 basis* formats against the 2026-27 regulations and update `build/generate-europe-dataset.py`.
-3. Step 17/18: cups and international competitions (ABA League, EuroLeague, EuroCup, BCL).
+3. Domestic cups are configured since Step 17 (`docs/CUP_FORMATS.md` §4); Step 18: international competitions (ABA League, EuroLeague, EuroCup, BCL).

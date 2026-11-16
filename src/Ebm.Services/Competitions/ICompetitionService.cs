@@ -16,13 +16,32 @@ public enum CompetitionPhase
     PlayIn,
     Playoffs,
     Completed,
+
+    /// <summary>A cup's group stage.</summary>
+    GroupStage,
+
+    /// <summary>A cup's knockout rounds.</summary>
+    Knockout,
 }
 
 /// <param name="FixturesCreated">Fixtures scheduled by the call that returned this progress.</param>
 public sealed record CompetitionProgress(CompetitionPhase Phase, int FixturesCreated);
 
+/// <summary>A cup season: seeds (best first), groups, byes, ties round by round, and the finalists once it is over.</summary>
+public sealed record CupView(
+    CompetitionPhase Phase,
+    IReadOnlyList<ClubId> Seeds,
+    IReadOnlyList<GroupTable> Groups,
+    IReadOnlyList<ClubId> Byes,
+    IReadOnlyList<CupTie> Ties,
+    ClubId? Winner,
+    ClubId? RunnerUp);
+
+/// <summary>One season of a competition's history: the champion (cup winner) and runner-up once it is completed.</summary>
+public sealed record CompetitionHistoryEntry(Season Season, CompetitionPhase Phase, ClubId? Champion, ClubId? RunnerUp);
+
 /// <summary>
-/// Runs league competitions from their rules data: registration, schedule, results, standings, playoffs and
+/// Runs league and cup competitions from their rules data: registration, schedule, results, standings, playoffs and
 /// promotion/relegation. Every call is one unit of work; rule violations throw <see cref="Domain.Common.DomainException"/>.
 /// </summary>
 public interface ICompetitionService
@@ -32,7 +51,8 @@ public interface ICompetitionService
 
     /// <summary>
     /// Generates the regular-season fixtures from the entered clubs, starting on <paramref name="firstRound"/>
-    /// (default: the season start). The whole schedule must fit in the season.
+    /// (default: the season start). The whole schedule must fit in the season. For a cup it makes the draw: seeds
+    /// the clubs (entered, or qualified from the league table), stores the seeds and schedules the first games.
     /// </summary>
     Task<CompetitionProgress> GenerateScheduleAsync(CompetitionId competitionId, SeasonId seasonId, DateOnly? firstRound = null, CancellationToken cancellationToken = default);
 
@@ -40,7 +60,8 @@ public interface ICompetitionService
     Task RecordResultAsync(FixtureId fixtureId, int homeScore, int awayScore, int overtimes = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Moves the season on: once the regular season is over, schedules the second phase, the play-in or the
+    /// Moves the season on. A cup is drawn as soon as its clubs are known (its qualification decided), then its next
+    /// round and second legs are scheduled as results come in, on days its clubs have no other game. A league: once the regular season is over, schedules the second phase, the play-in or the
     /// playoffs, then the next game of each series and the next round as results come in. Safe to call at any time.
     /// </summary>
     Task<CompetitionProgress> AdvanceAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
@@ -57,6 +78,12 @@ public interface ICompetitionService
     /// <summary>The second-phase group tables once the regular season is over; empty without a second phase.</summary>
     Task<IReadOnlyList<GroupTable>> GetGroupTablesAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
 
-    /// <summary>Champion, promoted and relegated clubs. Only for a completed season.</summary>
+    /// <summary>Champion (cup winner), runner-up, promoted and relegated clubs. Only for a completed season.</summary>
     Task<SeasonOutcome> GetOutcomeAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>The draw, groups and ties of a cup season.</summary>
+    Task<CupView> GetCupAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>Every season of a competition with entries, oldest first, with its champion and runner-up when completed.</summary>
+    Task<IReadOnlyList<CompetitionHistoryEntry>> GetHistoryAsync(CompetitionId competitionId, CancellationToken cancellationToken = default);
 }

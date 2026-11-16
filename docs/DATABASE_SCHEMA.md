@@ -14,6 +14,7 @@ Schema version: **`20261112154154_CareerAssistant`** (Step 14).
 | `20261112140336_Tactics` | 09 | New `Tactics` table (create-table only) |
 | `20261112144630_Careers` | 12 | New `Careers` table; `Matches.IsForfeit` (add-column, default false) |
 | `20261112154154_CareerAssistant` | 14 | `Careers.AssistantManages` (add-column, default false) |
+| `20261116135956_CupCompetitions` | 17 | `CompetitionParticipants.Seed` (nullable add-column). New fixture stages `CupGroup` and `Cup` (stored as text, no schema change); `Cup` fixtures use `GameNumber` 1–2 for the legs |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -106,6 +107,7 @@ A club's entry in a competition for a season. This is how a club takes part in s
 |---|---|---|
 | Id | id | PK |
 | CompetitionId / SeasonId / ClubId | id | FKs. **Unique** (`CompetitionId, SeasonId, ClubId`). Index (`ClubId, SeasonId`) |
+| Seed | int? | A cup's seed (1 = best), set by the draw (Step 17); null in leagues and before the draw |
 
 ### Arenas
 | Column | Type | Rules |
@@ -270,9 +272,9 @@ A club's saved tactical configurations (rules in `docs/TACTICS.md`).
 |---|---|---|
 | Id | id | PK |
 | CompetitionId / SeasonId | id | FKs. Index (`CompetitionId, SeasonId, Round`) |
-| Stage | text | `RegularSeason` or `Playoffs` (default `RegularSeason`) |
+| Stage | text | `RegularSeason`, `Playoffs`, `SecondPhase`, `PlayIn`, `CupGroup` or `Cup` (default `RegularSeason`) |
 | Round | int | 1–200, within the stage (playoff round 1 = first round) |
-| GameNumber | int | Game in a playoff series, 1–7; always 1 in the regular season (default 1) |
+| GameNumber | int | Game in a playoff series, 1–7; leg of a cup tie, 1–2; otherwise 1 (default 1) |
 | Date | date | Indexed |
 | HomeClubId / AwayClubId | id | FKs Clubs; must differ |
 

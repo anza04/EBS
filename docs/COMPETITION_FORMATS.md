@@ -43,8 +43,9 @@ No country-specific rule exists in code.
 * **Registration:** clubs from the competition's country, from a list of countries (`registration.countries`,
   cross-border leagues such as the BNXT League) or any country; squad limits including foreign and non-EU players.
 
-Not supported yet: cups and knockout-only formats (`Cup`/`Tournament` competitions cannot be scheduled; Step 17),
-relegation playoffs/play-outs, two-legged aggregate ties, reseeding, overtime-loss points, clubs joining a
+Cups (knockout rounds, two-legged ties, group stages, draws, qualification from a league table) are in
+`docs/CUP_FORMATS.md` (Step 17). Not supported yet: `Tournament` competitions, relegation playoffs/play-outs,
+two-legged ties inside league playoffs, reseeding, overtime-loss points, clubs joining a
 competition mid-season (e.g. ABA League clubs entering the Serbian or Croatian playoffs).
 
 ## 3. Rules schema

@@ -85,7 +85,7 @@ public sealed partial class MatchSimulation
     {
         _periodRunning = false;
         Emit(MatchEventKind.PeriodEnd, null, null, null, 0, $"End of {(Period <= _rules.Periods ? $"the {Ordinal(Period)} quarter" : $"overtime {Period - _rules.Periods}")}: {_home.Sheet.Name} {_home.Score}–{_away.Score} {_away.Sheet.Name}.");
-        if (Period >= _rules.Periods && _home.Score != _away.Score)
+        if (Period >= _rules.Periods && _home.Score != _away.Score && _home.Score - _away.Score != _overtimeMargin)
         {
             Finish();
         }

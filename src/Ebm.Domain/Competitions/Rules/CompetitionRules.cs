@@ -7,7 +7,7 @@ using Ebm.Domain.Rosters;
 namespace Ebm.Domain.Competitions.Rules;
 
 /// <summary>
-/// The configurable format of a league competition, stored as JSON in <see cref="Competition.RulesJson"/>.
+/// The configurable format of a competition (a league, or a cup with its <see cref="Cup"/> section), stored as JSON in <see cref="Competition.RulesJson"/>.
 /// Every property is optional; missing ones take the defaults below. Documented in docs/COMPETITION_FORMATS.md.
 /// </summary>
 public sealed record CompetitionRules
@@ -46,6 +46,9 @@ public sealed record CompetitionRules
 
     public RelegationRules Relegation { get; init; } = new();
 
+    /// <summary>The format of a cup competition (docs/CUP_FORMATS.md); <c>null</c> for a league.</summary>
+    public CupRules? Cup { get; init; }
+
     /// <summary>Parses and validates rules JSON. Errors are reported as <see cref="DomainValidationException"/>.</summary>
     public static CompetitionRules Parse(string json)
     {
@@ -82,6 +85,12 @@ public sealed record CompetitionRules
         {
             throw new DomainValidationException(
                 $"The competition needs between {Registration.MinTeams} and {Registration.MaxTeams} clubs; {clubs} are entered.");
+        }
+
+        if (Cup is not null)
+        {
+            Cup.ValidateForClubs(clubs);
+            return;
         }
 
         Require(Playoffs is null || Playoffs.LastQualifyingPosition <= clubs,
@@ -129,6 +138,13 @@ public sealed record CompetitionRules
         Guard.Range(Relegation!.Direct, 0, RegistrationRules.TeamLimit, "Rules: relegation.direct");
         Require(!(Promotion.PlayoffWinner && Promotion.PlayoffPlaces > 0), "use either promotion.playoffWinner or promotion.playoffPlaces");
         Require(Promotion.PlayoffPlaces is 0 or 1 or 2 or 4, "promotion.playoffPlaces must be 0, 1 (champion), 2 (finalists) or 4 (semi-finalists)");
+
+        if (Cup is not null)
+        {
+            Cup.Validate();
+            Require(Playoffs is null && SecondPhase is null && Promotion.Places == 0 && Relegation.Direct == 0,
+                "a cup has no playoffs, second phase, promotion or relegation");
+        }
 
         if (Playoffs is { } playoffs)
         {

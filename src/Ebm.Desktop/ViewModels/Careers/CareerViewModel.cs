@@ -2,7 +2,10 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ebm.Desktop.ViewModels.Editor;
+using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
+using Ebm.Domain.Competitions;
+using Ebm.Domain.Competitions.Engine;
 using Ebm.Domain.Matches;
 using Ebm.Services.Careers;
 using Ebm.Services.Competitions;
@@ -56,6 +59,13 @@ public sealed partial class CareerViewModel : ObservableObject
 
     [ObservableProperty]
     private IReadOnlyList<NewsLine> _news = [];
+
+    /// <summary>The selected cup: byes, ties round by round, the winner and the cup's past winners.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCup))]
+    private IReadOnlyList<NewsLine> _cupLines = [];
+
+    public bool HasCup => CupLines.Count > 0;
 
     [ObservableProperty]
     private IReadOnlyList<ClubSeasonRecord> _history = [];
@@ -122,6 +132,8 @@ public sealed partial class CareerViewModel : ObservableObject
                     FixtureStage.Playoffs => $" (playoffs, round {next.Fixture.Round}, game {next.Fixture.GameNumber})",
                     FixtureStage.PlayIn => $" (play-in, round {next.Fixture.Round})",
                     FixtureStage.SecondPhase => $" (second phase, round {next.Fixture.Round})",
+                    FixtureStage.CupGroup => $" (cup group stage, round {next.Fixture.Round})",
+                    FixtureStage.Cup => $" (cup, round {next.Fixture.Round}{(next.Fixture.GameNumber == 2 ? ", second leg" : string.Empty)})",
                     _ => string.Empty,
                 }
             : state.SeasonComplete ? "The season is over: review it and start the next one." : "No match scheduled.";
@@ -158,13 +170,45 @@ public sealed partial class CareerViewModel : ObservableObject
         if (State is not { } state || SelectedCompetition is not { } competition)
         {
             Standings = [];
+            CupLines = [];
             return;
         }
 
+        if (competition.Competition.Type == CompetitionType.Cup)
+        {
+            await LoadCupAsync(state, competition.Competition);
+            return;
+        }
+
+        CupLines = [];
         var rows = await _competitions.GetStandingsAsync(competition.Competition.Id, state.Season.Id);
         Standings =
         [
             .. rows.Select(r => new StandingLine(r.Position, _lookups.ClubName(r.ClubId), r.Played, r.Won, r.Lost, r.PointsFor, r.PointsAgainst, r.Points, r.ClubId == state.Club.Id)),
+        ];
+    }
+
+    /// <summary>A cup: its group tables as standings, its ties and past winners as lines.</summary>
+    private async Task LoadCupAsync(CareerState state, Competition competition)
+    {
+        var cup = await _competitions.GetCupAsync(competition.Id, state.Season.Id);
+        Standings =
+        [
+            .. cup.Groups.SelectMany(g => g.Rows.Select(r => new StandingLine(
+                r.Position, $"{g.Name} · {_lookups.ClubName(r.ClubId)}", r.Played, r.Won, r.Lost, r.PointsFor, r.PointsAgainst, r.Points, r.ClubId == state.Club.Id))),
+        ];
+        string Name(ClubId id) => _lookups.ClubName(id);
+        string Tie(CupTie t) => $"{Name(t.First)} – {Name(t.Second)}"
+            + (t.Games.Any(g => g.IsPlayed) ? $": {string.Join(", ", t.Games.Where(g => g.IsPlayed).Select(g => $"{g.HomeScore}–{g.AwayScore}"))}" : string.Empty)
+            + (t.Legs == 2 && t.IsDecided ? $" (aggregate {t.FirstPoints}–{t.SecondPoints})" : string.Empty)
+            + (t.Winner is { } w ? $" → {Name(w)}" : string.Empty);
+        var history = await _competitions.GetHistoryAsync(competition.Id);
+        CupLines =
+        [
+            .. cup.Byes.Count > 0 ? [new NewsLine("Byes", string.Join(", ", cup.Byes.Select(Name)))] : Array.Empty<NewsLine>(),
+            .. cup.Ties.Select(t => new NewsLine(t.RoundName, Tie(t))),
+            new NewsLine("Winner", cup.Winner is { } winner ? Name(winner) : cup.Phase == CompetitionPhase.Registration ? "Not drawn yet" : "To be decided"),
+            .. history.Where(h => h.Champion is not null).Select(h => new NewsLine(h.Season.Name, $"{Name(h.Champion!.Value)} (runner-up {Name(h.RunnerUp!.Value)})")),
         ];
     }
 

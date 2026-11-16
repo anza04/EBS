@@ -162,5 +162,11 @@ public sealed record MatchSetup(TeamSheet Home, TeamSheet Away, int Seed, MatchR
 {
     public MatchRules MatchRules => Rules ?? MatchRules.Fiba;
 
+    /// <summary>
+    /// Besides a level score, the match also goes to overtime while home − away equals this margin: the second leg
+    /// of a two-legged cup tie, where it is the first-leg margin of today's away side (0 = a normal game).
+    /// </summary>
+    public int OvertimeMargin { get; init; }
+
     public TeamSheet Sheet(TeamSide side) => side == TeamSide.Home ? Home : Away;
 }

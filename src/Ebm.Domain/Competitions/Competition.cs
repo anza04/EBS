@@ -60,11 +60,24 @@ public sealed class Competition : Entity<CompetitionId>
         Type = Guard.Defined(type, "Competition type");
         CountryId = Guard.Optional(countryId, "Competition country");
         DivisionId = Guard.Optional(divisionId, "Competition division");
+        if (RulesJson != EmptyRules)
+        {
+            CheckFormat(Type, ParseRules());
+        }
     }
 
     public void UpdateRules(string rulesJson)
     {
-        CompetitionRules.Parse(rulesJson);
+        CheckFormat(Type, CompetitionRules.Parse(rulesJson));
         RulesJson = rulesJson.Trim();
+    }
+
+    /// <summary>A cup section belongs to a cup competition only.</summary>
+    private static void CheckFormat(CompetitionType type, CompetitionRules rules)
+    {
+        if (rules.Cup is not null && type != CompetitionType.Cup)
+        {
+            throw new DomainValidationException("Competition rules: only a cup competition can have a cup section.");
+        }
     }
 }

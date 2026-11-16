@@ -24,4 +24,9 @@ public sealed class CompetitionParticipant : Entity<CompetitionParticipantId>
     public SeasonId SeasonId { get; private set; }
 
     public ClubId ClubId { get; private set; }
+
+    /// <summary>The club's seed in a cup (1 = best), set by the draw; <c>null</c> before the draw and in leagues.</summary>
+    public int? Seed { get; private set; }
+
+    public void SetSeed(int? seed) => Seed = seed is null ? null : Guard.Range(seed.Value, 1, Rules.RegistrationRules.TeamLimit, "Seed");
 }
