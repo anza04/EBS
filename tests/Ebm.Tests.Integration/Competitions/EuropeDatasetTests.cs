@@ -16,6 +16,7 @@ namespace Ebm.Tests.Integration.Competitions;
 /// Step 15 acceptance: every league of the European dataset (data/europe) imports, schedules inside the season,
 /// produces standings and finishes with a champion and the configured promotion and relegation.
 /// </summary>
+[Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class EuropeDatasetTests : IAsyncLifetime
 {
     private static readonly string DatasetFile = Path.Combine(

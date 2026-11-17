@@ -5,6 +5,7 @@ using Ebm.Domain.Players;
 using Ebm.Domain.Transfers;
 using Ebm.Services.Careers;
 using Ebm.Services.Import;
+using Ebm.Services.Management;
 using Ebm.Services.Transfers;
 using Ebm.Tests.Integration.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ namespace Ebm.Tests.Integration.Transfers;
 /// Step 19 acceptance on the European dataset: AI clubs recruit across countries, within their means, and every move
 /// leaves the contracts consistent; international clubs attract players for less.
 /// </summary>
+[Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class EuropeanTransferWindowTests : IAsyncLifetime
 {
     private static readonly string Folder = Path.Combine(
@@ -38,6 +40,8 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
         var market = _db.Services.GetRequiredService<ITransferService>();
         var before = (await _db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync())).ToDictionary(c => c.Id, c => c.Balance);
 
+        // As on a window day (CareerService.AdvanceDayAsync): the dataset starts without free agents, so the pool is replenished first.
+        await _db.Services.GetRequiredService<IClubManagementService>().ReplenishFreeAgentsAsync();
         var report = await market.RunAiTransferWindowAsync([managed.Id]);
 
         var clubs = (await _db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync())).ToDictionary(c => c.Id);
@@ -49,9 +53,13 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
         // Activity, across borders: bought from another country's club, and free agents of other nationalities.
         var bought = moves.Where(t => t.Kind is TransferKind.Transfer or TransferKind.ReleaseClause).ToList();
         Assert.True(report.Transactions >= 50, $"{report.Transactions} deals");
-        Assert.Contains(bought, t => clubs[t.FromClubId!.Value].CountryId != clubs[t.ToClubId].CountryId);
-        Assert.Contains(moves, t => t.Kind == TransferKind.FreeAgentSigning && players[t.PlayerId].NationalityId != clubs[t.ToClubId].CountryId);
-        Assert.Contains(report.Clubs.SelectMany(c => c.Actions), a => a.Contains("upgrade", StringComparison.Ordinal));
+        var actions = report.Clubs.SelectMany(c => c.Actions).ToList();
+        var signings = moves.Where(t => t.Kind == TransferKind.FreeAgentSigning).ToList();
+        var summary = $"bought={bought.Count} free agents={signings.Count} upgrades={actions.Count(a => a.Contains("upgrade", StringComparison.Ordinal))} " +
+            $"failed={string.Join(" | ", actions.Where(a => a.StartsWith("Could not", StringComparison.Ordinal)).Take(10))}";
+        Assert.True(bought.Any(t => clubs[t.FromClubId!.Value].CountryId != clubs[t.ToClubId].CountryId), $"No cross-border purchase: {summary}");
+        Assert.True(signings.Any(t => players[t.PlayerId].NationalityId != clubs[t.ToClubId].CountryId), $"No foreign free agent signed: {summary}");
+        Assert.True(actions.Any(a => a.Contains("upgrade", StringComparison.Ordinal)), $"No upgrade signing: {summary}");
         Assert.DoesNotContain(moves, t => t.ToClubId == managed.Id || t.FromClubId == managed.Id); // the user's club is left alone
 
         // Economics: nobody spends money it does not have; fees are paid at market prices.
@@ -75,11 +83,12 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
         var managed = (await careers.GetClubOptionsAsync()).Single(o => o.Club.Name == "Olimpia Milano").Club;
         await careers.StartAsync(managed.Id, "Europe"); // qualifies the international competitions
         var market = _db.Services.GetRequiredService<ITransferService>();
-        var agent = (await market.SearchAsync(new PlayerSearch(Filter: MarketFilter.FreeAgents, MaxResults: 1))).Single();
+        // The dataset starts with every player under contract: price one of another club's players for Milano.
+        var agent = (await market.SearchAsync(new PlayerSearch(Filter: MarketFilter.UnderContract, ForClub: managed.Id, MaxResults: 1))).Single();
 
         var priced = (await market.GetMarketPlayerAsync(agent.Player.Id, managed.Id))!;
 
-        var context = new NegotiationContext(agent.Overall, agent.Evaluation.PotentialRating, agent.Player.Reputation, agent.Age, ClubAttractiveness.Of(managed.Reputation, 1));
+        var context = new NegotiationContext(agent.Overall, agent.Evaluation.PotentialRating, agent.Player.Reputation, agent.Age, ClubAttractiveness.Of(managed.Reputation, 1), agent.Contract?.AnnualSalary);
         Assert.Equal(ContractNegotiator.Default.AskingSalary(context), priced.AskingSalary); // Milano plays the EuroLeague
         Assert.True(priced.AskingSalary < ContractNegotiator.Default.AskingSalary(context with { ClubReputation = managed.Reputation }));
     }

@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261112154154_CareerAssistant`** (Step 14).
+Schema version: **`20261117124356_Scouting`** (Step 20).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -17,6 +17,7 @@ Schema version: **`20261112154154_CareerAssistant`** (Step 14).
 | `20261116135956_CupCompetitions` | 17 | `CompetitionParticipants.Seed` (nullable add-column). New fixture stages `CupGroup` and `Cup` (stored as text, no schema change); `Cup` fixtures use `GameNumber` 1–2 for the legs |
 | `20261116144825_InternationalCompetitions` | 18 | `CompetitionParticipants.PrizeMoney` (long?) and `ReputationGain` (int?): cup rewards paid when the competition ended (nullable add-columns) |
 | `20261116151616_LoanAgreements` | 19 | `Transfers.SalaryContribution` (default 0) and `OptionFee` (long?): loan agreements (add-columns, no check constraint). New kind `OptionToBuy` (text column, no schema change) |
+| `20261117124356_Scouting` | 20 | `Staff.Ability` (default 50). New tables `ScoutingAssignments`, `ScoutReports` and `ScoutReportAttributes` (create-table and add-column only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -53,6 +54,8 @@ Club ─┬─< Contract >─ Player | StaffMember (exactly one)
       ├─< PlayerClubHistory >─ Player
       ├─< RosterSpot >─ Player (unique: one squad role per player)
       ├─< Tactic (assignments as JSON, players by ID without FK)
+      ├─< ScoutingAssignment >─ StaffMember (scout); Player | Country | Competition (target, optional)
+      ├─< ScoutReport >─ Player, StaffMember?, ScoutingAssignment? ── ScoutReportAttributes (1:1)
       └─< Transfer (FromClubId, optional / ToClubId) >─ Player, Contract (ContractId, ParentContractId; optional)
 ```
 
@@ -182,6 +185,7 @@ Step 05 columns are checked by the domain only: adding check constraints to an e
 | DateOfBirth | date | |
 | NationalityId | id | FK Countries |
 | Role | text | `HeadCoach`, `AssistantCoach`, `Scout`, `Physio`, `FitnessCoach` |
+| Ability | int | 1–100, default 50: how good he is at his job; for scouts, report accuracy (Step 20) |
 
 ### Contracts
 | Column | Type | Rules |
@@ -241,6 +245,43 @@ One row per player movement: free-agent signing, transfer, loan, loan return, op
 
 Transfers are never deleted (restrict-on-delete on every FK), so a player, club or contract with transfer history
 cannot be removed.
+
+### ScoutingAssignments
+One row per scouting assignment (rules in `docs/SCOUTING.md` §2–§3). Never deleted.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId | id | FK Clubs. Index (`ClubId, Status`) |
+| ScoutId | id | FK Staff |
+| Focus | text(16) | `Player`, `Region`, `League`, `Position`, `Youth` |
+| PlayerId | id? | FK Players: target of a player assignment |
+| CountryId | id? | FK Countries: region target, optional youth country |
+| CompetitionId | id? | FK Competitions: league target |
+| Position | text(16)? | Position target, else optional filter |
+| MaxAge | int? | Oldest player watched; set for youth assignments |
+| StartDate / DueDate | date | `DueDate > StartDate` (check constraint). Index (`Status, DueDate`) |
+| Status | text(16) | `Active`, `Completed`, `Cancelled` |
+| EndedOn | date? | Day it was completed or cancelled |
+
+### ScoutReports
+One row per report: what a club believes about a player on a date (`docs/SCOUTING.md` §4). The newest per club and
+player is the club's view; older ones are history. Never deleted.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId | id | FK Clubs. Index (`ClubId, PlayerId, Date`) |
+| PlayerId | id | FK Players |
+| ScoutId | id? | FK Staff; null for background knowledge |
+| AssignmentId | id? | FK ScoutingAssignments |
+| Date | date | |
+| Accuracy | int | 5–98 (check constraint) |
+| Margin / PotentialMargin | int | Largest error of an attribute or the overall / of the potential |
+| EstimatedOverall / EstimatedPotential | int | 1–100 |
+| EstimatedValue / EstimatedSalary | int | Euros, `>= 0` (check constraint) |
+
+`ScoutReportAttributes`: the 27 estimated attributes, keyed by `ScoutReportId` (1:1), same columns as `PlayerAttributes`.
 
 ### RosterSpots
 A player's role in his current club's squad: current state, not history (rules in `docs/ROSTER_RULES.md`).

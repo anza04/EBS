@@ -152,6 +152,8 @@ dotnet build EuropeanBasketballManager.slnx                      # Debug build
 dotnet build EuropeanBasketballManager.slnx -c Release           # Release build
 dotnet test  EuropeanBasketballManager.slnx                      # all tests (launches the app once)
 dotnet test  EuropeanBasketballManager.slnx --filter "Category!=Launch"   # headless machines
+dotnet test  EuropeanBasketballManager.slnx --filter "Category!=Launch&Category!=Slow"   # everyday run (~2 min)
+dotnet test  EuropeanBasketballManager.slnx --filter "Category=Slow"     # full datasets, simulations (~40 min): before releases
 dotnet run   --project src/Ebm.Desktop                           # start the game
 dotnet run   --project src/Ebm.Desktop -- --smoke-test           # start, render, exit 0
 ```

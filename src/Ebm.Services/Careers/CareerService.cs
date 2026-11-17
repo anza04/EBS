@@ -10,6 +10,7 @@ using Ebm.Services.Competitions;
 using Ebm.Services.Data;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
+using Ebm.Services.Scouting;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,7 @@ internal sealed class CareerService(
     IMatchService matches,
     ITransferService transfers,
     IClubManagementService management,
+    IScoutingService scouting,
     GameClock clock) : ICareerService
 {
     /// <summary>A new career starts this many days before its season, so the squad can be prepared.</summary>
@@ -91,6 +93,7 @@ internal sealed class CareerService(
         await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         await management.SetObjectivesAsync(season.Id, cancellationToken).ConfigureAwait(false);
         await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
+        await scouting.HireMissingScoutsAsync(cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
@@ -143,6 +146,7 @@ internal sealed class CareerService(
 
         var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
+        var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
         ClubId[] managed = career.AssistantManages ? [] : [career.ClubId];
 
         // Transfer windows: the last day of a season, two weeks before a season, and any Monday an AI club is short of players.
@@ -167,7 +171,7 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income));
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay);
     }
 
     public async Task<CalendarReport> ContinueAsync(int maxDays = 366, CancellationToken cancellationToken = default)

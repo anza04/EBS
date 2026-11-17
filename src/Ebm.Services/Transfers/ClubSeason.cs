@@ -70,7 +70,7 @@ internal static class ClubSeason
             .Select(c => (c.Name, c.ParseRules().Registration))
             .ToList();
         var window = RegistrationWindow.On(today, season.StartDate, season.EndDate, registrations);
-        var minPlayers = SquadRules.Strictest([SquadRules.Default, .. registrations.Select(r => r.Registration.Squad)]).MinPlayers;
+        var minPlayers = SquadRules.Strictest(registrations.Select(r => r.Registration.Squad)).MinPlayers; // Default only without competitions
         return (window, minPlayers, firstTeam);
     }
 

@@ -20,6 +20,7 @@ namespace Ebm.Tests.Integration.Import;
 /// Step 16 acceptance: the European player database (data/europe) imports for every country with stable IDs and
 /// correct player-club relationships; duplicates are found across leagues; missing data is marked, never verified.
 /// </summary>
+[Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class EuropePlayerDatabaseTests : IAsyncLifetime
 {
     private static readonly string Folder = Path.Combine(

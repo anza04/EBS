@@ -150,6 +150,8 @@ club's business. A player joining the youth squad is not registered, so the size
 Simple, deterministic rules (the same situation always gives the same plan), over a `ClubSituation` (balance, wage
 budget, wage bill, first team, strictest squad rules of the club's competitions — `SquadRules.Strictest`) and a list
 of `Candidate`s priced for the club (asking salary from the `ContractNegotiator`, fee from §2, foreign status).
+From Step 20 a candidate's `Overall` is what the club's scouts believe, not the true rating: its newest scout report,
+else background knowledge (docs/SCOUTING.md §6).
 
 **Sales (`Surplus`)**, in this order: over the registration maximum → the weakest first-team players; over the
 foreign-player limit → the weakest foreigners; over the wage budget → the most expensive non-starters, never below

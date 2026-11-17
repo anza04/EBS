@@ -3,6 +3,27 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.20.0] — 2026-11-17 — STEP 20: Scouting and player evaluation
+
+### Added
+- Scouts: `StaffMember.Ability` (1–100); every club employs 1–3 scouts by reputation, hired automatically on a
+  three-year contract with an ability that follows its reputation (`IScoutingService.HireMissingScoutsAsync`).
+- Scouting assignments (`ScoutingAssignment`): one player (7 days), a region, a league, a position (21 days) or youth
+  (28 days, age ≤ 21 by default), with optional position and age filters; one at a time per scout; cancellable.
+- Scout reports (`ScoutReport`), written when an assignment is due (`IScoutingService.ProcessDayAsync`, every game
+  day): estimated attributes, overall and potential with error margins, estimated market value and salary expectation.
+- Attribute uncertainty (`ScoutingRules`, `ScoutingEstimator`): accuracy from scout ability, study time and player
+  visibility (reputation, home country, international competition, age); bounded triangular errors; repeated reports
+  improve; deterministic seeds.
+- Player search over a club's reports (`SearchReportsAsync`) and report history (`GetPlayerReportsAsync`).
+- AI clubs judge transfer candidates by their reports or background scouting knowledge instead of true ratings.
+- *Scouting* screen: scouts, assignments, scouted-player search, report details with attribute ranges.
+- Migration `Scouting`: `Staff.Ability`, tables `ScoutingAssignments`, `ScoutReports`, `ScoutReportAttributes`.
+- Documentation: `docs/SCOUTING.md`.
+
+### Changed
+- `GameDayReport` carries the day's `ScoutingDay`; scout salaries are paid like every contract.
+
 ## [0.19.0] — 2026-11-16 — STEP 19: European transfer market
 
 ### Added

@@ -708,6 +708,131 @@ namespace Ebm.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Scouting.ScoutReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Accuracy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("AssignmentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EstimatedOverall")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EstimatedPotential")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("EstimatedSalary")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("EstimatedValue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Margin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PotentialMargin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ScoutId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("ScoutId");
+
+                    b.HasIndex("ClubId", "PlayerId", "Date");
+
+                    b.ToTable("ScoutReports", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ScoutReports_Accuracy", "Accuracy BETWEEN 5 AND 98");
+
+                            t.HasCheckConstraint("CK_ScoutReports_Money", "EstimatedValue >= 0 AND EstimatedSalary >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Scouting.ScoutingAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CompetitionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CountryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("EndedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Focus")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("MaxAge")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Position")
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ScoutId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompetitionId");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("ScoutId");
+
+                    b.HasIndex("ClubId", "Status");
+
+                    b.HasIndex("Status", "DueDate");
+
+                    b.ToTable("ScoutingAssignments", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ScoutingAssignments_Dates", "DueDate > StartDate");
+                        });
+                });
+
             modelBuilder.Entity("Ebm.Domain.Seasons.Season", b =>
                 {
                     b.Property<Guid>("Id")
@@ -739,6 +864,11 @@ namespace Ebm.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Ability")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(50);
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("TEXT");
@@ -1342,6 +1472,158 @@ namespace Ebm.Persistence.Migrations
                     b.HasOne("Ebm.Domain.Players.Player", null)
                         .WithMany()
                         .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Scouting.ScoutReport", b =>
+                {
+                    b.HasOne("Ebm.Domain.Scouting.ScoutingAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Staff.StaffMember", null)
+                        .WithMany()
+                        .HasForeignKey("ScoutId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.OwnsOne("Ebm.Domain.Players.PlayerAttributes", "Attributes", b1 =>
+                        {
+                            b1.Property<Guid>("ScoutReportId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("Agility")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("BallHandling")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Block")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("CloseShot")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Concentration")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Consistency")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("CourtVision")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DecisionMaking")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DefensivePositioning")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DefensiveRebound")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Dunk")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("FreeThrow")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("InteriorDefense")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Layup")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Leadership")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("MidRange")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("OffensiveRebound")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Passing")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("PerimeterDefense")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("PostMoves")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Speed")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Stamina")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Steal")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Strength")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("ThreePoint")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Vertical")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("WorkRate")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("ScoutReportId");
+
+                            b1.ToTable("ScoutReportAttributes", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ScoutReportId");
+                        });
+
+                    b.Navigation("Attributes")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Scouting.ScoutingAssignment", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Competitions.Competition", null)
+                        .WithMany()
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Countries.Country", null)
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Staff.StaffMember", null)
+                        .WithMany()
+                        .HasForeignKey("ScoutId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

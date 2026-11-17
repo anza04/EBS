@@ -88,6 +88,8 @@ internal sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffM
         builder.Property(x => x.FirstName).HasMaxLength(StaffMember.NameMaxLength).IsRequired();
         builder.Property(x => x.LastName).HasMaxLength(StaffMember.NameMaxLength).IsRequired();
         builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(32);
+        builder.Property(x => x.Ability).HasDefaultValue(StaffMember.DefaultAbility); // Step 20
+        builder.Ignore(x => x.FullName);
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.NationalityId);
     }
 }

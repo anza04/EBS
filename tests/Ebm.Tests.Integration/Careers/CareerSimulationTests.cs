@@ -19,6 +19,7 @@ namespace Ebm.Tests.Integration.Careers;
 /// Simulated careers (Step 13): three seasons (or EBM_SIM_SEASONS) of the sample world with AI clubs running themselves. Checks rosters,
 /// transfer activity, finances, results and season progression, and prints the statistics for docs/AI_MANAGEMENT.md.
 /// </summary>
+[Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class CareerSimulationTests(ITestOutputHelper output)
 {
     /// <summary>Seasons to simulate: 3, or the <c>EBM_SIM_SEASONS</c> environment variable (long runs, Step 14).</summary>

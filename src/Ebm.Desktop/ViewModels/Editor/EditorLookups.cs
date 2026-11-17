@@ -34,6 +34,9 @@ public sealed partial class EditorLookups : ObservableObject
     [ObservableProperty]
     private IReadOnlyList<Option<DivisionId>> _optionalDivisions = [];
 
+    [ObservableProperty]
+    private IReadOnlyList<Option<CompetitionId>> _competitions = [];
+
     public IReadOnlyList<Position> Positions { get; } = Enum.GetValues<Position>();
 
     public IReadOnlyList<BoardExpectation> BoardExpectations { get; } = Enum.GetValues<BoardExpectation>();
@@ -56,6 +59,7 @@ public sealed partial class EditorLookups : ObservableObject
         OptionalArenas = [new(null, None), .. snapshot.Arenas.OrderBy(a => a.Name).Select(a => new Option<ArenaId>(a.Id, $"{a.Name}, {a.City}"))];
         Clubs = [.. snapshot.Clubs.OrderBy(c => c.Name).Select(c => new Option<ClubId>(c.Id, c.Name))];
         Players = [.. snapshot.Players.OrderBy(p => p.LastName).ThenBy(p => p.FirstName).Select(p => new Option<PlayerId>(p.Id, $"{p.LastName}, {p.FirstName}"))];
+        Competitions = [.. snapshot.Competitions.OrderBy(c => c.Name).Select(c => new Option<CompetitionId>(c.Id, c.Name))];
         var leagues = snapshot.Leagues.ToDictionary(l => l.Id, l => l.ShortName);
         OptionalDivisions =
         [

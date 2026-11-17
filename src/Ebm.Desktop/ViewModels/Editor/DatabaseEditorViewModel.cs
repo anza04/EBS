@@ -6,6 +6,7 @@ using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Saves;
+using Ebm.Desktop.ViewModels.Scouting;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Careers;
@@ -17,6 +18,7 @@ using Ebm.Services.Import;
 using Ebm.Services.Matches;
 using Ebm.Services.Players;
 using Ebm.Services.Saves;
+using Ebm.Services.Scouting;
 using Ebm.Services.Tactics;
 using Ebm.Services.Transfers;
 
@@ -45,7 +47,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IMatchService matches,
         ICompetitionService competitions,
         ICareerService? careers = null,
-        ISaveGameService? saves = null)
+        ISaveGameService? saves = null,
+        IScoutingService? scouting = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -67,6 +70,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Matches = new MatchCenterViewModel(matches, competitions, ReloadAsync);
         Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
         Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
+        Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -105,6 +109,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     /// <summary>The saved-games screen; <c>null</c> without a save service (editor-only tests).</summary>
     public SaveGamesViewModel? Saves { get; }
 
+    /// <summary>The scouting screen; <c>null</c> without a scouting service (editor-only tests).</summary>
+    public ScoutingViewModel? Scouting { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -131,6 +138,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Saves is not null)
         {
             await Saves.RefreshAsync();
+        }
+
+        if (Scouting is not null)
+        {
+            await Scouting.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

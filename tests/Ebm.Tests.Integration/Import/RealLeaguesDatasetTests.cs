@@ -13,6 +13,7 @@ namespace Ebm.Tests.Integration.Import;
 /// The real-leagues dataset (data/real-leagues, build/generate-real-leagues-dataset.py) imports on its own: eight real
 /// divisions with 138 real clubs, the real players with contracts and the rest as free agents.
 /// </summary>
+[Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class RealLeaguesDatasetTests : IAsyncLifetime
 {
     private static readonly string Folder = Path.Combine(

@@ -9,6 +9,7 @@ using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Contracts;
 using Ebm.Services.Data;
+using Ebm.Services.Scouting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ebm.Services.Transfers;
@@ -435,6 +436,13 @@ internal sealed class TransferService : ITransferService
             }
         }
 
+        // What each club's scouts know; no report is written during the window, so it is loaded once.
+        ScoutingKnowledge knowledge;
+        using (var scope = _scopes.CreateScope())
+        {
+            knowledge = await ScoutingKnowledge.LoadAsync(scope.ServiceProvider, today, cancellationToken).ConfigureAwait(false);
+        }
+
         // Each club shops in turn, richest reputation first; the market is reloaded after every club's deals.
         foreach (var club in aiClubs)
         {
@@ -465,6 +473,7 @@ internal sealed class TransferService : ITransferService
             }
 
             // Free agents and listed players of any country; unlisted players of AI clubs of lower reputation for upgrades.
+            // The club judges them by what its scouts know, not by their true ratings (docs/SCOUTING.md §6).
             var candidates = market.Players
                 .Where(p => !taken.Contains(p.Id))
                 .Select(p => market.Describe(p, current))
@@ -476,7 +485,7 @@ internal sealed class TransferService : ITransferService
                     c.Market.Player.FullName,
                     c.Market.Player.Position,
                     c.Market.Player.SecondaryPositions,
-                    c.Market.Overall,
+                    knowledge.Overall(current, c.Market.Player, c.Market.Evaluation, market.Visibility(c.Market, current)),
                     c.Market.Age,
                     c.Market.AskingSalary,
                     c.Market.IsFreeAgent ? 0 : forSale.TryGetValue(c.Market.Player.Id, out var listed) ? listed.Fee : c.Market.Valuation.BuyNowFee,
@@ -861,6 +870,13 @@ internal sealed class TransferService : ITransferService
 
         /// <summary>The club's attractiveness to players: reputation plus its international competition (<see cref="ClubAttractiveness"/>).</summary>
         public int Attractiveness(Club club) => ClubAttractiveness.Of(club.Reputation, _tiers.TryGetValue(club.Id, out var tier) ? tier : null);
+
+        /// <summary>How visible the player is to <paramref name="scoutingClub"/>'s scouts (<see cref="Domain.Scouting.ScoutingRules.Visibility"/>).</summary>
+        public int Visibility(MarketPlayer player, Club scoutingClub) => Domain.Scouting.ScoutingRules.Visibility(
+            player.Player.Reputation,
+            player.Club is { } current ? current.CountryId == scoutingClub.CountryId : player.Player.HasNationality(c => c == scoutingClub.CountryId),
+            player.Club is { } club && _tiers.ContainsKey(club.Id),
+            player.Age);
 
         /// <summary>The club's country differs from the player's (sporting) nationality.</summary>
         public static bool IsForeignAt(Player player, Club club) => player.NationalityId != club.CountryId;
