@@ -224,7 +224,16 @@ internal sealed class ClubManagementService(
                     continue;
                 }
 
-                await contracts.SignAsync(agent.Player.Id, clubId, new ContractTerms(today, end, asking), RosterRole.Bench, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await contracts.SignAsync(agent.Player.Id, clubId, new ContractTerms(today, end, asking), RosterRole.Bench, cancellationToken).ConfigureAwait(false);
+                }
+                catch (DomainException)
+                {
+                    // E.g. injury cover after the registration deadline (only the squad minimum is exempt): no signing.
+                    break;
+                }
+
                 balance -= asking;
                 missing--;
                 signed++;

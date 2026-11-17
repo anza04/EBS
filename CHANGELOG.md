@@ -16,6 +16,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - `EuropeanTransferWindowTests` counted purchases funded by sales in the same window as overspending.
+- An AI emergency signing for injury cover after a registration deadline stopped the career calendar; the club now
+  skips it (found by `MilestoneTwoTests` in the 2026-27 European season).
 
 ## [0.23.0] — 2026-11-17 — STEP 23: Financial management
 

@@ -41,7 +41,9 @@ transfers, scouting, development, injuries, finances and multi-season progressio
     `EuropeDatasetTests` (both), `RealLeaguesDatasetTests`, `EuropeanTransferWindowTests.Clubs_in_international_…`.
   - FAIL → fixed in the test: `EuropeanTransferWindowTests.Ai_clubs_recruit_…` (43 min 53 s): three clubs bought with
     money received from sales in the same window; the check now counts those sales. Not re-run yet.
-  - `MilestoneTwoTests`: not reached. Re-run started on its own; still running when this step was committed.
+  - `MilestoneTwoTests`, run alone: FAIL after 22 min — an injury-cover emergency signing (Anadolu Efes, after the
+    BSL deadline of 2027-02-28) threw and stopped the calendar. Fixed in `ClubManagementService.FillSquadsAsync`
+    (refused signings are skipped); fast suite 144/144 PASS after the fix. Re-run pending.
 - Release build (`build/publish.ps1`): not run in this step.
 
 ## 6. Known limitations
