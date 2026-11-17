@@ -69,11 +69,13 @@
                 <TextBlock Text="{Binding SelectedSummary}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
                 <StackPanel IsEnabled="{Binding HasSelection}">
                   <Button Content="Renew…" Command="{Binding StartRenewalCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,10,0,0" />
-                  <TextBlock Text="Terminate" Style="{StaticResource Form.Label}" />
+                  <TextBlock Text="Release / terminate" Style="{StaticResource Form.Label}" />
                   <StackPanel Orientation="Horizontal">
                     <ComboBox ItemsSource="{Binding TerminationKinds}" SelectedItem="{Binding TerminationKind}" Width="150" />
                     <TextBox Text="{Binding Settlement, UpdateSourceTrigger=PropertyChanged}" Width="110" Margin="8,0,0,0" ToolTip="Buyout in euros (mutual agreement only; empty = the least the player accepts)" />
-                    <Button Content="Ask the player" Command="{Binding AskBuyoutCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Button Content="Ask the player" Command="{Binding AskBuyoutCommand}" Style="{StaticResource Button.Secondary}" />
                     <Button Content="Terminate" Command="{Binding TerminateCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
                   </StackPanel>
                   <TextBlock Text="A release pays the remaining salary in full; a mutual agreement pays the settlement (default: half)." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,4,0,0" />
