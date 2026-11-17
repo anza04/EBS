@@ -4,10 +4,12 @@ using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
 using Ebm.Domain.Competitions.Rules;
 using Ebm.Domain.Countries;
+using Ebm.Domain.Finances;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Domain.Standings;
 using Ebm.Services.Data;
+using Ebm.Services.Finances;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ebm.Services.Competitions;
@@ -506,13 +508,14 @@ internal sealed class CompetitionService : ICompetitionService
         }
 
         var clubs = Repo<Club, ClubId>(services);
+        var paidOn = data.Fixtures.Count > 0 ? data.Fixtures.Max(f => f.Date) : data.SeasonEntity.EndDate;
         foreach (var entry in unpaid)
         {
             var reward = data.Cup!.Reward(entry.ClubId);
             entry.RecordReward(reward.Prize, reward.Reputation);
             if (await clubs.FindAsync(entry.ClubId, cancellationToken).ConfigureAwait(false) is { } club)
             {
-                club.ChangeBalance(reward.Prize);
+                Ledger.Book(services, club, paidOn, FinanceCategory.PrizeMoney, reward.Prize, $"{data.Competition.Name} {data.SeasonEntity.Name}");
                 club.ChangeReputation(reward.Reputation);
             }
         }

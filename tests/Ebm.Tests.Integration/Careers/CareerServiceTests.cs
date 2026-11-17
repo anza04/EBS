@@ -103,6 +103,11 @@ public sealed class CareerServiceTests : IAsyncLifetime
         Assert.Equal(2, next.Career.SeasonsPlayed);
         Assert.Equal(2, next.Competitions.Count);
         Assert.All(next.Competitions, c => Assert.Equal(CompetitionPhase.RegularSeason, c.Phase));
+
+        // The board sets next season's budgets (Step 23): every club gets one, renewed from the last one.
+        var budgets = await _db.ReadAsync(s => s.Repo<Ebm.Domain.Finances.ClubBudget, Ebm.Domain.Finances.ClubBudgetId>().ListAsync(b => b.SeasonId == next.Season.Id));
+        Assert.Equal(14, budgets.Count);
+        Assert.All(budgets, b => Assert.True(b.WageBudget > 0 && b.Sponsorship > 0));
         var names = (await _db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync())).ToDictionary(c => c.Id, c => c.Name);
         var serieANext = (await Competitions.GetStandingsAsync(serieA.Competition.Id, next.Season.Id)).Select(r => names[r.ClubId]).ToList();
         var serieA2Next = (await Competitions.GetStandingsAsync(serieA2.Competition.Id, next.Season.Id)).Select(r => names[r.ClubId]).ToList();

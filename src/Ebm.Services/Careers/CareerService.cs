@@ -3,12 +3,14 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
+using Ebm.Domain.Finances;
 using Ebm.Domain.Management;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
 using Ebm.Services.Development;
+using Ebm.Services.Finances;
 using Ebm.Services.Medical;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
@@ -28,6 +30,8 @@ internal sealed class CareerService(
     IScoutingService scouting,
     IDevelopmentService development,
     IMedicalService medical,
+    IFinanceService finances,
+    FinanceModel financeModel,
     GameClock clock) : ICareerService
 {
     /// <summary>A new career starts this many days before its season, so the squad can be prepared.</summary>
@@ -40,7 +44,14 @@ internal sealed class CareerService(
     {
         var career = await FindCareerAsync(cancellationToken).ConfigureAwait(false);
         clock.Set(career?.CurrentDate);
-        return career is null ? null : await StateAsync(career, cancellationToken).ConfigureAwait(false);
+        if (career is null)
+        {
+            return null;
+        }
+
+        // Careers saved before Step 23 get their season budgets on load.
+        await finances.PlanBudgetsAsync(career.SeasonId, null, cancellationToken).ConfigureAwait(false);
+        return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<CareerClubOption>> GetClubOptionsAsync(CancellationToken cancellationToken = default)
@@ -100,6 +111,7 @@ internal sealed class CareerService(
         await scouting.HireMissingScoutsAsync(cancellationToken).ConfigureAwait(false);
         await development.HireMissingCoachesAsync(cancellationToken).ConfigureAwait(false);
         await medical.HireMissingPhysiosAsync(cancellationToken).ConfigureAwait(false);
+        await finances.PlanBudgetsAsync(season.Id, null, cancellationToken).ConfigureAwait(false);
         await management.PlanTrainingAsync([clubId], cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
@@ -167,7 +179,7 @@ internal sealed class CareerService(
         var medicalDay = await medical.ProcessDayAsync(playedToday, cancellationToken).ConfigureAwait(false);
         var seasonEnd = seasonEnds ? await development.ProcessSeasonEndAsync(cancellationToken).ConfigureAwait(false) : null;
 
-        var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
+        var money = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
 
@@ -193,7 +205,7 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay, developmentDay, seasonEnd, medicalDay);
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay);
     }
 
     /// <summary>The matches played (not forfeited) on <paramref name="day"/>.</summary>
@@ -285,6 +297,12 @@ internal sealed class CareerService(
         }
 
         var current = state.Season;
+
+        // The board judges the season before setting the next objectives; renewed sponsorship deals follow the verdict.
+        var objectivesMet = (await ReviewAsync(career, current.Id, cancellationToken).ConfigureAwait(false)).Competitions
+            .SelectMany(c => c.Objectives)
+            .GroupBy(o => o.Club.Id)
+            .ToDictionary(g => g.Key, g => g.All(o => o.Met));
         Season next;
         Dictionary<CompetitionId, List<ClubId>> nextEntries;
         Dictionary<CompetitionId, int> firstRoundOffsets = [];
@@ -349,6 +367,7 @@ internal sealed class CareerService(
         await competitions.QualifyAsync(next.Id, cancellationToken).ConfigureAwait(false);
         await ScheduleLeaguesAsync(next.Id, id => next.StartDate.AddDays(firstRoundOffsets.GetValueOrDefault(id)), cancellationToken).ConfigureAwait(false);
         await management.SetObjectivesAsync(next.Id, cancellationToken).ConfigureAwait(false);
+        await finances.PlanBudgetsAsync(next.Id, objectivesMet, cancellationToken).ConfigureAwait(false);
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
@@ -514,13 +533,13 @@ internal sealed class CareerService(
         }
     }
 
-    /// <summary>Closes the game day <paramref name="today"/>: books its salaries and income and moves the date on, in one transaction.</summary>
-    private async Task<(long Salaries, long Income)> MoveCareerAsync(CareerId careerId, DateOnly today, CancellationToken cancellationToken)
+    /// <summary>Closes the game day <paramref name="today"/>: books its money (docs/FINANCES.md §2) and moves the date on, in one transaction.</summary>
+    private async Task<FinanceDay> MoveCareerAsync(CareerId careerId, DateOnly today, CancellationToken cancellationToken)
     {
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
         var career = (await Repo<Career, CareerId>(s).FindAsync(careerId, cancellationToken).ConfigureAwait(false))!;
-        var money = await ClubManagementService.AddFinancesAsync(s, today, cancellationToken).ConfigureAwait(false);
+        var money = await FinanceService.BookDayAsync(s, financeModel, today, cancellationToken).ConfigureAwait(false);
         career.MoveTo(today.AddDays(1));
         await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         clock.Set(career.CurrentDate);

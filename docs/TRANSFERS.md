@@ -254,6 +254,6 @@ competitions close on 28 February, second divisions on 31 March.
 
 * Career mode (Steps 09–12): persist pending offers to and from the user's club (today an AI club never bids for a
   managed club's players); run `ProcessTransferDatesAsync` every game day; transfer windows as calendar periods.
-* Finances (Step 27): book salaries, enforce the wage budget for the user, amortise fees.
+* Finances: fees and loan payments are booked in the ledger and AI clubs keep to a transfer budget (Step 23, docs/FINANCES.md); enforcing the wage budget for the user and amortising fees remain (Step 27).
 * Later steps: richer valuations (form, statistics), AI clubs bidding for the user's players (pending offers), AI
   loans, buy-back clauses, sell-on fees, licences and work permits; deadlines per country from verified sources.

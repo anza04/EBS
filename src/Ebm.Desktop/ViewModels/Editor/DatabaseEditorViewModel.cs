@@ -8,6 +8,7 @@ using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Scouting;
 using Ebm.Desktop.ViewModels.Tactical;
+using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
@@ -19,6 +20,7 @@ using Ebm.Services.Development;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Matches;
+using Ebm.Services.Finances;
 using Ebm.Services.Medical;
 using Ebm.Services.Players;
 using Ebm.Services.Saves;
@@ -54,7 +56,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ISaveGameService? saves = null,
         IScoutingService? scouting = null,
         IDevelopmentService? development = null,
-        IMedicalService? medical = null)
+        IMedicalService? medical = null,
+        IFinanceService? finances = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -79,6 +82,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
         Training = development is null ? null : new TrainingViewModel(development, Lookups);
         Medical = medical is null ? null : new MedicalViewModel(medical, Lookups);
+        Finances = finances is null ? null : new FinancesViewModel(finances, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -125,6 +129,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public MedicalViewModel? Medical { get; }
 
+    public FinancesViewModel? Finances { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -166,6 +172,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Medical is not null)
         {
             await Medical.RefreshAsync();
+        }
+
+        if (Finances is not null)
+        {
+            await Finances.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

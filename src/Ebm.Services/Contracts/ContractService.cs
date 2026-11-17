@@ -2,12 +2,14 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
+using Ebm.Domain.Finances;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
 using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Data;
+using Ebm.Services.Finances;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -165,7 +167,7 @@ internal sealed class ContractService : IContractService
         }
 
         data.Contracts.Add(contract);
-        club.ChangeBalance(-terms.SigningBonus);
+        Ledger.Book(scope.ServiceProvider, club, data.Today, FinanceCategory.SigningBonuses, -terms.SigningBonus, $"Signing bonus of {player.FullName}");
         if (joins)
         {
             await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, clubId, data.Today, joinAs, cancellationToken).ConfigureAwait(false);
@@ -189,7 +191,7 @@ internal sealed class ContractService : IContractService
         contract.Supersede(terms.StartDate);
         var renewal = Contract.ForPlayer(ContractId.New(), contract.ClubId, player.Id, terms);
         data.Contracts.Add(renewal);
-        club.ChangeBalance(-terms.SigningBonus);
+        Ledger.Book(scope.ServiceProvider, club, data.Today, FinanceCategory.SigningBonuses, -terms.SigningBonus, $"Renewal bonus of {player.FullName}");
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return renewal.Id;
     }
@@ -219,7 +221,7 @@ internal sealed class ContractService : IContractService
         }
 
         contract.Terminate(data.Today, paid);
-        club.ChangeBalance(-paid);
+        Ledger.Book(scope.ServiceProvider, club, data.Today, FinanceCategory.Settlements, -paid, $"Contract settlement of {player.FullName}");
 
         // The player stays only if another contract with the club runs today (e.g. the one this renewal would replace).
         var others = await data.Contracts.ListAsync(c => c.PlayerId == player.Id && c.ClubId == club.Id && c.Id != contract.Id, cancellationToken).ConfigureAwait(false);

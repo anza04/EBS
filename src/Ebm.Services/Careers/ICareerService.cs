@@ -92,7 +92,7 @@ public sealed record PlayedFixture(string Competition, string Home, string Away,
 }
 
 /// <summary>What the AI clubs and the club finances did on one game day.</summary>
-public sealed record ManagementDay(int LineupsChanged, int TacticsPlanned, int Renewals, int Releases, int EmergencySignings, int PlayersCreated, long SalariesPaid, long Income);
+public sealed record ManagementDay(int LineupsChanged, int TacticsPlanned, int Renewals, int Releases, int EmergencySignings, int PlayersCreated, long SalariesPaid, long Income, long Costs = 0);
 
 /// <summary>What happened on one game day.</summary>
 public sealed record GameDayReport(

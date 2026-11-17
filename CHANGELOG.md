@@ -3,6 +3,24 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.23.0] — 2026-11-17 — STEP 23: Financial management
+
+### Added
+- Ledger (`FinancialTransaction`, table `FinancialTransactions`): every game-driven balance change is booked by
+  category (player and staff salaries, signing bonuses, settlements, transfer and loan fees, sponsorship, ticket sales,
+  prize money, arena and travel costs), so balances always reconcile with their bookings (`docs/FINANCES.md`).
+- Matchday finances: ticket sales by reputation and arena capacity (big games draw more), matchday operations, travel
+  for away games (domestic or abroad); monthly sponsorship instalments and arena upkeep.
+- Season budgets (`ClubBudget`, table `ClubBudgets`, `FinanceModel`): sponsorship deal, expected ticket sales and
+  running costs, wage budget, transfer budget and the board's financial target; renewed every season by reputation,
+  results, reserves and debt. Set at career start, each new season and when an older save is loaded.
+- Financial reports (`IFinanceService`) and a *Finances* tab: budget, income and expenditure of the year by category,
+  profit or loss, salary commitments, transfer budget left, the board's verdict and the latest bookings.
+- AI clubs spend at most their transfer budget in a window; debts cut next season's wage budget. Migration `Finances`.
+
+### Changed
+- The placeholder income (one twelfth of the wage budget a month) is replaced by the revenue model.
+
 ## [0.22.0] — 2026-11-17 — STEP 22: Injuries and medical management
 
 ### Added

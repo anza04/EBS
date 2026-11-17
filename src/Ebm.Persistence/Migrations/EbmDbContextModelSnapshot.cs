@@ -429,6 +429,99 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("TrainingPlans", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Finances.ClubBudget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ArenaCosts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Attendance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("HomeGames")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MinimumBalance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("OpeningBalance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("PlannedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Reputation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Sponsorship")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("StaffWages")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TicketPrice")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TicketSales")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TransferBudget")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TravelCosts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WageBudget")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeasonId");
+
+                    b.HasIndex("ClubId", "SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("ClubBudgets", (string)null);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Finances.FinancialTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId", "Date");
+
+                    b.ToTable("FinancialTransactions", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Matches.Fixture", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1288,6 +1381,30 @@ namespace Ebm.Persistence.Migrations
                         });
 
                     b.Navigation("Individuals");
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Finances.ClubBudget", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Seasons.Season", null)
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Finances.FinancialTransaction", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Ebm.Domain.Matches.Fixture", b =>

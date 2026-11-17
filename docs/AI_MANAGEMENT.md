@@ -47,8 +47,9 @@ the club's tactic "AI plan" and selected.
 
 * Salaries are paid on each instalment's due date (`SalaryCalculator.PaymentSchedule`) by the club holding the contract;
   a loaned-out player's parent contract is not paid (the loan club pays its loan contract). Applies to every club.
-* Income (placeholder until Step 27): on the last day of each month every club receives one twelfth of its wage budget.
-  A club within its wage budget therefore never loses money on wages; transfer fees and bonuses move balances.
+* Income and running costs (Step 23, docs/FINANCES.md): sponsorship (monthly), ticket sales, arena and travel costs
+  on matchdays, prize money. The board sets each season's wage and transfer budgets from the club's revenue and
+  balance, so AI clubs that respect them stay solvent; in a window an AI club spends at most its transfer budget left.
 
 ## 6. Season objectives (`SeasonObjectives`)
 
@@ -90,7 +91,7 @@ balance below zero; at most 6 moves per club. Over the three seasons the three s
 * Turnover grows over long careers (six-season run: 34 → 76 moves per season) as players age without youth intake or retirement.
 * A user's club that nobody manages loses its players as contracts expire (found by the six-season run): use the assistant.
 * Without youth intake or retirement, players only age; generated free agents keep the market supplied.
-* Income equals the wage budget, so AI balances drift upwards; real revenues come with Step 27.
+* Revenues are modelled (docs/FINANCES.md); the first season's sponsorship is sized to fund each club's dataset wage budget.
 * The AI does not use loans, release clauses or bids for the user's players, and does not react to injuries beyond
   match-day roles (injuries arrive with Step 22).
 * Tactics are re-planned only at transfer windows, not per opponent.

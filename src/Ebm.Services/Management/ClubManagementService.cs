@@ -308,35 +308,6 @@ internal sealed class ClubManagementService(
         await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Books the salaries due and the month-end income of <paramref name="date"/> in the unit of work of <paramref name="s"/>.</summary>
-    internal static async Task<(long Salaries, long Income)> AddFinancesAsync(IServiceProvider s, DateOnly date, CancellationToken cancellationToken)
-    {
-        var clubRepo = Repo<Club, ClubId>(s);
-        var all = (await clubRepo.ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
-        long salaries = 0, income = 0;
-        foreach (var contract in await Repo<Contract, ContractId>(s).ListAsync(Contract.RunningOn(date), cancellationToken).ConfigureAwait(false))
-        {
-            var due = ClubFinances.SalaryDue(contract, date);
-            if (due > 0 && all.TryGetValue(contract.ClubId, out var payer))
-            {
-                payer.ChangeBalance(-due);
-                salaries += due;
-            }
-        }
-
-        if (ClubFinances.IsIncomeDay(date))
-        {
-            foreach (var club in all.Values)
-            {
-                var amount = ClubFinances.MonthlyIncome(club);
-                club.ChangeBalance(amount);
-                income += amount;
-            }
-        }
-
-        return (salaries, income);
-    }
-
     private async Task<IReadOnlyList<ClubId>> AiClubsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(managedClubs);

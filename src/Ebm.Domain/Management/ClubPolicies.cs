@@ -51,10 +51,9 @@ public static class SeasonObjectives
 }
 
 /// <summary>
-/// Club money per game day (docs/AI_MANAGEMENT.md §5). Salaries are paid on their instalment due dates
+/// Club money per game day (docs/AI_MANAGEMENT.md §5, docs/FINANCES.md): salaries are paid on their instalment due dates
 /// (<see cref="SalaryCalculator.PaymentSchedule"/>); a parent contract of a loaned-out player is not paid (the loan club
-/// pays). Income is a placeholder until the finance step (27): on the last day of each month a club receives one twelfth
-/// of its wage budget (the board funds the budget it sets).
+/// pays). Monthly income and costs (sponsorship, arena upkeep) are booked on the last day of each month.
 /// </summary>
 public static class ClubFinances
 {
@@ -71,12 +70,6 @@ public static class ClubFinances
     }
 
     public static bool IsIncomeDay(DateOnly date) => date.AddDays(1).Day == 1;
-
-    public static long MonthlyIncome(Club club)
-    {
-        ArgumentNullException.ThrowIfNull(club);
-        return club.WageBudget / 12;
-    }
 }
 
 /// <summary>

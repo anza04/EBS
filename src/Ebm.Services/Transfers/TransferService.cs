@@ -2,6 +2,7 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
+using Ebm.Domain.Finances;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
@@ -9,6 +10,7 @@ using Ebm.Domain.Transfers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Contracts;
 using Ebm.Services.Data;
+using Ebm.Services.Finances;
 using Ebm.Services.Scouting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -166,8 +168,10 @@ internal sealed class TransferService : ITransferService
         contract.Transfer(today);
         var signed = Contract.ForPlayer(ContractId.New(), buyerId, playerId, terms);
         market.Data.Contracts.Add(signed);
-        seller.ChangeBalance(fee);
-        buyer.ChangeBalance(-(fee + terms.SigningBonus));
+        var sp = scope.ServiceProvider;
+        Ledger.Book(sp, seller, today, FinanceCategory.TransferFees, fee, $"Sale of {player.FullName} to {buyer.Name}");
+        Ledger.Book(sp, buyer, today, FinanceCategory.TransferFees, -fee, $"Purchase of {player.FullName} from {seller.Name}");
+        Ledger.Book(sp, buyer, today, FinanceCategory.SigningBonuses, -terms.SigningBonus, $"Signing bonus of {player.FullName}");
         await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, buyerId, today, joinAs, cancellationToken).ConfigureAwait(false);
         var viaClause = contract.ReleaseClause is { } clause && fee >= clause && fee < listing.Valuation.AskingFee;
         var transfer = Transfer.Permanent(TransferId.New(), playerId, seller.Id, buyerId, today, fee, signed.Id, viaClause);
@@ -215,8 +219,11 @@ internal sealed class TransferService : ITransferService
         contract.SendOnLoan(today, until);
         var loanContract = Contract.ForPlayer(ContractId.New(), borrowerId, playerId, new ContractTerms(today, until, contract.AnnualSalary, contract.PaymentFrequency));
         market.Data.Contracts.Add(loanContract);
-        parent.ChangeBalance(fee - contribution);
-        borrower.ChangeBalance(contribution - fee);
+        var sp = scope.ServiceProvider;
+        Ledger.Book(sp, parent, today, FinanceCategory.LoanFees, fee, $"Loan fee for {player.FullName} from {borrower.Name}");
+        Ledger.Book(sp, parent, today, FinanceCategory.LoanFees, -contribution, $"Salary contribution for {player.FullName} on loan");
+        Ledger.Book(sp, borrower, today, FinanceCategory.LoanFees, -fee, $"Loan fee for {player.FullName} to {parent.Name}");
+        Ledger.Book(sp, borrower, today, FinanceCategory.LoanFees, contribution, $"Salary contribution for {player.FullName} from {parent.Name}");
         await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, borrowerId, today, joinAs, cancellationToken).ConfigureAwait(false);
         var loan = Transfer.OnLoan(TransferId.New(), playerId, parent.Id, borrowerId, today, until, fee, loanContract.Id, contract.Id, contribution, optionFee);
         market.Data.Transfers.Add(loan);
@@ -255,8 +262,8 @@ internal sealed class TransferService : ITransferService
         var unused = UnusedContribution(loan, returnDay);
         if (unused > 0 && await data.Clubs.FindAsync(loan.ToClubId, cancellationToken).ConfigureAwait(false) is { } borrower)
         {
-            borrower.ChangeBalance(-unused);
-            parentClub.ChangeBalance(unused);
+            Ledger.Book(scope.ServiceProvider, borrower, data.Today, FinanceCategory.LoanFees, -unused, $"Refund of the salary contribution for {player.FullName}");
+            Ledger.Book(scope.ServiceProvider, parentClub, data.Today, FinanceCategory.LoanFees, unused, $"Refund of the salary contribution for {player.FullName}");
         }
 
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
@@ -329,8 +336,12 @@ internal sealed class TransferService : ITransferService
         loan.Return(today);
         var signed = Contract.ForPlayer(ContractId.New(), buyer.Id, player.Id, terms);
         market.Data.Contracts.Add(signed);
-        seller.ChangeBalance(fee + unused);
-        buyer.ChangeBalance(-(cash + unused));
+        var sp = scope.ServiceProvider;
+        Ledger.Book(sp, seller, today, FinanceCategory.TransferFees, fee, $"Option to buy {player.FullName} exercised by {buyer.Name}");
+        Ledger.Book(sp, seller, today, FinanceCategory.LoanFees, unused, $"Refund of the salary contribution for {player.FullName}");
+        Ledger.Book(sp, buyer, today, FinanceCategory.TransferFees, -fee, $"Option to buy {player.FullName} from {seller.Name}");
+        Ledger.Book(sp, buyer, today, FinanceCategory.LoanFees, -unused, $"Refund of the salary contribution for {player.FullName}");
+        Ledger.Book(sp, buyer, today, FinanceCategory.SigningBonuses, -terms.SigningBonus, $"Signing bonus of {player.FullName}");
         var transfer = Transfer.ByOption(TransferId.New(), player.Id, seller.Id, buyer.Id, today, fee, signed.Id, parent.Id);
         market.Data.Transfers.Add(transfer);
         await market.Data.SaveAsync(cancellationToken).ConfigureAwait(false);
@@ -463,7 +474,14 @@ internal sealed class TransferService : ITransferService
             RegistrationWindow window;
             using (var scope = _scopes.CreateScope())
             {
-                window = (await ClubSeason.RegistrationAsync(scope.ServiceProvider, club.Id, today, cancellationToken).ConfigureAwait(false)).Window;
+                var s = scope.ServiceProvider;
+                window = (await ClubSeason.RegistrationAsync(s, club.Id, today, cancellationToken).ConfigureAwait(false)).Window;
+
+                // The board's transfer budget caps the cash the club may spend (docs/FINANCES.md §5).
+                if (await FinanceService.TransferBudgetLeftAsync(s, s.GetService<FinanceModel>() ?? FinanceModel.Default, club.Id, today, cancellationToken).ConfigureAwait(false) is { } left)
+                {
+                    situation = situation with { Balance = Math.Max(0, Math.Min(situation.Balance, left)) };
+                }
             }
 
             if (!window.Allows(situation.FirstTeam.Count + 1, situation.Rules.MinPlayers))

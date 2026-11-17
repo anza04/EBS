@@ -1,0 +1,62 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:fi="clr-namespace:Ebm.Desktop.ViewModels.Finances">
+  <!-- Club finances (Step 23). Uses the tokens from Shell.xaml, the styles from Editor.xaml and Players.Lines. -->
+
+  <DataTemplate DataType="{x:Type fi:FinancesViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+        <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" Margin="20,0,0,0" />
+      </StackPanel>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="380" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,12,0">
+          <StackPanel>
+            <Border Style="{StaticResource Card}" Padding="16">
+              <StackPanel>
+                <TextBlock Text="Summary" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+                <ContentControl Content="{Binding Summary}" ContentTemplate="{StaticResource Players.Lines}" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="Board's budget" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+                <ContentControl Content="{Binding Budget}" ContentTemplate="{StaticResource Players.Lines}" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="Income" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+                <ContentControl Content="{Binding Income}" ContentTemplate="{StaticResource Players.Lines}" />
+                <TextBlock Text="Expenditure" Style="{StaticResource Text.Title}" Margin="0,12,0,8" />
+                <ContentControl Content="{Binding Expenditure}" ContentTemplate="{StaticResource Players.Lines}" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="Salary commitments" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
+                <ContentControl Content="{Binding Commitments}" ContentTemplate="{StaticResource Players.Lines}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+        <DockPanel Grid.Column="1">
+          <TextBlock DockPanel.Dock="Top" Text="Latest bookings" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
+          <DataGrid ItemsSource="{Binding Transactions}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
+              <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="140" />
+              <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" MinWidth="160" />
+              <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="120" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </Grid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

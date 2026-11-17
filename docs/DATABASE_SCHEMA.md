@@ -20,6 +20,7 @@ Schema version: **`20261117124356_Scouting`** (Step 20).
 | `20261117124356_Scouting` | 20 | `Staff.Ability` (default 50). New tables `ScoutingAssignments`, `ScoutReports` and `ScoutReportAttributes` (create-table and add-column only) |
 | `20261117140121_Development` | 21 | `Players.RetiredOn`. New table `TrainingPlans` (create-table and add-column only) |
 | `20261117143312_Medical` | 22 | New table `Injuries` (create-table only) |
+| `20261117150208_Finances` | 23 | New tables `ClubBudgets` and `FinancialTransactions` (create-table only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -348,6 +349,33 @@ Medical records: one row per injury, history, never deleted (rules in `docs/INJU
 | IsRecurrence | bool | Same body part injured within the recurrence window |
 | Aggravations | int | Times made worse by playing or training on it |
 | RecoveredOn | date? | First fit day; null while active (indexed) |
+
+### ClubBudgets
+The board's budget of a club for a season (docs/FINANCES.md §3); history.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId / SeasonId | id | FKs; unique (ClubId, SeasonId) |
+| PlannedOn | date | |
+| Reputation | int | Club reputation when planned, 1–100 |
+| OpeningBalance | long | Balance when planned |
+| Sponsorship, TicketSales, ArenaCosts, TravelCosts, StaffWages | long | Expected for the year |
+| TicketPrice / Attendance / HomeGames | long / int / int | Regular-season matchday assumptions |
+| WageBudget / TransferBudget | long | Copied wage budget (also in `Clubs.WageBudget`); fees, loan payments and bonuses allowed |
+| MinimumBalance | long | Financial target for the year end |
+
+### FinancialTransactions
+The ledger: one row per booking, never deleted (docs/FINANCES.md §1–2).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId | id | FK Clubs; index (ClubId, Date) |
+| Date | date | |
+| Category | text(32) | `FinanceCategory` name (`PlayerSalaries`, `TicketSales`, …) |
+| Amount | long | Non-zero; + income, − expenditure |
+| Description | text(200)? | |
 
 ### Fixtures
 | Column | Type | Rules |
