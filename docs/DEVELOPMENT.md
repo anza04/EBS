@@ -10,7 +10,7 @@ run but equal players develop differently.
 | When (career calendar) | What |
 |---|---|
 | Career start | Missing coaches hired (§2.3); AI training plans |
-| Every game day, after the matches | Fitness: fatigue from the day's minutes, then recovery (§3) |
+| Every game day, after the matches | Fitness: fatigue from the day's minutes (every match of the day, the user's included), then recovery (§3); then the medical day (docs/INJURIES.md) |
 | Mondays | AI clubs re-plan training (§6); missing coaches hired; one week of development for every active player (§4) |
 | Last day of a season (before the AI transfer window) | Potential revised (§4.4); retirements (§5) |
 
@@ -126,5 +126,5 @@ are left out of development, the free-agent list, the transfer market, scouting 
 ## 7. Limitations
 * No youth intake: retirements are replaced by generated free agents (Step 13) and transfers.
 * Development history is not stored (only current attributes); scout reports are snapshots and age (`docs/SCOUTING.md`).
-* Matches change fitness, not morale; injuries come with Step 22 (injured players already neither train nor develop).
+* Matches change fitness, not morale. Injuries: docs/INJURIES.md (Step 22).
 * Formulas are code (`PlayerDevelopment` properties and tables), not a data file; only retirement is configurable.

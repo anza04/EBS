@@ -1,4 +1,5 @@
 using Ebm.Domain.Development;
+using Ebm.Domain.Medical;
 using Serilog.Events;
 
 namespace Ebm.Hosting.Configuration;
@@ -18,6 +19,9 @@ public sealed class EbmOptions
 
     /// <summary>Retirement rules (section <c>Ebm:Retirement</c>); unset values keep the defaults.</summary>
     public RetirementRules Retirement { get; set; } = new();
+
+    /// <summary>Injury rates (section <c>Ebm:Injuries</c>); unset values keep the defaults.</summary>
+    public InjuryRules Injuries { get; set; } = new();
 }
 
 public sealed class PathsOptions

@@ -13,11 +13,12 @@ docs/SEASON_LIFECYCLE.md) decides when. Recruitment itself is the Step 08 `ClubR
 | Before each game day's matches | Squad roles of every AI club that plays that day (saved only when they change) |
 | End of every game day | Salaries due that day; month-end income (one transaction with the date change) |
 | Last day of a season, 14 days before a season, any Monday an AI club is short of players | Transfer window: free-agent replenishment, `RunAiTransferWindowAsync`, releases above the squad limit, emergency signings, AI tactics re-planned |
-| Mondays | Training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6) |
+| Mondays | Training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6; injured players handled as in docs/INJURIES.md §5) |
 | Last day of each month | Contract renewals |
 | Next season | Board objectives for the new season |
 
-"Short of players" = first team below `SquadRules.MinPlayers` (10) or fewer than five available players.
+"Short of players" = first team below `SquadRules.MinPlayers` (10), fewer than five available players, or fewer than 10
+players once those expected back from injury in more than 28 days are left out (docs/INJURIES.md §5).
 
 ## 2. Starting lineups and rotation (`LineupPlanner`)
 
@@ -65,8 +66,8 @@ the club's tactic "AI plan" and selected.
 * Replenishment (`PlayerGenerator`, before each window): the market keeps 2 free agents per club; missing ones are
   created as fictional players aged 18–23, quality 38–60, nationality of a random club, names recombined from existing
   players of that nationality (data, not code). Stand-in for youth intake (later step).
-* Emergency signings: a club still below 10 players after a window signs the best free agents whose asking salary its
-  balance covers for a year, ignoring the wage budget.
+* Emergency signings: a club still below 10 players after a window (long-term injured players not counted, at most 18
+  in the squad) signs the best free agents whose asking salary its balance covers for a year, ignoring the wage budget.
 
 ## 8. Simulation results
 

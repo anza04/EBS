@@ -9,6 +9,7 @@ using Ebm.Domain.Seasons;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
 using Ebm.Services.Development;
+using Ebm.Services.Medical;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
 using Ebm.Services.Scouting;
@@ -26,6 +27,7 @@ internal sealed class CareerService(
     IClubManagementService management,
     IScoutingService scouting,
     IDevelopmentService development,
+    IMedicalService medical,
     GameClock clock) : ICareerService
 {
     /// <summary>A new career starts this many days before its season, so the squad can be prepared.</summary>
@@ -97,6 +99,7 @@ internal sealed class CareerService(
         await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
         await scouting.HireMissingScoutsAsync(cancellationToken).ConfigureAwait(false);
         await development.HireMissingCoachesAsync(cancellationToken).ConfigureAwait(false);
+        await medical.HireMissingPhysiosAsync(cancellationToken).ConfigureAwait(false);
         await management.PlanTrainingAsync([clubId], cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
@@ -156,7 +159,12 @@ internal sealed class CareerService(
             await management.PlanTrainingAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        var developmentDay = await development.ProcessDayAsync([.. results.Select(r => r.Match.Id)], cancellationToken).ConfigureAwait(false);
+        // Every match of the day counts, the user's own (played before the day moves on) included.
+        var playedToday = await PlayedOnAsync(today, cancellationToken).ConfigureAwait(false);
+        var developmentDay = await development.ProcessDayAsync(playedToday, cancellationToken).ConfigureAwait(false);
+
+        // Medical (docs/INJURIES.md): recovery, then injuries from today's matches and training.
+        var medicalDay = await medical.ProcessDayAsync(playedToday, cancellationToken).ConfigureAwait(false);
         var seasonEnd = seasonEnds ? await development.ProcessSeasonEndAsync(cancellationToken).ConfigureAwait(false) : null;
 
         var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
@@ -185,7 +193,18 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay, developmentDay, seasonEnd);
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay, developmentDay, seasonEnd, medicalDay);
+    }
+
+    /// <summary>The matches played (not forfeited) on <paramref name="day"/>.</summary>
+    private async Task<IReadOnlyList<MatchId>> PlayedOnAsync(DateOnly day, CancellationToken cancellationToken)
+    {
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        List<FixtureId> fixtures = [.. (await Repo<Fixture, FixtureId>(s).ListAsync(f => f.Date == day, cancellationToken).ConfigureAwait(false)).Select(f => f.Id)];
+        return fixtures.Count == 0
+            ? []
+            : [.. (await Repo<Match, MatchId>(s).ListAsync(m => fixtures.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false)).Select(m => m.Id)];
     }
 
     public async Task<CalendarReport> ContinueAsync(int maxDays = 366, CancellationToken cancellationToken = default)

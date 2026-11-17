@@ -25,6 +25,9 @@ internal sealed class ClubManagementService(
     PlayerRatingCalculator calculator,
     GameClock clock) : IClubManagementService
 {
+    /// <summary>An injury expected to last longer than this many days is covered by a signing.</summary>
+    public const int LongTermInjuryDays = 28;
+
     public async Task<int> PrepareMatchdayAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clubIds);
@@ -205,7 +208,7 @@ internal sealed class ClubManagementService(
         foreach (var clubId in await ClubsShortOfPlayersAsync(managedClubs, cancellationToken).ConfigureAwait(false))
         {
             var roster = (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false))!;
-            var missing = SquadRules.Default.MinPlayers - roster.FirstTeam.Count();
+            var missing = Math.Max(SquadRules.Default.MinPlayers - roster.FirstTeam.Count(), InjuryCover(roster, today));
             var balance = roster.Club.Balance;
             foreach (var agent in await contracts.GetFreeAgentsAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -272,7 +275,8 @@ internal sealed class ClubManagementService(
         {
             if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is { } roster
                 && (roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
-                    || roster.FirstTeam.Count(p => p.Availability != PlayerAvailability.Unavailable) < SquadRules.Starters))
+                    || roster.FirstTeam.Count(p => p.Availability != PlayerAvailability.Unavailable) < SquadRules.Starters
+                    || InjuryCover(roster, clock.Today) > 0))
             {
                 shortOf.Add(clubId);
             }
@@ -344,6 +348,17 @@ internal sealed class ClubManagementService(
                 .OrderBy(c => c.Name)
                 .Select(c => c.Id),
         ];
+    }
+
+    /// <summary>
+    /// Signings an AI club needs to cover long-term injuries (docs/INJURIES.md §5): players expected back in more than
+    /// <see cref="LongTermInjuryDays"/> days do not count towards the minimum squad; limited by the room left in the squad.
+    /// </summary>
+    internal static int InjuryCover(ClubRoster roster, DateOnly today)
+    {
+        var firstTeam = roster.FirstTeam.ToList();
+        var fit = firstTeam.Count(p => !(p.Player.InjuryStatus == InjuryStatus.Injured && p.Player.InjuryReturnDate > today.AddDays(LongTermInjuryDays)));
+        return Math.Clamp(SquadRules.Default.MinPlayers - fit, 0, Math.Max(0, SquadRules.Default.MaxPlayers - firstTeam.Count));
     }
 
     private static IRepository<TEntity, TId> Repo<TEntity, TId>(IServiceProvider services)

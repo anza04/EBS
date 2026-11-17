@@ -47,6 +47,7 @@
       <TabItem Header="Scouting" Content="{Binding Scouting}" />
       <TabItem Header="Tactics" Content="{Binding Tactics}" />
       <TabItem Header="Training" Content="{Binding Training}" />
+      <TabItem Header="Medical" Content="{Binding Medical}" />
       <TabItem Header="Matches" Content="{Binding Matches}" />
       <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">

@@ -19,6 +19,7 @@ Schema version: **`20261117124356_Scouting`** (Step 20).
 | `20261116151616_LoanAgreements` | 19 | `Transfers.SalaryContribution` (default 0) and `OptionFee` (long?): loan agreements (add-columns, no check constraint). New kind `OptionToBuy` (text column, no schema change) |
 | `20261117124356_Scouting` | 20 | `Staff.Ability` (default 50). New tables `ScoutingAssignments`, `ScoutReports` and `ScoutReportAttributes` (create-table and add-column only) |
 | `20261117140121_Development` | 21 | `Players.RetiredOn`. New table `TrainingPlans` (create-table and add-column only) |
+| `20261117143312_Medical` | 22 | New table `Injuries` (create-table only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -157,7 +158,7 @@ so `WinTitle` (the enum's CLR default) is always written instead of being replac
 | Experience / Reputation / Potential | int | 1–100 (domain); defaults 1 / 1 / 50 |
 | Fitness / Morale | int | 0–100 / 1–100 (domain); defaults 100 / 50 |
 | InjuryStatus | text(16) | `Healthy` (default), `DayToDay`, `Injured` |
-| InjuryReturnDate | date? | Required when `Injured`, null when `Healthy` (domain) |
+| InjuryReturnDate | date? | Required when `Injured`, null when `Healthy` (domain). Follows the active injury's estimate (docs/INJURIES.md) |
 | RetiredOn | date? | First day after the player retired; null while active (Step 21, `docs/DEVELOPMENT.md` §5) |
 
 Step 05 columns are checked by the domain only: adding check constraints to an existing table would force a rebuild
@@ -326,6 +327,27 @@ A club's training programme (rules in `docs/DEVELOPMENT.md`).
 | TeamFocus | text(16) | `Balanced`, `Shooting`, `Tactical`, `Defense`, `Physical`, `Recovery` |
 | Intensity | text(16) | `Light`, `Normal`, `Hard` |
 | Individuals | json? | Array of `{ PlayerId, Focus }`, at most 30, each player once. Current state; no player foreign key |
+
+### Injuries
+Medical records: one row per injury, history, never deleted (rules in `docs/INJURIES.md`).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerId | id | FK Players; index (PlayerId, OccurredOn) |
+| ClubId | id? | FK Clubs: the player's club when injured (null for a free agent) |
+| Type | text(32) | `InjuryType` name (`AnkleSprain`, `TornAcl`, …) |
+| Severity | text(16) | `Minor`, `Moderate`, `Serious`, `Severe` (from the recovery days) |
+| Source | text(16) | `Match`, `Training` |
+| OccurredOn | date | |
+| MatchId | id? | FK Matches, for match injuries |
+| RecoveryDays | int | True recovery time at normal speed, 1–400 (grows when aggravated) |
+| Progress | real | Recovery days done, 0–RecoveryDays |
+| EstimatedReturn | date | Latest medical estimate |
+| AssessedOn | date | Date of that estimate |
+| IsRecurrence | bool | Same body part injured within the recurrence window |
+| Aggravations | int | Times made worse by playing or training on it |
+| RecoveredOn | date? | First fit day; null while active (indexed) |
 
 ### Fixtures
 | Column | Type | Rules |

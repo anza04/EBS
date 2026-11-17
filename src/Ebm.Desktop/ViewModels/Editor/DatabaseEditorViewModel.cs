@@ -8,6 +8,7 @@ using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Scouting;
 using Ebm.Desktop.ViewModels.Tactical;
+using Ebm.Desktop.ViewModels.Medical;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Careers;
@@ -18,6 +19,7 @@ using Ebm.Services.Development;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Matches;
+using Ebm.Services.Medical;
 using Ebm.Services.Players;
 using Ebm.Services.Saves;
 using Ebm.Services.Scouting;
@@ -51,7 +53,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ICareerService? careers = null,
         ISaveGameService? saves = null,
         IScoutingService? scouting = null,
-        IDevelopmentService? development = null)
+        IDevelopmentService? development = null,
+        IMedicalService? medical = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -75,6 +78,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
         Training = development is null ? null : new TrainingViewModel(development, Lookups);
+        Medical = medical is null ? null : new MedicalViewModel(medical, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -119,6 +123,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     /// <summary>The training screen; <c>null</c> without a development service (editor-only tests).</summary>
     public TrainingViewModel? Training { get; }
 
+    public MedicalViewModel? Medical { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -155,6 +161,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Training is not null)
         {
             await Training.RefreshAsync();
+        }
+
+        if (Medical is not null)
+        {
+            await Medical.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

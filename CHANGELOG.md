@@ -3,6 +3,24 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.22.0] — 2026-11-17 — STEP 22: Injuries and medical management
+
+### Added
+- Injuries (`Injury`, table `Injuries`): 18 types by body part with recovery ranges, severity (minor to severe),
+  source (match or training), recurrence and aggravation; history never deleted (`docs/INJURIES.md`).
+- Injury risk (`InjuryRules`, configurable `Ebm:Injuries`): minutes played and training intensity, fatigue, weekly
+  workload, age, strength and stamina, physio, recent injuries, recent return, playing hurt and a hidden proneness.
+- Medical day (`IMedicalService`, after training every game day): recovery by physio and age, treatment and
+  rehabilitation phases with training restrictions, weekly reassessment of the estimated return, return-to-play
+  fitness; physios hired automatically.
+- *Medical* tab: physio, squad status, injury, phase, restriction, expected return, risk and the year's history.
+  Career news reports the user's club's injuries.
+- AI: training plans leave injured players out, rest players with knocks and avoid hard training in an injury crisis;
+  clubs sign cover for long-term injuries. Migration `Medical`.
+
+### Fixed
+- The user's own match now tires his players: the day's fitness and injuries use every match of the day.
+
 ## [0.21.0] — 2026-11-17 — STEP 21: Training, development and player aging
 
 ### Added

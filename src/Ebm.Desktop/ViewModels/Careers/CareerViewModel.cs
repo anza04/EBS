@@ -7,6 +7,8 @@ using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
 using Ebm.Domain.Matches;
+using Ebm.Domain.Medical;
+using Ebm.Domain.Players;
 using Ebm.Services.Careers;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
@@ -308,6 +310,18 @@ public sealed partial class CareerViewModel : ObservableObject
             if (day.Development is { PlayersDeveloped: > 0 } development)
             {
                 lines.Add(new NewsLine(date, $"Training week: {development.Improved} player(s) improved, {development.Declined} declined."));
+            }
+
+            if (day.Medical is { Injuries.Count: > 0 } medical)
+            {
+                var own = State?.Club.Id;
+                lines.AddRange(medical.Injuries.Where(i => i.ClubId is { } club && club == own).Select(i => new NewsLine(
+                    date,
+                    $"Injury: {i.Player}, {InjuryCatalog.Of(i.Type).Name.ToLowerInvariant()} ({PlayerCatalog.DisplayName(i.Severity).ToLowerInvariant()}, {(i.Aggravated ? "aggravated" : PlayerCatalog.DisplayName(i.Source).ToLowerInvariant())}), expected back {i.EstimatedReturn.ToString("d MMM", CultureInfo.CurrentCulture)}.")));
+                if (medical.Injuries.Count(i => i.ClubId is not { } club || club != own) is > 0 and var others)
+                {
+                    lines.Add(new NewsLine(date, $"Other clubs: {others} new injury report(s)."));
+                }
             }
 
             if (day.SeasonEnd is { Retired.Count: > 0 } seasonEnd)

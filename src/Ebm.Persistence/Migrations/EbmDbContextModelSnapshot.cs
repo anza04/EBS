@@ -546,6 +546,72 @@ namespace Ebm.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Medical.Injury", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Aggravations")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("AssessedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("EstimatedReturn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRecurrence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("MatchId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("OccurredOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Progress")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateOnly?>("RecoveredOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RecoveryDays")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("RecoveredOn");
+
+                    b.HasIndex("PlayerId", "OccurredOn");
+
+                    b.ToTable("Injuries", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Players.Player", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1350,6 +1416,25 @@ namespace Ebm.Persistence.Migrations
                         });
 
                     b.Navigation("BoxScore")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Medical.Injury", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Matches.Match", null)
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

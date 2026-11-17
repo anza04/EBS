@@ -1,5 +1,6 @@
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Development;
+using Ebm.Domain.Medical;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Scouting;
 using Ebm.Domain.Transfers;
@@ -8,6 +9,7 @@ using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Development;
+using Ebm.Services.Medical;
 using Ebm.Services.Editing;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
@@ -51,6 +53,8 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(PlayerDevelopment.Default);
         services.TryAddSingleton(RetirementRules.Default);
         services.TryAddSingleton<IDevelopmentService, DevelopmentService>();
+        services.TryAddSingleton(InjuryRules.Default);
+        services.TryAddSingleton<IMedicalService, MedicalService>();
         services.TryAddSingleton<ITacticsService, TacticsService>();
         services.TryAddSingleton<IMatchService, MatchService>();
         services.TryAddSingleton<IClubManagementService, ClubManagementService>();

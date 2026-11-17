@@ -45,6 +45,7 @@ public static class EbmHost
         builder.Services.AddSingleton(ApplicationInfo.FromAssembly(typeof(EbmHost).Assembly));
         builder.Services.AddSingleton<ExceptionHandlingPolicy>();
         builder.Services.AddSingleton(options.Retirement.Validated());
+        builder.Services.AddSingleton(options.Injuries.Validated());
 
         builder.Services
             .AddGameServices()

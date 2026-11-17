@@ -10,7 +10,8 @@ public sealed record TrainingProgramme(TrainingFocus TeamFocus, TrainingIntensit
 /// <summary>
 /// The AI coach's training choice (docs/AI_MANAGEMENT.md §3, docs/DEVELOPMENT.md §6): the team works on the rotation's
 /// weakest area, intensity follows the squad's fitness and age, young players with room to grow work on their own
-/// weakest area, veterans on their physique and tired players rest. Pure and deterministic.
+/// weakest area, veterans on their physique and tired players rest. Injured players get no programme, players with a knock
+/// rest, and a squad with a quarter of its players injured never trains hard (docs/INJURIES.md §5). Pure and deterministic.
 /// </summary>
 public static class TrainingPlanner
 {
@@ -31,6 +32,9 @@ public static class TrainingPlanner
     /// <summary>Players below this fitness rest.</summary>
     public const int TiredFitness = 70;
 
+    /// <summary>With at least this share of the squad injured, the coach does not train hard.</summary>
+    public const double InjuryCrisisShare = 0.25;
+
     public static TrainingProgramme Plan(IReadOnlyList<(Player Player, PlayerEvaluation Evaluation)> squad, DateOnly today)
     {
         ArgumentNullException.ThrowIfNull(squad);
@@ -44,17 +48,24 @@ public static class TrainingPlanner
         var weakest = areas.OrderBy(a => a.Value).ThenBy(a => a.Key).First();
         var teamFocus = weakest.Value <= areas.Values.Average() - Margin ? weakest.Key : TrainingFocus.Balanced;
 
-        var fitness = squad.Average(p => p.Player.Fitness);
+        var fit = squad.Where(p => p.Player.InjuryStatus != InjuryStatus.Injured).ToList();
+        var injured = squad.Count - fit.Count;
+        var fitness = (fit.Count > 0 ? fit : squad).Average(p => p.Player.Fitness);
         var ages = squad.Select(p => p.Player.AgeOn(today)).Order().ToList();
         var intensity = fitness < 85 ? TrainingIntensity.Light
-            : fitness >= 95 && ages[ages.Count / 2] <= 24 ? TrainingIntensity.Hard
+            : fitness >= 95 && ages[ages.Count / 2] <= 24 && injured < squad.Count * InjuryCrisisShare ? TrainingIntensity.Hard
             : TrainingIntensity.Normal;
 
         var individuals = new List<IndividualTraining>();
         foreach (var (player, evaluation) in squad.OrderBy(p => p.Player.Id.Value).Take(TrainingPlan.MaxIndividuals))
         {
+            if (player.InjuryStatus == InjuryStatus.Injured)
+            {
+                continue; // The medical staff decides what an injured player does.
+            }
+
             var age = player.AgeOn(today);
-            TrainingFocus? focus = player.Fitness < TiredFitness ? TrainingFocus.Recovery
+            TrainingFocus? focus = player.Fitness < TiredFitness || player.InjuryStatus == InjuryStatus.DayToDay ? TrainingFocus.Recovery
                 : age >= VeteranAge ? TrainingFocus.Physical
                 : age <= YoungAge && evaluation.PotentialRating - evaluation.Overall >= GrowthGap
                     ? Areas.OrderBy(a => AreaRating(player.Attributes, a)).ThenBy(a => a).First()
@@ -69,7 +80,7 @@ public static class TrainingPlanner
             teamFocus,
             intensity,
             individuals,
-            $"Team: {(teamFocus == TrainingFocus.Balanced ? "balanced" : $"weakest area {teamFocus}")}; {intensity} (fitness {fitness:0}, median age {ages[ages.Count / 2]}); {individuals.Count} individual programmes.");
+            $"Team: {(teamFocus == TrainingFocus.Balanced ? "balanced" : $"weakest area {teamFocus}")}; {intensity} (fitness {fitness:0}, median age {ages[ages.Count / 2]}, {injured} injured); {individuals.Count} individual programmes.");
     }
 
     /// <summary>Average of the attributes an area trains.</summary>

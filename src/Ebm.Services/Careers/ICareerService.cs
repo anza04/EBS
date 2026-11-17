@@ -6,6 +6,7 @@ using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Competitions;
 using Ebm.Services.Development;
+using Ebm.Services.Medical;
 using Ebm.Services.Matches;
 using Ebm.Services.Scouting;
 using Ebm.Services.Transfers;
@@ -103,7 +104,8 @@ public sealed record GameDayReport(
     ManagementDay Management,
     ScoutingDay? Scouting = null,
     DevelopmentDay? Development = null,
-    SeasonDevelopment? SeasonEnd = null);
+    SeasonDevelopment? SeasonEnd = null,
+    MedicalDay? Medical = null);
 
 /// <summary>Why <see cref="ICareerService.ContinueAsync"/> stopped.</summary>
 public enum CalendarStop
