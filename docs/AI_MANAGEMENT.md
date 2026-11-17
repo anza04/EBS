@@ -12,7 +12,7 @@ docs/SEASON_LIFECYCLE.md) decides when. Recruitment itself is the Step 08 `ClubR
 | Career start | Board objectives for the season; AI tactics and training plans for every AI club |
 | Before each game day's matches | Squad roles of every AI club that plays that day (saved only when they change) |
 | End of every game day | Salaries due that day; month-end income (one transaction with the date change) |
-| Last day of a season, 14 days before a season, any Monday an AI club is short of players | Transfer window: free-agent replenishment, `RunAiTransferWindowAsync`, releases above the squad limit, emergency signings, AI tactics re-planned |
+| Last day of a season, 14 days before a season (every AI club); any Monday an AI club is short of players (those clubs only, Step 24) | Transfer window: free-agent replenishment, `RunAiTransferWindowAsync`, releases above the squad limit, emergency signings, AI tactics re-planned |
 | Mondays | Training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6; injured players handled as in docs/INJURIES.md §5) |
 | Last day of each month | Contract renewals |
 | Next season | Board objectives for the new season |

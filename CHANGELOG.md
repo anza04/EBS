@@ -3,6 +3,20 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.0] — 2026-11-17 — STEP 24: Milestone 2 integration and release
+
+### Added
+- `MilestoneTwoTests` (slow): the whole European dataset run by AI clubs for two seasons (`EBM_M2_SEASONS`): every
+  league, domestic cup and international competition finished, cross-country moves, consistent contracts and club
+  histories, operational AI squads, no systematic debt, scouting, injuries, and every balance reconciled with its ledger.
+
+### Changed
+- Monday emergency transfer windows run only for the AI clubs short of players (previously every AI club shopped).
+- The AI transfer window reloads the market only after a club's deals, not for every club.
+
+### Fixed
+- `EuropeanTransferWindowTests` counted purchases funded by sales in the same window as overspending.
+
 ## [0.23.0] — 2026-11-17 — STEP 23: Financial management
 
 ### Added

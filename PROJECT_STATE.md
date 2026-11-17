@@ -4,20 +4,20 @@
 European Basketball Manager
 
 ## Current milestone
-Milestone 2 — Complete European basketball ecosystem (Milestone 1 completed, release 0.14.0)
+Milestone 3 — Advanced management and simulation (Milestone 2 completed, release 0.24.0)
 
 ## Current step
 None in progress
 
 ## Last completed step
-STEP 23 — Financial management (2026-11-17)
+STEP 24 — Milestone 2 integration and release (2026-11-17)
 
 ## Next step
-STEP 24 — Milestone 2 integration and release (docs/ROADMAP.md)
+STEP 25 — Advanced contract negotiations (docs/ROADMAP.md)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: unit PASS (408/408); integration fast suite PASS (144/144, `Category!=Launch&Category!=Slow`, 3.5 min); launch PASS. Slow suite (`Category=Slow`: European/real-leagues datasets, European transfer window, three-season simulation): not run this step (logs/STEP_23_LOG.md §5)
+- Tests: unit PASS (408/408); integration fast suite PASS (144/144, `Category!=Launch&Category!=Slow`, 3.5 min); launch PASS. Slow suite (`Category=Slow`): see logs/STEP_24_LOG.md §5 (stopped once for low memory; `MilestoneTwoTests` was still running at commit time)
 - Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, scouting, tactics, training, medical, match centre, contracts editor, leagues, competitions, finances, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; scouts, assignments and reports as `IScoutingService`; training, development, fitness and retirement as `IDevelopmentService`; injuries, recovery and medical records as `IMedicalService`; budgets, the ledger and financial reports as `IFinanceService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
@@ -60,7 +60,8 @@ STEP 24 — Milestone 2 integration and release (docs/ROADMAP.md)
 - [x] Training and development: training plans (team/individual focus, intensity), coaches, weekly growth and age decline, daily fitness, potential realisation, configurable retirement; AI training plans (Step 21)
 - [x] Injuries and medical management: injury types and severity, risk from workload/fatigue/age/physique/history, match and training injuries, recovery and rehabilitation phases, training restrictions, physio assessment, return-to-play fitness, recurrence, injury history; AI handling (Step 22)
 - [x] Financial management: ledger of every booking by category, matchday ticket sales/arena/travel, monthly sponsorship and upkeep, season budgets (wage, transfer, financial target) renewed by reputation, results and debt, financial reports and *Finances* tab; AI transfer budgets (Step 23)
-- [ ] Step 24 onwards (Milestone 2) … see docs/ROADMAP.md
+- [x] Milestone 2 integration: European two-season acceptance test (`MilestoneTwoTests`), targeted emergency windows, faster AI windows (Step 24)
+- [ ] Step 25 onwards (Milestone 3) … see docs/ROADMAP.md
 
 ## Database
 - Current schema version: `20261117150208_Finances`
@@ -188,7 +189,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_23_LOG.md
+logs/STEP_24_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

@@ -64,7 +64,11 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
 
         // Economics: nobody spends money it does not have; fees are paid at market prices.
         Assert.All(clubs.Values, c => Assert.True(c.Balance >= 0 || before[c.Id] < 0, $"{c.Name}: {c.Balance:N0}"));
-        Assert.All(bought.GroupBy(t => t.ToClubId), g => Assert.True(g.Sum(t => t.Fee) <= before[g.Key], $"{clubs[g.Key].Name} paid {g.Sum(t => t.Fee):N0} from {before[g.Key]:N0}"));
+        // Fees received in the window (sales) may fund later purchases.
+        var received = bought.GroupBy(t => t.FromClubId!.Value).ToDictionary(g => g.Key, g => g.Sum(t => t.Fee));
+        Assert.All(bought.GroupBy(t => t.ToClubId), g => Assert.True(
+            g.Sum(t => t.Fee) <= before[g.Key] + received.GetValueOrDefault(g.Key),
+            $"{clubs[g.Key].Name} paid {g.Sum(t => t.Fee):N0} from {before[g.Key]:N0} + {received.GetValueOrDefault(g.Key):N0} sales"));
         Assert.All(bought, t => Assert.InRange(t.Fee, TransferNegotiator.MinimumValue, 20_000_000));
 
         // Contracts: one running contract per player (two only while on loan), each move backed by its contract.

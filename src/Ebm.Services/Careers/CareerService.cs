@@ -183,10 +183,14 @@ internal sealed class CareerService(
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
 
-        // Transfer windows: the last day of a season, two weeks before a season, and any Monday an AI club is short of players.
+        // Transfer windows: the last day of a season and two weeks before a season for every AI club; on any Monday for the
+        // AI clubs short of players only (the others are left out as if managed).
+        IReadOnlyCollection<ClubId> windowManaged = managed;
         if (!windowOpens && today.DayOfWeek == DayOfWeek.Monday)
         {
-            windowOpens = (await management.ClubsShortOfPlayersAsync(managed, cancellationToken).ConfigureAwait(false)).Count > 0;
+            var shortOf = (await management.ClubsShortOfPlayersAsync(managed, cancellationToken).ConfigureAwait(false)).ToHashSet();
+            windowOpens = shortOf.Count > 0;
+            windowManaged = [.. names.Keys.Where(id => !shortOf.Contains(id))];
         }
 
         TransferWindowReport? window = null;
@@ -194,10 +198,10 @@ internal sealed class CareerService(
         if (windowOpens)
         {
             created = await management.ReplenishFreeAgentsAsync(cancellationToken).ConfigureAwait(false);
-            window = await transfers.RunAiTransferWindowAsync(managed, cancellationToken).ConfigureAwait(false);
-            releases = await management.ReleaseSurplusAsync(managed, cancellationToken).ConfigureAwait(false);
-            emergency = await management.FillSquadsAsync(managed, cancellationToken).ConfigureAwait(false);
-            planned = await management.PlanTacticsAsync(managed, cancellationToken).ConfigureAwait(false);
+            window = await transfers.RunAiTransferWindowAsync(windowManaged, cancellationToken).ConfigureAwait(false);
+            releases = await management.ReleaseSurplusAsync(windowManaged, cancellationToken).ConfigureAwait(false);
+            emergency = await management.FillSquadsAsync(windowManaged, cancellationToken).ConfigureAwait(false);
+            planned = await management.PlanTacticsAsync(windowManaged, cancellationToken).ConfigureAwait(false);
         }
 
         if (today.AddDays(1).Day == 1)

@@ -454,7 +454,9 @@ internal sealed class TransferService : ITransferService
             knowledge = await ScoutingKnowledge.LoadAsync(scope.ServiceProvider, today, cancellationToken).ConfigureAwait(false);
         }
 
-        // Each club shops in turn, richest reputation first; the market is reloaded after every club's deals.
+        // Each club shops in turn, richest reputation first; the market is reloaded after a club's deals (only then has
+        // anything changed: failed deals write nothing).
+        Market? loaded = null;
         foreach (var club in aiClubs)
         {
             var report = reports[club.Id];
@@ -463,11 +465,13 @@ internal sealed class TransferService : ITransferService
                 continue;
             }
 
-            Market market;
-            using (var scope = _scopes.CreateScope())
+            if (loaded is null)
             {
-                market = await Market.LoadAsync(this, scope.ServiceProvider, today, cancellationToken).ConfigureAwait(false);
+                using var scope = _scopes.CreateScope();
+                loaded = await Market.LoadAsync(this, scope.ServiceProvider, today, cancellationToken).ConfigureAwait(false);
             }
+
+            var market = loaded;
 
             var current = market.Clubs[club.Id];
             var situation = Situation(market, current, roster);
@@ -543,6 +547,7 @@ internal sealed class TransferService : ITransferService
                     }
 
                     report.Transactions++;
+                    loaded = null;
                     active += joinAs == RosterRole.Bench ? 1 : 0;
                 }
                 catch (DomainException ex)
