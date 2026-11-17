@@ -43,7 +43,11 @@ transfers, scouting, development, injuries, finances and multi-season progressio
     money received from sales in the same window; the check now counts those sales. Not re-run yet.
   - `MilestoneTwoTests`, run alone: FAIL after 22 min — an injury-cover emergency signing (Anadolu Efes, after the
     BSL deadline of 2027-02-28) threw and stopped the calendar. Fixed in `ClubManagementService.FillSquadsAsync`
-    (refused signings are skipped); fast suite 144/144 PASS after the fix. Re-run pending.
+    (refused signings are skipped); fast suite 144/144 PASS after the fix.
+    Second run: season 2026-27 completed in 27 min (every competition finished, forfeits within limit); failed the
+    cross-border check, which only counted purchases (in season only emergency free-agent signings happen; the big
+    windows are in the offseason). The check now also counts foreign free agents and requires purchases abroad over
+    the run. Re-run pending.
 - Release build (`build/publish.ps1`): not run in this step.
 
 ## 6. Known limitations

@@ -50,6 +50,7 @@ public sealed class MilestoneTwoTests(ITestOutputHelper output)
         var startBalance = clubs.Values.ToDictionary(c => c.Id, c => c.Balance);
         var playersAtStart = (await db.ReadAsync(s => s.Repo<Player, PlayerId>().ListAsync())).Select(p => p.Id).ToHashSet();
 
+        var purchasesAbroad = 0;
         for (var season = 1; season <= Seasons; season++)
         {
             var clock = Stopwatch.StartNew();
@@ -92,7 +93,11 @@ public sealed class MilestoneTwoTests(ITestOutputHelper output)
 
             // Players move across countries; every move is backed by its contract and the player's club history.
             var moves = (await db.ReadAsync(s => s.Repo<Transfer, TransferId>().ListAsync())).Where(t => !transfersBefore.Contains(t.Id)).ToList();
-            var crossBorder = moves.Count(t => t.FromClubId is { } from && clubs[from].CountryId != clubs[t.ToClubId].CountryId);
+            // In season: emergency free-agent signings of foreign players; the big windows run in the offseason (counted
+            // with the next season), where clubs also buy from clubs of other countries.
+            var nationality = (await db.ReadAsync(s => s.Repo<Player, PlayerId>().ListAsync())).ToDictionary(p => p.Id, p => p.NationalityId);
+            var crossBorder = moves.Count(t => t.FromClubId is { } from ? clubs[from].CountryId != clubs[t.ToClubId].CountryId : nationality[t.PlayerId] != clubs[t.ToClubId].CountryId);
+            purchasesAbroad += moves.Count(t => t.Kind is TransferKind.Transfer or TransferKind.ReleaseClause && clubs[t.FromClubId!.Value].CountryId != clubs[t.ToClubId].CountryId);
             Assert.True(crossBorder > 0, "no cross-country move");
             var spells = await db.ReadAsync(s => s.Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>().ListAsync());
             Assert.All(spells.GroupBy(x => x.PlayerId), g => Assert.True(g.Count(x => x.EndDate is null) <= 1, $"{g.Key}: several open spells"));
@@ -123,7 +128,7 @@ public sealed class MilestoneTwoTests(ITestOutputHelper output)
 
             output.WriteLine(
                 $"Season {state.Season.Name}: {clock.Elapsed:hh\\:mm\\:ss}, {days} days, {windows} window days, {matches.Count} matches ({forfeits} forfeits), " +
-                $"{leagues} leagues + {all.Count - leagues} cups, {moves.Count} moves ({crossBorder} cross-border), {reports} scout reports, {injuries} injuries, " +
+                $"{leagues} leagues + {all.Count - leagues} cups, {moves.Count} moves ({crossBorder} cross-border, {purchasesAbroad} purchases abroad so far), {reports} scout reports, {injuries} injuries, " +
                 $"{inDebt} clubs in debt, balances {clubs.Values.Sum(c => c.Balance):N0}");
 
             if (season < Seasons)
@@ -132,6 +137,11 @@ public sealed class MilestoneTwoTests(ITestOutputHelper output)
                 Assert.Equal(season + 1, state.Career.SeasonsPlayed);
                 Assert.Contains(state.Competitions, c => c.Competition.CountryId is null); // international competitions qualified again
             }
+        }
+
+        if (Seasons > 1)
+        {
+            Assert.True(purchasesAbroad > 0, "no purchase from a club of another country in the offseason window");
         }
     }
 }
