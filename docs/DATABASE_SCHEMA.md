@@ -18,6 +18,7 @@ Schema version: **`20261117124356_Scouting`** (Step 20).
 | `20261116144825_InternationalCompetitions` | 18 | `CompetitionParticipants.PrizeMoney` (long?) and `ReputationGain` (int?): cup rewards paid when the competition ended (nullable add-columns) |
 | `20261116151616_LoanAgreements` | 19 | `Transfers.SalaryContribution` (default 0) and `OptionFee` (long?): loan agreements (add-columns, no check constraint). New kind `OptionToBuy` (text column, no schema change) |
 | `20261117124356_Scouting` | 20 | `Staff.Ability` (default 50). New tables `ScoutingAssignments`, `ScoutReports` and `ScoutReportAttributes` (create-table and add-column only) |
+| `20261117140121_Development` | 21 | `Players.RetiredOn`. New table `TrainingPlans` (create-table and add-column only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -157,6 +158,7 @@ so `WinTitle` (the enum's CLR default) is always written instead of being replac
 | Fitness / Morale | int | 0–100 / 1–100 (domain); defaults 100 / 50 |
 | InjuryStatus | text(16) | `Healthy` (default), `DayToDay`, `Injured` |
 | InjuryReturnDate | date? | Required when `Injured`, null when `Healthy` (domain) |
+| RetiredOn | date? | First day after the player retired; null while active (Step 21, `docs/DEVELOPMENT.md` §5) |
 
 Step 05 columns are checked by the domain only: adding check constraints to an existing table would force a rebuild
 (decision 21).
@@ -313,6 +315,17 @@ A club's saved tactical configurations (rules in `docs/TACTICS.md`).
 | DefenseSwitching, DefensePickAndRollCoverage, DefenseRebounding | text(16) | Enum names |
 | IsSelected | bool | |
 | Assignments | json? | Array of `{ PlayerId, Role, ShotPriority, MinutesTarget }`. Current state; player IDs have no foreign key, so tactics never block deleting a player, and assignments of players who left the club are ignored |
+
+### TrainingPlans
+A club's training programme (rules in `docs/DEVELOPMENT.md`).
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| ClubId | id | FK Clubs, **unique** (one plan per club) |
+| TeamFocus | text(16) | `Balanced`, `Shooting`, `Tactical`, `Defense`, `Physical`, `Recovery` |
+| Intensity | text(16) | `Light`, `Normal`, `Hard` |
+| Individuals | json? | Array of `{ PlayerId, Focus }`, at most 30, each player once. Current state; no player foreign key |
 
 ### Fixtures
 | Column | Type | Rules |

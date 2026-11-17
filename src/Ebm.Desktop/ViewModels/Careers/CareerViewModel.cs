@@ -304,6 +304,16 @@ public sealed partial class CareerViewModel : ObservableObject
             {
                 lines.Add(new NewsLine(date, $"AI transfer window: {window.Clubs.Sum(c => c.Transactions)} move(s)."));
             }
+
+            if (day.Development is { PlayersDeveloped: > 0 } development)
+            {
+                lines.Add(new NewsLine(date, $"Training week: {development.Improved} player(s) improved, {development.Declined} declined."));
+            }
+
+            if (day.SeasonEnd is { Retired.Count: > 0 } seasonEnd)
+            {
+                lines.Add(new NewsLine(date, $"{seasonEnd.Retired.Count} player(s) retired: {string.Join(", ", seasonEnd.Retired.Take(5).Select(r => $"{r.Name} ({r.Age})"))}{(seasonEnd.Retired.Count > 5 ? ", …" : string.Empty)}."));
+            }
         }
 
         lines.Reverse();

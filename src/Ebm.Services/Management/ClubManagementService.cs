@@ -2,8 +2,10 @@ using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Contracts;
+using Ebm.Domain.Development;
 using Ebm.Domain.Management;
 using Ebm.Domain.Players;
+using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Clubs;
@@ -20,6 +22,7 @@ internal sealed class ClubManagementService(
     IClubService clubs,
     ITacticsService tactics,
     IContractService contracts,
+    PlayerRatingCalculator calculator,
     GameClock clock) : IClubManagementService
 {
     public async Task<int> PrepareMatchdayAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default)
@@ -73,6 +76,35 @@ internal sealed class ClubManagementService(
         }
 
         return planned;
+    }
+
+    public async Task<int> PlanTrainingAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
+    {
+        var ai = (await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false)).ToHashSet();
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        var today = clock.Today;
+        var members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
+        var squads = (await Repo<Player, PlayerId>(s).ListAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false))
+            .Where(p => members.TryGetValue(p.Id, out var club) && ai.Contains(club))
+            .GroupBy(p => members[p.Id])
+            .ToDictionary(g => g.Key, g => g.Select(p => (p, calculator.Evaluate(p))).ToList());
+        var repo = Repo<TrainingPlan, TrainingPlanId>(s);
+        var plans = (await repo.ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId);
+        foreach (var clubId in ai)
+        {
+            var programme = TrainingPlanner.Plan(squads.GetValueOrDefault(clubId) ?? [], today);
+            if (!plans.TryGetValue(clubId, out var plan))
+            {
+                plan = new TrainingPlan(TrainingPlanId.New(), clubId);
+                repo.Add(plan);
+            }
+
+            plan.Update(programme.TeamFocus, programme.Intensity, programme.Individuals);
+        }
+
+        await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return ai.Count;
     }
 
     public async Task<int> RenewContractsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)

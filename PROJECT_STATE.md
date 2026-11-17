@@ -10,15 +10,15 @@ Milestone 2 — Complete European basketball ecosystem (Milestone 1 completed, r
 None in progress
 
 ## Last completed step
-STEP 20 — Scouting and player evaluation (2026-11-17)
+STEP 21 — Training, development and player aging (2026-11-17)
 
 ## Next step
-STEP 21 — Training, development and player aging (docs/ROADMAP.md)
+STEP 22 — Injuries and medical management (docs/ROADMAP.md)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: unit PASS (371/371); integration fast suite PASS (128/128, `Category!=Launch&Category!=Slow`, 1.5 min). Slow suite (`Category=Slow`: European/real-leagues datasets, European transfer window, three-season simulation): see logs/STEP_20_LOG.md §5
-- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, scouting, tactics, match centre, contracts editor, leagues, competitions, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; scouts, assignments and reports as `IScoutingService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
+- Tests: unit PASS (384/384); integration fast suite PASS (135/135, `Category!=Launch&Category!=Slow`, 1.5 min). Slow suite (`Category=Slow`: European/real-leagues datasets, European transfer window, three-season simulation): not run this step (logs/STEP_21_LOG.md §5)
+- Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, scouting, tactics, training, match centre, contracts editor, leagues, competitions, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; scouts, assignments and reports as `IScoutingService`; training, development, fitness and retirement as `IDevelopmentService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
 - Language: C# 14 / .NET 10 (SDK 10.0.203, pinned in `global.json`)
@@ -57,11 +57,12 @@ STEP 21 — Training, development and player aging (docs/ROADMAP.md)
 - [x] International club competitions: EuroLeague, EuroCup, BCL, FIBA Europe Cup; season-by-season qualification by tier, league phases, neutral Final Fours, prize money and reputation rewards, calendar conflict detection (Step 18)
 - [x] European transfer market: one market across countries, club attractiveness (international competitions), loan agreements (salary share, option to buy), contract buyouts, registration deadlines, AI upgrade signings across borders; international rules documented (Step 19)
 - [x] Scouting: scouts (staff ability), player/region/league/position/youth assignments, reports with attribute uncertainty, estimated value and salary expectation, report search; AI clubs recruit on scouted estimates (Step 20)
-- [ ] Step 21 onwards (Milestone 2) … see docs/ROADMAP.md
+- [x] Training and development: training plans (team/individual focus, intensity), coaches, weekly growth and age decline, daily fitness, potential realisation, configurable retirement; AI training plans (Step 21)
+- [ ] Step 22 onwards (Milestone 2) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261117124356_Scouting`
-- Latest migration: `20261117124356_Scouting` (`Staff.Ability`, `ScoutingAssignments`, `ScoutReports`, `ScoutReportAttributes`; 25 tables)
+- Current schema version: `20261117140121_Development`
+- Latest migration: `20261117140121_Development` (`Players.RetiredOn`, `TrainingPlans`; 26 tables)
 - Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. `data/europe/` (generated by `build/generate-europe-dataset.py`; import all four files into a new game): 18 countries + 23 player nationalities, 20 leagues, 56 competitions (35 leagues, 17 domestic cups, `docs/CUP_FORMATS.md` §4, 4 international competitions, `docs/INTERNATIONAL_COMPETITIONS.md` §4), 512 clubs (240 real, Unverified), 6,168 players (generated, plus real squads of all 16 Serie A clubs from `build/real-rosters`), 6,168 contracts, 1,509 past spells (`docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`). Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
@@ -134,14 +135,16 @@ STEP 21 — Training, development and player aging (docs/ROADMAP.md)
 67. A mutual termination is a buyout the player must accept (`ContractNegotiator.MinimumBuyout`); the default settlement is his minimum.
 68. Scouting knowledge is per club: stored reports are snapshots (never deleted, newest wins); anything else a club "knows" is background knowledge computed on the fly from its best scout, seeded per club, player and year (`ScoutingKnowledge`), so AI clubs need no stored reports. Every estimate is bounded by the report's margin and seeded with `ScoutingRules.StableSeed` (never `HashCode`).
 69. The deadline exemption ("short of players") uses the competitions' own squad minimum; `SquadRules.Default` applies only to a club without competitions. The AI recruiter keeps the default as the club's baseline.
+70. Development is pure (`PlayerDevelopment`, singleton) with seeded randomness (`ScoutingRules.StableSeed`): fitness daily, development on Mondays, potential and retirement on a season's last day before the transfer window (docs/DEVELOPMENT.md §1). Training plans are current state, one per club; AI clubs are re-planned weekly in bulk by `IClubManagementService.PlanTrainingAsync`. Retirement is final (`Player.RetiredOn`) and its rules are the only configurable part (`Ebm:Retirement`, bound by the host). Retired players are filtered wherever players are offered (free agents, market, scouting, negotiation).
+71. Generated staff (scouts, coaches) are hired through `StaffHiring` (Services), one formula for ability and naming.
 
-Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`, `docs/INTERNATIONAL_COMPETITIONS.md`, `docs/SCOUTING.md`.
+Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`, `docs/INTERNATIONAL_COMPETITIONS.md`, `docs/SCOUTING.md`, `docs/DEVELOPMENT.md`.
 
 ## Known issues
-- AI: no youth intake or retirement (generated free agents keep the market supplied); placeholder income, so balances drift up (Step 27); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
+- AI: no youth intake (generated free agents keep the market supplied); placeholder income, so balances drift up (Step 27); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
 - Career: one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
-- Experience, reputation, potential, fitness, morale and injury are stored and edited but not yet changed by the game (Steps 12, 21, 22). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
+- Reputation, morale and injury are stored and edited but not yet changed by the game (Steps 22+). Development history is not stored; no youth intake (docs/DEVELOPMENT.md §7). Rating weights are code (`RatingModel.Default`), not a data file (Step 33).
 - Player import files in the old 8-rating format are no longer accepted.
 - Leagues and cups can be scheduled; `Tournament` competitions cannot. No relegation playoffs, two-legged ties inside league playoffs, reseeding or mid-season entrants (see `docs/COMPETITION_FORMATS.md` §2, `docs/COUNTRY_REPORT.md` §3).
 - Cups: domestic Final Eights/Fours are hosted by the better seed (rounds can be neutral), legs are never drawn, qualification only from the current table of the cup's own country (no previous-season seeding, holders, hosts, late-entering lower-division clubs or supercups); cup formats are unverified simplifications; cup runs are not in the club history (use `ICompetitionService.GetHistoryAsync`)(`docs/CUP_FORMATS.md` §5).
@@ -180,7 +183,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_20_LOG.md
+logs/STEP_21_LOG.md
 
 ## Instructions for continuing
 1. Read this file.

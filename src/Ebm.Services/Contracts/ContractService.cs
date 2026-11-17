@@ -101,7 +101,7 @@ internal sealed class ContractService : IContractService
         var lastClub = contracts.GroupBy(c => c.PlayerId!.Value).ToDictionary(g => g.Key, g => g.MaxBy(c => c.StartDate)!.ClubId);
         var clubs = (await data.Clubs.ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
         var countries = (await data.Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
-        var players = await data.Players.ListAsync(null, cancellationToken).ConfigureAwait(false);
+        var players = await data.Players.ListAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false);
         return
         [
             .. players
@@ -457,9 +457,16 @@ internal sealed class ContractService : IContractService
             SalaryCalculator.RemainingSalary(contract, Today),
             contract.IsRunningOn(Today) || contract.IsUpcomingOn(Today) ? SalaryCalculator.NextPayment(contract, Today) : null);
 
-        public async Task<(Player Player, Club Club)> PlayerAndClubAsync(PlayerId playerId, ClubId clubId, CancellationToken cancellationToken) => (
-            await Players.FindAsync(playerId, cancellationToken).ConfigureAwait(false) ?? throw new DomainException("The player no longer exists in the database."),
-            await Clubs.FindAsync(clubId, cancellationToken).ConfigureAwait(false) ?? throw new DomainException("The club no longer exists in the database."));
+        public async Task<(Player Player, Club Club)> PlayerAndClubAsync(PlayerId playerId, ClubId clubId, CancellationToken cancellationToken)
+        {
+            var player = await Players.FindAsync(playerId, cancellationToken).ConfigureAwait(false) ?? throw new DomainException("The player no longer exists in the database.");
+            if (player.RetiredOn is { } retired)
+            {
+                throw new DomainValidationException($"{player.FullName} retired on {retired:yyyy-MM-dd}.");
+            }
+
+            return (player, await Clubs.FindAsync(clubId, cancellationToken).ConfigureAwait(false) ?? throw new DomainException("The club no longer exists in the database."));
+        }
 
         public async Task<(Contract Contract, Player Player, Club Club)> PlayerContractAsync(ContractId contractId, CancellationToken cancellationToken)
         {

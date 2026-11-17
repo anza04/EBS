@@ -8,6 +8,7 @@ using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
+using Ebm.Services.Development;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
 using Ebm.Services.Scouting;
@@ -24,6 +25,7 @@ internal sealed class CareerService(
     ITransferService transfers,
     IClubManagementService management,
     IScoutingService scouting,
+    IDevelopmentService development,
     GameClock clock) : ICareerService
 {
     /// <summary>A new career starts this many days before its season, so the squad can be prepared.</summary>
@@ -94,6 +96,8 @@ internal sealed class CareerService(
         await management.SetObjectivesAsync(season.Id, cancellationToken).ConfigureAwait(false);
         await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
         await scouting.HireMissingScoutsAsync(cancellationToken).ConfigureAwait(false);
+        await development.HireMissingCoachesAsync(cancellationToken).ConfigureAwait(false);
+        await management.PlanTrainingAsync([clubId], cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
@@ -104,7 +108,7 @@ internal sealed class CareerService(
         List<(Fixture Fixture, string Competition)> due;
         Dictionary<ClubId, string> names;
         IReadOnlyList<Competition> leagues;
-        bool windowOpens;
+        bool windowOpens, seasonEnds;
         using (var scope = scopes.CreateScope())
         {
             var s = scope.ServiceProvider;
@@ -123,8 +127,9 @@ internal sealed class CareerService(
                     .Select(f => (f, byId[f.CompetitionId].Name)),
             ];
             names = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id, c => c.Name);
-            windowOpens = (await Repo<Season, SeasonId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false))
-                .Any(x => x.EndDate == today || x.StartDate.AddDays(-PreseasonWindowDays) == today);
+            var seasons = await Repo<Season, SeasonId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false);
+            seasonEnds = seasons.Any(x => x.EndDate == today);
+            windowOpens = seasonEnds || seasons.Any(x => x.StartDate.AddDays(-PreseasonWindowDays) == today);
         }
 
         // AI coaches name their matchday squads; the user's club plays with the roles the user set.
@@ -144,10 +149,19 @@ internal sealed class CareerService(
             scheduled += (await competitions.AdvanceAsync(league.Id, career.SeasonId, cancellationToken).ConfigureAwait(false)).FixturesCreated;
         }
 
+        // Training (docs/DEVELOPMENT.md §1): AI clubs plan on Mondays; fitness daily, development weekly, retirement at season end.
+        ClubId[] managed = career.AssistantManages ? [] : [career.ClubId];
+        if (today.DayOfWeek == DayOfWeek.Monday)
+        {
+            await management.PlanTrainingAsync(managed, cancellationToken).ConfigureAwait(false);
+        }
+
+        var developmentDay = await development.ProcessDayAsync([.. results.Select(r => r.Match.Id)], cancellationToken).ConfigureAwait(false);
+        var seasonEnd = seasonEnds ? await development.ProcessSeasonEndAsync(cancellationToken).ConfigureAwait(false) : null;
+
         var (salaries, income) = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
-        ClubId[] managed = career.AssistantManages ? [] : [career.ClubId];
 
         // Transfer windows: the last day of a season, two weeks before a season, and any Monday an AI club is short of players.
         if (!windowOpens && today.DayOfWeek == DayOfWeek.Monday)
@@ -171,7 +185,7 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay);
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, salaries, income), scoutingDay, developmentDay, seasonEnd);
     }
 
     public async Task<CalendarReport> ContinueAsync(int maxDays = 366, CancellationToken cancellationToken = default)

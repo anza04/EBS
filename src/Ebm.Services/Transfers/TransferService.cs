@@ -900,7 +900,7 @@ internal sealed class TransferService : ITransferService
         public static async Task<Market> LoadAsync(TransferService service, IServiceProvider services, DateOnly today, CancellationToken cancellationToken)
         {
             var data = new Data(services, today);
-            var players = await data.Players.ListAsync(null, cancellationToken).ConfigureAwait(false);
+            var players = await data.Players.ListAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false);
             var clubs = (await data.Clubs.ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
             var contracts = (await data.Contracts.ListAsync(c => c.PlayerId != null, cancellationToken).ConfigureAwait(false))
                 .GroupBy(c => c.PlayerId!.Value)

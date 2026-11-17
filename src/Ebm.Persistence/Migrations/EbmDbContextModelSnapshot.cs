@@ -403,6 +403,32 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("Countries", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Development.TrainingPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Intensity")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TeamFocus")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId")
+                        .IsUnique();
+
+                    b.ToTable("TrainingPlans", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Matches.Fixture", b =>
                 {
                     b.Property<Guid>("Id")
@@ -597,6 +623,9 @@ namespace Ebm.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(1);
+
+                    b.Property<DateOnly?>("RetiredOn")
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SecondNationalityId")
                         .HasColumnType("TEXT");
@@ -1158,6 +1187,41 @@ namespace Ebm.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("StaffMemberId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Development.TrainingPlan", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsMany("Ebm.Domain.Development.IndividualTraining", "Individuals", b1 =>
+                        {
+                            b1.Property<Guid>("TrainingPlanId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("Focus")
+                                .IsRequired();
+
+                            b1.Property<Guid>("PlayerId");
+
+                            b1.HasKey("TrainingPlanId", "__synthesizedOrdinal");
+
+                            b1.ToTable("TrainingPlans");
+
+                            b1
+                                .ToJson("Individuals")
+                                .HasColumnType("TEXT");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainingPlanId");
+                        });
+
+                    b.Navigation("Individuals");
                 });
 
             modelBuilder.Entity("Ebm.Domain.Matches.Fixture", b =>

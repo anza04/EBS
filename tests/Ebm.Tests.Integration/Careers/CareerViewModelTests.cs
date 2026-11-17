@@ -45,7 +45,7 @@ public sealed class CareerViewModelTests
         await vm.StartNextSeasonCommand.ExecuteAsync(null);
         Assert.True(vm.IsError);
         await vm.AdvanceDayCommand.ExecuteAsync(null);
-        Assert.Equal(6, vm.News.Count); // the other two Serie A2 games and the four Serie A games
+        Assert.Equal(6, vm.News.Count(n => !n.Text.StartsWith("Training week", StringComparison.Ordinal))); // the other two Serie A2 games and the four Serie A games
     }
 
     [Fact]

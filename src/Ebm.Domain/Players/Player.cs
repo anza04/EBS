@@ -130,6 +130,11 @@ public sealed class Player : Entity<PlayerId>
 
     public PlayerTendencies Tendencies { get; private set; } = null!;
 
+    /// <summary>The day the player retired (first day no longer a player); <c>null</c> while active. Retirement is final.</summary>
+    public DateOnly? RetiredOn { get; private set; }
+
+    public bool IsRetired => RetiredOn is not null;
+
     /// <summary>Age in whole years on <paramref name="date"/>.</summary>
     public int AgeOn(DateOnly date)
     {
@@ -241,4 +246,26 @@ public sealed class Player : Entity<PlayerId>
         ArgumentNullException.ThrowIfNull(tendencies);
         Tendencies = tendencies;
     }
+
+    /// <summary>Ends the player's career from <paramref name="date"/>. Contracts and club spells are ended by the caller.</summary>
+    public void Retire(DateOnly date)
+    {
+        if (RetiredOn is not null)
+        {
+            throw new DomainValidationException($"{FullName} has already retired.");
+        }
+
+        RetiredOn = date;
+    }
+
+    /// <summary>Applies development: new attributes, experience gained (capped at 100) and a revised potential.</summary>
+    public void Develop(PlayerAttributes attributes, int experienceGain, int potential)
+    {
+        UpdateAttributes(attributes);
+        Experience = Math.Clamp(Experience + Math.Max(0, experienceGain), MinRating, MaxRating);
+        Potential = Guard.Range(potential, MinRating, MaxRating, "Potential");
+    }
+
+    /// <summary>Sets match fitness (0–100), keeping the rest of the condition.</summary>
+    public void UpdateFitness(int fitness) => Fitness = Guard.Range(fitness, MinFitness, MaxFitness, "Fitness");
 }

@@ -8,11 +8,13 @@ using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Scouting;
 using Ebm.Desktop.ViewModels.Tactical;
+using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Careers;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
+using Ebm.Services.Development;
 using Ebm.Services.Editing;
 using Ebm.Services.Import;
 using Ebm.Services.Matches;
@@ -48,7 +50,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ICompetitionService competitions,
         ICareerService? careers = null,
         ISaveGameService? saves = null,
-        IScoutingService? scouting = null)
+        IScoutingService? scouting = null,
+        IDevelopmentService? development = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -71,6 +74,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
         Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
+        Training = development is null ? null : new TrainingViewModel(development, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -112,6 +116,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     /// <summary>The scouting screen; <c>null</c> without a scouting service (editor-only tests).</summary>
     public ScoutingViewModel? Scouting { get; }
 
+    /// <summary>The training screen; <c>null</c> without a development service (editor-only tests).</summary>
+    public TrainingViewModel? Training { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -143,6 +150,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Scouting is not null)
         {
             await Scouting.RefreshAsync();
+        }
+
+        if (Training is not null)
+        {
+            await Training.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

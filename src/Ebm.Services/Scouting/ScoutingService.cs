@@ -23,7 +23,7 @@ internal sealed class ScoutingService(
     GameClock clock) : IScoutingService
 {
     /// <summary>Length of a scout's contract, in years.</summary>
-    public const int ScoutContractYears = 3;
+    public const int ScoutContractYears = StaffHiring.ContractYears;
 
     /// <summary>A player reported on this recently is watched again only when nobody new is left to watch.</summary>
     public const int RecentReportDays = 90;
@@ -138,50 +138,7 @@ internal sealed class ScoutingService(
     public async Task<int> HireMissingScoutsAsync(CancellationToken cancellationToken = default)
     {
         using var scope = scopes.CreateScope();
-        var s = scope.ServiceProvider;
-        var today = Today;
-        var clubs = await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false);
-        var employed = (await ScoutsAsync(s, today, null, cancellationToken).ConfigureAwait(false)).GroupBy(x => x.Contract.ClubId).ToDictionary(g => g.Key, g => g.Count());
-        var missing = clubs.Select(c => (Club: c, Count: ScoutingRules.ScoutsFor(c.Reputation) - employed.GetValueOrDefault(c.Id))).Where(x => x.Count > 0).ToList();
-        if (missing.Count == 0)
-        {
-            return 0;
-        }
-
-        // Names recombine the players' names of the club's country (data, not code), else of every player.
-        var players = await Repo<Player, PlayerId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false);
-        var byCountry = players.GroupBy(p => p.NationalityId).ToDictionary(g => g.Key, g => g.ToList());
-        var staff = Repo<StaffMember, StaffMemberId>(s);
-        var contracts = Repo<Contract, ContractId>(s);
-        var hired = 0;
-        foreach (var (club, count) in missing)
-        {
-            var pool = byCountry.GetValueOrDefault(club.CountryId) is { Count: > 0 } local ? local : players;
-            if (pool.Count == 0)
-            {
-                continue;
-            }
-
-            var random = new Random(ScoutingRules.StableSeed(club.Id.Value, Guid.Empty, today.DayNumber));
-            for (var i = 0; i < count; i++)
-            {
-                var ability = Math.Clamp(ScoutingRules.TypicalAbility(club.Reputation) + random.Next(-10, 11), StaffMember.MinAbility, StaffMember.MaxAbility);
-                var scout = new StaffMember(
-                    StaffMemberId.New(),
-                    pool[random.Next(pool.Count)].FirstName,
-                    pool[random.Next(pool.Count)].LastName,
-                    today.AddYears(-random.Next(35, 61)).AddDays(-random.Next(0, 365)),
-                    club.CountryId,
-                    StaffRole.Scout,
-                    ability);
-                staff.Add(scout);
-                contracts.Add(Contract.ForStaff(ContractId.New(), club.Id, scout.Id, today, today.AddYears(ScoutContractYears).AddDays(-1), ScoutSalary(ability)));
-                hired++;
-            }
-        }
-
-        await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return hired;
+        return await StaffHiring.HireMissingAsync(scope.ServiceProvider, Today, StaffRole.Scout, c => ScoutingRules.ScoutsFor(c.Reputation), ScoutSalary, 0, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<ScoutingDay> ProcessDayAsync(CancellationToken cancellationToken = default)
@@ -353,16 +310,8 @@ internal sealed class ScoutingService(
     }
 
     /// <summary>Scouts with a contract running today, at one club or (<c>null</c>) every club.</summary>
-    internal static async Task<IReadOnlyList<(StaffMember Member, Contract Contract)>> ScoutsAsync(IServiceProvider s, DateOnly today, ClubId? clubId, CancellationToken cancellationToken)
-    {
-        var running = Contract.RunningOn(today);
-        var contracts = (await Repo<Contract, ContractId>(s).ListAsync(running, cancellationToken).ConfigureAwait(false))
-            .Where(c => c.StaffMemberId != null && (clubId is null || c.ClubId == clubId))
-            .ToList();
-        var ids = contracts.Select(c => c.StaffMemberId!.Value).Distinct().ToList();
-        var scouts = (await Repo<StaffMember, StaffMemberId>(s).ListAsync(m => m.Role == StaffRole.Scout && ids.Contains(m.Id), cancellationToken).ConfigureAwait(false)).ToDictionary(m => m.Id);
-        return [.. contracts.Where(c => scouts.ContainsKey(c.StaffMemberId!.Value)).Select(c => (scouts[c.StaffMemberId!.Value], c))];
-    }
+    internal static Task<IReadOnlyList<(StaffMember Member, Contract Contract)>> ScoutsAsync(IServiceProvider s, DateOnly today, ClubId? clubId, CancellationToken cancellationToken) =>
+        StaffHiring.StaffAsync(s, today, clubId, [StaffRole.Scout], cancellationToken);
 
     private static IRepository<TEntity, TId> Repo<TEntity, TId>(IServiceProvider services)
         where TEntity : Entity<TId>
@@ -399,7 +348,7 @@ internal sealed class ScoutingService(
 
         public static async Task<World> LoadAsync(IServiceProvider s, DateOnly today, CancellationToken cancellationToken)
         {
-            var players = await Repo<Player, PlayerId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false);
+            var players = await Repo<Player, PlayerId>(s).ListAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false);
             var clubs = (await Repo<Club, ClubId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
             var members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
 

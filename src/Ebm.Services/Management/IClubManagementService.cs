@@ -18,6 +18,9 @@ public interface IClubManagementService
     /// <summary>Saves and selects the AI tactic ("AI plan") of each club that is not managed. Returns the clubs planned.</summary>
     Task<int> PlanTacticsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 
+    /// <summary>Saves the AI training plan (<see cref="Domain.Management.TrainingPlanner"/>) of each club that is not managed. Returns the clubs planned.</summary>
+    Task<int> PlanTrainingAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
+
     /// <summary>Renews expiring contracts of the AI clubs' core players. Returns the contracts renewed.</summary>
     Task<int> RenewContractsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 

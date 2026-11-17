@@ -3,6 +3,28 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.21.0] — 2026-11-17 — STEP 21: Training, development and player aging
+
+### Added
+- Training plans (`TrainingPlan`, table `TrainingPlans`): team focus (Balanced, Shooting, Tactical, Defense, Physical,
+  Recovery), intensity (Light, Normal, Hard) and individual programmes; *Training* screen with coaches and a yearly
+  outlook per player (`IDevelopmentService`).
+- Weekly development (`PlayerDevelopment`, Mondays): growth towards potential by age, coaching, intensity, playing
+  time, competition level, professionalism (work rate), fitness and injuries; age-related decline led by physical
+  attributes; seasonal luck and weekly form, so development is not deterministic; experience and leadership grow with
+  minutes.
+- Daily fitness: fatigue from minutes played, recovery by intensity, recovery focus and fitness coach.
+- Season end: potential realisation (revised by age, never below the overall) and retirement by configurable
+  `RetirementRules` (`Ebm:Retirement` settings): contracts terminated, club spell closed, `Players.RetiredOn`.
+- Coaches: assistant coaches (1–3 by reputation) and a fitness coach hired automatically; staff hiring shared with
+  scouts (`StaffHiring`).
+- AI clubs plan their training every Monday (`TrainingPlanner`, `IClubManagementService.PlanTrainingAsync`).
+- Career news: training weeks and retirements. Migration `Development`. Documentation: `docs/DEVELOPMENT.md`.
+
+### Changed
+- Retired players are excluded from free agents, the transfer market, scouting and negotiations.
+- `GameDayReport` carries `DevelopmentDay` and `SeasonDevelopment`.
+
 ## [0.20.0] — 2026-11-17 — STEP 20: Scouting and player evaluation
 
 ### Added

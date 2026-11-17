@@ -38,6 +38,7 @@ internal sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.NationalityId);
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.SecondNationalityId);
         builder.Ignore(x => x.Nationalities);
+        builder.Ignore(x => x.IsRetired);
         builder.Property(x => x.ProfileStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
         builder.Property(x => x.AttributesStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
         builder.Property(x => x.Source).HasMaxLength(DataQuality.SourceMaxLength);

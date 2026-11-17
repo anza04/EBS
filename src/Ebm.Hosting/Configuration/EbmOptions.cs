@@ -1,3 +1,4 @@
+using Ebm.Domain.Development;
 using Serilog.Events;
 
 namespace Ebm.Hosting.Configuration;
@@ -14,6 +15,9 @@ public sealed class EbmOptions
     public PathsOptions Paths { get; set; } = new();
 
     public LoggingOptions Logging { get; set; } = new();
+
+    /// <summary>Retirement rules (section <c>Ebm:Retirement</c>); unset values keep the defaults.</summary>
+    public RetirementRules Retirement { get; set; } = new();
 }
 
 public sealed class PathsOptions
