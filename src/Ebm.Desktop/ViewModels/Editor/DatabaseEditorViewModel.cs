@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Careers;
 using Ebm.Desktop.ViewModels.Chemistry;
@@ -13,6 +14,7 @@ using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
+using Ebm.Domain.Clubs;
 using Ebm.Services.Careers;
 using Ebm.Services.Chemistry;
 using Ebm.Services.Clubs;
@@ -39,9 +41,24 @@ namespace Ebm.Desktop.ViewModels.Editor;
 public sealed partial class DatabaseEditorViewModel : ObservableObject
 {
     private readonly IDatabaseEditor _editor;
+    private readonly ClubLockStore? _lockStore;
 
     [ObservableProperty]
     private string _counts = string.Empty;
+
+    /// <summary>
+    /// The locked club: preselected in every screen that works on one club, and remembered between sessions.
+    /// <c>null</c> when nothing is locked.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsClubLocked), nameof(IsClubUnlocked), nameof(LockedClubName))]
+    [NotifyCanExecuteChangedFor(nameof(UnlockClubCommand))]
+    private ClubId? _lockedClubId;
+
+    /// <summary>The club picked in the header, locked by <see cref="LockClubCommand"/>.</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(LockClubCommand))]
+    private ClubId? _clubToLock;
 
     public DatabaseEditorViewModel(
         IDatabaseEditor editor,
@@ -60,12 +77,15 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IDevelopmentService? development = null,
         IMedicalService? medical = null,
         IFinanceService? finances = null,
-        IChemistryService? chemistry = null)
+        IChemistryService? chemistry = null,
+        ClubLockStore? clubLock = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
         ArgumentNullException.ThrowIfNull(filePicker);
         _editor = editor;
+        _lockStore = clubLock;
+        _lockedClubId = _clubToLock = clubLock?.Load();
         Players = new PlayersPageViewModel(editor, Lookups, ReloadAsync);
         Clubs = new ClubsPageViewModel(editor, Lookups, ReloadAsync);
         Contracts = new ContractsPageViewModel(editor, Lookups, ReloadAsync);
@@ -137,6 +157,84 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public DressingRoomViewModel? DressingRoom { get; }
 
+    public bool IsClubLocked => LockedClubId is not null;
+
+    public bool IsClubUnlocked => LockedClubId is null;
+
+    public string LockedClubName => LockedClubId is not { } id
+        ? string.Empty
+        : Lookups.Clubs.Count == 0 ? "…" : Lookups.ClubName(id) is { Length: > 0 } name ? name : "(club not in this database)";
+
+    [RelayCommand(CanExecute = nameof(CanLockClub))]
+    private void LockClub() => LockedClubId = ClubToLock;
+
+    private bool CanLockClub() => ClubToLock is not null;
+
+    [RelayCommand(CanExecute = nameof(IsClubLocked))]
+    private void UnlockClub() => LockedClubId = null;
+
+    partial void OnLockedClubIdChanged(ClubId? value)
+    {
+        _lockStore?.Save(value);
+        if (value is { } id)
+        {
+            ClubToLock = id;
+            ApplyLockedClub(onlyEmpty: false);
+        }
+    }
+
+    /// <summary>
+    /// Selects the locked club in every one-club screen. After a reload only the screens with no club chosen yet get it,
+    /// so a club picked by hand in one tab stays picked; locking a club switches every tab to it.
+    /// </summary>
+    private void ApplyLockedClub(bool onlyEmpty)
+    {
+        if (LockedClubId is not { } id || Lookups.Clubs.All(c => c.Id != id))
+        {
+            return;
+        }
+
+        void Apply(ClubId? current, Action<ClubId?> select)
+        {
+            if (!onlyEmpty || current is null)
+            {
+                select(id);
+            }
+        }
+
+        Apply(ClubProfile.ClubId, v => ClubProfile.ClubId = v);
+        Apply(Squad.ClubId, v => Squad.ClubId = v);
+        Apply(ClubContracts.ClubId, v => ClubContracts.ClubId = v);
+        Apply(TransferMarket.ClubId, v => TransferMarket.ClubId = v);
+        Apply(Tactics.ClubId, v => Tactics.ClubId = v);
+        if (Scouting is not null)
+        {
+            Apply(Scouting.ClubId, v => Scouting.ClubId = v);
+        }
+
+        if (Training is not null)
+        {
+            Apply(Training.ClubId, v => Training.ClubId = v);
+        }
+
+        if (Medical is not null)
+        {
+            Apply(Medical.ClubId, v => Medical.ClubId = v);
+        }
+
+        if (Finances is not null)
+        {
+            Apply(Finances.ClubId, v => Finances.ClubId = v);
+        }
+
+        if (DressingRoom is not null)
+        {
+            Apply(DressingRoom.ClubId, v => DressingRoom.ClubId = v);
+        }
+
+        Career?.PreselectClub(id);
+    }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -189,6 +287,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         {
             await DressingRoom.RefreshAsync();
         }
+
+        ApplyLockedClub(onlyEmpty: true);
+        OnPropertyChanged(nameof(LockedClubName));
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +
             $"{snapshot.Clubs.Count} clubs · {snapshot.Players.Count} players · {snapshot.PlayerContracts.Count} contracts";

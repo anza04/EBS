@@ -150,6 +150,54 @@ public sealed class DatabaseEditorTests : IAsyncLifetime
         Assert.Contains(vm.Import.Problems, p => p.StartsWith("missing.json", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task Locked_club_is_preselected_in_every_tab_and_remembered()
+    {
+        var store = new ClubLockStore(Path.Combine(_db.TempFolder, "locked-club.txt"));
+        var vm = NewEditorViewModel(store);
+        await vm.ReloadAsync();
+        Assert.Null(vm.Squad.ClubId);
+
+        vm.ClubToLock = _world.AwayClub.Id;
+        vm.LockClubCommand.Execute(null);
+
+        Assert.True(vm.IsClubLocked);
+        Assert.Equal(_world.AwayClub.Name, vm.LockedClubName);
+        Assert.Equal(_world.AwayClub.Id, vm.ClubProfile.ClubId);
+        Assert.Equal(_world.AwayClub.Id, vm.Squad.ClubId);
+        Assert.Equal(_world.AwayClub.Id, vm.ClubContracts.ClubId);
+        Assert.Equal(_world.AwayClub.Id, vm.TransferMarket.ClubId);
+        Assert.Equal(_world.AwayClub.Id, vm.Tactics.ClubId);
+
+        // A club picked by hand in one tab survives a reload.
+        vm.Squad.ClubId = _world.HomeClub.Id;
+        await vm.ReloadAsync();
+        Assert.Equal(_world.HomeClub.Id, vm.Squad.ClubId);
+
+        // The next session starts with the lock and preselects it everywhere.
+        var next = NewEditorViewModel(store);
+        await next.ReloadAsync();
+        Assert.Equal(_world.AwayClub.Id, next.LockedClubId);
+        Assert.Equal(_world.AwayClub.Id, next.Squad.ClubId);
+
+        next.UnlockClubCommand.Execute(null);
+        Assert.False(next.IsClubLocked);
+        Assert.Null(store.Load());
+    }
+
+    private DatabaseEditorViewModel NewEditorViewModel(ClubLockStore store) => new(
+        Editor,
+        _db.Services.GetRequiredService<IDataImportService>(),
+        new FixedFilePicker([]),
+        _db.Services.GetRequiredService<IPlayerProfileService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Clubs.IClubService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Contracts.IContractService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Transfers.ITransferService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Tactics.ITacticsService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Matches.IMatchService>(),
+        _db.Services.GetRequiredService<Ebm.Services.Competitions.ICompetitionService>(),
+        clubLock: store);
+
     private PlayerDraft Draft(PlayerId? id, string first, string last, DateOnly? dob = null, int height = 200, int rating = 60) =>
         new(id, first, last, dob ?? new DateOnly(2001, 1, 1), _world.Italy.Id, height, 95, height + 5, Position.Center, PositionSet.Of(Position.PowerForward),
             40, 30, 75, 90, 55, InjuryStatus.Healthy, null, PlayerAttributes.Uniform(rating), PlayerTendencies.Suggest(PlayerAttributes.Uniform(rating)));

@@ -101,6 +101,15 @@ public sealed partial class CareerViewModel : ObservableObject
         _reloadAll = reloadAll;
     }
 
+    /// <summary>Selects <paramref name="club"/> as the club to start a career with, when it is one of the options.</summary>
+    public void PreselectClub(ClubId club)
+    {
+        if (ClubOptions.FirstOrDefault(o => o.Club.Id == club) is { } option)
+        {
+            SelectedClub = option;
+        }
+    }
+
     public bool HasCareer => State is not null;
 
     public bool NoCareer => State is null;

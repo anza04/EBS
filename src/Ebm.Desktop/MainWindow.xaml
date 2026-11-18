@@ -10,12 +10,33 @@
         Width="1280" Height="760" MinWidth="960" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource Brush.Background}">
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="Shell.Visible" />
+  </Window.Resources>
   <DockPanel>
     <!-- Header bar -->
     <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Header}" Padding="24,14">
       <DockPanel>
         <TextBlock DockPanel.Dock="Right" Text="{Binding VersionText}" Style="{StaticResource Text.Muted}"
-                   Foreground="{StaticResource Brush.HeaderMuted}" VerticalAlignment="Center" />
+                   Foreground="{StaticResource Brush.HeaderMuted}" VerticalAlignment="Center" Margin="24,0,0,0" />
+
+        <!-- Locked club: preselected in every screen that works on one club -->
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" DataContext="{Binding Editor}">
+          <TextBlock Text="My club" Style="{StaticResource Text.Muted}" Foreground="{StaticResource Brush.HeaderMuted}"
+                     VerticalAlignment="Center" Margin="0,0,8,0" />
+          <StackPanel Orientation="Horizontal" Visibility="{Binding IsClubUnlocked, Converter={StaticResource Shell.Visible}}">
+            <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                      SelectedValue="{Binding ClubToLock}" Width="240" VerticalAlignment="Center" />
+            <Button Content="🔒 Lock" Command="{Binding LockClubCommand}" Style="{StaticResource Button.Secondary}"
+                    Padding="10,2" Margin="8,0,0,0" ToolTip="Preselect this club in every tab, also in future sessions" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Visibility="{Binding IsClubLocked, Converter={StaticResource Shell.Visible}}">
+            <TextBlock Text="{Binding LockedClubName, StringFormat='🔒 {0}'}" Style="{StaticResource Text.Body}"
+                       Foreground="{StaticResource Brush.HeaderText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Content="Unlock" Command="{Binding UnlockClubCommand}" Style="{StaticResource Button.Secondary}"
+                    Padding="10,2" Margin="8,0,0,0" />
+          </StackPanel>
+        </StackPanel>
         <TextBlock Text="{Binding ProductName}" Style="{StaticResource Text.Title}"
                    Foreground="{StaticResource Brush.HeaderText}" />
       </DockPanel>
