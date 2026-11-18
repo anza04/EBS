@@ -86,7 +86,7 @@ severity is recomputed (a minor knock can become a moderate injury and rule the 
   intensity uses the fitness of healthy players and is never hard with a quarter or more of the squad injured.
 - Cover: players expected back in more than 28 days do not count towards the 10-player minimum; a club short because
   of them opens the Monday window and signs free agents (`ClubsShortOfPlayersAsync`, `FillSquadsAsync`), within the
-  18-player maximum.
+  18-player maximum and the wage budget left (`docs/AI_MANAGEMENT.md`).
 
 ## 6. Medical records
 
@@ -121,5 +121,6 @@ Validated at start-up (`InjuryRules.Validated`).
 - The injury catalogue and formulas are code; only the rates in §7 are configurable.
 - The editor edits a player's condition, not his medical record: while an injury record is active, the next medical
   day sets the condition back to the injury's.
-- AI cover signings use the existing emergency signing (one-year contracts, cheapest affordable free agents).
+- AI cover signings use the existing emergency signing (one-year contracts, best free agents within the wage budget;
+  no cover when the budget is spent).
 - Injuries are not part of morale, valuations or transfer decisions yet.

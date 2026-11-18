@@ -2,32 +2,32 @@
 Serie A, Serie A2, Liga Endesa, BSL) with their 138 real clubs and the real players of
 build/player-stats/europe-*.csv (RealGM, supplied by the author). Serie A uses the curated squads of
 build/real-rosters; players at clubs outside these divisions are free agents. Ratings: build/realgm_ratings.py.
-docs/PLAYER_DATABASE.md §7. Deterministic (UUID v5 IDs shared with data/europe, seeded numbers).
+docs/PLAYER_DATABASE.md §7. Deterministic (UUID v5 IDs, seeded numbers). Formats and helpers: build/dataset_common.py;
+names, cities and founding years of the curated clubs: build/real-leagues-clubs.json.
 
 Run: python build/generate-real-leagues-dataset.py [--source <raw RealGM export .csv>]
 (--source first refreshes the compact statistics files.)
 """
-import importlib.util
 import json
 import random
 import sys
+from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
 import player_ratings
 import realgm_ratings
 
+import dataset_common as eu
+
 HERE = Path(__file__).resolve().parent
-_spec = importlib.util.spec_from_file_location("europe", HERE / "generate-europe-dataset.py")
-eu = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(eu)
 
 SLUG = "real-leagues"
 SEASON_START = eu.SEASON_START
 MIN_SQUAD = 12
 FREE_AGENTS = "free agents"
 
-# name: (code, EU/EEA/CH). Existing data/europe codes are kept (GER, GRE, CRO, SLO, NED, POR …); others ISO alpha-3.
+# name: (code, EU/EEA/CH). Game codes GER, GRE, CRO, SLO, NED, POR …; others ISO alpha-3.
 NATIONS = {
     "Albania": ("ALB", False), "Algeria": ("DZA", False), "Angola": ("AGO", False), "Argentina": ("ARG", False),
     "Armenia": ("ARM", False), "Australia": ("AUS", False), "Austria": ("AUT", True), "Azerbaijan": ("AZE", False),
@@ -77,7 +77,7 @@ LEAGUES = [
         D("ABA League", "ABA", 20, po=eu.playoffs(8, [3, 3, 5], play_in=True), countries=ABA_COUNTRIES)]),
 ]
 
-# RealGM team (2026-27) -> "club name|short|city|country". Names of data/europe clubs are kept (same IDs).
+# RealGM team (2026-27) -> "club name|short|city|country", or the name of a club in build/real-leagues-clubs.json.
 CLUBS = {
     "Lega Basket Serie A": {
         "Virtus Bologna": "Virtus Bologna", "AX Armani Exchange Milan": "Olimpia Milano", "Umana Venezia": "Reyer Venezia",
@@ -144,8 +144,9 @@ CLUBS = {
 GENERATED_NAMES = {"MNE": "SRB", "BIH": "CRO", "AUT": "GER", "SVK": "CZE", "ROU": "SRB", "ARE": "USA"}  # name pools for top-ups
 
 
-def europe_clubs():
-    return {c["name"]: c for c in json.loads((HERE.parent / "data" / "europe" / "europe-2026-27.json").read_text(encoding="utf-8"))["clubs"]}
+def curated_clubs():
+    """Clubs with curated identity (short name, city, founding year; Serie A: reputation), by name."""
+    return {c["name"]: c for c in json.loads((HERE / "real-leagues-clubs.json").read_text(encoding="utf-8"))}
 
 
 def club_identity(entry, known):
@@ -247,12 +248,12 @@ def main():
     if "--source" in sys.argv:
         realgm_ratings.compact(sys.argv[sys.argv.index("--source") + 1])
     rnd = random.Random(26)
-    known = europe_clubs()
+    known = curated_clubs()
     season = {"id": eu.uid("season", "2026-27"), "name": "2026-27", "startDate": SEASON_START.isoformat(), "endDate": eu.SEASON_END.isoformat()}
     data = {"format": "ebm-dataset", "version": 1, "countries": [], "clubs": [], "leagues": [], "divisions": [],
             "competitions": [], "seasons": [season], "participants": []}
 
-    # Clubs and the RealGM team names that point at them (first: current team; europe names: curated history).
+    # Clubs and the RealGM team names that point at them (first: current team; others: curated history).
     divisions, team_clubs = [], {}
     for league_name, short, country, divs in LEAGUES:
         league = {"id": eu.uid("league", league_name), "name": league_name, "shortName": short, **({"country": country} if country else {})}
@@ -297,7 +298,7 @@ def main():
         profiles.append(p)
     ratings = realgm_ratings.rate(profiles, calibration, eu.ATTRIBUTES, eu.PROFILES)
 
-    # Club strength from the squads: mean level of the best eight, on the scale of data/europe Serie A reputations.
+    # Club strength from the squads: mean level of the best eight, on the scale of the curated Serie A reputations.
     squads = {c["id"]: [] for _, _, _, cs in divisions for c in cs}
     for p in profiles:
         if p["club"]:
@@ -324,13 +325,13 @@ def main():
                                   "boardExpectation": eu.board(level, rank, div["clubs"], div), "dataStatus": "Unverified"})
             data["participants"].append({"id": eu.uid("entry", competition["id"], club["id"]), "competitionId": competition["id"],
                                          "seasonId": season["id"], "clubId": club["id"]})
-    eu.add_cups(data, season, {div["name"]: clubs for div, _, _, clubs in divisions})
+    eu.add_cups(data, season, LEAGUES, {div["name"]: clubs for div, _, _, clubs in divisions})
     eu.add_international(data)
     clubs_by_id = {c["id"]: c for c in data["clubs"]}
     club_ids = set(clubs_by_id)
 
-    # Curated Serie A squads (same records as data/europe); spells outside the dataset are dropped.
-    names = {**{n: {"id": c["id"]} for n, c in known.items()}, **{c["name"]: c for c in data["clubs"]}}
+    # Curated Serie A squads; spells at clubs outside the dataset are dropped.
+    names = defaultdict(lambda: {"id": ""}, {c["name"]: c for c in data["clubs"]})
     level_of = {}
     for roster in eu.REAL_ROSTERS.values():
         for x in roster["players"]:

@@ -3,6 +3,39 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- The slow suite plays `data/real-leagues` (138 clubs, 2,598 players) instead of the generated European dataset (512
+  clubs, 6,168 players): `EuropeanTransferWindowTests`, `MilestoneTwoTests`, `RealLeaguesCompetitionTests` (was
+  `EuropeDatasetTests`) and `RealLeaguesDatasetTests` (now also stable IDs, duplicates, a 20-day career); shared
+  `TestSupport/RealLeagues`.
+- `build/generate-europe-dataset.py` became the helper module `build/dataset_common.py`; the real-leagues generator no
+  longer reads `data/europe` (curated club identities frozen in `build/real-leagues-clubs.json`; output unchanged).
+
+### Fixed
+- AI emergency signings (`FillSquadsAsync`) respect the wage budget left: the best free agent within budget and balance;
+  below the squad minimum the cheapest one the balance covers; injury cover only within budget (27 of 138 real-leagues
+  clubs were in debt after two seasons). `docs/AI_MANAGEMENT.md`, `docs/CONTRACTS.md`, `docs/INJURIES.md`.
+- Emergency signings no longer stall the off-season (~45 s per signing with 900 free agents): the free-agent pool is read
+  once and demands in chunks (`IContractService.GetNegotiationsAsync`, shared reads memoized).
+- `MilestoneTwoTests`: cross-border moves checked over the whole run (none in the first season on real squads); no
+  scout-report check (AI clubs make no assignments, `docs/SCOUTING.md` §6); season timings printed before the checks.
+
+### Performance
+- Game days about 3.5× faster on `data/real-leagues` (60 days: 356 s → 101 s):
+  - Matchday squads, short-squad checks, AI tactics, surplus releases and the chemistry week read all squads at once
+    (`IClubService.GetRostersAsync`) and save changed squads in one unit of work (`SaveRostersAsync`); a single squad
+    save reads only its club's members (was every player's club).
+  - Contract dates read only open club spells (was the whole club history, scanned once per running contract).
+  - Untracked reads (`IRepository.ListUntrackedAsync`, `ClubMembership.SavedClubsAsync`) for the daily read-only loads:
+    memberships, fixtures, results and box scores in medical, development, training, chemistry, competition phases
+    and the career day setup.
+
+### Removed
+- The generated European dataset `data/europe` and its Italian slice `data/italy`, with `EuropePlayerDatabaseTests` and
+  `ItalyDatasetTests`.
+
 ## [0.26.0] — 2026-11-18 — STEP 26: Advanced roster management and chemistry
 
 ### Added

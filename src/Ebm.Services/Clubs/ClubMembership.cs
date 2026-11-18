@@ -16,17 +16,49 @@ internal static class ClubMembership
     /// <summary>
     /// Current club of every player who has one: the open club spell, else the club of the latest contract running on <paramref name="date"/>.
     /// </summary>
-    public static async Task<Dictionary<PlayerId, ClubId>> CurrentClubsAsync(IServiceProvider services, DateOnly date, CancellationToken cancellationToken)
+    public static async Task<Dictionary<PlayerId, ClubId>> CurrentClubsAsync(IServiceProvider services, DateOnly date, CancellationToken cancellationToken) =>
+        await CurrentClubsAsync(
+            services,
+            await services.GetRequiredService<IRepository<Contract, ContractId>>().ListAsync(Contract.RunningOn(date), cancellationToken).ConfigureAwait(false),
+            cancellationToken).ConfigureAwait(false);
+
+    /// <summary><see cref="CurrentClubsAsync(IServiceProvider, DateOnly, CancellationToken)"/> from the contracts running on that date, already loaded.</summary>
+    public static async Task<Dictionary<PlayerId, ClubId>> CurrentClubsAsync(IServiceProvider services, IEnumerable<Contract> running, CancellationToken cancellationToken)
     {
         var members = new Dictionary<PlayerId, ClubId>();
-        var running = await services.GetRequiredService<IRepository<Contract, ContractId>>()
-            .ListAsync(Contract.RunningOn(date), cancellationToken).ConfigureAwait(false);
         foreach (var contract in running.Where(c => c.PlayerId is not null).OrderBy(c => c.StartDate))
         {
             members[contract.PlayerId!.Value] = contract.ClubId;
         }
 
         foreach (var spell in await OpenSpellsAsync(services, null, cancellationToken).ConfigureAwait(false))
+        {
+            members[spell.PlayerId] = spell.ClubId;
+        }
+
+        return members;
+    }
+
+    /// <summary>
+    /// <see cref="CurrentClubsAsync(IServiceProvider, DateOnly, CancellationToken)"/> from the saved state, without change
+    /// tracking: for the daily reads at the start of a unit of work (medical, development, training, squads), never after
+    /// a change in the same unit of work.
+    /// </summary>
+    public static async Task<Dictionary<PlayerId, ClubId>> SavedClubsAsync(IServiceProvider services, DateOnly date, CancellationToken cancellationToken) =>
+        SavedClubs(
+            await services.GetRequiredService<IRepository<Contract, ContractId>>().ListUntrackedAsync(Contract.RunningOn(date), cancellationToken).ConfigureAwait(false),
+            await services.GetRequiredService<IRepository<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>>().ListUntrackedAsync(s => s.EndDate == null, cancellationToken).ConfigureAwait(false));
+
+    /// <summary>The membership rule of <see cref="CurrentClubsAsync(IServiceProvider, DateOnly, CancellationToken)"/> over loaded rows.</summary>
+    public static Dictionary<PlayerId, ClubId> SavedClubs(IEnumerable<Contract> running, IEnumerable<PlayerClubHistoryEntry> openSpells)
+    {
+        var members = new Dictionary<PlayerId, ClubId>();
+        foreach (var contract in running.Where(c => c.PlayerId is not null).OrderBy(c => c.StartDate))
+        {
+            members[contract.PlayerId!.Value] = contract.ClubId;
+        }
+
+        foreach (var spell in openSpells.Where(s => s.IsCurrent))
         {
             members[spell.PlayerId] = spell.ClubId;
         }

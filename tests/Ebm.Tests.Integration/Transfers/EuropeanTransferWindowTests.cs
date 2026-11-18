@@ -1,10 +1,8 @@
-using System.Reflection;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Players;
 using Ebm.Domain.Transfers;
 using Ebm.Services.Careers;
-using Ebm.Services.Import;
 using Ebm.Services.Management;
 using Ebm.Services.Transfers;
 using Ebm.Tests.Integration.TestSupport;
@@ -13,16 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Ebm.Tests.Integration.Transfers;
 
 /// <summary>
-/// Step 19 acceptance on the European dataset: AI clubs recruit across countries, within their means, and every move
+/// Step 19 acceptance on the real-leagues dataset (data/real-leagues): AI clubs recruit across countries, within their means, and every move
 /// leaves the contracts consistent; international clubs attract players for less.
 /// </summary>
 [Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
 public sealed class EuropeanTransferWindowTests : IAsyncLifetime
 {
-    private static readonly string Folder = Path.Combine(
-        typeof(EuropeanTransferWindowTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().Single(a => a.Key == "RepositoryDataPath").Value!,
-        "europe");
-
     private TestDatabase _db = null!;
 
     public async Task InitializeAsync() => _db = await TestDatabase.CreateAsync();
@@ -32,15 +26,14 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
     [Fact]
     public async Task Ai_clubs_recruit_internationally_within_their_means_and_contracts_stay_consistent()
     {
-        var files = new[] { "europe-2026-27.json", "players-europe-2026-27.csv", "contracts-europe-2026-27.csv", "playerHistory-europe-2026-27.csv" };
-        Assert.True((await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([.. files.Select(f => Path.Combine(Folder, f))], new ImportOptions())).Committed);
+        await RealLeagues.ImportAsync(_db);
         var careers = _db.Services.GetRequiredService<ICareerService>();
         var managed = (await careers.GetClubOptionsAsync()).Single(o => o.Club.Name == "Olimpia Milano").Club;
         await careers.StartAsync(managed.Id, "Europe");
         var market = _db.Services.GetRequiredService<ITransferService>();
         var before = (await _db.ReadAsync(s => s.Repo<Club, ClubId>().ListAsync())).ToDictionary(c => c.Id, c => c.Balance);
 
-        // As on a window day (CareerService.AdvanceDayAsync): the dataset starts without free agents, so the pool is replenished first.
+        // As on a window day (CareerService.AdvanceDayAsync): the free-agent pool is replenished first.
         await _db.Services.GetRequiredService<IClubManagementService>().ReplenishFreeAgentsAsync();
         var report = await market.RunAiTransferWindowAsync([managed.Id]);
 
@@ -52,7 +45,7 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
 
         // Activity, across borders: bought from another country's club, and free agents of other nationalities.
         var bought = moves.Where(t => t.Kind is TransferKind.Transfer or TransferKind.ReleaseClause).ToList();
-        Assert.True(report.Transactions >= 50, $"{report.Transactions} deals");
+        Assert.True(report.Transactions >= 20, $"{report.Transactions} deals"); // 138 clubs
         var actions = report.Clubs.SelectMany(c => c.Actions).ToList();
         var signings = moves.Where(t => t.Kind == TransferKind.FreeAgentSigning).ToList();
         var summary = $"bought={bought.Count} free agents={signings.Count} upgrades={actions.Count(a => a.Contains("upgrade", StringComparison.Ordinal))} " +
@@ -81,13 +74,12 @@ public sealed class EuropeanTransferWindowTests : IAsyncLifetime
     [Fact]
     public async Task Clubs_in_international_competitions_attract_players_for_less()
     {
-        var files = new[] { "europe-2026-27.json", "players-europe-2026-27.csv", "contracts-europe-2026-27.csv", "playerHistory-europe-2026-27.csv" };
-        Assert.True((await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([.. files.Select(f => Path.Combine(Folder, f))], new ImportOptions())).Committed);
+        await RealLeagues.ImportAsync(_db);
         var careers = _db.Services.GetRequiredService<ICareerService>();
         var managed = (await careers.GetClubOptionsAsync()).Single(o => o.Club.Name == "Olimpia Milano").Club;
         await careers.StartAsync(managed.Id, "Europe"); // qualifies the international competitions
         var market = _db.Services.GetRequiredService<ITransferService>();
-        // The dataset starts with every player under contract: price one of another club's players for Milano.
+        // Price one of another club's players for Milano.
         var agent = (await market.SearchAsync(new PlayerSearch(Filter: MarketFilter.UnderContract, ForClub: managed.Id, MaxResults: 1))).Single();
 
         var priced = (await market.GetMarketPlayerAsync(agent.Player.Id, managed.Id))!;

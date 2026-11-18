@@ -56,6 +56,13 @@ internal sealed class ClubService : IClubService
         return await new Data(scope.ServiceProvider, Today).LoadRosterAsync(clubId, _calculator, cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<ClubRoster>> GetRostersAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(clubIds);
+        using var scope = _scopes.CreateScope();
+        return await new Data(scope.ServiceProvider, Today).LoadRostersAsync(clubIds, _calculator, cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<ClubRoster> SaveRosterAsync(ClubId clubId, IReadOnlyList<RosterAssignment> assignments, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(assignments);
@@ -64,51 +71,39 @@ internal sealed class ClubService : IClubService
             var data = new Data(scope.ServiceProvider, Today);
             _ = await data.Repo<Club, ClubId>().FindAsync(clubId, cancellationToken).ConfigureAwait(false)
                 ?? throw new DomainException("The club no longer exists in the database.");
-            var members = (await data.MembersAsync(cancellationToken).ConfigureAwait(false))
-                .Where(m => m.Value == clubId)
-                .Select(m => m.Key)
-                .ToHashSet();
-            var listed = assignments.Select(a => a.PlayerId).ToList();
-            if (listed.Distinct().Count() != listed.Count)
-            {
-                throw new DomainValidationException("A player is listed twice in the squad.");
-            }
-
-            if (!members.SetEquals(listed))
-            {
-                throw new DomainException("The squad has changed since it was loaded. Reload it and try again.");
-            }
-
-            var spots = data.Repo<RosterSpot, RosterSpotId>();
-            var existing = (await spots.ListAsync(s => listed.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
-                .ToDictionary(s => s.PlayerId);
-            var rotationOrder = 0;
-            foreach (var assignment in assignments)
-            {
-                int? order = assignment.Role == RosterRole.Rotation ? ++rotationOrder : null;
-                if (existing.TryGetValue(assignment.PlayerId, out var spot))
-                {
-                    // A spot at another club is left over from a move made through the editor or an import.
-                    spot.MoveTo(clubId);
-                    spot.Assign(assignment.Role, assignment.LineupPosition, order);
-                }
-                else
-                {
-                    spots.Add(new RosterSpot(RosterSpotId.New(), assignment.PlayerId, clubId, assignment.Role, assignment.LineupPosition, order));
-                }
-            }
-
-            // Spots of players who are no longer at the club are current state, not history: drop them.
-            foreach (var stale in await spots.ListAsync(s => s.ClubId == clubId && !listed.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
-            {
-                spots.Remove(stale);
-            }
-
+            var (members, _) = await ClubMembership.MembersOfAsync(scope.ServiceProvider, clubId, Today, cancellationToken).ConfigureAwait(false);
+            await data.AssignAsync(clubId, assignments, [.. members], cancellationToken).ConfigureAwait(false);
             await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         }
 
         return await GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false)
             ?? throw new DomainException("The club no longer exists in the database.");
+    }
+
+    public async Task SaveRostersAsync(IReadOnlyDictionary<ClubId, IReadOnlyList<RosterAssignment>> squads, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(squads);
+        if (squads.Count == 0)
+        {
+            return;
+        }
+
+        using var scope = _scopes.CreateScope();
+        var data = new Data(scope.ServiceProvider, Today);
+        List<ClubId> ids = [.. squads.Keys];
+        var existing = (await data.Repo<Club, ClubId>().ListAsync(c => ids.Contains(c.Id), cancellationToken).ConfigureAwait(false)).Select(c => c.Id).ToHashSet();
+        if (ids.Any(id => !existing.Contains(id)))
+        {
+            throw new DomainException("The club no longer exists in the database.");
+        }
+
+        var members = (await data.MembersAsync(cancellationToken).ConfigureAwait(false)).ToLookup(m => m.Value, m => m.Key);
+        foreach (var (clubId, assignments) in squads)
+        {
+            await data.AssignAsync(clubId, assignments, [.. members[clubId]], cancellationToken).ConfigureAwait(false);
+        }
+
+        await data.SaveAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task AssignPlayerAsync(PlayerId playerId, ClubId clubId, RosterRole role = RosterRole.Bench, CancellationToken cancellationToken = default)
@@ -172,6 +167,27 @@ internal sealed class ClubService : IClubService
             return (season, [.. competitions.OrderBy(c => c.Type).ThenBy(c => c.Name)]);
         }
 
+        /// <summary>The competitions of several clubs in the current season (<see cref="CurrentCompetitionsAsync(ClubId, CancellationToken)"/>).</summary>
+        private async Task<Dictionary<ClubId, IReadOnlyList<Competition>>> CurrentCompetitionsAsync(List<ClubId> clubIds, CancellationToken cancellationToken)
+        {
+            var season = (await Repo<Season, SeasonId>().ListAsync(s => s.EndDate >= Today, cancellationToken).ConfigureAwait(false))
+                .OrderBy(s => s.StartDate)
+                .FirstOrDefault();
+            if (season is null)
+            {
+                return [];
+            }
+
+            var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>()
+                .ListAsync(p => clubIds.Contains(p.ClubId) && p.SeasonId == season.Id, cancellationToken).ConfigureAwait(false);
+            List<CompetitionId> entered = [.. entries.Select(p => p.CompetitionId).Distinct()];
+            var competitions = (await Repo<Competition, CompetitionId>().ListAsync(c => entered.Contains(c.Id), cancellationToken).ConfigureAwait(false))
+                .ToDictionary(c => c.Id);
+            return entries.Where(e => competitions.ContainsKey(e.CompetitionId)).GroupBy(e => e.ClubId).ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyList<Competition>)[.. g.Select(e => competitions[e.CompetitionId]).Distinct().OrderBy(c => c.Type).ThenBy(c => c.Name)]);
+        }
+
         public async Task<ClubRoster?> LoadRosterAsync(ClubId clubId, PlayerRatingCalculator calculator, CancellationToken cancellationToken)
         {
             if (await Repo<Club, ClubId>().FindAsync(clubId, cancellationToken).ConfigureAwait(false) is not { } club)
@@ -185,7 +201,100 @@ internal sealed class ClubService : IClubService
                 .ToDictionary(s => s.PlayerId);
             var contracted = running.Select(c => c.PlayerId!.Value).ToHashSet();
             var countries = (await Repo<Country, CountryId>().ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+            var (_, competitions) = await CurrentCompetitionsAsync(clubId, cancellationToken).ConfigureAwait(false);
+            return Build(club, players, spots, contracted, countries, competitions, calculator);
+        }
 
+        /// <summary>
+        /// The squads of several clubs with the rules of <see cref="LoadRosterAsync"/>, in a fixed number of queries (the
+        /// daily AI loops: matchday squads, short squads, tactics, chemistry). Clubs that do not exist are left out.
+        /// </summary>
+        public async Task<IReadOnlyList<ClubRoster>> LoadRostersAsync(IReadOnlyCollection<ClubId> clubIds, PlayerRatingCalculator calculator, CancellationToken cancellationToken)
+        {
+            List<ClubId> ids = [.. clubIds.Distinct()];
+            if (ids.Count == 0)
+            {
+                return [];
+            }
+
+            // A read-only unit of work: nothing is tracked (thousands of contracts, spells and players a day).
+            var clubs = (await Repo<Club, ClubId>().ListUntrackedAsync(c => ids.Contains(c.Id), cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+            var running = (await Repo<Contract, ContractId>().ListUntrackedAsync(Contract.RunningOn(Today), cancellationToken).ConfigureAwait(false))
+                .Where(c => c.PlayerId is not null)
+                .ToList();
+            var openSpells = await Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>().ListUntrackedAsync(s => s.EndDate == null, cancellationToken).ConfigureAwait(false);
+            var members = ClubMembership.SavedClubs(running, openSpells);
+            var wanted = clubs.Keys.ToHashSet();
+            List<PlayerId> playerIds = [.. members.Where(m => wanted.Contains(m.Value)).Select(m => m.Key)];
+            var players = (await Repo<Player, PlayerId>().ListUntrackedAsync(p => playerIds.Contains(p.Id), cancellationToken).ConfigureAwait(false))
+                .ToLookup(p => members[p.Id]);
+            var spots = (await Repo<RosterSpot, RosterSpotId>().ListUntrackedAsync(s => ids.Contains(s.ClubId), cancellationToken).ConfigureAwait(false))
+                .ToLookup(s => s.ClubId);
+            var contracted = running.ToLookup(c => c.ClubId, c => c.PlayerId!.Value);
+            var countries = (await Repo<Country, CountryId>().ListUntrackedAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+            var competitions = await CurrentCompetitionsAsync(ids, cancellationToken).ConfigureAwait(false);
+            return
+            [
+                .. ids.Where(clubs.ContainsKey).Select(id => Build(
+                    clubs[id],
+                    players[id],
+                    spots[id].ToDictionary(s => s.PlayerId),
+                    [.. contracted[id]],
+                    countries,
+                    competitions.GetValueOrDefault(id) ?? [],
+                    calculator)),
+            ];
+        }
+
+        /// <summary>Replaces the squad roles of one club's <paramref name="members"/> (validation of <see cref="SaveRosterAsync"/>).</summary>
+        public async Task AssignAsync(ClubId clubId, IReadOnlyList<RosterAssignment> assignments, HashSet<PlayerId> members, CancellationToken cancellationToken)
+        {
+            var listed = assignments.Select(a => a.PlayerId).ToList();
+            if (listed.Distinct().Count() != listed.Count)
+            {
+                throw new DomainValidationException("A player is listed twice in the squad.");
+            }
+
+            if (!members.SetEquals(listed))
+            {
+                throw new DomainException("The squad has changed since it was loaded. Reload it and try again.");
+            }
+
+            var spots = Repo<RosterSpot, RosterSpotId>();
+            var existing = (await spots.ListAsync(s => listed.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
+                .ToDictionary(s => s.PlayerId);
+            var rotationOrder = 0;
+            foreach (var assignment in assignments)
+            {
+                int? order = assignment.Role == RosterRole.Rotation ? ++rotationOrder : null;
+                if (existing.TryGetValue(assignment.PlayerId, out var spot))
+                {
+                    // A spot at another club is left over from a move made through the editor or an import.
+                    spot.MoveTo(clubId);
+                    spot.Assign(assignment.Role, assignment.LineupPosition, order);
+                }
+                else
+                {
+                    spots.Add(new RosterSpot(RosterSpotId.New(), assignment.PlayerId, clubId, assignment.Role, assignment.LineupPosition, order));
+                }
+            }
+
+            // Spots of players who are no longer at the club are current state, not history: drop them.
+            foreach (var stale in await spots.ListAsync(s => s.ClubId == clubId && !listed.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
+            {
+                spots.Remove(stale);
+            }
+        }
+
+        private ClubRoster Build(
+            Club club,
+            IEnumerable<Player> players,
+            Dictionary<PlayerId, RosterSpot> spots,
+            HashSet<PlayerId> contracted,
+            Dictionary<CountryId, Country> countries,
+            IReadOnlyList<Competition> competitions,
+            PlayerRatingCalculator calculator)
+        {
             var roster = players
                 .Select(p =>
                 {
@@ -210,7 +319,6 @@ internal sealed class ClubService : IClubService
                 .ThenBy(p => p.Player.LastName)
                 .ToList();
 
-            var (_, competitions) = await CurrentCompetitionsAsync(clubId, cancellationToken).ConfigureAwait(false);
             var (validation, registrations) = ClubRoster.Check([.. roster.Select(p => p.ToMember())], competitions);
             return new ClubRoster(club, Today, roster, validation, registrations);
         }

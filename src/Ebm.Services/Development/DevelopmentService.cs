@@ -204,7 +204,7 @@ internal sealed class DevelopmentService(
         List<MatchId> matchIds = [.. playedToday];
         var minutes = matchIds.Count == 0
             ? []
-            : (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListAsync(x => matchIds.Contains(x.MatchId), cancellationToken).ConfigureAwait(false))
+            : (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListUntrackedAsync(x => matchIds.Contains(x.MatchId), cancellationToken).ConfigureAwait(false))
                 .GroupBy(x => x.PlayerId).ToDictionary(g => g.Key, g => g.Sum(x => x.BoxScore.Minutes));
         List<PlayerId> played = [.. minutes.Keys];
         var players = await Repo<Player, PlayerId>(s).ListAsync(p => p.RetiredOn == null && (p.Fitness < Player.MaxFitness || played.Contains(p.Id)), cancellationToken).ConfigureAwait(false);
@@ -213,8 +213,8 @@ internal sealed class DevelopmentService(
             return 0;
         }
 
-        var members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
-        var plans = (await Repo<TrainingPlan, TrainingPlanId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId);
+        var members = await ClubMembership.SavedClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
+        var plans = (await Repo<TrainingPlan, TrainingPlanId>(s).ListUntrackedAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId);
         var staff = Staff.From(await StaffHiring.StaffAsync(s, today, null, CoachRoles, cancellationToken).ConfigureAwait(false));
         var changed = 0;
         foreach (var player in players)
@@ -334,9 +334,9 @@ internal sealed class DevelopmentService(
             HashSet<ClubId> international = [];
             if (season is not null)
             {
-                var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListAsync(p => p.SeasonId == season.Id, cancellationToken).ConfigureAwait(false);
-                var competitions = (await Repo<Competition, CompetitionId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
-                var divisions = (await Repo<Division, DivisionId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(d => d.Id, d => d.Level);
+                var entries = await Repo<CompetitionParticipant, CompetitionParticipantId>(s).ListUntrackedAsync(p => p.SeasonId == season.Id, cancellationToken).ConfigureAwait(false);
+                var competitions = (await Repo<Competition, CompetitionId>(s).ListUntrackedAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(c => c.Id);
+                var divisions = (await Repo<Division, DivisionId>(s).ListUntrackedAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(d => d.Id, d => d.Level);
                 foreach (var entry in entries)
                 {
                     if (!competitions.TryGetValue(entry.CompetitionId, out var competition))
@@ -357,14 +357,14 @@ internal sealed class DevelopmentService(
 
             var from = today.AddDays(1 - PlayingTimeDays);
             var weekFrom = today.AddDays(-6);
-            var fixtures = (await Repo<Fixture, FixtureId>(s).ListAsync(f => f.Date >= from && f.Date <= today, cancellationToken).ConfigureAwait(false)).ToDictionary(f => f.Id);
+            var fixtures = (await Repo<Fixture, FixtureId>(s).ListUntrackedAsync(f => f.Date >= from && f.Date <= today, cancellationToken).ConfigureAwait(false)).ToDictionary(f => f.Id);
             List<FixtureId> fixtureIds = [.. fixtures.Keys];
-            var matches = (await Repo<Match, MatchId>(s).ListAsync(m => fixtureIds.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false))
+            var matches = (await Repo<Match, MatchId>(s).ListUntrackedAsync(m => fixtureIds.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false))
                 .ToDictionary(m => m.Id, m => fixtures[m.FixtureId]);
             List<MatchId> matchIds = [.. matches.Keys];
             var lines = matchIds.Count == 0
                 ? []
-                : await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListAsync(x => matchIds.Contains(x.MatchId), cancellationToken).ConfigureAwait(false);
+                : await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListUntrackedAsync(x => matchIds.Contains(x.MatchId), cancellationToken).ConfigureAwait(false);
             var clubGames = matches.Values.SelectMany(f => new[] { f.HomeClubId, f.AwayClubId }).GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
 
             var world = new World
@@ -372,7 +372,7 @@ internal sealed class DevelopmentService(
                 Today = today,
                 SeasonYear = season?.StartDate.Year ?? today.Year,
                 Players = players,
-                Members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false),
+                Members = await ClubMembership.SavedClubsAsync(s, today, cancellationToken).ConfigureAwait(false),
                 Plans = (await Repo<TrainingPlan, TrainingPlanId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId),
                 DivisionLevels = levels,
                 International = international,

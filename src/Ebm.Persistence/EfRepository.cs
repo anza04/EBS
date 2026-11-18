@@ -31,6 +31,17 @@ internal sealed class EfRepository<TEntity, TId> : IRepository<TEntity, TId>
         return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<TEntity>> ListUntrackedAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    {
+        IQueryable<TEntity> query = _set.AsNoTracking();
+        if (predicate is not null)
+        {
+            query = query.Where(predicate);
+        }
+
+        return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public void Add(TEntity entity)
     {
         ArgumentNullException.ThrowIfNull(entity);

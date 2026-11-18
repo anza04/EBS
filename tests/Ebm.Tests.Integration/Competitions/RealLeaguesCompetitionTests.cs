@@ -1,4 +1,3 @@
-using System.Reflection;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Competitions.Engine;
@@ -13,17 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Ebm.Tests.Integration.Competitions;
 
 /// <summary>
-/// Step 15 acceptance: every league of the European dataset (data/europe) imports, schedules inside the season,
-/// produces standings and finishes with a champion and the configured promotion and relegation.
+/// Step 15 and 18 acceptance on the real-leagues dataset (data/real-leagues): every league imports, schedules inside
+/// the season, produces standings and finishes with a champion and the configured promotion and relegation; the
+/// international competitions qualify distinct clubs on free days.
 /// </summary>
 [Trait("Category", "Slow")] // full datasets or multi-season simulation: run before releases, not on every change
-public sealed class EuropeDatasetTests : IAsyncLifetime
+public sealed class RealLeaguesCompetitionTests : IAsyncLifetime
 {
-    private static readonly string DatasetFile = Path.Combine(
-        typeof(EuropeDatasetTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().Single(a => a.Key == "RepositoryDataPath").Value!,
-        "europe",
-        "europe-2026-27.json");
-
     private TestDatabase _db = null!;
 
     private ICompetitionService Service => _db.Services.GetRequiredService<ICompetitionService>();
@@ -35,15 +30,15 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
     [Fact]
     public async Task Every_league_plays_a_full_season_with_promotion_and_relegation()
     {
-        var report = await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([DatasetFile], new ImportOptions());
+        var report = await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([RealLeagues.World], new ImportOptions());
         Assert.True(report.Committed);
         var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
         var all = await _db.ReadAsync(s => s.Repo<Competition, CompetitionId>().ListAsync());
         var competitions = all.Where(c => c.Type == CompetitionType.League).ToList();
         var divisions = (await _db.ReadAsync(s => s.Repo<Division, DivisionId>().ListAsync())).ToDictionary(d => d.Id);
-        Assert.Equal(35, competitions.Count);
-        Assert.Equal(21, all.Count(c => c.Type == CompetitionType.Cup));
-        Assert.Equal(18, competitions.Select(c => c.CountryId).OfType<object>().Distinct().Count());
+        Assert.Equal(8, competitions.Count);
+        Assert.Equal(10, all.Count(c => c.Type == CompetitionType.Cup));
+        Assert.Equal(6, competitions.Select(c => c.CountryId).OfType<object>().Distinct().Count()); // plus the cross-border ABA League
 
         var finished = new List<(Division Division, IReadOnlyList<ClubId> Clubs, SeasonOutcome Outcome)>();
         var random = new Random(15);
@@ -82,7 +77,7 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
     [Fact]
     public async Task The_international_competitions_qualify_distinct_clubs_and_are_drawn_on_free_days()
     {
-        Assert.True((await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([DatasetFile], new ImportOptions())).Committed);
+        Assert.True((await _db.Services.GetRequiredService<IDataImportService>().ImportAsync([RealLeagues.World], new ImportOptions())).Committed);
         var season = (await _db.ReadAsync(s => s.Repo<Season, SeasonId>().ListAsync())).Single();
         var all = await _db.ReadAsync(s => s.Repo<Competition, CompetitionId>().ListAsync());
         foreach (var league in all.Where(c => c.Type == CompetitionType.League))
@@ -92,11 +87,13 @@ public sealed class EuropeDatasetTests : IAsyncLifetime
 
         var international = all.Where(c => c.ParseRules().Cup?.Entry is not null).OrderBy(c => c.ParseRules().Cup!.Entry!.Tier).ToList();
         Assert.Equal(["EL", "EC", "BCL", "FEC"], international.Select(c => c.ShortName));
-        Assert.Equal(104, await Service.QualifyAsync(season.Id));
+        var qualified = await Service.QualifyAsync(season.Id);
 
+        // Every competition is filled (wildcards by reputation), and a club plays one of them only.
         var entries = await _db.ReadAsync(s => s.Repo<CompetitionParticipant, CompetitionParticipantId>().ListAsync(p => p.SeasonId == season.Id));
         var clubs = international.Select(c => entries.Where(p => p.CompetitionId == c.Id).Select(p => p.ClubId).ToList()).ToList();
         Assert.Equal([20, 20, 32, 32], clubs.Select(c => c.Count));
+        Assert.Equal(104, qualified);
         Assert.Equal(104, clubs.SelectMany(c => c).Distinct().Count());
         foreach (var competition in international)
         {

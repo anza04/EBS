@@ -279,8 +279,10 @@ renew with that club (§4.2), and its agent's clients ask more of the club throu
   counter-offer (promises and clause included) if the salary rise is within the policy, the wage budget allows it and
   it is at most one year longer than the policy. Each attempt is a round, so a club that keeps failing makes the
   player break off for 30 days.
-* **Emergency signings** (`FillSquadsAsync`): read the demands (no round), meet them with `Meet` and sign if the
-  balance allows; players who broke off talks with the club are skipped.
+* **Emergency signings** (`FillSquadsAsync`): read the demands (no round, `GetNegotiationsAsync` in chunks), meet them
+  with `Meet` and sign the best player whose salary fits the balance and the wage budget left; below the squad minimum,
+  the cheapest player the balance covers when none fits (`docs/AI_MANAGEMENT.md`); players who broke off talks with the
+  club are skipped.
 * **Transfer window** (`RunAiTransferWindowAsync`): the recruiter plans at market salaries; each free agent's demands
   are then read (no round) and met, the extra salary taken from the wage budget left after the plan (a club below the
   squad minimum signs anyway); a purchase meets the player's personal-terms demands (`Meet`) and the wage budget check

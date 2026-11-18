@@ -42,6 +42,12 @@ public interface IContractService
     Task<NegotiationOverview> GetNegotiationAsync(PlayerId playerId, ClubId clubId, ContractId? renewing = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// <see cref="GetNegotiationAsync"/> for several players and one club (new contracts), reading the data they share
+    /// once: for AI loops over the free agents. The answers are in the order of <paramref name="playerIds"/>.
+    /// </summary>
+    Task<IReadOnlyList<NegotiationOverview>> GetNegotiationsAsync(ClubId clubId, IReadOnlyList<PlayerId> playerIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Reviews the playing-time promises due today (every 28 days per contract; docs/CONTRACTS.md §4.6): changes the
     /// players' morale and the agents' relationships. Called by the career calendar every day.
     /// </summary>

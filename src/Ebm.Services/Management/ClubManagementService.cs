@@ -30,17 +30,15 @@ internal sealed class ClubManagementService(
     /// <summary>An injury expected to last longer than this many days is covered by a signing.</summary>
     public const int LongTermInjuryDays = 28;
 
+    /// <summary>Free agents whose demands are read together when an AI club fills its squad.</summary>
+    private const int NegotiationChunk = 25;
+
     public async Task<int> PrepareMatchdayAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clubIds);
-        var changed = 0;
-        foreach (var clubId in clubIds)
+        var changes = new Dictionary<ClubId, IReadOnlyList<RosterAssignment>>();
+        foreach (var roster in await clubs.GetRostersAsync(clubIds, cancellationToken).ConfigureAwait(false))
         {
-            if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is not { } roster)
-            {
-                continue;
-            }
-
             var plan = LineupPlanner.Plan([.. roster.Players.Select(p => new LineupCandidate(p.Player.Id, p.Role, p.Availability, p.Evaluation, SquadBalance(p.Player)))]);
             var current = roster.Players.ToDictionary(p => p.Player.Id);
             var rotation = roster.Rotation.Select(p => p.Player.Id).ToList();
@@ -48,24 +46,20 @@ internal sealed class ClubManagementService(
                 && plan.Where(p => p.Role == RosterRole.Rotation).Select(p => p.PlayerId).SequenceEqual(rotation);
             if (!same)
             {
-                await clubs.SaveRosterAsync(clubId, [.. plan.Select(p => new RosterAssignment(p.PlayerId, p.Role, p.LineupPosition))], cancellationToken).ConfigureAwait(false);
-                changed++;
+                changes[roster.Club.Id] = [.. plan.Select(p => new RosterAssignment(p.PlayerId, p.Role, p.LineupPosition))];
             }
         }
 
-        return changed;
+        await clubs.SaveRostersAsync(changes, cancellationToken).ConfigureAwait(false);
+        return changes.Count;
     }
 
     public async Task<int> PlanTacticsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
     {
         var planned = 0;
-        foreach (var clubId in await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false))
+        foreach (var roster in await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
         {
-            if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is not { } roster)
-            {
-                continue;
-            }
-
+            var clubId = roster.Club.Id;
             var plan = TacticPlanner.Plan([.. roster.FirstTeam.Select(p => (p.Player, p.Evaluation))]);
             var existing = (await tactics.GetClubTacticsAsync(clubId, cancellationToken).ConfigureAwait(false))?.Tactics.FirstOrDefault(t => t.Name == IClubManagementService.AiTacticName);
             var tactic = await tactics.SaveAsync(
@@ -89,8 +83,8 @@ internal sealed class ClubManagementService(
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
         var today = clock.Today;
-        var members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
-        var squads = (await Repo<Player, PlayerId>(s).ListAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false))
+        var members = await ClubMembership.SavedClubsAsync(s, today, cancellationToken).ConfigureAwait(false);
+        var squads = (await Repo<Player, PlayerId>(s).ListUntrackedAsync(p => p.RetiredOn == null, cancellationToken).ConfigureAwait(false))
             .Where(p => members.TryGetValue(p.Id, out var club) && ai.Contains(club))
             .GroupBy(p => members[p.Id])
             .ToDictionary(g => g.Key, g => g.Select(p => (p, calculator.Evaluate(p))).ToList());
@@ -173,13 +167,9 @@ internal sealed class ClubManagementService(
                 .Where(c => c.PlayerId is not null)];
         }
 
-        foreach (var clubId in await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false))
+        foreach (var roster in await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
         {
-            if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is not { } roster)
-            {
-                continue;
-            }
-
+            var clubId = roster.Club.Id;
             var firstTeam = roster.FirstTeam.ToList();
             var excess = firstTeam.Count - SquadRules.Default.MaxPlayers;
             // Weakest first; an unhappy player counts BalanceBonus points weaker (docs/CHEMISTRY.md §7).
@@ -210,30 +200,54 @@ internal sealed class ClubManagementService(
     {
         var today = clock.Today;
         var signed = 0;
-        foreach (var clubId in await ClubsShortOfPlayersAsync(managedClubs, cancellationToken).ConfigureAwait(false))
+        var shortOf = await ClubsShortOfPlayersAsync(managedClubs, cancellationToken).ConfigureAwait(false);
+        if (shortOf.Count == 0)
         {
-            var roster = (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false))!;
-            var missing = Math.Max(SquadRules.Default.MinPlayers - roster.FirstTeam.Count(), InjuryCover(roster, today));
+            return 0;
+        }
+
+        // Best first, read once: a signed player leaves the pool (nothing else in it changes while squads are filled).
+        var pool = await contracts.GetFreeAgentsAsync(cancellationToken).ConfigureAwait(false);
+        var taken = new HashSet<PlayerId>();
+        Dictionary<ClubId, long> wageBills;
+        using (var scope = scopes.CreateScope())
+        {
+            // The club pays its players' salaries, loans in included; a player it loaned out is paid by the loan club.
+            wageBills = (await Repo<Contract, ContractId>(scope.ServiceProvider).ListUntrackedAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
+                .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)
+                .GroupBy(c => c.ClubId)
+                .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
+        }
+
+        var end = today.AddYears(1).AddDays(-1);
+        foreach (var roster in await clubs.GetRostersAsync(shortOf, cancellationToken).ConfigureAwait(false))
+        {
+            var clubId = roster.Club.Id;
+            var firstTeam = roster.FirstTeam.Count();
+            var missing = Math.Max(SquadRules.Default.MinPlayers - firstTeam, InjuryCover(roster, today));
             var balance = roster.Club.Balance;
-            foreach (var agent in await contracts.GetFreeAgentsAsync(cancellationToken).ConfigureAwait(false))
+            var room = roster.Club.WageBudget - wageBills.GetValueOrDefault(clubId);
+            var next = 0;
+            while (missing > 0)
             {
-                if (missing <= 0)
+                // The best free agent whose salary fits the wage budget left (and the balance); the cheapest one the
+                // balance covers only while the club is below the squad minimum (docs/AI_MANAGEMENT.md).
+                var (pick, fallback) = await FindSigningAsync(clubId, pool, taken, next, today, end, balance, room, cancellationToken).ConfigureAwait(false);
+                var below = firstTeam < SquadRules.Default.MinPlayers;
+                if (pick is null && below && next > 0)
+                {
+                    // The cheapest player may be among those skipped before the last signing.
+                    (_, fallback) = await FindSigningAsync(clubId, pool, taken, 0, today, end, balance, room, cancellationToken).ConfigureAwait(false);
+                }
+                if ((pick ?? (below ? fallback : null)) is not { } choice)
                 {
                     break;
                 }
 
-                var end = today.AddYears(1).AddDays(-1);
-                var talks = await contracts.GetNegotiationAsync(agent.Player.Id, clubId, cancellationToken: cancellationToken).ConfigureAwait(false);
-                var terms = negotiator.Meet(new ContractTerms(today, end, 0), talks.Demands);
-                var asking = terms.AnnualSalary;
-                if (asking > balance || talks.Talks.BrokenOffUntil is not null)
-                {
-                    continue;
-                }
-
+                var playerId = pool[choice.Index].Player.Id;
                 try
                 {
-                    await contracts.SignAsync(agent.Player.Id, clubId, terms, RosterRole.Bench, cancellationToken).ConfigureAwait(false);
+                    await contracts.SignAsync(playerId, clubId, choice.Terms, RosterRole.Bench, cancellationToken).ConfigureAwait(false);
                 }
                 catch (DomainException)
                 {
@@ -241,14 +255,80 @@ internal sealed class ClubManagementService(
                     break;
                 }
 
-                balance -= asking;
+                taken.Add(playerId);
+                balance -= choice.Terms.AnnualSalary;
+                room -= choice.Terms.AnnualSalary;
+                firstTeam++;
                 missing--;
                 signed++;
+                // Better players skipped so far stay out of reach; after a minimum-squad signing the whole pool is read again.
+                next = pick is not null ? choice.Index + 1 : 0;
             }
         }
 
         return signed;
     }
+
+    /// <summary>
+    /// From pool position <paramref name="from"/>: the first (best) free agent whose demands fit the balance and the wage
+    /// budget left, else the cheapest one the balance covers. Demands are read in chunks (<see cref="NegotiationChunk"/>).
+    /// </summary>
+    private async Task<(Signing? Pick, Signing? Fallback)> FindSigningAsync(
+        ClubId clubId,
+        IReadOnlyList<FreeAgent> pool,
+        HashSet<PlayerId> taken,
+        int from,
+        DateOnly today,
+        DateOnly end,
+        long balance,
+        long room,
+        CancellationToken cancellationToken)
+    {
+        Signing? fallback = null;
+        var next = from;
+        while (next < pool.Count)
+        {
+            List<int> chunk = [];
+            for (var j = next; j < pool.Count && chunk.Count < NegotiationChunk; j++)
+            {
+                if (!taken.Contains(pool[j].Player.Id))
+                {
+                    chunk.Add(j);
+                }
+            }
+
+            if (chunk.Count == 0)
+            {
+                break;
+            }
+
+            var talks = await contracts.GetNegotiationsAsync(clubId, [.. chunk.Select(j => pool[j].Player.Id)], cancellationToken).ConfigureAwait(false);
+            for (var i = 0; i < chunk.Count; i++)
+            {
+                var terms = negotiator.Meet(new ContractTerms(today, end, 0), talks[i].Demands);
+                if (terms.AnnualSalary > balance || talks[i].Talks.BrokenOffUntil is not null)
+                {
+                    continue;
+                }
+
+                if (terms.AnnualSalary <= room)
+                {
+                    return (new Signing(chunk[i], terms), fallback);
+                }
+
+                if (fallback is null || terms.AnnualSalary < fallback.Terms.AnnualSalary)
+                {
+                    fallback = new Signing(chunk[i], terms);
+                }
+            }
+
+            next = chunk[^1] + 1;
+        }
+
+        return (null, fallback);
+    }
+
+    private sealed record Signing(int Index, ContractTerms Terms);
 
     public async Task<int> ReplenishFreeAgentsAsync(CancellationToken cancellationToken = default)
     {
@@ -286,19 +366,14 @@ internal sealed class ClubManagementService(
 
     public async Task<IReadOnlyList<ClubId>> ClubsShortOfPlayersAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
     {
-        var shortOf = new List<ClubId>();
-        foreach (var clubId in await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false))
-        {
-            if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is { } roster
-                && (roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
+        return
+        [
+            .. (await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
+                .Where(roster => roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
                     || roster.FirstTeam.Count(p => p.Availability != PlayerAvailability.Unavailable) < SquadRules.Starters
-                    || InjuryCover(roster, clock.Today) > 0))
-            {
-                shortOf.Add(clubId);
-            }
-        }
-
-        return shortOf;
+                    || InjuryCover(roster, clock.Today) > 0)
+                .Select(roster => roster.Club.Id),
+        ];
     }
 
     public async Task SetObjectivesAsync(SeasonId seasonId, CancellationToken cancellationToken = default)

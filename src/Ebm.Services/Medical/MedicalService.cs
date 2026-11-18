@@ -235,11 +235,11 @@ internal sealed class MedicalService(IServiceScopeFactory scopes, InjuryRules ru
                 .GroupBy(i => i.PlayerId).ToDictionary(g => g.Key, g => g.ToList());
 
             var weekFrom = today.AddDays(-6);
-            List<FixtureId> fixtures = [.. (await Repo<Fixture, FixtureId>(s).ListAsync(f => f.Date >= weekFrom && f.Date <= today, cancellationToken).ConfigureAwait(false)).Select(f => f.Id)];
-            List<MatchId> matches = [.. (await Repo<Match, MatchId>(s).ListAsync(m => fixtures.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false)).Select(m => m.Id), .. playedToday];
+            List<FixtureId> fixtures = [.. (await Repo<Fixture, FixtureId>(s).ListUntrackedAsync(f => f.Date >= weekFrom && f.Date <= today, cancellationToken).ConfigureAwait(false)).Select(f => f.Id)];
+            List<MatchId> matches = [.. (await Repo<Match, MatchId>(s).ListUntrackedAsync(m => fixtures.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false)).Select(m => m.Id), .. playedToday];
             var lines = matches.Count == 0
                 ? []
-                : (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListAsync(x => matches.Contains(x.MatchId), cancellationToken).ConfigureAwait(false))
+                : (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListUntrackedAsync(x => matches.Contains(x.MatchId), cancellationToken).ConfigureAwait(false))
                     .DistinctBy(x => x.Id).ToList();
             var played = playedToday.ToHashSet();
 
@@ -249,8 +249,8 @@ internal sealed class MedicalService(IServiceScopeFactory scopes, InjuryRules ru
                 Rules = rules,
                 Date = today,
                 Players = players,
-                Members = await ClubMembership.CurrentClubsAsync(s, today, cancellationToken).ConfigureAwait(false),
-                Intensities = (await Repo<TrainingPlan, TrainingPlanId>(s).ListAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId, p => p.Intensity),
+                Members = await ClubMembership.SavedClubsAsync(s, today, cancellationToken).ConfigureAwait(false),
+                Intensities = (await Repo<TrainingPlan, TrainingPlanId>(s).ListUntrackedAsync(null, cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.ClubId, p => p.Intensity),
                 Physios = staff.GroupBy(x => x.Contract.ClubId).ToDictionary(g => g.Key, g => g.Max(x => x.Member.Ability)),
                 Injuries = injuries,
                 WeekMinutes = lines.GroupBy(x => x.PlayerId).ToDictionary(g => g.Key, g => g.Sum(x => x.BoxScore.Minutes)),

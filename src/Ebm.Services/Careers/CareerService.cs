@@ -628,9 +628,10 @@ internal sealed class CareerService(
 
     private static async Task<List<Fixture>> UnplayedFixturesAsync(IServiceProvider s, SeasonId seasonId, CancellationToken cancellationToken)
     {
-        var fixtures = await Repo<Fixture, FixtureId>(s).ListAsync(f => f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        // Read-only (game-day setup and career state): the season's fixtures and results are not tracked.
+        var fixtures = await Repo<Fixture, FixtureId>(s).ListUntrackedAsync(f => f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
         var ids = fixtures.Select(f => f.Id).ToList();
-        var played = (await Repo<Match, MatchId>(s).ListAsync(m => ids.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false))
+        var played = (await Repo<Match, MatchId>(s).ListUntrackedAsync(m => ids.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false))
             .Select(m => m.FixtureId)
             .ToHashSet();
         return [.. fixtures.Where(f => !played.Contains(f.Id))];

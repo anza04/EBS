@@ -71,7 +71,11 @@ the club's tactic "AI plan" and selected.
   created as fictional players aged 18–23, quality 38–60, nationality of a random club, names recombined from existing
   players of that nationality (data, not code). Stand-in for youth intake (later step).
 * Emergency signings: a club still below 10 players after a window (long-term injured players not counted, at most 18
-  in the squad) signs the best free agents whose asking salary its balance covers for a year, ignoring the wage budget.
+  in the squad) signs the best free agents whose salary fits both its balance (for a year) and the wage budget left
+  (budget minus running salaries; loaned-out players excluded). When none fits and the club is below the squad minimum,
+  it signs the cheapest free agent its balance covers, so the calendar never blocks; injury cover above the minimum is
+  signed only within the wage budget (since 2026-11-18: ignoring the budget put 27 of 138 real-leagues clubs in debt
+  in the second season of `MilestoneTwoTests`).
   Step 25: the club reads the player's demands without a round and meets them (`ContractNegotiator.Meet`); players who
   broke off talks with it are skipped.
 

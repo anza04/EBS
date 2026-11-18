@@ -166,6 +166,24 @@ internal sealed class ContractService : IContractService
         return new NegotiationOverview(demands, talks.Describe(demands));
     }
 
+    public async Task<IReadOnlyList<NegotiationOverview>> GetNegotiationsAsync(ClubId clubId, IReadOnlyList<PlayerId> playerIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(playerIds);
+        using var scope = _scopes.CreateScope();
+        // One read-only unit of work: the contracts, clubs, agents and squad shared by every player are read once.
+        var data = new Data(scope.ServiceProvider, Today) { Memoize = true };
+        var overviews = new List<NegotiationOverview>(playerIds.Count);
+        foreach (var playerId in playerIds)
+        {
+            var (player, club) = await data.PlayerAndClubAsync(playerId, clubId, cancellationToken).ConfigureAwait(false);
+            var talks = await TalksAsync(data, player, club, null, cancellationToken).ConfigureAwait(false);
+            var demands = _negotiator.Demands(talks.Context with { Round = talks.CurrentRound });
+            overviews.Add(new NegotiationOverview(demands, talks.Describe(demands)));
+        }
+
+        return overviews;
+    }
+
     public async Task<PromiseReview> ReviewPromisesAsync(CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
@@ -429,19 +447,28 @@ internal sealed class ContractService : IContractService
             var running = (await data.Contracts.ListAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
                 .Where(c => c.PlayerId is not null)
                 .ToList();
-            var history = await data.Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>().ListAsync(null, cancellationToken).ConfigureAwait(false);
+            // Only the open spells, and for players without one whether any spell exists (not the whole history every day).
+            var open = (await ClubMembership.OpenSpellsAsync(scope.ServiceProvider, null, cancellationToken).ConfigureAwait(false))
+                .GroupBy(s => s.PlayerId)
+                .ToDictionary(g => g.Key, g => g.First());
+            List<PlayerId> withoutOpen = [.. running.Select(c => c.PlayerId!.Value).Distinct().Where(p => !open.ContainsKey(p))];
+            var tracked = withoutOpen.Count == 0
+                ? []
+                : (await data.Repo<PlayerClubHistoryEntry, PlayerClubHistoryEntryId>().ListAsync(s => withoutOpen.Contains(s.PlayerId), cancellationToken).ConfigureAwait(false))
+                    .Select(s => s.PlayerId)
+                    .ToHashSet();
             foreach (var contract in running.OrderBy(c => c.StartDate))
             {
                 var playerId = contract.PlayerId!.Value;
-                var spells = history.Where(s => s.PlayerId == playerId).ToList();
-                var open = spells.FirstOrDefault(s => s.IsCurrent);
+                var spell = open.GetValueOrDefault(playerId);
 
                 // Players whose club history is not tracked (imported contracts only) keep belonging through the contract.
-                var moves = open is null ? spells.Count > 0 : open.ClubId != contract.ClubId && open.StartDate < contract.StartDate;
+                var moves = spell is null ? tracked.Contains(playerId) : spell.ClubId != contract.ClubId && spell.StartDate < contract.StartDate;
                 if (moves)
                 {
                     await ClubMembership.JoinAsync(scope.ServiceProvider, playerId, contract.ClubId, contract.StartDate, RosterRole.Bench, cancellationToken).ConfigureAwait(false);
-                    history = [.. history, .. await ClubMembership.OpenSpellsAsync(scope.ServiceProvider, playerId, cancellationToken).ConfigureAwait(false)];
+                    open.Remove(playerId); // the new spell is not saved yet: as before, the player then counts as tracked without an open spell
+                    tracked.Add(playerId);
                     started++;
                 }
             }
@@ -456,7 +483,7 @@ internal sealed class ContractService : IContractService
 
     /// <summary>The negotiation with <paramref name="club"/>, priced with its attractiveness (docs/TRANSFERS.md §2).</summary>
     private async Task<NegotiationContext> ContextAsync(Data data, Player player, Club club, long? currentSalary, CancellationToken cancellationToken) =>
-        Context(player, await ClubSeason.AttractivenessAsync(data.Services, club, data.Today, cancellationToken).ConfigureAwait(false), data.Today, currentSalary);
+        Context(player, await data.AttractivenessAsync(club, cancellationToken).ConfigureAwait(false), data.Today, currentSalary);
 
     private NegotiationContext Context(Player player, int clubReputation, DateOnly today, long? currentSalary)
     {
@@ -578,16 +605,7 @@ internal sealed class ContractService : IContractService
     {
         var today = data.Today;
         var context = await ContextAsync(data, player, club, current?.AnnualSalary, cancellationToken).ConfigureAwait(false);
-        var agents = await data.Repo<Agent, AgentId>().ListAsync(null, cancellationToken).ConfigureAwait(false);
-        if (agents.Count == 0)
-        {
-            // The pool is created once, the first time anyone negotiates.
-            agents = AgentPool.Create();
-            foreach (var created in agents)
-            {
-                data.Repo<Agent, AgentId>().Add(created);
-            }
-        }
+        var agents = await data.AgentsAsync(cancellationToken).ConfigureAwait(false);
 
         var agent = AgentPool.For(player.Id, player.Reputation, agents);
         var relationship = agent is null
@@ -599,11 +617,8 @@ internal sealed class ContractService : IContractService
         var refusedUntil = sessions.Where(n => n.RefusesTalksOn(today)).Select(n => n.BrokenOffUntil).Max();
         var session = latest is not null && latest.IsOpenOn(today) && latest.RenewalOfId == current?.Id ? latest : null;
 
-        var running = (await data.Contracts.ListAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
-            .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)
-            .ToList();
-        var squadIds = running.Where(c => c.ClubId == club.Id && c.PlayerId != player.Id).Select(c => c.PlayerId!.Value).Distinct().ToList();
-        var squad = await data.Players.ListAsync(p => squadIds.Contains(p.Id), cancellationToken).ConfigureAwait(false);
+        var running = await data.RunningAsync(cancellationToken).ConfigureAwait(false);
+        var squad = (await data.SquadAsync(club.Id, running, cancellationToken).ConfigureAwait(false)).Where(p => p.Id != player.Id);
         var rank = 1 + squad.Count(p => _calculator.Evaluate(p).Overall > context.Overall);
         var rivals = current is null || current.EndDate <= today.AddDays(180)
             ? await RivalsAsync(data, player, club, context, running, cancellationToken).ConfigureAwait(false)
@@ -633,7 +648,8 @@ internal sealed class ContractService : IContractService
         var market = context with { CurrentSalary = null };
         return
         [
-            .. (await data.Clubs.ListAsync(c => c.Id != club.Id && c.Reputation >= player.Reputation - 10, cancellationToken).ConfigureAwait(false))
+            .. (await data.ClubsAsync(cancellationToken).ConfigureAwait(false))
+                .Where(c => c.Id != club.Id && c.Reputation >= player.Reputation - 10)
                 .Select(c => (Club: c, Asking: _negotiator.AskingSalary(market with { ClubReputation = c.Reputation }), Wages: wages.GetValueOrDefault(c.Id)))
                 .Where(x => x.Club.WageBudget - x.Wages.Bill >= x.Asking && (x.Wages.Count == 0 || x.Asking >= 0.75 * x.Wages.Bill / x.Wages.Count))
                 .OrderByDescending(x => x.Club.Reputation)
@@ -705,6 +721,97 @@ internal sealed class ContractService : IContractService
         public IRepository<Player, PlayerId> Players => Repo<Player, PlayerId>();
 
         public IRepository<Club, ClubId> Clubs => Repo<Club, ClubId>();
+
+        /// <summary>
+        /// Keeps the shared negotiation reads (running contracts, clubs, agents, attractiveness, squads) for the rest of
+        /// the unit of work: only for read-only batches (<see cref="GetNegotiationsAsync"/>), never around a change.
+        /// </summary>
+        public bool Memoize { get; init; }
+
+        private IReadOnlyList<Contract>? _running;
+        private IReadOnlyList<Club>? _clubs;
+        private IReadOnlyList<Agent>? _agents;
+        private readonly Dictionary<ClubId, int> _attractiveness = [];
+        private readonly Dictionary<ClubId, IReadOnlyList<Player>> _squads = [];
+
+        /// <summary>Player contracts running today, loans excluded (negotiation context).</summary>
+        public async Task<IReadOnlyList<Contract>> RunningAsync(CancellationToken cancellationToken)
+        {
+            if (Memoize && _running is not null)
+            {
+                return _running;
+            }
+
+            IReadOnlyList<Contract> running = [.. (await Contracts.ListAsync(Contract.RunningOn(Today), cancellationToken).ConfigureAwait(false))
+                .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)];
+            return Memoize ? _running = running : running;
+        }
+
+        public async Task<IReadOnlyList<Club>> ClubsAsync(CancellationToken cancellationToken)
+        {
+            if (Memoize && _clubs is not null)
+            {
+                return _clubs;
+            }
+
+            var clubs = await Clubs.ListAsync(null, cancellationToken).ConfigureAwait(false);
+            return Memoize ? _clubs = clubs : clubs;
+        }
+
+        /// <summary>The agents; the pool is created once, the first time anyone negotiates.</summary>
+        public async Task<IReadOnlyList<Agent>> AgentsAsync(CancellationToken cancellationToken)
+        {
+            if (Memoize && _agents is not null)
+            {
+                return _agents;
+            }
+
+            var agents = await Repo<Agent, AgentId>().ListAsync(null, cancellationToken).ConfigureAwait(false);
+            if (agents.Count == 0)
+            {
+                agents = AgentPool.Create();
+                foreach (var created in agents)
+                {
+                    Repo<Agent, AgentId>().Add(created);
+                }
+            }
+
+            return Memoize ? _agents = agents : agents;
+        }
+
+        public async Task<int> AttractivenessAsync(Club club, CancellationToken cancellationToken)
+        {
+            if (Memoize && _attractiveness.TryGetValue(club.Id, out var known))
+            {
+                return known;
+            }
+
+            var value = await ClubSeason.AttractivenessAsync(services, club, Today, cancellationToken).ConfigureAwait(false);
+            if (Memoize)
+            {
+                _attractiveness[club.Id] = value;
+            }
+
+            return value;
+        }
+
+        /// <summary>The players under a running (non-loan) contract at the club.</summary>
+        public async Task<IReadOnlyList<Player>> SquadAsync(ClubId clubId, IReadOnlyList<Contract> running, CancellationToken cancellationToken)
+        {
+            if (Memoize && _squads.TryGetValue(clubId, out var known))
+            {
+                return known;
+            }
+
+            List<PlayerId> ids = [.. running.Where(c => c.ClubId == clubId).Select(c => c.PlayerId!.Value).Distinct()];
+            var squad = await Players.ListAsync(p => ids.Contains(p.Id), cancellationToken).ConfigureAwait(false);
+            if (Memoize)
+            {
+                _squads[clubId] = squad;
+            }
+
+            return squad;
+        }
 
         public IRepository<TEntity, TId> Repo<TEntity, TId>()
             where TEntity : Entity<TId>

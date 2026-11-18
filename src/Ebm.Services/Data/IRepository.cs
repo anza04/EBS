@@ -19,6 +19,12 @@ public interface IRepository<TEntity, TId>
     /// <summary>Lists entities matching <paramref name="predicate"/>, or all entities when it is <c>null</c>.</summary>
     Task<IReadOnlyList<TEntity>> ListAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// <see cref="ListAsync"/> without change tracking, for large reads that are never modified. The entities are the
+    /// saved state: changes made earlier in the unit of work are not seen, and changes to them are not saved.
+    /// </summary>
+    Task<IReadOnlyList<TEntity>> ListUntrackedAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
+
     void Add(TEntity entity);
 
     /// <summary>

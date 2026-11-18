@@ -230,7 +230,7 @@ day from the season's start (a February deadline falls in the second calendar ye
 * Registrations reopen on the **last day of the season**, when the career runs the end-of-season transfer window.
 
 `ITransferService.GetRegistrationWindowAsync(club)` reports the window (shown at the top of the market screen).
-Datasets (`data/europe`, `data/real-leagues`, *Unverified* simplification): top divisions and international
+Datasets (`data/real-leagues`, *Unverified* simplification): top divisions and international
 competitions close on 28 February, second divisions on 31 March.
 
 ## 10. International transfers and country rules (Step 19)

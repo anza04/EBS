@@ -30,6 +30,12 @@ public interface IClubService
     /// </summary>
     Task<ClubRoster> SaveRosterAsync(ClubId clubId, IReadOnlyList<RosterAssignment> assignments, CancellationToken cancellationToken = default);
 
+    /// <summary>The squads of several clubs as of today, read together (the daily AI loops); clubs that do not exist are left out.</summary>
+    Task<IReadOnlyList<ClubRoster>> GetRostersAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default);
+
+    /// <summary>Saves several squads in one unit of work, with the rules of <see cref="SaveRosterAsync"/>; nothing is reloaded.</summary>
+    Task SaveRostersAsync(IReadOnlyDictionary<ClubId, IReadOnlyList<RosterAssignment>> squads, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Moves a player to the club from today: his open club spell is closed and a new one opened, and he joins the
     /// squad in <paramref name="role"/> (bench, inactive or youth). Contracts are not changed (Step 07).

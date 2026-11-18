@@ -204,7 +204,7 @@ internal sealed class CompetitionService : ICompetitionService
     public async Task<CompetitionPhase> GetPhaseAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopes.CreateScope();
-        return ToPhase((await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken).ConfigureAwait(false)).Phase);
+        return ToPhase((await LoadAsync(scope.ServiceProvider, competitionId, seasonId, cancellationToken, readOnly: true).ConfigureAwait(false)).Phase);
     }
 
     public async Task<IReadOnlyList<StandingRow>> GetStandingsAsync(CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken = default)
@@ -636,7 +636,8 @@ internal sealed class CompetitionService : ICompetitionService
         }
     }
 
-    private static async Task<SeasonData> LoadAsync(IServiceProvider services, CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken)
+    /// <param name="readOnly">Fixtures and results read without change tracking (phase and table reads, several per game day).</param>
+    private static async Task<SeasonData> LoadAsync(IServiceProvider services, CompetitionId competitionId, SeasonId seasonId, CancellationToken cancellationToken, bool readOnly = false)
     {
         var competition = await RequireAsync<Competition, CompetitionId>(services, competitionId, "competition", cancellationToken).ConfigureAwait(false);
         var season = await RequireAsync<Season, SeasonId>(services, seasonId, "season", cancellationToken).ConfigureAwait(false);
@@ -652,12 +653,17 @@ internal sealed class CompetitionService : ICompetitionService
             countryOf = clubs.ToDictionary(c => c.Id, c => codes.GetValueOrDefault(c.CountryId, string.Empty));
         }
 
-        var fixtures = await Repo<Fixture, FixtureId>(services)
-            .ListAsync(f => f.CompetitionId == competitionId && f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
+        var fixtureRepo = Repo<Fixture, FixtureId>(services);
+        var matchRepo = Repo<Match, MatchId>(services);
+        var fixtures = readOnly
+            ? await fixtureRepo.ListUntrackedAsync(f => f.CompetitionId == competitionId && f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false)
+            : await fixtureRepo.ListAsync(f => f.CompetitionId == competitionId && f.SeasonId == seasonId, cancellationToken).ConfigureAwait(false);
         var fixtureIds = fixtures.Select(f => f.Id).ToList();
         var results = fixtureIds.Count == 0
             ? []
-            : (await Repo<Match, MatchId>(services).ListAsync(m => fixtureIds.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false))
+            : (readOnly
+                ? await matchRepo.ListUntrackedAsync(m => fixtureIds.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false)
+                : await matchRepo.ListAsync(m => fixtureIds.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false))
                 .ToDictionary(m => m.FixtureId);
         var games = fixtures.Select(f => results.TryGetValue(f.Id, out var m)
             ? new SeasonGame(f.Stage, f.Round, f.GameNumber, f.HomeClubId, f.AwayClubId, m.HomeScore, m.AwayScore)

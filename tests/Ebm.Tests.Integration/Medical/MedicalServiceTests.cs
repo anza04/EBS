@@ -133,7 +133,7 @@ public sealed class MedicalServiceTests : IAsyncLifetime
         await _db.WriteAsync(s =>
         {
             var club = s.Repo<Club, ClubId>().FindAsync(away).Result!;
-            club.UpdateProfile(club.City, club.Reputation, 5_000_000, club.WageBudget, club.BoardExpectation);
+            club.UpdateProfile(club.City, club.Reputation, 5_000_000, 5_000_000, club.BoardExpectation); // room in the wage budget
         });
         var management = _db.Services.GetRequiredService<IClubManagementService>();
         Assert.DoesNotContain(away, await management.ClubsShortOfPlayersAsync([Home]));
@@ -145,6 +145,55 @@ public sealed class MedicalServiceTests : IAsyncLifetime
         await management.FillSquadsAsync([Home]);
         Assert.Equal(SquadRules.Default.MinPlayers + 1, (await _db.Services.GetRequiredService<IClubService>().GetRosterAsync(away))!.FirstTeam.Count());
         Assert.DoesNotContain(away, await management.ClubsShortOfPlayersAsync([Home]));
+    }
+
+    [Fact]
+    public async Task Injury_cover_stays_within_the_wage_budget()
+    {
+        var away = _world.AwayClub.Id;
+        List<Player> squad = [];
+        for (var i = 0; i < SquadRules.Default.MinPlayers; i++)
+        {
+            squad.Add(await PlayerAsync(away));
+        }
+
+        await PlayerAsync(null);
+        var wageBill = await _db.ReadAsync(async s => (await s.Repo<Contract, ContractId>().ListAsync(c => c.ClubId == away)).Where(c => c.IsRunningOn(Monday)).Sum(c => c.AnnualSalary));
+        await _db.WriteAsync(s =>
+        {
+            var club = s.Repo<Club, ClubId>().FindAsync(away).Result!;
+            club.UpdateProfile(club.City, club.Reputation, 5_000_000, wageBill, club.BoardExpectation); // a rich club with no wage room
+        });
+        await InjureAsync(squad[0].Id, InjuryType.TornAcl, 240);
+        var management = _db.Services.GetRequiredService<IClubManagementService>();
+
+        // Above the squad minimum the club signs only within its wage budget, whatever its balance.
+        Assert.Equal(0, await management.FillSquadsAsync([Home]));
+        Assert.Equal(SquadRules.Default.MinPlayers, (await _db.Services.GetRequiredService<IClubService>().GetRosterAsync(away))!.FirstTeam.Count());
+    }
+
+    [Fact]
+    public async Task A_club_below_the_minimum_signs_the_cheapest_free_agent_beyond_its_wage_budget()
+    {
+        var away = _world.AwayClub.Id;
+        for (var i = 0; i < SquadRules.Default.MinPlayers - 1; i++)
+        {
+            await PlayerAsync(away);
+        }
+
+        var star = await PlayerAsync(null, level: 80);
+        await PlayerAsync(null, level: 35);
+        await _db.WriteAsync(s =>
+        {
+            var club = s.Repo<Club, ClubId>().FindAsync(away).Result!;
+            club.UpdateProfile(club.City, club.Reputation, 5_000_000, 0, club.BoardExpectation); // no wage room at all
+        });
+        var management = _db.Services.GetRequiredService<IClubManagementService>();
+
+        Assert.Equal(1, await management.FillSquadsAsync([Home]));
+        var roster = (await _db.Services.GetRequiredService<IClubService>().GetRosterAsync(away))!;
+        Assert.Equal(SquadRules.Default.MinPlayers, roster.FirstTeam.Count());
+        Assert.DoesNotContain(roster.Players, p => p.Player.Id == star.Id); // the best free agent is the most expensive
     }
 
     [Fact]
@@ -186,9 +235,9 @@ public sealed class MedicalServiceTests : IAsyncLifetime
         });
     }
 
-    private async Task<Player> PlayerAsync(ClubId? clubId)
+    private async Task<Player> PlayerAsync(ClubId? clubId, int level = 50)
     {
-        var player = new Player(PlayerId.New(), "Med", $"P{Guid.NewGuid():N}"[..12], Monday.AddYears(-25), _world.Italy.Id, 200, 95, Position.SmallForward, PlayerAttributes.Uniform(50));
+        var player = new Player(PlayerId.New(), "Med", $"P{Guid.NewGuid():N}"[..12], Monday.AddYears(-25), _world.Italy.Id, 200, 95, Position.SmallForward, PlayerAttributes.Uniform(level));
         await _db.WriteAsync(s =>
         {
             s.Repo<Player, PlayerId>().Add(player);

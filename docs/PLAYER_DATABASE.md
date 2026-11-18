@@ -1,8 +1,10 @@
 # Player Database (Step 16)
 
 How the European world is filled with clubs and players, how data quality is recorded, and what is still missing.
-Generator: `build/generate-europe-dataset.py`. Files: `data/europe/`. Tests: `EuropePlayerDatabaseTests`,
-`PlayerDataQualityTests`.
+Tests: `RealLeaguesDatasetTests`, `PlayerDataQualityTests`.
+
+> **Note:** the generated European dataset (`data/europe`, and its Italian slice `data/italy`) was removed after Step 26. §1–§6 describe that dataset and stay as the record of the rules still used (real squads,
+> stat-based ratings, data status, duplicates, now in `build/dataset_common.py`); the game's full world is §7.
 
 ## 1. Coverage
 
@@ -57,7 +59,7 @@ statistics.
 | Reputation | Half the hand estimate, half the level on the same scale (20 at 42, 72 at 70) plus up to 8 each for NBA and EuroLeague games |
 
 Players are matched by normalised name (accents, suffixes such as Jr., aliases such as Nico/Niccolò Mannion) and
-rejected when the ages in the file do not fit the birth year. Run `python build/generate-europe-dataset.py`.
+rejected when the ages in the file do not fit the birth year.
 
 Known conflicts: Erick Green's birth year (player page 1991, announcement 1992; 1991 used). Between 13 Oct and 5 Nov
 the real squad has seven foreign players, above the LBA limit of six in the game, so the game warns in that period.
@@ -132,7 +134,8 @@ matchdays, every league) about 3 minutes.
 
 `data/real-leagues` (generator `build/generate-real-leagues-dataset.py`, ratings `build/realgm_ratings.py`) is a
 standalone dataset of eight real 2026-27 top divisions and their real players. Import its four files together into a
-new game (not with `data/europe` or the samples). Test: `RealLeaguesDatasetTests`.
+new game (not with the samples). Tests: `RealLeaguesDatasetTests`, and the slow suite plays it (`RealLeaguesCompetitionTests`,
+`EuropeanTransferWindowTests`, `MilestoneTwoTests`).
 
 | Division | Clubs | Players under contract |
 |---|---|---|
@@ -150,9 +153,10 @@ new game (not with `data/europe` or the samples). Test: `RealLeaguesDatasetTests
   (2,630 players: profile, current team, every season's per-game statistics). Refresh with
   `python build/generate-real-leagues-dataset.py --source <export.csv>`.
 * **Clubs.** The RealGM 2026-27 league rows fix each division's clubs; `CLUBS` maps RealGM team names to club names.
-  Clubs already in `data/europe` keep their name and ID. Reputation comes from the mean level of the best eight
-  players, scaled to the `data/europe` Serie A reputations (half the slope below the weakest Serie A club); wage budget,
-  balance and board expectation as in `data/europe`. Clubs Unverified.
+  Short names, cities, founding years and Serie A reputations of the clubs that were in the former European dataset
+  are frozen in `build/real-leagues-clubs.json` (IDs unchanged). Reputation comes from the mean level of the best eight
+  players, scaled to those Serie A reputations (half the slope below the weakest Serie A club); wage budget, balance
+  and board expectation from reputation (`build/dataset_common.py`). Clubs Unverified.
 * **Serie A.** The curated squads of `build/real-rosters` (§1.1), unchanged. RealGM players matched to them (name, birth
   year ±1) are not added again; RealGM players at a Serie A club who are not in the curated squads become free agents.
 * **Players.** The current team decides the club. Players at any other team (Israel, Lithuania, NBA, college, youth and
@@ -162,7 +166,7 @@ new game (not with `data/europe` or the samples). Test: `RealLeaguesDatasetTests
   by height (with a secondary position). Left out: players without nationality or any age, and people over 40
   without a season since 2024-25 (staff listed at a club).
 * **Ratings.** As *Stat-based ratings* (§1.1), over the whole population: the composite score is scaled so the Serie A
-  players with curated ratings keep their mean and spread, so these leagues share the `data/europe` scale. Small
+  players with curated ratings keep their mean and spread, so these leagues share the curated scale. Small
   samples are blended toward the mean of the player's division (free agents: the 25th percentile). Strength, speed and
   agility move up to ±6 with weight and height against the position's build. Reputation: 20 at level 42, 72 at
   level 70, plus up to 8 each for NBA and EuroLeague games. Attributes Estimated.

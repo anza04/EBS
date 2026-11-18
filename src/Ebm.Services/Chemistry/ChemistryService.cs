@@ -31,14 +31,7 @@ internal sealed class ChemistryService(IServiceScopeFactory scopes, IClubService
             return ChemistryWeek.None;
         }
 
-        var rosters = new List<ClubRoster>();
-        foreach (var clubId in active)
-        {
-            if (await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false) is { } roster)
-            {
-                rosters.Add(roster);
-            }
-        }
+        var rosters = await clubs.GetRostersAsync(active, cancellationToken).ConfigureAwait(false);
 
         var ids = rosters.SelectMany(r => r.FirstTeam.Select(p => p.Player.Id)).Distinct().ToList();
         var players = (await Repo<Player, PlayerId>(s).ListAsync(p => ids.Contains(p.Id), cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.Id);
@@ -182,13 +175,13 @@ internal sealed class ChemistryService(IServiceScopeFactory scopes, IClubService
         var from = today.AddDays(-PromiseRules.ReviewDays + 1);
         var repo = Repo<Fixture, FixtureId>(s);
         var fixtures = (clubId is { } id
-                ? await repo.ListAsync(f => f.Date >= from && f.Date <= today && (f.HomeClubId == id || f.AwayClubId == id), cancellationToken).ConfigureAwait(false)
-                : await repo.ListAsync(f => f.Date >= from && f.Date <= today, cancellationToken).ConfigureAwait(false))
+                ? await repo.ListUntrackedAsync(f => f.Date >= from && f.Date <= today && (f.HomeClubId == id || f.AwayClubId == id), cancellationToken).ConfigureAwait(false)
+                : await repo.ListUntrackedAsync(f => f.Date >= from && f.Date <= today, cancellationToken).ConfigureAwait(false))
             .ToDictionary(f => f.Id);
         var fixtureIds = fixtures.Keys.ToList();
-        var matches = await Repo<Match, MatchId>(s).ListAsync(m => fixtureIds.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false);
+        var matches = await Repo<Match, MatchId>(s).ListUntrackedAsync(m => fixtureIds.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false);
         var matchIds = matches.Select(m => m.Id).ToList();
-        var lines = (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListAsync(l => matchIds.Contains(l.MatchId), cancellationToken).ConfigureAwait(false))
+        var lines = (await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s).ListUntrackedAsync(l => matchIds.Contains(l.MatchId), cancellationToken).ConfigureAwait(false))
             .ToLookup(l => l.MatchId);
         return
         [
