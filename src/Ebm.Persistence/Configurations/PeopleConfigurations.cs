@@ -122,6 +122,11 @@ internal sealed class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(x => x.TermsStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(DataStatus.Unverified);
         builder.Property(x => x.Source).HasMaxLength(DataQuality.SourceMaxLength);
         builder.Property(x => x.TerminationCompensation).HasDefaultValue(0L);
+
+        // Step 25 promises: nullable or defaulted, so existing contracts upgrade in place.
+        builder.Property(x => x.PromisedRole).HasConversion<string>().HasMaxLength(16);
+        builder.Property(x => x.PromiseStatus).HasConversion<string>().HasMaxLength(16).HasDefaultValue(PromiseStatus.None);
+        builder.Ignore(x => x.Promises);
         builder.HasIndex(x => new { x.ClubId, x.EndDate });
     }
 }

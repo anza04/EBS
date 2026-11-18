@@ -3,6 +3,36 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.25.0] — 2026-11-18 — STEP 25: Advanced contract negotiations
+
+### Added
+- Player demands (`ContractNegotiator.Demands`, `PlayerDemands`): asking value with premiums for competing offers, the
+  agent relationship and broken promises; preferred contract lengths by age; an expected squad role from the player's
+  rank at the club; stars insist on a role promise, players far above the club on a release clause
+  (`docs/CONTRACTS.md` §4).
+- Offer value counts playing-time promises, release clauses and the length penalty on top of salary, bonus, bonuses
+  and options; counter-offers adjust length, promises and clause before the salary (`ContractNegotiator.Meet`).
+- Agents (`Agent`, `AgentRelationship`, `AgentPool`): 24 fictional agents with toughness (patience, rejection
+  threshold) and a relationship with each club that moves with deals, broken-off talks and kept or broken promises.
+- Rounds of talks (`ContractNegotiation`): every offer is a round with a patience cost; the player breaks off for 30
+  days when out of patience; small concessions in later rounds. `IContractService.GetNegotiationAsync` reads demands
+  without a round.
+- Competing offers from rival clubs that can afford the player (free agents and contracts ending within 180 days).
+- Playing-time promises in contracts (role, minutes per game), reviewed every 28 days against minutes played
+  (`ReviewPromisesAsync`, daily in the career calendar): morale and agent relationships change; status shown in the
+  *Club contracts* list.
+- *Club contracts* offer form: promised role and minutes, *His demands*, talks state and competing offers in the answer.
+- Migration `ContractNegotiations`: tables `Agents`, `AgentRelationships`, `ContractNegotiations`; promise columns
+  on `Contracts`.
+
+### Changed
+- `NegotiateAsync` / `NegotiateRenewalAsync` now count and save a round (previously nothing was saved).
+- AI clubs meet player demands: emergency signings and transfer-window free agents within the wage budget left,
+  purchases through the personal-terms counter-offer; renewals accept counter-offers at most one year longer than
+  the policy.
+- *Use his counter-offer* copies every term of the counter-offer, not only the salary.
+- The database editor and the importer keep a contract's promises when they update its terms.
+
 ## [0.24.0] — 2026-11-17 — STEP 24: Milestone 2 integration and release
 
 ### Added

@@ -7,6 +7,7 @@ namespace Ebm.Domain.Contracts;
 /// <param name="ClubOptionUntil">If set, the club may extend the contract to this date before it ends.</param>
 /// <param name="PlayerOptionUntil">If set, the player may extend the contract to this date before it ends.</param>
 /// <param name="ReleaseClause">Fee for which another club can buy the player out (used by transfers, Step 08).</param>
+/// <param name="Promises">Playing-time promises made to the player (Step 25); only negotiations set them.</param>
 public sealed record ContractTerms(
     DateOnly StartDate,
     DateOnly EndDate,
@@ -16,7 +17,8 @@ public sealed record ContractTerms(
     PerformanceBonuses? Bonuses = null,
     long? ReleaseClause = null,
     DateOnly? ClubOptionUntil = null,
-    DateOnly? PlayerOptionUntil = null)
+    DateOnly? PlayerOptionUntil = null,
+    ContractPromises? Promises = null)
 {
     /// <summary>The performance bonuses; never <c>null</c>.</summary>
     public PerformanceBonuses PerformanceBonuses => Bonuses ?? PerformanceBonuses.None;

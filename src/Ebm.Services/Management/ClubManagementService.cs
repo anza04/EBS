@@ -23,6 +23,7 @@ internal sealed class ClubManagementService(
     ITacticsService tactics,
     IContractService contracts,
     PlayerRatingCalculator calculator,
+    ContractNegotiator negotiator,
     GameClock clock) : IClubManagementService
 {
     /// <summary>An injury expected to last longer than this many days is covered by a signing.</summary>
@@ -142,7 +143,9 @@ internal sealed class ClubManagementService(
                 var terms = answer.IsAccepted ? offer
                     : answer is { Outcome: NegotiationOutcome.CounterOffer, CounterOffer: { } counter } ? counter
                     : null;
+                // A counter-offer may ask for promises, a release clause or a longer deal: the club accepts at most one year more.
                 if (terms is null
+                    || terms.Years > RenewalPolicy.Years(ranked.p.Age) + 1.01
                     || terms.AnnualSalary > contract.AnnualSalary * RenewalPolicy.MaxRaise
                     || wageBill + terms.AnnualSalary - contract.AnnualSalary > roster.Club.WageBudget)
                 {
@@ -218,15 +221,17 @@ internal sealed class ClubManagementService(
                 }
 
                 var end = today.AddYears(1).AddDays(-1);
-                var asking = (await contracts.NegotiateAsync(agent.Player.Id, clubId, new ContractTerms(today, end, 1), cancellationToken).ConfigureAwait(false)).AskingSalary;
-                if (asking > balance)
+                var talks = await contracts.GetNegotiationAsync(agent.Player.Id, clubId, cancellationToken: cancellationToken).ConfigureAwait(false);
+                var terms = negotiator.Meet(new ContractTerms(today, end, 0), talks.Demands);
+                var asking = terms.AnnualSalary;
+                if (asking > balance || talks.Talks.BrokenOffUntil is not null)
                 {
                     continue;
                 }
 
                 try
                 {
-                    await contracts.SignAsync(agent.Player.Id, clubId, new ContractTerms(today, end, asking), RosterRole.Bench, cancellationToken).ConfigureAwait(false);
+                    await contracts.SignAsync(agent.Player.Id, clubId, terms, RosterRole.Bench, cancellationToken).ConfigureAwait(false);
                 }
                 catch (DomainException)
                 {

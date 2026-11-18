@@ -134,7 +134,11 @@ internal sealed class TransferService : ITransferService
         return _salaries.Evaluate(Context(market, player, buyer, listing.Contract!.AnnualSalary), terms);
     }
 
-    public async Task<TransferReceipt> BuyAsync(PlayerId playerId, ClubId buyerId, long fee, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, CancellationToken cancellationToken = default)
+    public Task<TransferReceipt> BuyAsync(PlayerId playerId, ClubId buyerId, long fee, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, bool enforceWageBudget = false, CancellationToken cancellationToken = default) =>
+        BuyAsync(playerId, buyerId, fee, terms, joinAs, enforceWageBudget, meetDemands: false, cancellationToken);
+
+    /// <param name="meetDemands">AI clubs: when the player does not accept <paramref name="terms"/>, meet his demands (docs/CONTRACTS.md §4.7); the wage budget still applies.</param>
+    private async Task<TransferReceipt> BuyAsync(PlayerId playerId, ClubId buyerId, long fee, ContractTerms terms, RosterRole joinAs, bool enforceWageBudget, bool meetDemands, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(terms);
         CheckJoinRole(joinAs);
@@ -157,7 +161,14 @@ internal sealed class TransferService : ITransferService
             throw new DomainException($"{seller.Name} refuses: {feeAnswer.Message}");
         }
 
-        var playerAnswer = _salaries.Evaluate(Context(market, player, buyer, contract.AnnualSalary), terms);
+        var personal = Context(market, player, buyer, contract.AnnualSalary);
+        var playerAnswer = _salaries.Evaluate(personal, terms);
+        if (meetDemands && !playerAnswer.IsAccepted && playerAnswer.Demands is { } demands && terms.Years <= ContractNegotiator.MaxYears + 0.01)
+        {
+            terms = _salaries.Meet(terms, demands);
+            playerAnswer = _salaries.Evaluate(personal, terms);
+        }
+
         if (!playerAnswer.IsAccepted)
         {
             throw new DomainException($"{player.FullName} refuses the contract: {playerAnswer.Message}");
@@ -519,6 +530,11 @@ internal sealed class TransferService : ITransferService
             var plan = _recruiter.Plan(window.IsOpen ? situation : situation with { Rules = situation.Rules with { MaxPlayers = situation.Rules.MinPlayers } }, candidates);
             report.Needs.AddRange(plan.Needs.Select(n => n.Reason));
             var active = roster.Players.Count(p => p.Role.IsActive());
+
+            // The plan prices players at their market salary; what they demand on top (competing offers, the agent) must
+            // fit the wage budget left after the plan, unless the club is short of players (docs/CONTRACTS.md §4.7).
+            var slack = situation.WageBudget - situation.WageBill - plan.Signings.Sum(s => s.Salary);
+            var signed = 0;
             foreach (var signing in plan.Signings)
             {
                 var candidate = signing.Candidate;
@@ -528,17 +544,29 @@ internal sealed class TransferService : ITransferService
                 {
                     if (candidate.IsFreeAgent)
                     {
+                        var talks = await _contracts.GetNegotiationAsync(candidate.PlayerId, club.Id, cancellationToken: cancellationToken).ConfigureAwait(false);
+                        var met = _salaries.Meet(terms, talks.Demands);
+                        var extra = met.AnnualSalary - terms.AnnualSalary;
+                        if (extra > Math.Max(0, slack) && situation.FirstTeam.Count + signed >= situation.Rules.MinPlayers)
+                        {
+                            report.Actions.Add($"Could not sign {candidate.Name}: he wants € {met.AnnualSalary:N0} a year, beyond the wage budget.");
+                            continue;
+                        }
+
+                        terms = met;
+                        slack -= Math.Max(0, extra);
                         await _contracts.SignAsync(candidate.PlayerId, club.Id, terms, joinAs, cancellationToken).ConfigureAwait(false);
-                        report.Actions.Add($"Signed {candidate.Name} as a free agent on € {signing.Salary:N0} a year until {terms.EndDate:yyyy-MM-dd} ({signing.Reason}).");
+                        report.Actions.Add($"Signed {candidate.Name} as a free agent on € {terms.AnnualSalary:N0} a year until {terms.EndDate:yyyy-MM-dd} ({signing.Reason}).");
                     }
                     else
                     {
-                        var receipt = await BuyAsync(candidate.PlayerId, club.Id, candidate.Fee, terms, joinAs, enforceWageBudget: true, cancellationToken).ConfigureAwait(false);
+                        var receipt = await BuyAsync(candidate.PlayerId, club.Id, candidate.Fee, terms, joinAs, enforceWageBudget: true, meetDemands: true, cancellationToken).ConfigureAwait(false);
                         var seller = reports.GetValueOrDefault(candidate.FromClubId!.Value);
                         seller.Actions?.Add($"Sold {candidate.Name} to {club.Name} for € {receipt.Fee:N0}.");
-                        report.Actions.Add($"Bought {candidate.Name} from {market.Clubs[candidate.FromClubId!.Value].Name} for € {receipt.Fee:N0}, on € {signing.Salary:N0} a year until {terms.EndDate:yyyy-MM-dd} ({signing.Reason}).");
+                        report.Actions.Add($"Bought {candidate.Name} from {market.Clubs[candidate.FromClubId!.Value].Name} for € {receipt.Fee:N0} ({signing.Reason}).");
                     }
 
+                    signed++;
                     taken.Add(candidate.PlayerId);
                     forSale.Remove(candidate.PlayerId);
                     if (!candidate.Listed && candidate.FromClubId is { } from)

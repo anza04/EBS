@@ -40,12 +40,15 @@ public sealed class ContractServiceTests : IAsyncLifetime
         return player;
     }
 
-    /// <summary>Terms the player accepts: his asking salary, from <paramref name="start"/> for two years.</summary>
+    /// <summary>
+    /// Terms the player accepts: his asking salary, from <paramref name="start"/> for two years, with whatever else he
+    /// insists on. Asking for his demands is not a round of talks.
+    /// </summary>
     private async Task<ContractTerms> AcceptableTermsAsync(PlayerId player, ClubId club, DateOnly start, long signingBonus = 0)
     {
-        var offer = new ContractTerms(start, start.AddYears(2).AddDays(-1), 1, SigningBonus: signingBonus);
-        var asking = (await Contracts.NegotiateAsync(player, club, offer)).AskingSalary;
-        return offer with { AnnualSalary = asking };
+        var demands = (await Contracts.GetNegotiationAsync(player, club)).Demands;
+        var offer = new ContractTerms(start, start.AddYears(2).AddDays(-1), demands.AskingSalary, SigningBonus: signingBonus);
+        return ContractNegotiator.Default.Meet(offer, demands);
     }
 
     private Task<Club> ClubAsync(ClubId id) => _db.ReadAsync(async s => (await s.Repo<Club, ClubId>().FindAsync(id))!);
@@ -89,7 +92,7 @@ public sealed class ContractServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task A_player_refuses_a_low_offer_and_nothing_is_saved()
+    public async Task A_player_refuses_a_low_offer_and_nothing_is_signed()
     {
         var player = await FreeAgentAsync();
         var terms = await AcceptableTermsAsync(player.Id, _world.AwayClub.Id, Today);
@@ -296,7 +299,7 @@ public sealed class ContractServiceTests : IAsyncLifetime
             VALUES ('66666666-6666-6666-6666-666666666666', '44444444-4444-4444-4444-444444444444', '55555555-5555-5555-5555-555555555555', '2025-07-01', '2027-06-30', 90000);
             """);
 
-        Assert.EndsWith("_Finances", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        Assert.EndsWith("_ContractNegotiations", await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
         var c = Assert.Single(await db.ReadAsync(s => s.Repo<Contract, ContractId>().ListAsync()));
         Assert.Equal((ContractStatus.Active, PaymentFrequency.Monthly, 0L, true), (c.Status, c.PaymentFrequency, c.SigningBonus, c.PerformanceBonuses.IsEmpty));
         Assert.Equal(((long?)null, (DateOnly?)null, (DateOnly?)null, 0L), (c.ReleaseClause, c.ClubOptionUntil, c.TerminationDate, c.TerminationCompensation));

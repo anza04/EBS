@@ -21,10 +21,13 @@ public interface IContractService
     /// <summary>Players without a running or upcoming contract, best first.</summary>
     Task<IReadOnlyList<FreeAgent>> GetFreeAgentsAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>The player's answer to a new contract offer from <paramref name="clubId"/>. Nothing is saved.</summary>
+    /// <summary>
+    /// The player's answer to a new contract offer from <paramref name="clubId"/>: one round of talks, counted and saved
+    /// (docs/CONTRACTS.md §4.5). Out of patience, the player breaks off the talks.
+    /// </summary>
     Task<NegotiationResponse> NegotiateAsync(PlayerId playerId, ClubId clubId, ContractTerms offer, CancellationToken cancellationToken = default);
 
-    /// <summary>The player's answer to a renewal offer for <paramref name="contractId"/>. Nothing is saved.</summary>
+    /// <summary>The player's answer to a renewal offer for <paramref name="contractId"/>: one round of talks, as <see cref="NegotiateAsync"/>.</summary>
     Task<NegotiationResponse> NegotiateRenewalAsync(ContractId contractId, ContractTerms offer, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -32,6 +35,18 @@ public interface IContractService
     /// signing bonus now. When the contract starts today or earlier the player joins the club in <paramref name="joinAs"/>
     /// (bench, inactive or youth); otherwise he joins on the start date (<see cref="ProcessContractDatesAsync"/>).
     /// </summary>
+    /// <summary>
+    /// What the player wants from the club and how the talks stand, without making an offer (no round is counted).
+    /// <paramref name="renewing"/> is the contract being renewed, if any.
+    /// </summary>
+    Task<NegotiationOverview> GetNegotiationAsync(PlayerId playerId, ClubId clubId, ContractId? renewing = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reviews the playing-time promises due today (every 28 days per contract; docs/CONTRACTS.md §4.6): changes the
+    /// players' morale and the agents' relationships. Called by the career calendar every day.
+    /// </summary>
+    Task<PromiseReview> ReviewPromisesAsync(CancellationToken cancellationToken = default);
+
     Task<ContractId> SignAsync(PlayerId playerId, ClubId clubId, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -118,6 +133,17 @@ public sealed record PlayerContracts(
 public sealed record FreeAgent(Player Player, int Age, int Overall, string Nationality, string? LastClub);
 
 /// <summary>What <see cref="IContractService.ProcessContractDatesAsync"/> changed.</summary>
+/// <summary>What the player wants and how the talks stand (<see cref="IContractService.GetNegotiationAsync"/>).</summary>
+public sealed record NegotiationOverview(PlayerDemands Demands, NegotiationTalks Talks);
+
+/// <summary>Promises reviewed by <see cref="IContractService.ReviewPromisesAsync"/>, by outcome.</summary>
+public sealed record PromiseReview(int Kept, int AtRisk, int Broken)
+{
+    public static PromiseReview None { get; } = new(0, 0, 0);
+
+    public int Reviewed => Kept + AtRisk + Broken;
+}
+
 public sealed record ContractDateChanges(int Expired, int Started, IReadOnlyList<PlayerId> NewFreeAgents)
 {
     public static ContractDateChanges None { get; } = new(0, 0, []);

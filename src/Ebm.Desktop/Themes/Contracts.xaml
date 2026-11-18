@@ -38,6 +38,7 @@
               <DataGridTextColumn Header="Options" Binding="{Binding Options}" Width="130" />
               <DataGridTextColumn Header="Release clause" Binding="{Binding ReleaseClause}" Width="105" />
               <DataGridTextColumn Header="Bonuses" Binding="{Binding Bonuses}" Width="160" />
+              <DataGridTextColumn Header="Promises" Binding="{Binding Promises}" Width="140" />
             </DataGrid.Columns>
           </DataGrid>
           <TextBlock Grid.Row="2" Text="Contract history" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
@@ -119,6 +120,8 @@
                     <TextBox Text="{Binding OfferSigningBonus, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Text="Club option until" Style="{StaticResource Form.Label}" />
                     <DatePicker SelectedDate="{Binding OfferClubOption}" />
+                    <TextBlock Text="Promised role" Style="{StaticResource Form.Label}" />
+                    <ComboBox ItemsSource="{Binding PromiseRoles}" SelectedItem="{Binding OfferRole}" />
                   </StackPanel>
                   <StackPanel Grid.Column="2">
                     <TextBlock Text="End date" Style="{StaticResource Form.Label}" />
@@ -129,11 +132,14 @@
                     <TextBox Text="{Binding OfferReleaseClause, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Text="Player option until" Style="{StaticResource Form.Label}" />
                     <DatePicker SelectedDate="{Binding OfferPlayerOption}" />
+                    <TextBlock Text="Promised minutes per game" Style="{StaticResource Form.Label}" />
+                    <TextBox Text="{Binding OfferMinutes, UpdateSourceTrigger=PropertyChanged}" />
                   </StackPanel>
                 </Grid>
                 <TextBlock Text="Performance bonuses (e.g. ReachPlayoffs:20000; LeagueTitle:50000)" Style="{StaticResource Form.Label}" />
                 <TextBox Text="{Binding OfferBonuses, UpdateSourceTrigger=PropertyChanged}" />
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <Button Content="His demands" Command="{Binding ShowDemandsCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0" />
                   <Button Content="Ask the player" Command="{Binding AskPlayerCommand}" Style="{StaticResource Button.Secondary}" />
                   <Button Content="Use his counter-offer" Command="{Binding AcceptCounterCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
                   <Button Content="Submit" Command="{Binding SubmitOfferCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />

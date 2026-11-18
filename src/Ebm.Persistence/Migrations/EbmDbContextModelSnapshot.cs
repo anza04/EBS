@@ -280,6 +280,51 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("Leagues", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Contracts.Agent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Toughness")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Agents", (string)null);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Contracts.AgentRelationship", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("AgentId", "ClubId")
+                        .IsUnique();
+
+                    b.ToTable("AgentRelationships", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Contracts.Contract", b =>
                 {
                     b.Property<Guid>("Id")
@@ -315,6 +360,23 @@ namespace Ebm.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly?>("PlayerOptionUntil")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("PromiseReviewedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromiseStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("None");
+
+                    b.Property<int?>("PromisedMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PromisedRole")
+                        .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
                     b.Property<long?>("ReleaseClause")
@@ -373,6 +435,51 @@ namespace Ebm.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_Contracts_Salary", "AnnualSalary >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Contracts.ContractNegotiation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("ClosedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("LastActivityOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Patience")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("RenewalOfId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Rounds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("StartedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("RenewalOfId");
+
+                    b.HasIndex("PlayerId", "ClubId", "StartedOn");
+
+                    b.ToTable("ContractNegotiations", (string)null);
                 });
 
             modelBuilder.Entity("Ebm.Domain.Countries.Country", b =>
@@ -1329,6 +1436,21 @@ namespace Ebm.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Contracts.AgentRelationship", b =>
+                {
+                    b.HasOne("Ebm.Domain.Contracts.Agent", null)
+                        .WithMany()
+                        .HasForeignKey("AgentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Ebm.Domain.Contracts.Contract", b =>
                 {
                     b.HasOne("Ebm.Domain.Clubs.Club", null)
@@ -1345,6 +1467,26 @@ namespace Ebm.Persistence.Migrations
                     b.HasOne("Ebm.Domain.Staff.StaffMember", null)
                         .WithMany()
                         .HasForeignKey("StaffMemberId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Contracts.ContractNegotiation", b =>
+                {
+                    b.HasOne("Ebm.Domain.Clubs.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Contracts.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("RenewalOfId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

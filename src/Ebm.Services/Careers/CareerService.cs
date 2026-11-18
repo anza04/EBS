@@ -18,6 +18,8 @@ using Ebm.Services.Scouting;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
 
+using Ebm.Services.Contracts;
+
 namespace Ebm.Services.Careers;
 
 /// <summary>Implements <see cref="ICareerService"/> by driving the competition, match and transfer services day by day.</summary>
@@ -31,6 +33,7 @@ internal sealed class CareerService(
     IDevelopmentService development,
     IMedicalService medical,
     IFinanceService finances,
+    IContractService contracts,
     FinanceModel financeModel,
     GameClock clock) : ICareerService
 {
@@ -183,6 +186,9 @@ internal sealed class CareerService(
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
 
+        // Playing-time promises (docs/CONTRACTS.md §4.6): each contract is reviewed every 28 days.
+        var promises = await contracts.ReviewPromisesAsync(cancellationToken).ConfigureAwait(false);
+
         // Transfer windows: the last day of a season and two weeks before a season for every AI club; on any Monday for the
         // AI clubs short of players only (the others are left out as if managed).
         IReadOnlyCollection<ClubId> windowManaged = managed;
@@ -209,7 +215,7 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay);
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay, promises);
     }
 
     /// <summary>The matches played (not forfeited) on <paramref name="day"/>.</summary>

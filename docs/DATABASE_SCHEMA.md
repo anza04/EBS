@@ -21,6 +21,7 @@ Schema version: **`20261117124356_Scouting`** (Step 20).
 | `20261117140121_Development` | 21 | `Players.RetiredOn`. New table `TrainingPlans` (create-table and add-column only) |
 | `20261117143312_Medical` | 22 | New table `Injuries` (create-table only) |
 | `20261117150208_Finances` | 23 | New tables `ClubBudgets` and `FinancialTransactions` (create-table only) |
+| `20261118081325_ContractNegotiations` | 25 | New tables `Agents`, `AgentRelationships`, `ContractNegotiations`; `Contracts` gains `PromisedRole`, `PromisedMinutes`, `PromiseStatus` (default `None`), `PromiseReviewedOn` (add-column, nullable or defaulted) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -208,6 +209,10 @@ Step 05 columns are checked by the domain only: adding check constraints to an e
 | Status | text(16) | `Active` (default), `Expired`, `Terminated`, `Renewed`, `OnLoan` (Step 08), `Transferred` (Step 08) |
 | TerminationDate | date? | First day not under contract after an early end |
 | TerminationCompensation | int | Settlement paid on termination, default 0 |
+| PromisedRole | text(16)? | Step 25: `Reserve`, `Prospect`, `Rotation`, `Starter`, `Star`; null = no role promise |
+| PromisedMinutes | int? | Minutes per game promised, 1–40 (domain) |
+| PromiseStatus | text(16) | `None` (default), `Kept`, `AtRisk`, `Broken`: latest promise review |
+| PromiseReviewedOn | date? | Date of the latest promise review |
 
 Index (`ClubId, EndDate`). Columns added in Step 07 have defaults and domain-only range checks (decision 21).
 Contracts are never deleted; expired, terminated and renewed ones are history. Lifecycle and salary rules:
@@ -328,6 +333,38 @@ A club's training programme (rules in `docs/DEVELOPMENT.md`).
 | TeamFocus | text(16) | `Balanced`, `Shooting`, `Tactical`, `Defense`, `Physical`, `Recovery` |
 | Intensity | text(16) | `Light`, `Normal`, `Hard` |
 | Individuals | json? | Array of `{ PlayerId, Focus }`, at most 30, each player once. Current state; no player foreign key |
+
+### Agents
+Player agents (Step 25, `docs/CONTRACTS.md` §4.1). Created once, the first time anyone negotiates.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| Name | text(60) | Unique |
+| Toughness | int | 1–100 |
+
+### AgentRelationships
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| AgentId | id | FK Agents; unique (AgentId, ClubId) |
+| ClubId | id | FK Clubs |
+| Score | int | −100…100, 0 = no history |
+
+### ContractNegotiations
+Rounds of contract talks between a club and a player (`docs/CONTRACTS.md` §4.5); history, never deleted.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerId | id | FK Players; index (PlayerId, ClubId, StartedOn) |
+| ClubId | id | FK Clubs |
+| RenewalOfId | id? | FK Contracts: the contract being renewed; null for a new contract |
+| StartedOn / LastActivityOn | date | |
+| Rounds | int | Offers made |
+| Patience | int | Rounds left before the player breaks off |
+| Status | text(16) | `Open`, `Agreed`, `BrokenOff` |
+| ClosedOn | date? | Agreement or break-off date (talks resume 30 days after a break-off) |
 
 ### Injuries
 Medical records: one row per injury, history, never deleted (rules in `docs/INJURIES.md`).

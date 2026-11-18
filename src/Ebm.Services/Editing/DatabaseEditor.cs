@@ -101,7 +101,7 @@ internal sealed class DatabaseEditor : IDatabaseEditor
                     throw new DomainValidationException("The club and player of a contract cannot be changed. Create a new contract instead.");
                 }
 
-                c.UpdateTerms(draft.Terms);
+                c.UpdateTerms(draft.Terms with { Promises = c.Promises }); // promises come from negotiations only
             },
             DuplicateKeys.Of,
             _ => "This player already has a contract with this club starting on the same date.",

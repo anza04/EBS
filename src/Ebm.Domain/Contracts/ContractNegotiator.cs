@@ -6,7 +6,49 @@ namespace Ebm.Domain.Contracts;
 /// <param name="Reputation">Player reputation, 1–100.</param>
 /// <param name="ClubReputation">Reputation of the club making the offer, 1–100.</param>
 /// <param name="CurrentSalary">Annual salary of the contract being renewed or replaced, if any.</param>
-public sealed record NegotiationContext(int Overall, int Potential, int Reputation, int Age, int ClubReputation, long? CurrentSalary = null);
+/// <param name="ExpectedRole">The role he expects at the club from his rank in its squad; <c>null</c> when unknown (promises are then worth nothing).</param>
+/// <param name="AgentToughness">His agent's toughness, 1–100 (50 = average, also for players without an agent).</param>
+/// <param name="Relationship">His agent's relationship with the club, −100…100.</param>
+/// <param name="CompetingOffers">Other clubs bidding for him (docs/CONTRACTS.md §4.4).</param>
+/// <param name="BrokenPromise">The club broke a promise in his current contract.</param>
+/// <param name="Round">The negotiation round this offer is (1 = first).</param>
+public sealed record NegotiationContext(
+    int Overall,
+    int Potential,
+    int Reputation,
+    int Age,
+    int ClubReputation,
+    long? CurrentSalary = null,
+    SquadRole? ExpectedRole = null,
+    int AgentToughness = 50,
+    int Relationship = 0,
+    int CompetingOffers = 0,
+    bool BrokenPromise = false,
+    int Round = 1);
+
+/// <summary>
+/// What the player wants from a club (docs/CONTRACTS.md §4.2).
+/// </summary>
+/// <param name="AskingSalary">Annual value he wants: the market salary with the premiums for competing offers, the agent relationship and broken promises.</param>
+/// <param name="MarketSalary">His market salary at the club (<see cref="ContractNegotiator.AskingSalary"/>).</param>
+/// <param name="MinimumValue">The least annual value he accepts in this round (rounds bring small concessions).</param>
+/// <param name="MinYears">Shortest length he accepts without a penalty.</param>
+/// <param name="MaxYears">Longest length he accepts without a penalty.</param>
+/// <param name="RequiredRole">A role he insists on being promised, or <c>null</c>.</param>
+/// <param name="MaxReleaseClause">He insists on a release clause of at most this fee, or <c>null</c>.</param>
+/// <param name="RejectBelow">Offers worth less than this are rejected outright instead of countered.</param>
+/// <param name="Patience">Rounds he tolerates in new talks.</param>
+public sealed record PlayerDemands(
+    long AskingSalary,
+    long MarketSalary,
+    long MinimumValue,
+    int MinYears,
+    int MaxYears,
+    SquadRole? ExpectedRole,
+    SquadRole? RequiredRole,
+    long? MaxReleaseClause,
+    long RejectBelow,
+    int Patience);
 
 public enum NegotiationOutcome
 {
@@ -22,7 +64,29 @@ public enum NegotiationOutcome
 public sealed record NegotiationResponse(NegotiationOutcome Outcome, long AskingSalary, long OfferValue, ContractTerms? CounterOffer, string Message)
 {
     public bool IsAccepted => Outcome == NegotiationOutcome.Accepted;
+
+    /// <summary>What the player wants (Step 25); <c>null</c> for answers that do not come from the contract negotiation.</summary>
+    public PlayerDemands? Demands { get; init; }
+
+    /// <summary>The state of the talks, when the answer was a counted round (docs/CONTRACTS.md §4.5).</summary>
+    public NegotiationTalks? Talks { get; init; }
 }
+
+/// <summary>Who represents the player and how the talks stand.</summary>
+/// <param name="Round">Rounds so far (0 before the first offer).</param>
+/// <param name="Patience">Rounds left before the player breaks off.</param>
+/// <param name="BrokenOffUntil">Set when the player refuses to talk until that day.</param>
+public sealed record NegotiationTalks(
+    string? Agent,
+    int AgentToughness,
+    int Relationship,
+    int Round,
+    int Patience,
+    DateOnly? BrokenOffUntil,
+    IReadOnlyList<CompetingOffer> CompetingOffers);
+
+/// <summary>A rival club bidding for the player, with the annual salary it would offer him.</summary>
+public sealed record CompetingOffer(Clubs.ClubId ClubId, string Club, long AnnualSalary);
 
 /// <summary>
 /// The simplified contract negotiation of Step 07 (docs/CONTRACTS.md §4): the player has an asking salary from his
@@ -102,36 +166,203 @@ public sealed class ContractNegotiator
         return (long)Math.Round(value, MidpointRounding.AwayFromZero);
     }
 
+    /// <summary>Premium on the asking value per competing offer, at most <see cref="MaxCompetingOffers"/> offers.</summary>
+    public double CompetitionPremium { get; init; } = 0.04;
+
+    public const int MaxCompetingOffers = 3;
+
+    /// <summary>Asking value change at the extreme relationships (−5% trusted … +5% hostile).</summary>
+    public double RelationshipEffect { get; init; } = 0.05;
+
+    /// <summary>Premium a player asks a club that broke a promise to him.</summary>
+    public double BrokenPromisePremium { get; init; } = 0.10;
+
+    /// <summary>Concession per round after the first (at most three rounds).</summary>
+    public double RoundConcession { get; init; } = 0.01;
+
+    /// <summary>Value penalty, as a share of the asking value, per year outside the preferred lengths.</summary>
+    public double LengthPenalty { get; init; } = 0.07;
+
+    /// <summary>Value of a promise per role level above the expected role, and per minute above its minutes; capped at <see cref="MaxPromiseValue"/>.</summary>
+    public double RolePromiseValue { get; init; } = 0.04;
+
+    public double MinutePromiseValue { get; init; } = 0.005;
+
+    public double MaxPromiseValue { get; init; } = 0.10;
+
+    /// <summary>Players from this reputation insist on being promised their expected role when it is starter or star.</summary>
+    public int RoleDemandReputation { get; init; } = 60;
+
+    /// <summary>Players aged 30 or less whose reputation exceeds the club's by this much insist on a release clause.</summary>
+    public int ClauseDemandGap { get; init; } = 25;
+
+    /// <summary>The highest release clause such a player accepts, in years of asking value.</summary>
+    public double ClauseMultiple { get; init; } = 20;
+
+    /// <summary>Patience of new talks with an average agent and a neutral relationship.</summary>
+    public int BasePatience { get; init; } = 4;
+
+    /// <summary>The player's demands to <paramref name="context"/>'s club (docs/CONTRACTS.md §4.2).</summary>
+    public PlayerDemands Demands(NegotiationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        var market = AskingSalary(context);
+        var factor = 1
+            + (Math.Clamp(context.CompetingOffers, 0, MaxCompetingOffers) * CompetitionPremium)
+            - (RelationshipEffect * Math.Clamp(context.Relationship, AgentRelationship.Min, AgentRelationship.Max) / 100)
+            + (context.BrokenPromise ? BrokenPromisePremium : 0);
+        var asking = Math.Max(MinimumSalary, RoundThousands(market * factor));
+        var minimum = (long)Math.Ceiling(asking * (1 - (RoundConcession * Math.Clamp(context.Round - 1, 0, 3))));
+        var (minYears, maxYears) = PreferredYears(context);
+        SquadRole? required = context.ExpectedRole is { } role && role >= SquadRole.Starter && context.Reputation >= RoleDemandReputation ? role : null;
+        long? clause = context.Age <= 30 && context.Reputation >= context.ClubReputation + ClauseDemandGap ? RoundUpThousands(ClauseMultiple * asking) : null;
+        var toughness = Math.Clamp(context.AgentToughness, 1, 100);
+        var threshold = Math.Clamp(CounterThreshold + (0.10 * (toughness - 50) / 50), 0.6, 0.9);
+        var patience = BasePatience - (toughness >= 70 ? 1 : 0) + (context.Relationship >= 40 ? 1 : 0) - (context.Relationship <= -40 ? 1 : 0);
+        return new(asking, market, minimum, minYears, maxYears, context.ExpectedRole, required, clause, (long)Math.Ceiling(threshold * minimum), Math.Max(1, patience));
+    }
+
+    /// <summary>
+    /// Contract lengths the player accepts without a penalty: improving players aged 23 or less want 1–3 years (to cash
+    /// in later), players aged 31–34 want security (2–5), the others take 1–5.
+    /// </summary>
+    public static (int Min, int Max) PreferredYears(NegotiationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return context.Age switch
+        {
+            <= 23 when context.Potential > context.Overall + 5 => (1, 3),
+            >= 31 and <= 34 => (2, MaxYears),
+            _ => (1, MaxYears),
+        };
+    }
+
+    /// <summary>
+    /// The annual value of <paramref name="offer"/> to a player with <paramref name="demands"/>: <see cref="OfferValue(ContractTerms)"/>
+    /// plus the promises above his expected role, plus a release clause, minus the length penalty (docs/CONTRACTS.md §4.2).
+    /// </summary>
+    public long OfferValue(ContractTerms offer, PlayerDemands demands)
+    {
+        ArgumentNullException.ThrowIfNull(offer);
+        ArgumentNullException.ThrowIfNull(demands);
+        double asking = demands.AskingSalary;
+        var value = (double)OfferValue(offer);
+        if (demands.ExpectedRole is { } expected && offer.Promises is { } promises)
+        {
+            var levels = promises.Role is { } role ? Math.Max(0, (int)role - (int)expected) : 0;
+            var baseMinutes = PromiseRules.Minutes(promises.Role is { } r && r > expected ? r : expected);
+            var minutes = Math.Max(0, (promises.MinutesPerGame ?? 0) - baseMinutes);
+            value += asking * Math.Min(MaxPromiseValue, (RolePromiseValue * levels) + (MinutePromiseValue * minutes));
+        }
+
+        if (offer.ReleaseClause is { } clause)
+        {
+            value += clause <= 10 * asking ? 0.04 * asking : clause <= ClauseMultiple * asking ? 0.02 * asking : 0;
+        }
+
+        var years = Math.Round(offer.Years * 4) / 4;
+        var outside = years < demands.MinYears ? demands.MinYears - years : years > demands.MaxYears ? years - demands.MaxYears : 0;
+        value -= LengthPenalty * asking * outside;
+        return (long)Math.Round(value, MidpointRounding.AwayFromZero);
+    }
+
     /// <summary>The player's answer to <paramref name="offer"/>.</summary>
     public NegotiationResponse Evaluate(NegotiationContext context, ContractTerms offer)
     {
         ArgumentNullException.ThrowIfNull(offer);
-        var asking = AskingSalary(context);
-        var value = OfferValue(offer);
+        var demands = Demands(context);
+        var value = OfferValue(offer, demands);
         if (offer.EndDate <= offer.StartDate || offer.Years > MaxYears + 0.01)
         {
-            return new(NegotiationOutcome.Rejected, asking, value, null, $"The player signs for at most {MaxYears} years.");
+            return new(NegotiationOutcome.Rejected, demands.AskingSalary, value, null, $"The player signs for at most {MaxYears} years.") { Demands = demands };
         }
 
-        if (value >= asking)
+        var unmet = Unmet(offer, demands);
+        if (unmet.Count == 0 && value >= demands.MinimumValue)
         {
-            return new(NegotiationOutcome.Accepted, asking, value, null, "The player accepts the offer.");
+            return new(NegotiationOutcome.Accepted, demands.AskingSalary, value, null, "The player accepts the offer.") { Demands = demands };
         }
 
-        if (value >= CounterThreshold * asking)
+        if (value >= demands.RejectBelow)
         {
-            // Raise the salary until the offer is worth the asking value; the other terms stay as offered.
-            var counter = offer with { AnnualSalary = offer.AnnualSalary + RoundUpThousands((asking - value) / ScaleOf(offer)) };
+            var counter = Meet(offer, demands);
+            var wants = unmet.Count == 0 ? string.Empty : $" He insists on {string.Join(" and ", unmet)}.";
             return new(
                 NegotiationOutcome.CounterOffer,
-                asking,
+                demands.AskingSalary,
                 value,
                 counter,
-                $"The player wants more. He would sign for € {counter.AnnualSalary:N0} a year on the same terms.");
+                $"The player wants more.{wants} He would sign for € {counter.AnnualSalary:N0} a year on the terms of his counter-offer.")
+            { Demands = demands };
         }
 
-        return new(NegotiationOutcome.Rejected, asking, value, null, $"The offer is far below what the player expects (about € {asking:N0} a year).");
+        var insists = unmet.Count == 0 ? string.Empty : $" He insists on {string.Join(" and ", unmet)}.";
+        return new(NegotiationOutcome.Rejected, demands.AskingSalary, value, null, $"The offer is far below what the player expects (about € {demands.AskingSalary:N0} a year).{insists}")
+        { Demands = demands };
     }
+
+    /// <summary>
+    /// <paramref name="offer"/> changed as little as possible to satisfy <paramref name="demands"/>: the length moved into
+    /// his preferred range, the role he insists on promised, a release clause he accepts, then the salary raised (to the
+    /// next € 1,000) until the value reaches his minimum. The result is always accepted.
+    /// </summary>
+    public ContractTerms Meet(ContractTerms offer, PlayerDemands demands)
+    {
+        ArgumentNullException.ThrowIfNull(offer);
+        ArgumentNullException.ThrowIfNull(demands);
+        var terms = offer;
+        var years = Math.Round(offer.Years * 4) / 4;
+        if (years < demands.MinYears || years > demands.MaxYears)
+        {
+            var end = offer.StartDate.AddYears(years < demands.MinYears ? demands.MinYears : demands.MaxYears).AddDays(-1);
+            terms = terms with
+            {
+                EndDate = end,
+                ClubOptionUntil = ValidOption(offer.ClubOptionUntil, end),
+                PlayerOptionUntil = ValidOption(offer.PlayerOptionUntil, end),
+            };
+        }
+
+        if (demands.RequiredRole is { } role && !RoleMet(terms.Promises, role))
+        {
+            terms = terms with { Promises = (terms.Promises ?? new ContractPromises()) with { Role = role } };
+        }
+
+        if (demands.MaxReleaseClause is { } maxClause && (terms.ReleaseClause is not { } clause || clause > maxClause))
+        {
+            terms = terms with { ReleaseClause = maxClause };
+        }
+
+        var shortfall = demands.MinimumValue - OfferValue(terms, demands);
+        if (shortfall > 0)
+        {
+            terms = terms with { AnnualSalary = terms.AnnualSalary + RoundUpThousands(shortfall / ScaleOf(terms)) };
+        }
+
+        return terms;
+    }
+
+    private static List<string> Unmet(ContractTerms offer, PlayerDemands demands)
+    {
+        var unmet = new List<string>();
+        if (demands.RequiredRole is { } role && !RoleMet(offer.Promises, role))
+        {
+            unmet.Add($"being promised a {role.ToString().ToLowerInvariant()} role");
+        }
+
+        if (demands.MaxReleaseClause is { } max && (offer.ReleaseClause is not { } clause || clause > max))
+        {
+            unmet.Add($"a release clause of at most € {max:N0}");
+        }
+
+        return unmet;
+    }
+
+    private static bool RoleMet(ContractPromises? promises, SquadRole role) =>
+        promises is not null && (promises.Role >= role || promises.TargetMinutes >= PromiseRules.Minutes(role));
+
+    private static DateOnly? ValidOption(DateOnly? until, DateOnly end) =>
+        until is { } date && date > end && date <= end.AddYears(Contract.MaxOptionYears) ? date : null;
 
     /// <summary>
     /// Whether the player takes up his option: he does when the contract pays at least what he would ask on the market.

@@ -39,7 +39,9 @@ the club's tactic "AI plan" and selected.
 
 * Renewals (`RenewalPolicy`): players among the club's best 10 by overall, aged ≤ 33, whose contract ends within 150 days.
   Length 3 years (< 27), 2 (< 31), else 1. Offer: the current salary; a counter-offer is accepted up to 1.5× the
-  current salary if the wage bill stays within the wage budget.
+  current salary if the wage bill stays within the wage budget and it is at most one year longer (Step 25: it may
+  carry the promises and release clause the player insists on; each attempt is a round of talks,
+  docs/CONTRACTS.md §4.7).
 * Expiries: contracts end on their date (`ProcessContractDatesAsync`); the player becomes a free agent.
 * Releases: above `SquadRules.MaxPlayers` (18) the weakest players with a single, own contract leave by mutual agreement.
 
@@ -69,6 +71,8 @@ the club's tactic "AI plan" and selected.
   players of that nationality (data, not code). Stand-in for youth intake (later step).
 * Emergency signings: a club still below 10 players after a window (long-term injured players not counted, at most 18
   in the squad) signs the best free agents whose asking salary its balance covers for a year, ignoring the wage budget.
+  Step 25: the club reads the player's demands without a round and meets them (`ContractNegotiator.Meet`); players who
+  broke off talks with it are skipped.
 
 ## 8. Simulation results
 

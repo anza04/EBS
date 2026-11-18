@@ -149,7 +149,7 @@ internal sealed class ImportSession
             (target, c) =>
             {
                 Immutable(target.ClubId == c.ClubId && target.PlayerId == c.PlayerId, "The club and player of a contract cannot be changed. Import it as a new contract.");
-                target.UpdateTerms(c.Terms);
+                target.UpdateTerms(c.Terms with { Promises = target.Promises });
                 target.UpdateDataQuality(c.TermsStatus, c.Source);
             }),
         ImportRecordKind.PlayerHistory => Apply(record, _spells, BuildSpell, (target, s) => Immutable(

@@ -151,12 +151,13 @@ Applies the calendar up to today; idempotent. Run at application start and, from
   not enforced (a transfer that exceeds it is completed with a warning); AI clubs never exceed it when recruiting
   (docs/TRANSFERS.md §5). Finances (Step 27) decide whether the board enforces it.
 
-## 4. Negotiation (`ContractNegotiator`)
+## 4. Negotiation (`ContractNegotiator`, Step 07, extended in Step 25)
 
-Simplified and deterministic: the same offer always gets the same answer. Parameters are properties of
-`ContractNegotiator` (defaults below), registered as a singleton.
+Deterministic: the same offer in the same state of the talks always gets the same answer. Parameters are properties
+of `ContractNegotiator` (defaults below), registered as a singleton.
 
-**Asking salary** (annual, rounded to € 1,000, minimum € 15,000):
+**Market salary** (`AskingSalary`; annual, rounded to € 1,000, minimum € 15,000). The transfer market, AI recruitment
+and buyouts use it unchanged:
 
 ```text
 asking = 30,000 × e^(0.08 × (overall − 40))
@@ -169,21 +170,127 @@ asking = max(asking, 0.9 × current salary)                renewals: at most a 1
 
 Overall 60 ≈ € 150,000; 70 ≈ € 330,000; 80 ≈ € 735,000 (average reputations).
 
+### 4.1 Agents and relationships (`Agent`, `AgentRelationship`, `AgentPool`)
+
+* A fixed pool of 24 fictional agents is created the first time anyone negotiates (table `Agents`). A player's agent
+  is a stable function of his id (hash modulo the pool, ordered by name), so player data never changes. Players with
+  reputation below 15 negotiate for themselves (toughness 50, no relationship).
+* **Toughness** (30–99): the rejection threshold is `0.75 + 0.10 × (toughness − 50) / 50` (0.60–0.90) of the
+  minimum value; agents of toughness ≥ 70 have one round less patience.
+* **Relationship** with each club (−100…100, table `AgentRelationships`, shared by all the agent's clients):
+  asking value × `(1 − 0.05 × relationship / 100)`; patience +1 at ≥ 40, −1 at ≤ −40.
+
+  | Event | Change |
+  |---|---|
+  | Contract signed or renewed with the club | +5 |
+  | Talks broken off (§4.5) | −10 |
+  | Promise review: kept | +2 |
+  | Promise broken (first time per contract) | −15 |
+
+### 4.2 Demands (`Demands` → `PlayerDemands`)
+
+```text
+asking value  = market salary × (1 + 0.04 × competing offers (max 3)
+                                   − 0.05 × relationship / 100
+                                   + 0.10 if the club broke a promise in his current contract)   rounded to € 1,000
+minimum value = asking value × (1 − 0.01 × min(3, round − 1))          small concessions in later rounds
+reject below  = rejection threshold (§4.1) × minimum value
+```
+
+| Demand | Rule |
+|---|---|
+| Contract length | Accepted without penalty: 1–3 years for players aged ≤ 23 with potential > overall + 5 (they want to cash in later); 2–5 for ages 31–34 (security); 1–5 otherwise. Each year outside costs 7% of the asking value |
+| Expected role | From his rank by overall among the club's players under contract (§4.3) |
+| Role promise | A player with reputation ≥ 60 whose expected role is starter or star **insists** on being promised it (a role at least that high, or at least its minutes) |
+| Release clause | A player aged ≤ 30 whose reputation is ≥ the club's attractiveness + 25 **insists** on a release clause of at most 20 × the asking value |
+
 **Offer value** (annual, as the player sees it):
 
 ```text
 value = salary + signingBonus / years + 0.25 × seasonBonuses
       + 5% of salary with a player option − 5% of salary with a club option
+      + promise value: asking × min(10%, 4% per role level above his expected role
+                                        + 0.5% per promised minute above that role's minutes)
+      + release clause: 4% of asking if ≤ 10 × asking, 2% if ≤ 20 × asking
+      − 7% of asking per year outside his preferred lengths
 ```
 
-`years` is the length rounded to a quarter year, at least 1.
+`years` is the length rounded to a quarter year, at least 1. Promises are worth nothing when his expected role is
+unknown (transfer personal terms).
 
-**Answer:** length over 5 years → rejected. `value ≥ asking` → **accepted**. `value ≥ 75% of asking` →
-**counter-offer**: the same terms with the salary raised (to the next € 1,000) until the value reaches the asking
-salary; the counter-offer is always acceptable. Below 75% → **rejected**.
+**Answer:** length over 5 years → rejected. No unmet demand and `value ≥ minimum` → **accepted**. `value ≥ reject
+below` → **counter-offer** (`Meet`): the length moved into his range (options that no longer fit are dropped), the
+role he insists on promised, the release clause he insists on added, then the salary raised to the next € 1,000 until
+the value reaches the minimum; the counter-offer is always acceptable. Otherwise → **rejected**, naming his unmet
+demands.
 
-`NegotiateAsync` / `NegotiateRenewalAsync` return the answer without saving anything; *Ask the player* on the
-*Club contracts* screen shows it, and *Use his counter-offer* copies the counter salary into the form.
+### 4.3 Squad roles and playing time (`SquadRole`, `PromiseRules`)
+
+| Rank at the club (1 = best, counting him) | Expected role | Minutes per game |
+|---|---|---|
+| 1–2 | Star | 30 |
+| 3–5 | Starter | 25 |
+| 6–8 | Rotation | 17 |
+| 6+ and aged ≤ 21 | Prospect | 12 |
+| 9+ | Reserve | 8 |
+
+A contract may promise a role, minutes per game (1–40), or both (`ContractPromises`; `Contracts.PromisedRole`,
+`PromisedMinutes`). The target is the larger of the role's minutes and the promised minutes. Only negotiations set
+promises: the database editor and the importer keep a contract's promises when they update its terms.
+
+### 4.4 Competing offers
+
+For a free agent, or a player whose contract ends within 180 days, up to three other clubs bid: clubs with reputation
+at least the player's − 10, whose wage budget minus wage bill covers his market salary at their reputation, and for
+whom that salary is at least 75% of their average salary (he would matter to them). Most reputable first. Each raises
+his asking value by 4%; the screen lists them with the salary each would offer. The AI transfer window and emergency
+signings remain the way rivals actually sign players.
+
+### 4.5 Rounds of talks (`ContractNegotiation`, table `ContractNegotiations`)
+
+* `GetNegotiationAsync` shows the demands and the talks (agent, relationship, round, patience, competing offers)
+  without counting a round. `NegotiateAsync` / `NegotiateRenewalAsync` count one **round** and save it.
+* Patience of new talks: 4, −1 with a tough agent, ±1 with the relationship (§4.1), at least 1. A counter-offer
+  costs 1, a rejection 2, an acceptance nothing. At 0 the player **breaks off**: no talks or signing with that club for
+  30 days (other clubs are unaffected); the agent's relationship drops by 10.
+* Talks idle for 30 days, or ended by a signing, start again from round 1. `SignAsync` / `RenewAsync` evaluate the
+  terms at the current round (no round counted), refuse while talks are broken off, and close the talks as agreed.
+* Transfer personal terms (`ITransferService`) use the same demands (without expected role, agent, competing offers
+  or rounds).
+
+### 4.6 Promises and satisfaction (`ReviewPromisesAsync`)
+
+Every day the career calendar reviews each running contract with promises once every 28 days (from its start):
+the player's average minutes over the club's non-forfeited games in the last 28 days (0 when he did not play).
+Windows with fewer than 3 club games (off-season) and injured players are skipped.
+
+| Average minutes / target | Status | Morale |
+|---|---|---|
+| ≥ 85% | Kept | +3 |
+| 60–85% | At risk | −3 |
+| < 60% | Broken | −8 (agent relationship −15 the first time) |
+
+The status is shown in the contract list (*Promises* column). A broken promise makes the player ask 10% more to
+renew with that club (§4.2), and its agent's clients ask more of the club through the relationship.
+
+### 4.7 AI clubs
+
+* **Renewals** (`RenewContractsAsync`): offer the current salary for the policy length; accept the player's
+  counter-offer (promises and clause included) if the salary rise is within the policy, the wage budget allows it and
+  it is at most one year longer than the policy. Each attempt is a round, so a club that keeps failing makes the
+  player break off for 30 days.
+* **Emergency signings** (`FillSquadsAsync`): read the demands (no round), meet them with `Meet` and sign if the
+  balance allows; players who broke off talks with the club are skipped.
+* **Transfer window** (`RunAiTransferWindowAsync`): the recruiter plans at market salaries; each free agent's demands
+  are then read (no round) and met, the extra salary taken from the wage budget left after the plan (a club below the
+  squad minimum signs anyway); a purchase meets the player's personal-terms demands (`Meet`) and the wage budget check
+  of the purchase still applies. A player who wants too much is skipped and reported.
+
+### 4.8 Screen
+
+*Club contracts* offer form: promised role and minutes, *His demands* (no round), *Ask the player* (one round; the
+answer shows his demands, the agent, round, patience and competing offers), *Use his counter-offer* (copies every
+term of the counter-offer into the form), *Submit*.
 
 ## 5. Transaction rules
 

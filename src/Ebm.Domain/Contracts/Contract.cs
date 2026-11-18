@@ -101,7 +101,39 @@ public sealed class Contract : Entity<ContractId>
 
     /// <summary>The negotiable terms as stored.</summary>
     public ContractTerms Terms => new(
-        StartDate, EndDate, AnnualSalary, PaymentFrequency, SigningBonus, PerformanceBonuses, ReleaseClause, ClubOptionUntil, PlayerOptionUntil);
+        StartDate, EndDate, AnnualSalary, PaymentFrequency, SigningBonus, PerformanceBonuses, ReleaseClause, ClubOptionUntil, PlayerOptionUntil, Promises);
+
+    /// <summary>Squad role promised to the player (Step 25, docs/CONTRACTS.md §4.3).</summary>
+    public SquadRole? PromisedRole { get; private set; }
+
+    /// <summary>Minutes per game promised to the player.</summary>
+    public int? PromisedMinutes { get; private set; }
+
+    /// <summary>The promises, or <c>null</c> when none was made.</summary>
+    public ContractPromises? Promises => PromisedRole is null && PromisedMinutes is null ? null : new(PromisedRole, PromisedMinutes);
+
+    /// <summary>Outcome of the latest review of the promises (docs/CONTRACTS.md §4.6).</summary>
+    public PromiseStatus PromiseStatus { get; private set; }
+
+    public DateOnly? PromiseReviewedOn { get; private set; }
+
+    /// <summary>Whether the promises are due for review on <paramref name="today"/> (every <see cref="PromiseRules.ReviewDays"/> days).</summary>
+    public bool PromiseReviewDue(DateOnly today) =>
+        Promises is not null && IsRunningOn(today) && (PromiseReviewedOn ?? StartDate).AddDays(PromiseRules.ReviewDays) <= today;
+
+    /// <summary>Records a review; returns <c>true</c> when the promises have just become broken.</summary>
+    public bool RecordPromiseReview(DateOnly today, PromiseStatus status)
+    {
+        if (Promises is null)
+        {
+            throw new DomainValidationException("This contract has no promises to review.");
+        }
+
+        var newlyBroken = status == PromiseStatus.Broken && PromiseStatus != PromiseStatus.Broken;
+        PromiseStatus = Guard.Defined(status, "Promise status");
+        PromiseReviewedOn = today;
+        return newlyBroken;
+    }
 
     public static Contract ForPlayer(ContractId id, ClubId clubId, PlayerId playerId, ContractTerms terms) =>
         new(id, clubId, Guard.Required(playerId, nameof(playerId)), null, terms);
@@ -151,7 +183,20 @@ public sealed class Contract : Entity<ContractId>
             throw new DomainValidationException($"Release clause must be between 1 and {MaxReleaseClause:N0} euros.");
         }
 
-        CheckOption(terms.ClubOptionUntil, terms.EndDate, "club");
+        if (terms.Promises is { } promises)
+        {
+            if (promises.Role is { } role)
+            {
+                Guard.Defined(role, "Promised role");
+            }
+
+            if (promises.MinutesPerGame is { } minutes && minutes is < 1 or > ContractPromises.MaxMinutes)
+            {
+                throw new DomainValidationException($"Promised minutes must be between 1 and {ContractPromises.MaxMinutes}.");
+            }
+        }
+
+                CheckOption(terms.ClubOptionUntil, terms.EndDate, "club");
         CheckOption(terms.PlayerOptionUntil, terms.EndDate, "player");
         if (TerminationDate is { } ended && (ended < terms.StartDate || ended > terms.EndDate.AddDays(1)))
         {
@@ -167,6 +212,8 @@ public sealed class Contract : Entity<ContractId>
         ReleaseClause = terms.ReleaseClause;
         ClubOptionUntil = terms.ClubOptionUntil;
         PlayerOptionUntil = terms.PlayerOptionUntil;
+        PromisedRole = terms.Promises?.Role;
+        PromisedMinutes = terms.Promises?.MinutesPerGame;
     }
 
     /// <summary>

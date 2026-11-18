@@ -3,6 +3,7 @@ using Ebm.Domain.Common;
 using Ebm.Domain.Contracts;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Finances;
+using Ebm.Domain.Matches;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
@@ -126,7 +127,7 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (player, club) = await data.PlayerAndClubAsync(playerId, clubId, cancellationToken).ConfigureAwait(false);
         await CheckFreeAsync(data, player, club, offer, cancellationToken).ConfigureAwait(false);
-        return _negotiator.Evaluate(await ContextAsync(data, player, club, null, cancellationToken).ConfigureAwait(false), offer);
+        return await RoundAsync(data, player, club, null, offer, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<NegotiationResponse> NegotiateRenewalAsync(ContractId contractId, ContractTerms offer, CancellationToken cancellationToken = default)
@@ -136,7 +137,98 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
         CheckRenewable(contract, offer, data.Today);
-        return _negotiator.Evaluate(await ContextAsync(data, player, club, contract.AnnualSalary, cancellationToken).ConfigureAwait(false), offer);
+        return await RoundAsync(data, player, club, contract, offer, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<NegotiationOverview> GetNegotiationAsync(PlayerId playerId, ClubId clubId, ContractId? renewing = null, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var data = new Data(scope.ServiceProvider, Today);
+        Contract? current = null;
+        Player player;
+        Club club;
+        if (renewing is { } id)
+        {
+            (current, player, club) = await data.PlayerContractAsync(id, cancellationToken).ConfigureAwait(false);
+            if (current.PlayerId != playerId || current.ClubId != clubId)
+            {
+                throw new DomainValidationException("The contract belongs to another player or club.");
+            }
+        }
+        else
+        {
+            (player, club) = await data.PlayerAndClubAsync(playerId, clubId, cancellationToken).ConfigureAwait(false);
+        }
+
+        var talks = await TalksAsync(data, player, club, current, cancellationToken).ConfigureAwait(false);
+        // The demands a signing must meet now: the concessions of the rounds already played (as SignAsync).
+        var demands = _negotiator.Demands(talks.Context with { Round = talks.CurrentRound });
+        return new NegotiationOverview(demands, talks.Describe(demands));
+    }
+
+    public async Task<PromiseReview> ReviewPromisesAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopes.CreateScope();
+        var data = new Data(scope.ServiceProvider, Today);
+        var today = data.Today;
+        var due = (await data.Contracts.ListAsync(c => c.PlayerId != null && (c.PromisedRole != null || c.PromisedMinutes != null), cancellationToken).ConfigureAwait(false))
+            .Where(c => c.Status == ContractStatus.Active && c.PromiseReviewDue(today))
+            .ToList();
+        if (due.Count == 0)
+        {
+            return PromiseReview.None;
+        }
+
+        var from = today.AddDays(-PromiseRules.ReviewDays + 1);
+        var clubIds = due.Select(c => c.ClubId).Distinct().ToList();
+        var fixtureIds = (await data.Repo<Fixture, FixtureId>().ListAsync(
+                f => f.Date >= from && f.Date <= today && (clubIds.Contains(f.HomeClubId) || clubIds.Contains(f.AwayClubId)),
+                cancellationToken).ConfigureAwait(false))
+            .Select(f => f.Id)
+            .ToList();
+        var matchIds = (await data.Repo<Match, MatchId>().ListAsync(m => fixtureIds.Contains(m.FixtureId) && !m.IsForfeit, cancellationToken).ConfigureAwait(false))
+            .Select(m => m.Id)
+            .ToList();
+        var lines = await data.Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>().ListAsync(
+            s => matchIds.Contains(s.MatchId) && clubIds.Contains(s.ClubId), cancellationToken).ConfigureAwait(false);
+        var playerIds = due.Select(c => c.PlayerId!.Value).ToList();
+        var players = (await data.Players.ListAsync(p => playerIds.Contains(p.Id), cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.Id);
+        var agents = await data.Repo<Agent, AgentId>().ListAsync(null, cancellationToken).ConfigureAwait(false);
+        int kept = 0, atRisk = 0, broken = 0;
+        foreach (var contract in due)
+        {
+            var games = lines.Where(l => l.ClubId == contract.ClubId).Select(l => l.MatchId).Distinct().Count();
+            if (games < PromiseRules.MinGames || !players.TryGetValue(contract.PlayerId!.Value, out var player)
+                || player.InjuryStatus != InjuryStatus.Healthy)
+            {
+                // Off-season, or he cannot play: the promise is not judged on this window.
+                continue;
+            }
+
+            var minutes = lines.Where(l => l.ClubId == contract.ClubId && l.PlayerId == player.Id).Sum(l => l.BoxScore.Minutes) / (double)games;
+            var status = PromiseRules.Assess(contract.Promises!.TargetMinutes, minutes);
+            var newlyBroken = contract.RecordPromiseReview(today, status);
+            player.UpdateCondition(
+                player.Fitness,
+                Math.Clamp(player.Morale + PromiseRules.MoraleChange(status), Player.MinRating, Player.MaxRating),
+                player.InjuryStatus,
+                player.InjuryReturnDate);
+            if (AgentPool.For(player.Id, player.Reputation, agents) is { } agent && (newlyBroken || status == PromiseStatus.Kept))
+            {
+                (await RelationshipAsync(data, agent, contract.ClubId, cancellationToken).ConfigureAwait(false))
+                    .Adjust(newlyBroken ? AgentPool.PromiseBroken : AgentPool.PromiseKept);
+            }
+
+            _ = status switch
+            {
+                PromiseStatus.Kept => kept++,
+                PromiseStatus.AtRisk => atRisk++,
+                _ => broken++,
+            };
+        }
+
+        await data.SaveAsync(cancellationToken).ConfigureAwait(false);
+        return new PromiseReview(kept, atRisk, broken);
     }
 
     public async Task<ContractId> SignAsync(PlayerId playerId, ClubId clubId, ContractTerms terms, RosterRole joinAs = RosterRole.Bench, CancellationToken cancellationToken = default)
@@ -156,7 +248,8 @@ internal sealed class ContractService : IContractService
         }
 
         await CheckFreeAsync(data, player, club, terms, cancellationToken).ConfigureAwait(false);
-        RequireAcceptance(_negotiator.Evaluate(await ContextAsync(data, player, club, null, cancellationToken).ConfigureAwait(false), terms));
+        var talks = await TalksAsync(data, player, club, null, cancellationToken).ConfigureAwait(false);
+        RequireAcceptance(talks, _negotiator.Evaluate(talks.Context with { Round = talks.CurrentRound }, terms));
 
         var contract = Contract.ForPlayer(ContractId.New(), clubId, playerId, terms);
         var current = (await ClubMembership.CurrentClubsAsync(scope.ServiceProvider, data.Today, cancellationToken).ConfigureAwait(false)).TryGetValue(playerId, out var at) ? at : (ClubId?)null;
@@ -175,6 +268,7 @@ internal sealed class ContractService : IContractService
 
         // The signing is part of the transfer history (docs/TRANSFERS.md §1).
         data.Repo<Transfer, TransferId>().Add(Transfer.Signing(TransferId.New(), playerId, current == clubId ? null : current, clubId, terms.StartDate, contract.Id));
+        await AgreeAsync(data, talks, clubId, cancellationToken).ConfigureAwait(false);
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return contract.Id;
     }
@@ -186,12 +280,14 @@ internal sealed class ContractService : IContractService
         var data = new Data(scope.ServiceProvider, Today);
         var (contract, player, club) = await data.PlayerContractAsync(contractId, cancellationToken).ConfigureAwait(false);
         CheckRenewable(contract, terms, data.Today);
-        RequireAcceptance(_negotiator.Evaluate(await ContextAsync(data, player, club, contract.AnnualSalary, cancellationToken).ConfigureAwait(false), terms));
+        var talks = await TalksAsync(data, player, club, contract, cancellationToken).ConfigureAwait(false);
+        RequireAcceptance(talks, _negotiator.Evaluate(talks.Context with { Round = talks.CurrentRound }, terms));
 
         contract.Supersede(terms.StartDate);
         var renewal = Contract.ForPlayer(ContractId.New(), contract.ClubId, player.Id, terms);
         data.Contracts.Add(renewal);
         Ledger.Book(scope.ServiceProvider, club, data.Today, FinanceCategory.SigningBonuses, -terms.SigningBonus, $"Renewal bonus of {player.FullName}");
+        await AgreeAsync(data, talks, club.Id, cancellationToken).ConfigureAwait(false);
         await data.SaveAsync(cancellationToken).ConfigureAwait(false);
         return renewal.Id;
     }
@@ -414,11 +510,178 @@ internal sealed class ContractService : IContractService
 
     private static string StatusName(ContractStatus status) => PlayerCatalog.DisplayName(status).ToLowerInvariant();
 
-    private static void RequireAcceptance(NegotiationResponse response)
+    private static void RequireAcceptance(Talks talks, NegotiationResponse response)
     {
+        if (talks.Refusal is { } refusal)
+        {
+            throw new DomainException(refusal);
+        }
+
         if (!response.IsAccepted)
         {
             throw new DomainException(response.Message);
+        }
+    }
+
+    /// <summary>One round of talks: the player's answer to <paramref name="offer"/>, counted and saved (docs/CONTRACTS.md §4.5).</summary>
+    private async Task<NegotiationResponse> RoundAsync(Data data, Player player, Club club, Contract? current, ContractTerms offer, CancellationToken cancellationToken)
+    {
+        var talks = await TalksAsync(data, player, club, current, cancellationToken).ConfigureAwait(false);
+        var response = _negotiator.Evaluate(talks.Context with { Round = talks.NextRound }, offer);
+        if (talks.Refusal is { } refusal)
+        {
+            return response with { Outcome = NegotiationOutcome.Rejected, CounterOffer = null, Message = refusal, Talks = talks.Describe(response.Demands!) };
+        }
+
+        var session = talks.Session;
+        if (session is null)
+        {
+            session = new ContractNegotiation(ContractNegotiationId.New(), player.Id, club.Id, current?.Id, data.Today, response.Demands!.Patience);
+            data.Repo<ContractNegotiation, ContractNegotiationId>().Add(session);
+        }
+
+        if (session.RecordRound(data.Today, response.Outcome))
+        {
+            if (talks.Agent is { } agent)
+            {
+                (await RelationshipAsync(data, agent, club.Id, cancellationToken).ConfigureAwait(false)).Adjust(AgentPool.TalksBrokenOff);
+            }
+
+            response = response with
+            {
+                Outcome = NegotiationOutcome.Rejected,
+                CounterOffer = null,
+                Message = $"{response.Message} {player.FullName} has lost patience and breaks off the talks until {session.BrokenOffUntil:yyyy-MM-dd}.",
+            };
+        }
+
+        await data.SaveAsync(cancellationToken).ConfigureAwait(false);
+        return response with { Talks = talks.Describe(response.Demands!, session) };
+    }
+
+    /// <summary>Closes the talks after a signing or renewal; the agent appreciates the deal.</summary>
+    private static async Task AgreeAsync(Data data, Talks talks, ClubId clubId, CancellationToken cancellationToken)
+    {
+        talks.Session?.Agree(data.Today);
+        if (talks.Agent is { } agent)
+        {
+            (await RelationshipAsync(data, agent, clubId, cancellationToken).ConfigureAwait(false)).Adjust(AgentPool.DealSigned);
+        }
+    }
+
+    /// <summary>
+    /// Everything the player weighs in talks with <paramref name="club"/>: his market price there, his expected role
+    /// (rank in the club's squad), his agent and the agent's relationship with the club, rival clubs bidding for him
+    /// (free agents and contracts ending within 180 days) and the open talks (docs/CONTRACTS.md §4).
+    /// </summary>
+    private async Task<Talks> TalksAsync(Data data, Player player, Club club, Contract? current, CancellationToken cancellationToken)
+    {
+        var today = data.Today;
+        var context = await ContextAsync(data, player, club, current?.AnnualSalary, cancellationToken).ConfigureAwait(false);
+        var agents = await data.Repo<Agent, AgentId>().ListAsync(null, cancellationToken).ConfigureAwait(false);
+        if (agents.Count == 0)
+        {
+            // The pool is created once, the first time anyone negotiates.
+            agents = AgentPool.Create();
+            foreach (var created in agents)
+            {
+                data.Repo<Agent, AgentId>().Add(created);
+            }
+        }
+
+        var agent = AgentPool.For(player.Id, player.Reputation, agents);
+        var relationship = agent is null
+            ? 0
+            : (await data.Repo<AgentRelationship, AgentRelationshipId>().ListAsync(r => r.AgentId == agent.Id && r.ClubId == club.Id, cancellationToken).ConfigureAwait(false))
+                .FirstOrDefault()?.Score ?? 0;
+        var sessions = await data.Repo<ContractNegotiation, ContractNegotiationId>().ListAsync(n => n.PlayerId == player.Id && n.ClubId == club.Id, cancellationToken).ConfigureAwait(false);
+        var latest = sessions.OrderByDescending(n => n.LastActivityOn).ThenByDescending(n => n.Rounds).FirstOrDefault();
+        var refusedUntil = sessions.Where(n => n.RefusesTalksOn(today)).Select(n => n.BrokenOffUntil).Max();
+        var session = latest is not null && latest.IsOpenOn(today) && latest.RenewalOfId == current?.Id ? latest : null;
+
+        var running = (await data.Contracts.ListAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
+            .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)
+            .ToList();
+        var squadIds = running.Where(c => c.ClubId == club.Id && c.PlayerId != player.Id).Select(c => c.PlayerId!.Value).Distinct().ToList();
+        var squad = await data.Players.ListAsync(p => squadIds.Contains(p.Id), cancellationToken).ConfigureAwait(false);
+        var rank = 1 + squad.Count(p => _calculator.Evaluate(p).Overall > context.Overall);
+        var rivals = current is null || current.EndDate <= today.AddDays(180)
+            ? await RivalsAsync(data, player, club, context, running, cancellationToken).ConfigureAwait(false)
+            : [];
+
+        context = context with
+        {
+            ExpectedRole = PromiseRules.Expected(rank, context.Age),
+            AgentToughness = agent?.Toughness ?? 50,
+            Relationship = relationship,
+            CompetingOffers = rivals.Count,
+            BrokenPromise = current?.PromiseStatus == PromiseStatus.Broken,
+        };
+        var refusal = refusedUntil is { } until
+            ? $"{player.FullName} broke off the talks with {club.Name} and refuses to negotiate until {until:yyyy-MM-dd}."
+            : null;
+        return new Talks(context, session, agent, relationship, rivals, refusal, refusedUntil);
+    }
+
+    /// <summary>
+    /// Up to three other clubs that bid for the player: as reputable as him (at most 10 points less), able to pay his
+    /// asking salary there within their wage budget, and for whom he is worth at least 75% of their average salary.
+    /// </summary>
+    private async Task<IReadOnlyList<CompetingOffer>> RivalsAsync(Data data, Player player, Club club, NegotiationContext context, IReadOnlyList<Contract> running, CancellationToken cancellationToken)
+    {
+        var wages = running.GroupBy(c => c.ClubId).ToDictionary(g => g.Key, g => (Bill: g.Sum(c => c.AnnualSalary), Count: g.Count()));
+        var market = context with { CurrentSalary = null };
+        return
+        [
+            .. (await data.Clubs.ListAsync(c => c.Id != club.Id && c.Reputation >= player.Reputation - 10, cancellationToken).ConfigureAwait(false))
+                .Select(c => (Club: c, Asking: _negotiator.AskingSalary(market with { ClubReputation = c.Reputation }), Wages: wages.GetValueOrDefault(c.Id)))
+                .Where(x => x.Club.WageBudget - x.Wages.Bill >= x.Asking && (x.Wages.Count == 0 || x.Asking >= 0.75 * x.Wages.Bill / x.Wages.Count))
+                .OrderByDescending(x => x.Club.Reputation)
+                .ThenByDescending(x => x.Asking)
+                .ThenBy(x => x.Club.Name, StringComparer.Ordinal)
+                .Take(ContractNegotiator.MaxCompetingOffers)
+                .Select(x => new CompetingOffer(x.Club.Id, x.Club.Name, x.Asking)),
+        ];
+    }
+
+    private static async Task<AgentRelationship> RelationshipAsync(Data data, Agent agent, ClubId clubId, CancellationToken cancellationToken)
+    {
+        var repo = data.Repo<AgentRelationship, AgentRelationshipId>();
+        var existing = (await repo.ListAsync(r => r.AgentId == agent.Id && r.ClubId == clubId, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var created = new AgentRelationship(AgentRelationshipId.New(), agent.Id, clubId);
+        repo.Add(created);
+        return created;
+    }
+
+    private sealed record Talks(
+        NegotiationContext Context,
+        ContractNegotiation? Session,
+        Agent? Agent,
+        int Relationship,
+        IReadOnlyList<CompetingOffer> Rivals,
+        string? Refusal,
+        DateOnly? RefusedUntil)
+    {
+        public int NextRound => (Session?.Rounds ?? 0) + 1;
+
+        public int CurrentRound => Math.Max(1, Session?.Rounds ?? 0);
+
+        public NegotiationTalks Describe(PlayerDemands demands, ContractNegotiation? session = null)
+        {
+            var s = session ?? Session;
+            return new(
+                Agent?.Name,
+                Agent?.Toughness ?? 50,
+                Relationship,
+                s?.Rounds ?? 0,
+                s?.Patience ?? demands.Patience,
+                s?.BrokenOffUntil ?? RefusedUntil,
+                Rivals);
         }
     }
 

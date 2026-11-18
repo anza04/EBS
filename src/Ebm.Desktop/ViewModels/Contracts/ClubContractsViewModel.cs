@@ -78,6 +78,12 @@ public sealed record ContractRowView(ContractLine Line)
 
     public string Bonuses => Money.Bonuses(Contract.PerformanceBonuses);
 
+    /// <summary>Promised role and minutes, with how they are being kept (Step 25).</summary>
+    public string Promises => Contract.Promises is not { } p
+        ? "—"
+        : string.Join(", ", new[] { p.Role?.ToString(), p.MinutesPerGame is { } m ? $"{m} min" : null }.OfType<string>())
+            + (Contract.PromiseStatus == PromiseStatus.None ? string.Empty : $" ({Contract.PromiseStatus switch { PromiseStatus.AtRisk => "at risk", var status => status.ToString().ToLowerInvariant() }})");
+
     public string SigningBonus => Contract.SigningBonus == 0 ? "—" : Money.Euros(Contract.SigningBonus);
 
     public string Settlement => Contract.Status == ContractStatus.Terminated ? Money.Euros(Contract.TerminationCompensation) : "—";
@@ -159,6 +165,12 @@ public sealed partial class ClubContractsViewModel : ObservableObject
     private DateTime? _offerPlayerOption;
 
     [ObservableProperty]
+    private string _offerRole = NoPromise;
+
+    [ObservableProperty]
+    private string _offerMinutes = string.Empty;
+
+    [ObservableProperty]
     private RosterRole _joinAs = RosterRole.Bench;
 
     [ObservableProperty]
@@ -195,6 +207,11 @@ public sealed partial class ClubContractsViewModel : ObservableObject
     public IReadOnlyList<PaymentFrequency> Frequencies { get; } = Enum.GetValues<PaymentFrequency>();
 
     public IReadOnlyList<RosterRole> JoinRoles { get; } = [RosterRole.Bench, RosterRole.Inactive, RosterRole.Youth];
+
+    private const string NoPromise = "No promise";
+
+    /// <summary>Squad roles that can be promised (Step 25), best first.</summary>
+    public IReadOnlyList<string> PromiseRoles { get; } = [NoPromise, .. Enum.GetValues<SquadRole>().Reverse().Select(r => r.ToString())];
 
     public IReadOnlyList<TerminationKind> TerminationKinds { get; } = Enum.GetValues<TerminationKind>();
 
@@ -316,11 +333,58 @@ public sealed partial class ClubContractsViewModel : ObservableObject
             var response = Mode == OfferMode.Renewal
                 ? await _contracts.NegotiateRenewalAsync(RenewingId(), terms)
                 : await _contracts.NegotiateAsync(Required(OfferPlayerId, "player"), Required(ClubId, "club"), terms);
-            Negotiation = $"{response.Message} (He values the offer at {Money.Euros(response.OfferValue)} a year and asks about {Money.Euros(response.AskingSalary)}.)";
+            Negotiation = $"{response.Message} (He values the offer at {Money.Euros(response.OfferValue)} a year and asks about {Money.Euros(response.AskingSalary)}.)"
+                + (response.Demands is { } demands && response.Talks is { } talks ? Environment.NewLine + Describe(demands, talks) : string.Empty);
             _counterOffer = response.CounterOffer;
             AcceptCounterCommand.NotifyCanExecuteChanged();
             return null;
         });
+    }
+
+    /// <summary>Shows what the player wants and how the talks stand, without making an offer.</summary>
+    [RelayCommand]
+    private async Task ShowDemandsAsync()
+    {
+        try
+        {
+            var overview = await _contracts.GetNegotiationAsync(
+                Required(OfferPlayerId, "player"), Required(ClubId, "club"), Mode == OfferMode.Renewal ? RenewingId() : null);
+            Negotiation = Describe(overview.Demands, overview.Talks);
+        }
+        catch (DomainException ex)
+        {
+            Report(ex.Message, error: true);
+        }
+    }
+
+    private static string Describe(PlayerDemands d, NegotiationTalks t)
+    {
+        var lines = new List<string>
+        {
+            $"Asks about {Money.Euros(d.AskingSalary)} a year (market salary {Money.Euros(d.MarketSalary)}); wants {d.MinYears}–{d.MaxYears} years; expects a {d.ExpectedRole?.ToString().ToLowerInvariant() ?? "squad"} role.",
+            $"Agent: {t.Agent ?? "none (he negotiates himself)"}{(t.Agent is null ? string.Empty : $", toughness {t.AgentToughness}, relationship with the club {t.Relationship:+0;-0;0}")}. Round {t.Round}, patience {t.Patience}.",
+        };
+        if (d.RequiredRole is { } role)
+        {
+            lines.Add($"He insists on being promised a {role.ToString().ToLowerInvariant()} role.");
+        }
+
+        if (d.MaxReleaseClause is { } clause)
+        {
+            lines.Add($"He insists on a release clause of at most {Money.Euros(clause)}.");
+        }
+
+        if (t.CompetingOffers.Count > 0)
+        {
+            lines.Add("Competing offers: " + string.Join(", ", t.CompetingOffers.Select(o => $"{o.Club} ({Money.Euros(o.AnnualSalary)})")) + ".");
+        }
+
+        if (t.BrokenOffUntil is { } until)
+        {
+            lines.Add($"He refuses to talk until {until:yyyy-MM-dd}.");
+        }
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptCounter))]
@@ -328,8 +392,8 @@ public sealed partial class ClubContractsViewModel : ObservableObject
     {
         if (_counterOffer is { } counter)
         {
-            OfferSalary = counter.AnnualSalary.ToString("N0", CultureInfo.CurrentCulture);
-            Negotiation = "Salary set to the player's counter-offer. Submit to sign.";
+            FillForm(counter);
+            Negotiation = "The form now holds the player's counter-offer. Submit to sign.";
         }
     }
 
@@ -464,7 +528,22 @@ public sealed partial class ClubContractsViewModel : ObservableObject
             PerformanceBonuses.Parse(OfferBonuses),
             Money.ParseOptional(OfferReleaseClause, "Release clause"),
             OfferClubOption is { } club ? DateOnly.FromDateTime(club) : null,
-            OfferPlayerOption is { } player ? DateOnly.FromDateTime(player) : null);
+            OfferPlayerOption is { } player ? DateOnly.FromDateTime(player) : null,
+            Promises());
+    }
+
+    private ContractPromises? Promises()
+    {
+        SquadRole? role = Enum.TryParse<SquadRole>(OfferRole, out var parsed) ? parsed : null;
+        int? minutes = null;
+        if (!string.IsNullOrWhiteSpace(OfferMinutes))
+        {
+            minutes = int.TryParse(OfferMinutes, NumberStyles.Integer, CultureInfo.CurrentCulture, out var m) && m is >= 1 and <= ContractPromises.MaxMinutes
+                ? m
+                : throw new DomainValidationException($"Promised minutes must be a whole number between 1 and {ContractPromises.MaxMinutes}.");
+        }
+
+        return role is null && minutes is null ? null : new ContractPromises(role, minutes);
     }
 
     private void FillForm(ContractTerms terms)
@@ -478,6 +557,8 @@ public sealed partial class ClubContractsViewModel : ObservableObject
         OfferReleaseClause = terms.ReleaseClause?.ToString("N0", CultureInfo.CurrentCulture) ?? string.Empty;
         OfferClubOption = terms.ClubOptionUntil?.ToDateTime(TimeOnly.MinValue);
         OfferPlayerOption = terms.PlayerOptionUntil?.ToDateTime(TimeOnly.MinValue);
+        OfferRole = terms.Promises?.Role?.ToString() ?? NoPromise;
+        OfferMinutes = terms.Promises?.MinutesPerGame?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
         _counterOffer = null;
         AcceptCounterCommand.NotifyCanExecuteChanged();
     }
