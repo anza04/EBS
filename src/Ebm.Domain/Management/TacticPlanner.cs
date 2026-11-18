@@ -11,7 +11,11 @@ public sealed record TacticPlan(
     DefensiveSystem DefensiveSystem,
     DefensiveSettings Defense,
     IReadOnlyList<TacticalAssignment> Assignments,
-    string Reason);
+    string Reason)
+{
+    /// <summary>Game management (Step 27): the AI coach adapts to the opponent, plays two-for-ones and sizes the rotation to the bench.</summary>
+    public SituationSettings Situations { get; init; } = SituationSettings.Default;
+}
 
 /// <summary>
 /// The AI coach's tactical choice (docs/AI_MANAGEMENT.md §3): the squad's strongest category among its playing
@@ -73,6 +77,14 @@ public static class TacticPlanner
         var assignments = rotation
             .Select((p, i) => new TacticalAssignment(p.Player.Id, TacticalRoles.Suggest(p.Player), i < 3 ? 4 : TacticLevel.Normal))
             .ToList();
-        return new TacticPlan(system, offense, defenseSystem, defenseSettings, assignments, $"{system} for {why}, {defenseSystem} defence.");
+        // A strong bench plays a deep rotation, a weak one a tight eight-man rotation.
+        var starters = rotation.Take(5).Average(p => p.Evaluation.Overall);
+        var bench = rotation.Skip(5).Select(p => (double)p.Evaluation.Overall).DefaultIfEmpty(0).Average();
+        var depth = bench >= starters - 4 ? RotationStrategy.Deep : bench <= starters - 12 ? RotationStrategy.Tight : RotationStrategy.Standard;
+        var situations = SituationSettings.Default with { CoachAdjusts = true, EndOfQuarter = EndOfQuarter.TwoForOne, Rotation = depth };
+        return new TacticPlan(system, offense, defenseSystem, defenseSettings, assignments, $"{system} for {why}, {defenseSystem} defence, {depth} rotation.")
+        {
+            Situations = situations,
+        };
     }
 }

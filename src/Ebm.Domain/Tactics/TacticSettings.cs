@@ -79,3 +79,52 @@ public sealed record DefensiveSettings
         Guard.Defined(Rebounding, "Rebounding priority");
     }
 }
+
+/// <summary>
+/// Game management of a tactic (Step 27): matchups, play calling, zone offense, end of quarters and games, fouls,
+/// rotation and whether the engine's coach adapts the tactic to the opponent (docs/TACTICS.md §7).
+/// </summary>
+public sealed record SituationSettings
+{
+    public static readonly SituationSettings Default = new();
+
+    public MatchupTargeting MatchupTargeting { get; init; } = MatchupTargeting.Off;
+
+    public PlayCalling PlayCalling { get; init; } = PlayCalling.Flow;
+
+    public ZoneOffense ZoneOffense { get; init; } = ZoneOffense.Standard;
+
+    public EndOfQuarter EndOfQuarter { get; init; } = EndOfQuarter.Normal;
+
+    public FoulManagement FoulManagement { get; init; } = FoulManagement.Normal;
+
+    public RotationStrategy Rotation { get; init; } = RotationStrategy.Standard;
+
+    /// <summary>Leading in the last two minutes: use the whole shot clock.</summary>
+    public bool MilkClockWhenLeading { get; init; } = true;
+
+    /// <summary>Trailing in the last two minutes: shoot early; down three at the end, shoot a three.</summary>
+    public bool HurryWhenTrailing { get; init; } = true;
+
+    /// <summary>Trailing late: foul on purpose to stop the clock.</summary>
+    public bool FoulWhenTrailing { get; init; } = true;
+
+    /// <summary>Leading by three in the last seconds: foul before the opponent can shoot the tying three.</summary>
+    public bool FoulUpThree { get; init; }
+
+    /// <summary>Sit the starters in the last five minutes of a 20-point game.</summary>
+    public bool RestStartersInBlowouts { get; init; } = true;
+
+    /// <summary>The engine's coach adapts the tactic to the opponent before and during the match (automatic sides only).</summary>
+    public bool CoachAdjusts { get; init; }
+
+    public void Validate()
+    {
+        Guard.Defined(MatchupTargeting, "Matchup targeting");
+        Guard.Defined(PlayCalling, "Play calling");
+        Guard.Defined(ZoneOffense, "Zone offense");
+        Guard.Defined(EndOfQuarter, "End of quarter");
+        Guard.Defined(FoulManagement, "Foul management");
+        Guard.Defined(Rotation, "Rotation strategy");
+    }
+}

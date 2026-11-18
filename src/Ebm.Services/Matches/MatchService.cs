@@ -159,6 +159,7 @@ internal sealed class MatchService(
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
         var match = await CompetitionService.AddResultAsync(s, session.Fixture.Id, result.HomeScore, result.AwayScore, result.Overtimes, cancellationToken).ConfigureAwait(false);
+        match.SetTacticalNotes(result.TacticalNotes);
         var statistics = Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s);
         foreach (var side in TeamSides.Both)
         {

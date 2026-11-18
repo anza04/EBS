@@ -90,5 +90,8 @@ public sealed record MatchReport(
 {
     public TeamStatistics HomeStatistics => TeamStatistics.From(HomeLines.Select(l => l.BoxScore));
 
+    /// <summary>The coaches' tactical decisions and situational plays (Step 27).</summary>
+    public IReadOnlyList<TacticalNote> TacticalNotes => Match.TacticalNotes;
+
     public TeamStatistics AwayStatistics => TeamStatistics.From(AwayLines.Select(l => l.BoxScore));
 }

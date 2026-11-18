@@ -9,8 +9,14 @@ public sealed class TacticalAssignment
 {
     public const int MaxMinutesTarget = 40;
 
-    public TacticalAssignment(PlayerId playerId, TacticalRole role, int shotPriority = TacticLevel.Normal, int? minutesTarget = null)
+    public TacticalAssignment(
+        PlayerId playerId,
+        TacticalRole role,
+        int shotPriority = TacticLevel.Normal,
+        int? minutesTarget = null,
+        DefensiveMatchup matchup = DefensiveMatchup.Positional)
     {
+        Matchup = Guard.Defined(matchup, "Defensive matchup");
         PlayerId = Guard.Required(playerId, nameof(playerId));
         Role = Guard.Defined(role, "Tactical role");
         ShotPriority = TacticLevel.Check(shotPriority, "Shot priority");
@@ -30,6 +36,9 @@ public sealed class TacticalAssignment
 
     /// <summary>Minutes the coach wants him to play; <c>null</c> = let the rotation decide.</summary>
     public int? MinutesTarget { get; private set; }
+
+    /// <summary>Whom he guards in man-based defenses (Step 27).</summary>
+    public DefensiveMatchup Matchup { get; private set; }
 }
 
 /// <summary>
@@ -50,11 +59,12 @@ public sealed class Tactic : Entity<TacticId>
         OffensiveSystem offensiveSystem,
         OffensiveSettings offense,
         DefensiveSystem defensiveSystem,
-        DefensiveSettings defense)
+        DefensiveSettings defense,
+        SituationSettings? situations = null)
         : base(id)
     {
         ClubId = Guard.Required(clubId, nameof(clubId));
-        Update(name, offensiveSystem, offense, defensiveSystem, defense);
+        Update(name, offensiveSystem, offense, defensiveSystem, defense, situations);
     }
 
     private Tactic()
@@ -73,6 +83,8 @@ public sealed class Tactic : Entity<TacticId>
 
     public DefensiveSettings Defense { get; private set; } = DefensiveSettings.Default;
 
+    public SituationSettings Situations { get; private set; } = SituationSettings.Default;
+
     /// <summary>Whether this is the tactic the club plays its next match with. At most one per club.</summary>
     public bool IsSelected { get; private set; }
 
@@ -82,17 +94,27 @@ public sealed class Tactic : Entity<TacticId>
     public static Tactic CreateDefault(ClubId clubId) => new(
         TacticId.New(), clubId, "Standard", OffensiveSystem.MotionOffense, OffensiveSettings.Default, DefensiveSystem.ManToMan, DefensiveSettings.Default);
 
-    public void Update(string name, OffensiveSystem offensiveSystem, OffensiveSettings offense, DefensiveSystem defensiveSystem, DefensiveSettings defense)
+    /// <summary>Replaces systems and settings; <paramref name="situations"/> <c>null</c> = the default game management.</summary>
+    public void Update(
+        string name,
+        OffensiveSystem offensiveSystem,
+        OffensiveSettings offense,
+        DefensiveSystem defensiveSystem,
+        DefensiveSettings defense,
+        SituationSettings? situations = null)
     {
         ArgumentNullException.ThrowIfNull(offense);
         ArgumentNullException.ThrowIfNull(defense);
+        situations ??= SituationSettings.Default;
         offense.Validate();
         defense.Validate();
+        situations.Validate();
         Name = Guard.Text(name, "Tactic name", NameMaxLength);
         OffensiveSystem = Guard.Defined(offensiveSystem, "Offensive system");
         DefensiveSystem = Guard.Defined(defensiveSystem, "Defensive system");
         Offense = offense;
         Defense = defense;
+        Situations = situations;
     }
 
     /// <summary>Replaces the player assignments; each player at most once.</summary>
@@ -119,7 +141,7 @@ public sealed class Tactic : Entity<TacticId>
 
     /// <summary>The configuration as the match engine reads it.</summary>
     public TeamTactics ToTeamTactics() =>
-        new(OffensiveSystem, Offense, DefensiveSystem, Defense, Assignments.ToDictionary(a => a.PlayerId));
+        new(OffensiveSystem, Offense, DefensiveSystem, Defense, Assignments.ToDictionary(a => a.PlayerId)) { Situations = Situations };
 }
 
 /// <summary>
@@ -135,6 +157,20 @@ public sealed record TeamTactics(
 {
     public static readonly TeamTactics Default = new(
         OffensiveSystem.MotionOffense, OffensiveSettings.Default, DefensiveSystem.ManToMan, DefensiveSettings.Default, new Dictionary<PlayerId, TacticalAssignment>());
+
+    /// <summary>Game management (Step 27).</summary>
+    public SituationSettings Situations { get; init; } = SituationSettings.Default;
+
+    /// <summary>The same tactics with one player's defensive matchup changed (his other assignment fields kept).</summary>
+    public TeamTactics WithMatchup(Player player, DefensiveMatchup matchup)
+    {
+        var current = AssignmentOf(player);
+        var assignments = new Dictionary<PlayerId, TacticalAssignment>(Assignments)
+        {
+            [player.Id] = new TacticalAssignment(player.Id, current.Role, current.ShotPriority, current.MinutesTarget, matchup),
+        };
+        return this with { Assignments = assignments };
+    }
 
     /// <summary>The player's assignment; players without one get the suggested role at normal priority.</summary>
     public TacticalAssignment AssignmentOf(Player player)

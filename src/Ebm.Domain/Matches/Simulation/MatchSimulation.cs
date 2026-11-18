@@ -83,6 +83,9 @@ public sealed partial class MatchSimulation
 
     public IReadOnlyList<PlayerLine> Lines(TeamSide side) => [.. Get(side).Runners.Select(r => r.Line)];
 
+    /// <summary>Tactical decisions and situational summaries so far (Step 27).</summary>
+    public IReadOnlyList<TacticalNote> TacticalNotes => _notes;
+
     /// <summary>The players on court, in slot order (guards first).</summary>
     public IReadOnlyList<PlayerLine> OnCourt(TeamSide side) => [.. Get(side).Court.Where(r => r is not null).Select(r => r!.Line)];
 
@@ -158,7 +161,10 @@ public sealed partial class MatchSimulation
             throw new DomainException("The match is not over yet.");
         }
 
-        return new MatchResult(_home.Score, _away.Score, Overtimes, Lines(TeamSide.Home), Lines(TeamSide.Away), _possessions, _endedByDefault);
+        return new MatchResult(_home.Score, _away.Score, Overtimes, Lines(TeamSide.Home), Lines(TeamSide.Away), _possessions, _endedByDefault)
+        {
+            TacticalNotes = [.. _notes],
+        };
     }
 
     /// <summary>Live mode: swaps a player on court for a bench player (dead ball between possessions).</summary>
@@ -213,8 +219,9 @@ public sealed partial class MatchSimulation
 
         var team = Get(side);
         team.SetTactics(tactics);
-        Emit(MatchEventKind.TacticsChanged, side, null, null, 0,
-            $"{team.Sheet.Name} switch to {PlayerCatalog.DisplayName(tactics.OffensiveSystem)} on offense and {PlayerCatalog.DisplayName(tactics.DefensiveSystem)} on defense.");
+        var text = $"switch to {PlayerCatalog.DisplayName(tactics.OffensiveSystem)} on offense and {PlayerCatalog.DisplayName(tactics.DefensiveSystem)} on defense.";
+        Note(team, $"Coach's change: {text}");
+        Emit(MatchEventKind.TacticsChanged, side, null, null, 0, $"{team.Sheet.Name} {text}");
     }
 
     private Team Get(TeamSide side) => side == TeamSide.Home ? _home : _away;

@@ -64,6 +64,38 @@ public sealed class TacticsServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Game_management_and_defensive_matchups_are_saved_and_handed_to_the_match_engine()
+    {
+        var club = _world.HomeClub.Id;
+        var player = _world.Player.Id;
+        var situations = SituationSettings.Default with
+        {
+            MatchupTargeting = MatchupTargeting.SizeMismatch,
+            PlayCalling = PlayCalling.SetPlays,
+            ZoneOffense = ZoneOffense.HighPost,
+            EndOfQuarter = EndOfQuarter.HoldForLastShot,
+            FoulManagement = FoulManagement.Protect,
+            Rotation = RotationStrategy.Tight,
+            FoulWhenTrailing = false,
+            FoulUpThree = true,
+            CoachAdjusts = true,
+        };
+        var draft = Draft("Managed", OffensiveSystem.PickAndRoll, DefensiveSystem.ManToMan, new TacticalAssignment(player, TacticalRole.PerimeterStopper, 2, null, DefensiveMatchup.BestShooter))
+            with { Situations = situations, Defense = new DefensiveSettings { PickAndRollCoverage = PickAndRollCoverage.Ice } };
+        await Tactics.SaveAsync(club, draft);
+
+        var match = await Tactics.GetMatchTacticsAsync(club);
+        Assert.Equal(situations, match.Situations);
+        Assert.Equal(PickAndRollCoverage.Ice, match.Defense.PickAndRollCoverage);
+        Assert.Equal(DefensiveMatchup.BestShooter, match.Assignments[player].Matchup);
+
+        // Saving without game management restores the defaults.
+        var saved = (await Tactics.GetClubTacticsAsync(club))!.Tactics[0];
+        await Tactics.SaveAsync(club, draft with { Id = saved.Id, Situations = null });
+        Assert.Equal(SituationSettings.Default, (await Tactics.GetMatchTacticsAsync(club)).Situations);
+    }
+
+    [Fact]
     public async Task Duplicate_names_and_players_of_other_clubs_are_refused()
     {
         var club = _world.HomeClub.Id;

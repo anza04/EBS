@@ -77,8 +77,8 @@ rim +0.01·spacing − 0.02·help, three +0.012·help; pick-and-roll coverage on
 energy); + the shooter's form of the day `N(0, 0.01 + 0.03·(100 − consistency)/100)`; home +0.015; +0.05 per missing
 defender; fast-break rim +0.12; hurried last shot −0.10. Clamped 0.05–0.90.
 
-The **defender** is the player in the same slot (PG…C); in man-to-man a *perimeter stopper* guards the opponent's
-main scorer on non-post shots.
+The **defender** is the player in the same slot (PG…C) against zones; in man-based defenses the matchup map of §8.1
+(explicit matchups, the perimeter stopper on the best scorer, switches on pick and rolls).
 
 **Shooting fouls**: rim 0.23 (fast break 0.27), post 0.20, mid 0.06, three 0.025, × (1 + 0.25·intensity). The fouler
 is the defender (inside shots: 40% the best shot blocker). The shot counts only when made (`0.5·p`, and-one: one free
@@ -104,6 +104,9 @@ Every tactical setting is read through `TacticLevel.Offset` (−1…+1) as in §
 `TacticalModel` (shot mix, make edges, turnover edges, pace, defensive load, rebound edges, fast breaks, pick-and-roll
 coverage). Tactics can be replaced during a live match (`ChangeTactics`); assignments (role, shot priority, minutes
 target) are re-read for every player.
+
+### Advanced tactics (Step 27)
+See §8.
 
 ### Chemistry and morale (Step 26)
 Make probability + 0.02 × `TeamSheet.Chemistry`, turnover chance − 0.008 × chemistry, player form + 0.01 × (morale − 50) / 50
@@ -158,21 +161,94 @@ players with position-typical attributes; quality 60 against 60). Results on 400
 
 | Statistic | Engine | Accepted range |
 |---|---|---|
-| Points | 77.3 | 72–88 |
-| Possessions | 73.0 | 68–78 |
-| 2P% / 3P% / FT% | 53.9% / 34.4% / 78.6% | 48–57 / 32–39 / 70–80 |
+| Points | 79.1 | 72–88 |
+| Possessions | 74.0 | 68–78 |
+| 2P% / 3P% / FT% | 54.2% / 34.9% / 78.2% | 48–57 / 32–39 / 70–80 |
 | Three-point share of field goals | 36.3% | 32–45% |
-| Free-throw attempts | 20.3 | 16–26 |
-| Rebounds (offensive) | 33.1 (9.5) | 32–40 (8–13) |
-| Assists / turnovers / steals / blocks | 15.9 / 12.5 / 6.0 / 2.0 | 14–21 / 11–16 / 5–9 / 1.5–4.5 |
-| Personal fouls | 19.6 | 17–24 |
-| Games to overtime | 2.3% | 2–12% |
-| Top scorer's share of team points | 25% | 18–35% |
-| Starters' minutes | 28.9 | 24–33 |
-| Home wins | 52.5% | 50–65% |
+| Free-throw attempts | 21.4 | 16–26 |
+| Rebounds (offensive) | 33.2 (9.4) | 32–40 (8–13) |
+| Assists / turnovers / steals / blocks | 16.1 / 12.5 / 6.0 / 2.0 | 14–21 / 11–16 / 5–9 / 1.5–4.5 |
+| Personal fouls | 20.2 | 17–24 |
+| Games to overtime | 3.0% | 2–12% |
+| Top scorer's share of team points | 24% | 18–35% |
+| Starters' minutes | 28.8 | 24–33 |
+| Home wins | 55% | 50–65% |
 
-Other checks: quality 70 vs 55 wins 95% (margin +22); tempo 1 + post offense 63.8 possessions / 63.4 points against
+(Step 27 values: the default game management — clock management and intentional fouls late, blowout rest — adds
+about one point and one free throw per game.)
+
+Other checks: quality 70 vs 55 wins 89% (margin +21); tempo 1 + post offense 63.8 possessions / 63.4 points against
 tempo 5 + transition 97.7 / 108.1; five-out three-point share 40.4% against 31.9% for a post offense; a full-court
 press forces more turnovers; low fitness (45) costs more than 3 points of margin; 60 complete matches and 150
 short-handed matches (5 players) never reach an invalid state (score = sum of points, 200 player-minutes per team and
 25 per overtime, nobody above 5 fouls, nobody plays after fouling out).
+
+## 8. Advanced tactics (Step 27)
+
+Options and the engine's coach: `docs/TACTICS.md` §7. Code: `MatchSimulation.Situations.cs`, tables in `TacticalModel`.
+
+### 8.1 Matchups and switches (man-to-man and presses)
+For every shot the defense builds a matchup map: defenders with an explicit matchup (a perimeter stopper without one:
+best scorer) take the free opponent with the highest value — best scorer `points + 8 × usage`, best shooter three-point,
+best playmaker passing + ball handling, best big `post moves + close shot + 1.5 × (height − 195)` — then the others take
+the nearest free slot. On a pick-and-roll shot (§2.4) the screener is the roll man, else the tallest player; the
+handler's and the screener's defenders switch when the coverage is *Switch*, switching is *Everything*, or *SameSize*
+with heights within 7 cm. A switched play gets no coverage edge; the handler and the screener shoot against each
+other's defender.
+
+Size mismatch on the shot type (shooter − defender height): ≥ 8 cm post ×2.2 (×2.8 when hunted); ≤ −8 cm post ×0.6,
+rim ×1.1, mid-range and three ×1.15.
+
+Matchup hunting (offense, against man-based defenses): the hunted player (lowest `(perimeter + interior defense) / 2` of
+his defender, or the largest height advantage of 6 cm+) has shot weight ×1.5; possessions +0.8 s, turnovers +0.004.
+
+### 8.2 Coverage, play calling, zone offense
+| Item | Effect |
+|---|---|
+| Ice | rim −0.03, mid +0.015 on pick-and-roll plays; turnovers +0.005 (pick-and-roll offense) |
+| Under | three +0.035, mid +0.01, rim −0.025 on pick-and-roll plays |
+| Set plays | possession +1.5 s, half-court make +0.015, turnovers −0.008, assists ×1.05 |
+| Hot hand | shot weight × (1 + 0.15 × clamp(made − missed/2, 0, 10)) |
+| Overload (vs zone) | three weight ×1.15, make +0.012; turnovers +0.005 |
+| High post (vs zone) | mid ×1.3 (+0.02), post ×1.1 (+0.01) |
+| Attack gaps (vs zone) | rim ×1.2 (+0.015); turnovers +0.01 |
+| After own timeout | first shot of the next possession +0.03 |
+
+### 8.3 Clock and fouls
+Half-court possessions (not fast breaks or second chances) can follow a clock plan:
+- Q1–Q3: *two-for-one* with 30–44 s left → shoot after `clock − 30 − U(0, 4)` s (min 2), make −0.015; *hold for the
+  last shot* with the shot clock off (≤ 24.5 s, > 4 s) → shoot at `clock − 0.5 − U(0, 2)` s.
+- Q4/OT, last 120 s: leading and *milk the clock* → `shot clock − 0.5 − U(0, 1.5)` s (or the rest of the period);
+  trailing within 3 with the shot clock off and *hurry* → shoot at `clock − 1.5 − U(0, 2)` s, a three when down 3;
+  trailing by 4+ → `7 + U(0, 3)` s, make −0.015.
+
+Intentional fouls (Q4/OT, before every action of a possession): the defense trailing by 3–8 with ≤ 60 s, or by 1–2 with
+≤ 15 s and a shot clock longer than the game clock (*foul when trailing*), or leading by 3 with ≤ 7 s in the bonus
+(*foul up three*), fouls after `1 + U(0, 2)` s: the fouled player is weighted by `(100 − free throw)²`, the fouler is the
+defender with fewest fouls (bench players first). In the bonus: two free throws; otherwise play goes on with at least
+14 s on the shot clock.
+
+Foul management changes foul trouble (§5): *Ignore* never; *Protect* as normal in Q1–Q3 and at four fouls in the whole
+fourth quarter and overtimes. A defender of a *Protect* team in foul trouble: shooting fouls ×0.7, make +0.02.
+Rotation: rest thresholds −8 (*Tight*, bench players beyond rotation priority 3 are not used by choice) or +6 (*Deep*,
+rested players return from 84 energy instead of 88). Blowout (Q4/OT, ≤ 300 s, margin ≥ 20, *rest starters*): starters
+need rest, lose 30 value points and are not brought back.
+
+### 8.4 Measured effects (`TacticalEngineTests`, 150 matches each, quality 60)
+| Instruction | Effect |
+|---|---|
+| Elite defender on the opposing star (best scorer) | star 26.6 → 24.9 points |
+| Hunting the weakest defender | hunted player's shot share 15.3% → 19.3% |
+| Ice vs Under against a pick-and-roll offense | 3P% 34.8% vs 38.7% |
+| Switch everything vs never, against a blitz | post shots 5.1 → 5.4, 3P% 37.6% → 35.9% |
+| Set plays vs flow | possessions 148 → 137, turnovers 12.8 → 10.7 |
+| Hot hand | top shooter's share 23.1% → 24.3% |
+| Overload / attack gaps vs a 2-3 zone | three share 41.9% → 45.0% / 40.5% |
+| Two-for-one vs hold for the last shot | possessions 151.0 vs 148.7 |
+| Late clock management and intentional fouls | free throws in the last minute 1.8 → 4.4 |
+| Tight / standard / deep rotation | starters' minutes 30.1 / 28.7 / 27.4; players used 8.6 / 10.4 / 10.4 |
+| Foul management ignore / normal / protect | foul-outs 333 / 274 / 140 |
+| Rest starters in blowouts (80 vs 45) | winners' starters 31.8 → 30.4 minutes |
+| Coach adjusts, 50 vs 70 | late full-court press in 49 of 60 games |
+
+Engine cost: about 10–20% more time per match than Step 26 (400 matches ≈ 1.1 s in Release).

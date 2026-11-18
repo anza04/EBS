@@ -41,7 +41,8 @@ public sealed record TacticDraft(
     OffensiveSettings Offense,
     DefensiveSystem DefensiveSystem,
     DefensiveSettings Defense,
-    IReadOnlyList<TacticalAssignment> Assignments);
+    IReadOnlyList<TacticalAssignment> Assignments,
+    SituationSettings? Situations = null);
 
 /// <summary>A club player in the tactics screen with his stored assignment in the shown tactic (or the suggestion).</summary>
 public sealed record TacticSquadPlayer(Player Player, RosterRole RosterRole, Position? LineupPosition, TacticalRole SuggestedRole);

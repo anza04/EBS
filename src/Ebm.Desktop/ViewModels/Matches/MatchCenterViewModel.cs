@@ -332,7 +332,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         HomeBox = [.. report.HomeLines.Select(l => new BoxRow(l.Player, false, l.BoxScore, null, null, l.BoxScore.PersonalFouls >= 5))];
         AwayBox = [.. report.AwayLines.Select(l => new BoxRow(l.Player, false, l.BoxScore, null, null, l.BoxScore.PersonalFouls >= 5))];
         TeamStats = Compare(report.HomeStatistics, report.AwayStatistics);
-        Report = ReportLines(HomeName, AwayName, m.HomeScore, m.AwayScore, m.Overtimes, report.HomeLines.Select(l => (l.Player, l.BoxScore)), report.AwayLines.Select(l => (l.Player, l.BoxScore)));
+        Report = ReportLines(HomeName, AwayName, m.HomeScore, m.AwayScore, m.Overtimes, report.HomeLines.Select(l => (l.Player, l.BoxScore)), report.AwayLines.Select(l => (l.Player, l.BoxScore)), notes: report.TacticalNotes);
         HomeInfo = AwayInfo = string.Empty;
     }
 
@@ -484,7 +484,8 @@ public sealed partial class MatchCenterViewModel : ObservableObject
             sim.Overtimes,
             sim.Lines(TeamSide.Home).Select(l => (l.Player.FullName, l.ToBoxScore())),
             sim.Lines(TeamSide.Away).Select(l => (l.Player.FullName, l.ToBoxScore())),
-            Quarters(sim));
+            Quarters(sim),
+            sim.TacticalNotes);
         if (ManagedTeam is { } side)
         {
             OnCourt = [.. sim.OnCourt(side).Select(l => new Option<PlayerId>(l.Player.Id, $"{l.Player.FullName} · {l.Energy:0}% · {l.PersonalFouls} PF"))];
@@ -552,7 +553,8 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         int overtimes,
         IEnumerable<(string Player, BoxScore Box)> home,
         IEnumerable<(string Player, BoxScore Box)> away,
-        IReadOnlyList<InfoLine>? quarters = null)
+        IReadOnlyList<InfoLine>? quarters = null,
+        IEnumerable<TacticalNote>? notes = null)
     {
         var h = home.ToList();
         var a = away.ToList();
@@ -569,6 +571,9 @@ public sealed partial class MatchCenterViewModel : ObservableObject
             new("Most assists", Leader(h.Concat(a), b => b.Assists)),
         ];
         lines.AddRange(quarters ?? []);
+
+        // Tactical decisions and situational plays (Step 27).
+        lines.AddRange((notes ?? []).Select(n => new InfoLine($"{n.Time} · {(n.Home ? homeName : awayName)}", n.Text)));
         return lines;
     }
 

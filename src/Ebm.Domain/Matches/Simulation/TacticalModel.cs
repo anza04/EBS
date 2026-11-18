@@ -181,6 +181,11 @@ public static class TacticalModel
         (PickAndRollCoverage.Hedge, ShotType.Rim) => 0.015,
         (PickAndRollCoverage.Blitz, ShotType.Three) => 0.03,
         (PickAndRollCoverage.Blitz, ShotType.Rim) => 0.02,
+        (PickAndRollCoverage.Ice, ShotType.Rim) => -0.03,
+        (PickAndRollCoverage.Ice, ShotType.MidRange) => 0.015,
+        (PickAndRollCoverage.Under, ShotType.Three) => 0.035,
+        (PickAndRollCoverage.Under, ShotType.MidRange) => 0.01,
+        (PickAndRollCoverage.Under, ShotType.Rim) => -0.025,
         _ => 0.0,
     };
 
@@ -189,6 +194,65 @@ public static class TacticalModel
     {
         PickAndRollCoverage.Blitz => 0.03,
         PickAndRollCoverage.Hedge => 0.012,
+        PickAndRollCoverage.Ice => 0.005,
         _ => 0.0,
     };
+
+    /// <summary>Whether the defense is a zone.</summary>
+    public static bool IsZone(DefensiveSystem system) => system is DefensiveSystem.Zone23 or DefensiveSystem.Zone32 or DefensiveSystem.Zone131;
+
+    /// <summary>Whether players guard a man (man-to-man and the presses): matchups and switches apply.</summary>
+    public static bool IsManBased(DefensiveSystem system) => !IsZone(system);
+
+    /// <summary>Shot-type weight multiplier of the zone offense (only against zones).</summary>
+    public static double ZoneOffenseMix(ZoneOffense offense, ShotType type) => (offense, type) switch
+    {
+        (ZoneOffense.Overload, ShotType.Three) => 1.15,
+        (ZoneOffense.HighPost, ShotType.MidRange) => 1.3,
+        (ZoneOffense.HighPost, ShotType.Post) => 1.1,
+        (ZoneOffense.AttackGaps, ShotType.Rim) => 1.2,
+        _ => 1.0,
+    };
+
+    /// <summary>Make-probability change of the zone offense (only against zones).</summary>
+    public static double ZoneOffenseEdge(ZoneOffense offense, ShotType type) => (offense, type) switch
+    {
+        (ZoneOffense.Overload, ShotType.Three) => 0.012,
+        (ZoneOffense.HighPost, ShotType.MidRange) => 0.02,
+        (ZoneOffense.HighPost, ShotType.Post) => 0.01,
+        (ZoneOffense.AttackGaps, ShotType.Rim) => 0.015,
+        _ => 0.0,
+    };
+
+    /// <summary>Turnover change of the zone offense (only against zones).</summary>
+    public static double ZoneOffenseTurnovers(ZoneOffense offense) => offense switch
+    {
+        ZoneOffense.AttackGaps => 0.01,
+        ZoneOffense.Overload => 0.005,
+        _ => 0.0,
+    };
+
+    /// <summary>Seconds a set-play possession adds.</summary>
+    public const double SetPlaySeconds = 1.5;
+
+    /// <summary>Make-probability change of half-court shots with set plays.</summary>
+    public const double SetPlayEdge = 0.015;
+
+    /// <summary>Turnover change with set plays.</summary>
+    public const double SetPlayTurnovers = -0.008;
+
+    /// <summary>Make-probability change of the first shot after the team's own timeout (a drawn-up play).</summary>
+    public const double AfterTimeoutEdge = 0.03;
+
+    /// <summary>Seconds matchup hunting adds against man-based defenses.</summary>
+    public const double HuntingSeconds = 0.8;
+
+    /// <summary>Turnover change of matchup hunting against man-based defenses.</summary>
+    public const double HuntingTurnovers = 0.004;
+
+    /// <summary>Shot-share multiplier of the hunted player.</summary>
+    public const double HuntedUsage = 1.5;
+
+    /// <summary>Make-probability change of a hurried two-for-one shot.</summary>
+    public const double TwoForOneEdge = -0.015;
 }

@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261118090203_PlayerChemistry`** (Step 26).
+Schema version: **`20261118133803_TacticalEngine`** (Step 27).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -23,6 +23,7 @@ Schema version: **`20261118090203_PlayerChemistry`** (Step 26).
 | `20261117150208_Finances` | 23 | New tables `ClubBudgets` and `FinancialTransactions` (create-table only) |
 | `20261118081325_ContractNegotiations` | 25 | New tables `Agents`, `AgentRelationships`, `ContractNegotiations`; `Contracts` gains `PromisedRole`, `PromisedMinutes`, `PromiseStatus` (default `None`), `PromiseReviewedOn` (add-column, nullable or defaulted) |
 | `20261118090203_PlayerChemistry` | 26 | New table `PlayerRelationships` (create-table only) |
+| `20261118133803_TacticalEngine` | 27 | Tactics: twelve `Situation*` columns (add-column with defaults; existing "AI plan" tactics get coach adjustments and two-for-ones). Matches: `TacticalNotes` (JSON, nullable) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -321,8 +322,10 @@ A club's saved tactical configurations (rules in `docs/TACTICS.md`).
 | OffenseFocus | text(16) | `Balanced`, `Inside`, `Perimeter`, `KeyPlayers` |
 | DefenseIntensity, DefenseBallPressure, DefenseHelpDefense | int | 1–5 (domain-checked) |
 | DefenseSwitching, DefensePickAndRollCoverage, DefenseRebounding | text(16) | Enum names |
+| SituationMatchupTargeting, SituationPlayCalling, SituationZoneOffense, SituationEndOfQuarter, SituationFoulManagement, SituationRotation | text(16) | Enum names (defaults `Off`, `Flow`, `Standard`, `Normal`, `Normal`, `Standard`) |
+| SituationMilkClockWhenLeading, SituationHurryWhenTrailing, SituationFoulWhenTrailing, SituationFoulUpThree, SituationRestStartersInBlowouts, SituationCoachAdjusts | bool | Defaults true, true, true, false, true, false (docs/TACTICS.md §7) |
 | IsSelected | bool | |
-| Assignments | json? | Array of `{ PlayerId, Role, ShotPriority, MinutesTarget }`. Current state; player IDs have no foreign key, so tactics never block deleting a player, and assignments of players who left the club are ignored |
+| Assignments | json? | Array of `{ PlayerId, Role, ShotPriority, MinutesTarget, Matchup }` (`Matchup` missing in older rows = `Positional`). Current state; player IDs have no foreign key, so tactics never block deleting a player, and assignments of players who left the club are ignored |
 
 ### TrainingPlans
 A club's training programme (rules in `docs/DEVELOPMENT.md`).
@@ -447,6 +450,7 @@ The played result of a fixture.
 | HomeScore / AwayScore | int | 0–300, **no draws** (`HomeScore <> AwayScore`) |
 | Overtimes | int | 0–10 |
 | IsForfeit | bool | Game awarded 20–0 because a club could not field five players; no box score (default false) |
+| TacticalNotes | json? | Array of `{ Period, Clock, Home, Text }` (≤ 60, text ≤ 200): game plans, tactical changes and situational summaries (Step 27). Null for older results |
 
 ### Careers
 The user's career (at most one per game database, enforced by `ICareerService`; rules in `docs/SEASON_LIFECYCLE.md`).

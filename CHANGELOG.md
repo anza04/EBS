@@ -5,7 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.27.0] — 2026-11-18 — STEP 27: Advanced tactical engine
+
+### Added
+- Game management in every tactic (`SituationSettings`): matchup hunting, play calling (flow / hot hand / set plays),
+  zone offenses, end-of-quarter plans (two-for-one, hold for the last shot), foul management, rotation strategies,
+  late-game clock management and intentional fouls, blowout rest, coach adjustments. `docs/TACTICS.md` §7.
+- Per-player defensive matchups (`TacticalAssignment.Matchup`) and new pick-and-roll coverages `Ice` and `Under`;
+  switching rules now act on pick and rolls (size mismatches). `docs/MATCH_ENGINE.md` §8.
+- The engine's coach for AI tactics: a game plan against each opponent and in-game adjustments (zones, presses,
+  stoppers, pace, zone offenses), with reasons.
+- Tactical notes stored with each result (`Matches.TacticalNotes`) and shown in the match report; situational plays as
+  commentary events (`MatchEventKind.Situation`).
+- *Tactics* screen: game-management section and a *Guards* column. Migration `20261118133803_TacticalEngine`.
+- `TacticalEngineTests` (12 measured effects), persistence and report tests.
+
 ### Changed
+- AI tactics (`TacticPlanner`) let the coach adjust, play two-for-ones and size the rotation to the bench.
+- Statistical validation: 79.1 points and 21.4 free throws per team (was 77.3 / 20.3) from the default late-game
+  management.
+
+### Changed (since 0.26.0)
 - The slow suite plays `data/real-leagues` (138 clubs, 2,598 players) instead of the generated European dataset (512
   clubs, 6,168 players): `EuropeanTransferWindowTests`, `MilestoneTwoTests`, `RealLeaguesCompetitionTests` (was
   `EuropeDatasetTests`) and `RealLeaguesDatasetTests` (now also stable IDs, duplicates, a 20-day career); shared

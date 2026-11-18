@@ -40,6 +40,21 @@ internal sealed class TacticConfiguration : IEntityTypeConfiguration<Tactic>
             d.Property(x => x.PickAndRollCoverage).HasConversion<string>().HasMaxLength(16);
             d.Property(x => x.Rebounding).HasConversion<string>().HasMaxLength(16);
         });
+        builder.OwnsOne(x => x.Situations, o =>
+        {
+            foreach (var p in typeof(SituationSettings).GetProperties().Where(p => p.CanWrite && p.Name != "EqualityContract"))
+            {
+                o.Property(p.Name).HasColumnName("Situation" + p.Name);
+            }
+
+            o.Property(x => x.MatchupTargeting).HasConversion<string>().HasMaxLength(16);
+            o.Property(x => x.PlayCalling).HasConversion<string>().HasMaxLength(16);
+            o.Property(x => x.ZoneOffense).HasConversion<string>().HasMaxLength(16);
+            o.Property(x => x.EndOfQuarter).HasConversion<string>().HasMaxLength(16);
+            o.Property(x => x.FoulManagement).HasConversion<string>().HasMaxLength(16);
+            o.Property(x => x.Rotation).HasConversion<string>().HasMaxLength(16);
+        });
+        builder.Navigation(x => x.Situations).IsRequired();
         builder.Navigation(x => x.Offense).IsRequired();
         builder.Navigation(x => x.Defense).IsRequired();
 
@@ -48,6 +63,7 @@ internal sealed class TacticConfiguration : IEntityTypeConfiguration<Tactic>
         {
             a.ToJson("Assignments");
             a.Property(x => x.Role).HasConversion<string>();
+            a.Property(x => x.Matchup).HasConversion<string>();
         });
         builder.Navigation(x => x.Assignments).UsePropertyAccessMode(PropertyAccessMode.Field).HasField("_assignments");
     }

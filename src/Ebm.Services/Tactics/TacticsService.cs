@@ -52,11 +52,11 @@ internal sealed class TacticsService(IServiceScopeFactory scopes, IClubService c
         if (draft.Id is { } id)
         {
             tactic = existing.FirstOrDefault(t => t.Id == id) ?? throw new DomainException("The tactic no longer exists in the database.");
-            tactic.Update(name, draft.OffensiveSystem, draft.Offense, draft.DefensiveSystem, draft.Defense);
+            tactic.Update(name, draft.OffensiveSystem, draft.Offense, draft.DefensiveSystem, draft.Defense, draft.Situations);
         }
         else
         {
-            tactic = new Tactic(TacticId.New(), clubId, name, draft.OffensiveSystem, draft.Offense, draft.DefensiveSystem, draft.Defense);
+            tactic = new Tactic(TacticId.New(), clubId, name, draft.OffensiveSystem, draft.Offense, draft.DefensiveSystem, draft.Defense, draft.Situations);
             if (!existing.Any(t => t.IsSelected))
             {
                 tactic.Select();

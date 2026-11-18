@@ -63,6 +63,25 @@
               <ComboBox ItemsSource="{Binding Coverages}" SelectedItem="{Binding Coverage}" />
               <TextBlock Text="Rebounding" Style="{StaticResource Form.Label}" />
               <ComboBox ItemsSource="{Binding ReboundingPriorities}" SelectedItem="{Binding Rebounding}" />
+              <TextBlock Text="Game management" Style="{StaticResource Text.Title}" Margin="0,12,0,0" />
+              <TextBlock Text="Matchup hunting" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding MatchupTargetingOptions}" SelectedItem="{Binding MatchupTargeting}" />
+              <TextBlock Text="Play calling" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding PlayCallingOptions}" SelectedItem="{Binding PlayCalling}" />
+              <TextBlock Text="Against zones" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding ZoneOffenseOptions}" SelectedItem="{Binding ZoneOffense}" />
+              <TextBlock Text="End of quarter" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding EndOfQuarterOptions}" SelectedItem="{Binding EndOfQuarter}" />
+              <TextBlock Text="Foul trouble" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding FoulManagementOptions}" SelectedItem="{Binding FoulManagement}" />
+              <TextBlock Text="Rotation" Style="{StaticResource Form.Label}" />
+              <ComboBox ItemsSource="{Binding RotationStrategyOptions}" SelectedItem="{Binding Rotation}" />
+              <CheckBox Content="Milk the clock when leading late" IsChecked="{Binding MilkClockWhenLeading}" Margin="0,6,0,0" />
+              <CheckBox Content="Hurry when trailing late" IsChecked="{Binding HurryWhenTrailing}" Margin="0,6,0,0" />
+              <CheckBox Content="Foul on purpose when trailing late" IsChecked="{Binding FoulWhenTrailing}" Margin="0,6,0,0" />
+              <CheckBox Content="Foul when up three at the end" IsChecked="{Binding FoulUpThree}" Margin="0,6,0,0" />
+              <CheckBox Content="Rest starters in blowouts" IsChecked="{Binding RestStartersInBlowouts}" Margin="0,6,0,0" />
+              <CheckBox Content="Let the coach adapt to the opponent" IsChecked="{Binding CoachAdjusts}" Margin="0,6,0,0" />
               <Button Content="Save tactic" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,14,0,0" />
             </StackPanel>
           </Border>
@@ -93,6 +112,13 @@
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                     <TextBox Text="{Binding MinutesTarget, UpdateSourceTrigger=PropertyChanged}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Header="Guards" Width="120">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <ComboBox ItemsSource="{Binding DataContext.Matchups, RelativeSource={RelativeSource AncestorType=DataGrid}}" SelectedItem="{Binding Matchup, UpdateSourceTrigger=PropertyChanged}" />
                   </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
               </DataGridTemplateColumn>

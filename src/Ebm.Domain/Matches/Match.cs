@@ -11,6 +11,10 @@ public sealed class Match : Entity<MatchId>
     /// <summary>Score of a game awarded by forfeit (FIBA: 20–0 to the side that could play).</summary>
     public const int ForfeitScore = 20;
 
+    public const int MaxTacticalNotes = 60;
+
+    private List<TacticalNote>? _tacticalNotes = [];
+
     public Match(MatchId id, FixtureId fixtureId, int homeScore, int awayScore, int overtimes = 0)
         : this(id, fixtureId, homeScore, awayScore, overtimes, isForfeit: false)
     {
@@ -49,4 +53,13 @@ public sealed class Match : Entity<MatchId>
     public bool IsForfeit { get; private set; }
 
     public bool HomeWon => HomeScore > AwayScore;
+
+    /// <summary>The coaches' tactical decisions and situational plays (Step 27); empty for older results and forfeits.</summary>
+    public IReadOnlyList<TacticalNote> TacticalNotes => _tacticalNotes ?? [];
+
+    public void SetTacticalNotes(IEnumerable<TacticalNote> notes)
+    {
+        ArgumentNullException.ThrowIfNull(notes);
+        _tacticalNotes = [.. notes.Take(MaxTacticalNotes)];
+    }
 }

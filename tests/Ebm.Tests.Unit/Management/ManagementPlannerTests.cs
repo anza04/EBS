@@ -57,6 +57,11 @@ public sealed class ManagementPlannerTests
 
         var balanced = Enumerable.Range(0, 9).Select(i => NewPlayer((Position)(i % 5), 60)).Select(p => (p, Calculator.Evaluate(p))).ToList();
         Assert.Equal(OffensiveSystem.MotionOffense, TacticPlanner.Plan(balanced).OffensiveSystem);
+
+        // Step 27: the AI coach adapts to opponents, plays two-for-ones and uses a deep bench of equal players.
+        Assert.True(plan.Situations.CoachAdjusts);
+        Assert.Equal(EndOfQuarter.TwoForOne, plan.Situations.EndOfQuarter);
+        Assert.Equal(RotationStrategy.Deep, TacticPlanner.Plan(balanced).Situations.Rotation);
         Assert.Empty(TacticPlanner.Plan([]).Assignments);
     }
 

@@ -36,6 +36,10 @@ Defence: strong defence with athletic players → man-to-man, intensity and ball
 rebounders → 2-3 zone; else man-to-man. Roles: `TacticalRoles.Suggest`; the three best get shot priority 4. Saved as
 the club's tactic "AI plan" and selected.
 
+Game management (Step 27): *Coach adjusts* on (the engine's coach builds a game plan against each opponent and adjusts
+during the match, docs/TACTICS.md §7.3), two-for-ones at the end of quarters, and the rotation by depth: bench (players
+6–9) within 4 overall points of the starters → *Deep*, 12 or more below → *Tight*, else *Standard*.
+
 ## 4. Contracts
 
 * Renewals (`RenewalPolicy`): players among the club's best 10 by overall, aged ≤ 33, whose contract ends within 150 days.

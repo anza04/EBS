@@ -64,7 +64,7 @@ internal sealed class ClubManagementService(
             var existing = (await tactics.GetClubTacticsAsync(clubId, cancellationToken).ConfigureAwait(false))?.Tactics.FirstOrDefault(t => t.Name == IClubManagementService.AiTacticName);
             var tactic = await tactics.SaveAsync(
                 clubId,
-                new TacticDraft(existing?.Id, IClubManagementService.AiTacticName, plan.OffensiveSystem, plan.Offense, plan.DefensiveSystem, plan.Defense, plan.Assignments),
+                new TacticDraft(existing?.Id, IClubManagementService.AiTacticName, plan.OffensiveSystem, plan.Offense, plan.DefensiveSystem, plan.Defense, plan.Assignments, plan.Situations),
                 cancellationToken).ConfigureAwait(false);
             if (!tactic.IsSelected)
             {

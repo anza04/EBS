@@ -62,6 +62,10 @@ public sealed class MatchServiceTests : IAsyncLifetime
         var reopened = (await Matches.GetReportAsync(report.Match.Id))!;
         Assert.Equal(report.HomeLines.Select(l => (l.PlayerId, l.BoxScore.Points, l.BoxScore.Minutes)), reopened.HomeLines.Select(l => (l.PlayerId, l.BoxScore.Points, l.BoxScore.Minutes)));
 
+        // Tactical decisions are stored with the result (Step 27): at least each side's game plan.
+        Assert.Contains(reopened.TacticalNotes, n => n.Home && n.Period == 1 && n.Text.StartsWith("Game plan", StringComparison.Ordinal));
+        Assert.Contains(reopened.TacticalNotes, n => !n.Home && n.Text.StartsWith("Game plan", StringComparison.Ordinal));
+
         var line = Assert.Single(await Matches.GetFixturesAsync(_world.Championship.Id, _world.Season.Id), f => f.Fixture.Id == _fixture.Id);
         Assert.Equal(report.Match.Id, line.Match!.Id);
         var standings = await _db.Services.GetRequiredService<ICompetitionService>().GetStandingsAsync(_world.Championship.Id, _world.Season.Id);

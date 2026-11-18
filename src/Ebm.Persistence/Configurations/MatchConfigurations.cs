@@ -38,6 +38,10 @@ internal sealed class MatchConfiguration : IEntityTypeConfiguration<Match>
             t.HasCheckConstraint("CK_Matches_NoDraw", "HomeScore <> AwayScore");
             t.HasCheckConstraint("CK_Matches_Scores", "HomeScore >= 0 AND AwayScore >= 0 AND Overtimes >= 0");
         });
+
+        // Tactical notes of the match (Step 27): a JSON array in one column, written once with the result.
+        builder.OwnsMany(x => x.TacticalNotes, n => n.ToJson("TacticalNotes"));
+        builder.Navigation(x => x.TacticalNotes).UsePropertyAccessMode(PropertyAccessMode.Field).HasField("_tacticalNotes");
         builder.HasOne<Fixture>().WithOne().HasForeignKey<Match>(x => x.FixtureId);
         builder.HasIndex(x => x.FixtureId).IsUnique();
     }

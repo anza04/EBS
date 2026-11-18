@@ -105,6 +105,28 @@ public sealed partial class MatchSimulation
         /// <summary>Game seconds elapsed at this team's last timeout.</summary>
         public double LastTimeout { get; set; } = double.MinValue;
 
+        /// <summary>The next possession starts with a play drawn up in the team's own timeout.</summary>
+        public bool AfterTimeout { get; set; }
+
+        /// <summary>Points from field goals, and those at the rim or in the post: what the opposing coach reads.</summary>
+        public int FieldGoalPoints { get; set; }
+
+        public int InsidePoints { get; set; }
+
+        public int Possessions { get; set; }
+
+        /// <summary>Period whose closing minutes the coach already reviewed.</summary>
+        public int ClosingReviewed { get; set; }
+
+        /// <summary>Situational plays run, by description (summarised in the tactical notes).</summary>
+        public SortedDictionary<string, int> Situations { get; } = new(StringComparer.Ordinal);
+
+        public int ThreeMade => Runners.Sum(r => r.Line.ThreePointMade);
+
+        public int ThreeAttempted => Runners.Sum(r => r.Line.ThreePointAttempted);
+
+        public int Turnovers => Runners.Sum(r => r.Line.Turnovers);
+
         public Runner? Find(PlayerId id) => Runners.FirstOrDefault(r => r.Player.Id == id);
 
         public void SetTactics(TeamTactics tactics)

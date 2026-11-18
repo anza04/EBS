@@ -19,6 +19,9 @@ public enum MatchEventKind
     Substitution,
     Timeout,
     TacticsChanged,
+
+    /// <summary>A situational play: intentional foul, two-for-one, last-shot play, set play after a timeout (Step 27).</summary>
+    Situation,
     PeriodEnd,
     GameEnd,
 }
@@ -187,6 +190,9 @@ public sealed record MatchResult(
     bool EndedByDefault)
 {
     public IReadOnlyList<PlayerLine> Lines(TeamSide side) => side == TeamSide.Home ? HomeLines : AwayLines;
+
+    /// <summary>Tactical decisions and situational summaries (Step 27), in match order.</summary>
+    public IReadOnlyList<TacticalNote> TacticalNotes { get; init; } = [];
 
     public TeamStatistics Statistics(TeamSide side) => TeamStatistics.From(Lines(side).Select(l => l.ToBoxScore()));
 }

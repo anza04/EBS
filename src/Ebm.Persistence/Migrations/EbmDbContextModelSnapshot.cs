@@ -1625,6 +1625,36 @@ namespace Ebm.Persistence.Migrations
                         .HasForeignKey("Ebm.Domain.Matches.Match", "FixtureId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.OwnsMany("Ebm.Domain.Matches.TacticalNote", "TacticalNotes", b1 =>
+                        {
+                            b1.Property<Guid>("MatchId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<int>("Clock");
+
+                            b1.Property<bool>("Home");
+
+                            b1.Property<int>("Period");
+
+                            b1.Property<string>("Text")
+                                .IsRequired();
+
+                            b1.HasKey("MatchId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Matches");
+
+                            b1
+                                .ToJson("TacticalNotes")
+                                .HasColumnType("TEXT");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MatchId");
+                        });
+
+                    b.Navigation("TacticalNotes");
                 });
 
             modelBuilder.Entity("Ebm.Domain.Matches.PlayerMatchStatistics", b =>
@@ -2198,12 +2228,88 @@ namespace Ebm.Persistence.Migrations
                                 .HasForeignKey("TacticId");
                         });
 
+                    b.OwnsOne("Ebm.Domain.Tactics.SituationSettings", "Situations", b1 =>
+                        {
+                            b1.Property<Guid>("TacticId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<bool>("CoachAdjusts")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationCoachAdjusts");
+
+                            b1.Property<string>("EndOfQuarter")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationEndOfQuarter");
+
+                            b1.Property<string>("FoulManagement")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationFoulManagement");
+
+                            b1.Property<bool>("FoulUpThree")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationFoulUpThree");
+
+                            b1.Property<bool>("FoulWhenTrailing")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationFoulWhenTrailing");
+
+                            b1.Property<bool>("HurryWhenTrailing")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationHurryWhenTrailing");
+
+                            b1.Property<string>("MatchupTargeting")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationMatchupTargeting");
+
+                            b1.Property<bool>("MilkClockWhenLeading")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationMilkClockWhenLeading");
+
+                            b1.Property<string>("PlayCalling")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationPlayCalling");
+
+                            b1.Property<bool>("RestStartersInBlowouts")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("SituationRestStartersInBlowouts");
+
+                            b1.Property<string>("Rotation")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationRotation");
+
+                            b1.Property<string>("ZoneOffense")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("SituationZoneOffense");
+
+                            b1.HasKey("TacticId");
+
+                            b1.ToTable("Tactics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TacticId");
+                        });
+
                     b.OwnsMany("Ebm.Domain.Tactics.TacticalAssignment", "Assignments", b1 =>
                         {
                             b1.Property<Guid>("TacticId");
 
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("Matchup")
+                                .IsRequired();
 
                             b1.Property<int?>("MinutesTarget");
 
@@ -2232,6 +2338,9 @@ namespace Ebm.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Offense")
+                        .IsRequired();
+
+                    b.Navigation("Situations")
                         .IsRequired();
                 });
 

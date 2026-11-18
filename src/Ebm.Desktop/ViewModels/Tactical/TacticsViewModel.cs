@@ -23,6 +23,9 @@ public sealed partial class AssignmentRowViewModel : ObservableObject
     [ObservableProperty]
     private string _minutesTarget = string.Empty;
 
+    [ObservableProperty]
+    private DefensiveMatchup _matchup;
+
     public AssignmentRowViewModel(TacticSquadPlayer player, TacticalAssignment? assignment)
     {
         ArgumentNullException.ThrowIfNull(player);
@@ -30,6 +33,7 @@ public sealed partial class AssignmentRowViewModel : ObservableObject
         _role = assignment?.Role ?? player.SuggestedRole;
         _shotPriority = assignment?.ShotPriority ?? TacticLevel.Normal;
         _minutesTarget = assignment?.MinutesTarget?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+        _matchup = assignment?.Matchup ?? DefensiveMatchup.Positional;
     }
 
     public TacticSquadPlayer Player { get; }
@@ -49,7 +53,7 @@ public sealed partial class AssignmentRowViewModel : ObservableObject
             : int.TryParse(MinutesTarget, NumberStyles.Integer, CultureInfo.CurrentCulture, out var m)
                 ? m
                 : throw new DomainValidationException($"Minutes target of {Name} must be a whole number.");
-        return new TacticalAssignment(Player.Player.Id, Role, ShotPriority, minutes);
+        return new TacticalAssignment(Player.Player.Id, Role, ShotPriority, minutes, Matchup);
     }
 }
 
@@ -120,6 +124,42 @@ public sealed partial class TacticsViewModel : ObservableObject
     private ReboundingPriority _rebounding = ReboundingPriority.Balanced;
 
     [ObservableProperty]
+    private MatchupTargeting _matchupTargeting;
+
+    [ObservableProperty]
+    private PlayCalling _playCalling;
+
+    [ObservableProperty]
+    private ZoneOffense _zoneOffense;
+
+    [ObservableProperty]
+    private EndOfQuarter _endOfQuarter;
+
+    [ObservableProperty]
+    private FoulManagement _foulManagement;
+
+    [ObservableProperty]
+    private RotationStrategy _rotation;
+
+    [ObservableProperty]
+    private bool _milkClockWhenLeading;
+
+    [ObservableProperty]
+    private bool _hurryWhenTrailing;
+
+    [ObservableProperty]
+    private bool _foulWhenTrailing;
+
+    [ObservableProperty]
+    private bool _foulUpThree;
+
+    [ObservableProperty]
+    private bool _restStartersInBlowouts;
+
+    [ObservableProperty]
+    private bool _coachAdjusts;
+
+    [ObservableProperty]
     private IReadOnlyList<AssignmentRowViewModel> _assignments = [];
 
     [ObservableProperty]
@@ -145,6 +185,20 @@ public sealed partial class TacticsViewModel : ObservableObject
     public IReadOnlyList<PickAndRollCoverage> Coverages { get; } = Enum.GetValues<PickAndRollCoverage>();
 
     public IReadOnlyList<ReboundingPriority> ReboundingPriorities { get; } = Enum.GetValues<ReboundingPriority>();
+
+    public IReadOnlyList<MatchupTargeting> MatchupTargetingOptions { get; } = Enum.GetValues<MatchupTargeting>();
+
+    public IReadOnlyList<PlayCalling> PlayCallingOptions { get; } = Enum.GetValues<PlayCalling>();
+
+    public IReadOnlyList<ZoneOffense> ZoneOffenseOptions { get; } = Enum.GetValues<ZoneOffense>();
+
+    public IReadOnlyList<EndOfQuarter> EndOfQuarterOptions { get; } = Enum.GetValues<EndOfQuarter>();
+
+    public IReadOnlyList<FoulManagement> FoulManagementOptions { get; } = Enum.GetValues<FoulManagement>();
+
+    public IReadOnlyList<RotationStrategy> RotationStrategyOptions { get; } = Enum.GetValues<RotationStrategy>();
+
+    public IReadOnlyList<DefensiveMatchup> Matchups { get; } = Enum.GetValues<DefensiveMatchup>();
 
     public IReadOnlyList<TacticalRole> Roles { get; } = TacticalRoles.All;
 
@@ -204,7 +258,8 @@ public sealed partial class TacticsViewModel : ObservableObject
             new OffensiveSettings { Tempo = Tempo, ShotSelection = ShotSelection, BallMovement = BallMovement, Spacing = Spacing, PickAndRollFrequency = PickAndRollFrequency, Focus = Focus },
             DefensiveSystem,
             new DefensiveSettings { Intensity = Intensity, BallPressure = BallPressure, HelpDefense = HelpDefense, Switching = Switching, PickAndRollCoverage = Coverage, Rebounding = Rebounding },
-            [.. Assignments.Select(a => a.ToAssignment())]);
+            [.. Assignments.Select(a => a.ToAssignment())],
+            new SituationSettings { MatchupTargeting = MatchupTargeting, PlayCalling = PlayCalling, ZoneOffense = ZoneOffense, EndOfQuarter = EndOfQuarter, FoulManagement = FoulManagement, Rotation = Rotation, MilkClockWhenLeading = MilkClockWhenLeading, HurryWhenTrailing = HurryWhenTrailing, FoulWhenTrailing = FoulWhenTrailing, FoulUpThree = FoulUpThree, RestStartersInBlowouts = RestStartersInBlowouts, CoachAdjusts = CoachAdjusts });
         var saved = await _tactics.SaveAsync(id, draft);
         await RefreshAsync();
         SelectedTactic = Saved.FirstOrDefault(t => t.Id == saved.Id);
@@ -235,6 +290,7 @@ public sealed partial class TacticsViewModel : ObservableObject
     {
         var offense = tactic?.Offense ?? OffensiveSettings.Default;
         var defense = tactic?.Defense ?? DefensiveSettings.Default;
+        var situations = tactic?.Situations ?? SituationSettings.Default;
         Name = tactic?.Name ?? (Saved.Count == 0 ? "Standard" : Name);
         OffensiveSystem = tactic?.OffensiveSystem ?? OffensiveSystem.MotionOffense;
         Tempo = offense.Tempo;
@@ -250,6 +306,18 @@ public sealed partial class TacticsViewModel : ObservableObject
         Switching = defense.Switching;
         Coverage = defense.PickAndRollCoverage;
         Rebounding = defense.Rebounding;
+        MatchupTargeting = situations.MatchupTargeting;
+        PlayCalling = situations.PlayCalling;
+        ZoneOffense = situations.ZoneOffense;
+        EndOfQuarter = situations.EndOfQuarter;
+        FoulManagement = situations.FoulManagement;
+        Rotation = situations.Rotation;
+        MilkClockWhenLeading = situations.MilkClockWhenLeading;
+        HurryWhenTrailing = situations.HurryWhenTrailing;
+        FoulWhenTrailing = situations.FoulWhenTrailing;
+        FoulUpThree = situations.FoulUpThree;
+        RestStartersInBlowouts = situations.RestStartersInBlowouts;
+        CoachAdjusts = situations.CoachAdjusts;
         var stored = tactic?.Assignments.ToDictionary(a => a.PlayerId) ?? [];
         Assignments = [.. (_data?.Squad ?? []).Select(p => new AssignmentRowViewModel(p, stored.GetValueOrDefault(p.Player.Id)))];
     }
