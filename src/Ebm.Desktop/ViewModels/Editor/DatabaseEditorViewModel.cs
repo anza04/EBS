@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.Startup;
 using Ebm.Desktop.ViewModels.Careers;
+using Ebm.Desktop.ViewModels.Chemistry;
 using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Matches;
@@ -13,6 +14,7 @@ using Ebm.Desktop.ViewModels.Medical;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Services.Careers;
+using Ebm.Services.Chemistry;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
@@ -57,7 +59,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IScoutingService? scouting = null,
         IDevelopmentService? development = null,
         IMedicalService? medical = null,
-        IFinanceService? finances = null)
+        IFinanceService? finances = null,
+        IChemistryService? chemistry = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -83,6 +86,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Training = development is null ? null : new TrainingViewModel(development, Lookups);
         Medical = medical is null ? null : new MedicalViewModel(medical, Lookups);
         Finances = finances is null ? null : new FinancesViewModel(finances, Lookups);
+        DressingRoom = chemistry is null ? null : new DressingRoomViewModel(chemistry, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -131,6 +135,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     public FinancesViewModel? Finances { get; }
 
+    public DressingRoomViewModel? DressingRoom { get; }
+
     /// <summary>Reloads every page from the database.</summary>
     public async Task ReloadAsync()
     {
@@ -177,6 +183,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Finances is not null)
         {
             await Finances.RefreshAsync();
+        }
+
+        if (DressingRoom is not null)
+        {
+            await DressingRoom.RefreshAsync();
         }
 
         Counts = $"{snapshot.Countries.Count} countries · {snapshot.Leagues.Count} leagues · {snapshot.Competitions.Count} competitions · " +

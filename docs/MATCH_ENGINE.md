@@ -105,6 +105,10 @@ Every tactical setting is read through `TacticLevel.Offset` (−1…+1) as in §
 coverage). Tactics can be replaced during a live match (`ChangeTactics`); assignments (role, shot priority, minutes
 target) are re-read for every player.
 
+### Chemistry and morale (Step 26)
+Make probability + 0.02 × `TeamSheet.Chemistry`, turnover chance − 0.008 × chemistry, player form + 0.01 × (morale − 50) / 50
+(docs/CHEMISTRY.md §6).
+
 ## 4. Fatigue
 
 Energy starts at the player's fitness (minimum 40) and is capped there. On court, per second:

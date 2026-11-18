@@ -1,3 +1,4 @@
+using Ebm.Domain.Chemistry;
 using Ebm.Domain.Players;
 using Ebm.Domain.Tactics;
 
@@ -477,6 +478,7 @@ public sealed partial class MatchSimulation
         p -= (100 - shooter.Energy) * 0.0012;
         p += defender is null ? 0 : (100 - defender.Energy) * 0.0006;
         p += shooter.Form;
+        p += ChemistryModel.MakeEdge * off.Sheet.Chemistry;
         p += off.Side == TeamSide.Home && !_neutral ? 0.015 : 0;
         p += 0.05 * (5 - def.OnCourt.Count());
         p += fastBreak && type == ShotType.Rim ? 0.12 : 0;
@@ -497,7 +499,8 @@ public sealed partial class MatchSimulation
             + (off.Tactics.OffensiveSystem == OffensiveSystem.Transition ? 0.01 : 0)
             - ((((handler.A.BallHandling + handler.A.DecisionMaking) / 2.0) - 50) * 0.0012)
             + ((def.OnCourt.Average(r => r.A.Steal) - 50) * 0.0008)
-            + ((100 - handler.Energy) * 0.0004);
+            + ((100 - handler.Energy) * 0.0004)
+            - (ChemistryModel.TurnoverEdge * off.Sheet.Chemistry);
         if (off.Tactics.OffensiveSystem == OffensiveSystem.PickAndRoll)
         {
             p += TacticalModel.PickAndRollTurnovers(d.PickAndRollCoverage);

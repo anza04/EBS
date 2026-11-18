@@ -6,6 +6,7 @@ using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Seasons;
+using Ebm.Services.Chemistry;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
@@ -19,6 +20,7 @@ internal sealed class MatchService(
     IServiceScopeFactory scopes,
     IClubService clubs,
     ITacticsService tactics,
+    IChemistryService chemistry,
     PlayerRatingCalculator calculator) : IMatchService
 {
     public async Task<IReadOnlyList<CompetitionSeason>> GetCompetitionSeasonsAsync(CancellationToken cancellationToken = default)
@@ -239,12 +241,15 @@ internal sealed class MatchService(
         var roster = await clubs.GetRosterAsync(clubId, cancellationToken).ConfigureAwait(false)
             ?? throw new DomainException("A club of this fixture no longer exists in the database.");
         var teamTactics = await tactics.GetMatchTacticsAsync(clubId, cancellationToken).ConfigureAwait(false);
-        return TeamSheet.Pick(
+        var sheet = TeamSheet.Pick(
             clubId,
             roster.Club.Name,
             roster.Players.Select(p => (p.Player, p.Role, p.LineupPosition, p.RotationOrder)),
             teamTactics,
             calculator);
+
+        // Team chemistry (docs/CHEMISTRY.md §6) of the named core.
+        return sheet with { Chemistry = (await chemistry.RateAsync(sheet, cancellationToken).ConfigureAwait(false)).Score };
     }
 
     private static IRepository<TEntity, TId> Repo<TEntity, TId>(IServiceProvider services)

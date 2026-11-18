@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261117124356_Scouting`** (Step 20).
+Schema version: **`20261118090203_PlayerChemistry`** (Step 26).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -22,6 +22,7 @@ Schema version: **`20261117124356_Scouting`** (Step 20).
 | `20261117143312_Medical` | 22 | New table `Injuries` (create-table only) |
 | `20261117150208_Finances` | 23 | New tables `ClubBudgets` and `FinancialTransactions` (create-table only) |
 | `20261118081325_ContractNegotiations` | 25 | New tables `Agents`, `AgentRelationships`, `ContractNegotiations`; `Contracts` gains `PromisedRole`, `PromisedMinutes`, `PromiseStatus` (default `None`), `PromiseReviewedOn` (add-column, nullable or defaulted) |
+| `20261118090203_PlayerChemistry` | 26 | New table `PlayerRelationships` (create-table only) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -350,6 +351,17 @@ Player agents (Step 25, `docs/CONTRACTS.md` §4.1). Created once, the first time
 | AgentId | id | FK Agents; unique (AgentId, ClubId) |
 | ClubId | id | FK Clubs |
 | Score | int | −100…100, 0 = no history |
+
+### PlayerRelationships
+How well two players get on (`docs/CHEMISTRY.md` §4); one row per pair, kept when they part.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerAId | id | FK Players; the smaller id of the pair; unique (PlayerAId, PlayerBId) |
+| PlayerBId | id | FK Players; indexed |
+| Score | int | −100…100, 0 = strangers |
+| UpdatedOn | date | Last change |
 
 ### ContractNegotiations
 Rounds of contract talks between a club and a player (`docs/CONTRACTS.md` §4.5); history, never deleted.

@@ -324,6 +324,14 @@ public sealed partial class CareerViewModel : ObservableObject
                 }
             }
 
+            if (day.Chemistry is { Conflicts.Count: > 0 } chemistry)
+            {
+                var own = State?.Club.Id;
+                lines.AddRange(chemistry.Conflicts.Where(c => c.ClubId == own).Select(c => new NewsLine(
+                    date,
+                    $"Dressing room: {c.Player} is unhappy with his playing time{(c.Rival is { } rival ? $" and has fallen out with {rival}" : string.Empty)}.")));
+            }
+
             if (day.SeasonEnd is { Retired.Count: > 0 } seasonEnd)
             {
                 lines.Add(new NewsLine(date, $"{seasonEnd.Retired.Count} player(s) retired: {string.Join(", ", seasonEnd.Retired.Take(5).Select(r => $"{r.Name} ({r.Age})"))}{(seasonEnd.Retired.Count > 5 ? ", …" : string.Empty)}."));

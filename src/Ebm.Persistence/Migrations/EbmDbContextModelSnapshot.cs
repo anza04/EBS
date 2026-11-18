@@ -54,6 +54,33 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("Careers", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.Chemistry.PlayerRelationship", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerAId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerBId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("UpdatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerBId");
+
+                    b.HasIndex("PlayerAId", "PlayerBId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerRelationships", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Clubs.Arena", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1358,6 +1385,21 @@ namespace Ebm.Persistence.Migrations
                     b.HasOne("Ebm.Domain.Seasons.Season", null)
                         .WithMany()
                         .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ebm.Domain.Chemistry.PlayerRelationship", b =>
+                {
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerAId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Ebm.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerBId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

@@ -11,6 +11,7 @@ using Ebm.Services.Competitions;
 using Ebm.Services.Contracts;
 using Ebm.Services.Development;
 using Ebm.Services.Finances;
+using Ebm.Services.Chemistry;
 using Ebm.Services.Medical;
 using Ebm.Services.Editing;
 using Ebm.Services.Management;
@@ -60,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(FinanceModel.Default);
         services.TryAddSingleton<IFinanceService, FinanceService>();
         services.TryAddSingleton<ITacticsService, TacticsService>();
+        services.TryAddSingleton<IChemistryService, ChemistryService>();
         services.TryAddSingleton<IMatchService, MatchService>();
         services.TryAddSingleton<IClubManagementService, ClubManagementService>();
         services.TryAddSingleton<ICareerService, CareerService>();

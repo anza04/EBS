@@ -1,3 +1,4 @@
+using Ebm.Domain.Chemistry;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Competitions;
@@ -40,7 +41,7 @@ internal sealed class ClubManagementService(
                 continue;
             }
 
-            var plan = LineupPlanner.Plan([.. roster.Players.Select(p => new LineupCandidate(p.Player.Id, p.Role, p.Availability, p.Evaluation))]);
+            var plan = LineupPlanner.Plan([.. roster.Players.Select(p => new LineupCandidate(p.Player.Id, p.Role, p.Availability, p.Evaluation, SquadBalance(p.Player)))]);
             var current = roster.Players.ToDictionary(p => p.Player.Id);
             var rotation = roster.Rotation.Select(p => p.Player.Id).ToList();
             var same = plan.All(p => current[p.PlayerId].Role == p.Role && current[p.PlayerId].LineupPosition == p.LineupPosition)
@@ -181,7 +182,8 @@ internal sealed class ClubManagementService(
 
             var firstTeam = roster.FirstTeam.ToList();
             var excess = firstTeam.Count - SquadRules.Default.MaxPlayers;
-            foreach (var player in firstTeam.OrderBy(p => p.Evaluation.Overall).ThenBy(p => p.Player.Id.Value))
+            // Weakest first; an unhappy player counts BalanceBonus points weaker (docs/CHEMISTRY.md §7).
+            foreach (var player in firstTeam.OrderBy(p => p.Evaluation.Overall - SquadBalance(p.Player)).ThenBy(p => p.Player.Id.Value))
             {
                 if (excess <= 0)
                 {
@@ -321,6 +323,9 @@ internal sealed class ClubManagementService(
 
         await s.GetRequiredService<IUnitOfWork>().SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>Squad balance (docs/CHEMISTRY.md §7): an unhappy player gets minutes ahead of a slightly better teammate and is released first.</summary>
+    private static int SquadBalance(Player player) => player.Morale <= ChemistryModel.UnhappyMorale ? ChemistryModel.BalanceBonus : 0;
 
     private async Task<IReadOnlyList<ClubId>> AiClubsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken)
     {

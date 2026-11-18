@@ -1,3 +1,4 @@
+using Ebm.Domain.Chemistry;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Tactics;
@@ -41,7 +42,7 @@ public sealed partial class MatchSimulation
 
         public TacticalAssignment Assignment { get; set; }
 
-        /// <summary>Make-probability change of the day (random, wider for inconsistent players).</summary>
+        /// <summary>Make-probability change of the day (random, wider for inconsistent players, plus morale).</summary>
         public double Form { get; }
 
         public double MaxEnergy { get; }
@@ -69,7 +70,7 @@ public sealed partial class MatchSimulation
                     p,
                     calculator.Evaluate(p.Player),
                     sheet.Tactics.AssignmentOf(p.Player),
-                    Normal(random) * (0.01 + (0.03 * (100 - p.Player.Attributes.Consistency) / 100.0)))),
+                    (Normal(random) * (0.01 + (0.03 * (100 - p.Player.Attributes.Consistency) / 100.0))) + ChemistryModel.FormEdge(p.Player.Morale))),
             ];
             foreach (var runner in Runners.Where(r => r.Line.StartingPosition is not null))
             {

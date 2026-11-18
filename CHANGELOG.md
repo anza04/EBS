@@ -3,6 +3,23 @@
 All notable changes to this project are documented here, one section per development step.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.26.0] — 2026-11-18 — STEP 26: Advanced roster management and chemistry
+
+### Added
+- Squad hierarchy (`ChemistryModel.Hierarchy`): rank by overall, expected role and minutes (Step 25 role table, raised
+  by contract promises), leader score (leadership and experience), captain and leaders (`docs/CHEMISTRY.md` §1).
+- Role satisfaction from minutes per game over four weeks (happy / content / unhappy) (§2).
+- Weekly morale on Mondays (`IChemistryService.ProcessWeekAsync`, `GameDayReport.Chemistry`): results, playing time,
+  drift and leaders (§3).
+- Player relationships (`PlayerRelationship`): grow with shared court time and nationality, fall with conflicts;
+  internal conflicts between an unhappy player and the teammate ahead of him, reported as career news (§4).
+- Team chemistry of the core from morale, relationships, leadership and tactical role fit (`ChemistryModel.Team`) (§5).
+- Match engine: chemistry changes make probability (±2%) and turnovers (∓0.8%), morale changes a player's form
+  (±1%); `TeamSheet.Chemistry` set by `MatchService` (§6).
+- AI squad balance: unhappy players get rotation minutes over slightly better teammates and are released first (§7).
+- *Dressing room* tab: chemistry, hierarchy, satisfaction, morale, leaders, conflicts and relationships.
+- Migration `PlayerChemistry`: table `PlayerRelationships`.
+
 ## [0.25.0] — 2026-11-18 — STEP 25: Advanced contract negotiations
 
 ### Added

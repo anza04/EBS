@@ -13,7 +13,7 @@ docs/SEASON_LIFECYCLE.md) decides when. Recruitment itself is the Step 08 `ClubR
 | Before each game day's matches | Squad roles of every AI club that plays that day (saved only when they change) |
 | End of every game day | Salaries due that day; month-end income (one transaction with the date change) |
 | Last day of a season, 14 days before a season (every AI club); any Monday an AI club is short of players (those clubs only, Step 24) | Transfer window: free-agent replenishment, `RunAiTransferWindowAsync`, releases above the squad limit, emergency signings, AI tactics re-planned |
-| Mondays | Training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6; injured players handled as in docs/INJURIES.md §5) |
+| Mondays | Dressing room: morale and relationships of every club that played that week (docs/CHEMISTRY.md §3–4); training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6; injured players handled as in docs/INJURIES.md §5) |
 | Last day of each month | Contract renewals |
 | Next season | Board objectives for the new season |
 
@@ -25,6 +25,7 @@ players once those expected back from injury in more than 28 days are left out (
 * Unavailable players are left out; doubtful players count 5 points lower; youth players keep their role.
 * Starters: repeatedly the best remaining (player, position) pair by effective rating, one per position.
 * Rotation: the next 4 by overall, in that order. Bench: up to the 12-player matchday squad. Everyone else: inactive.
+* Squad balance (Step 26, docs/CHEMISTRY.md §7): an unhappy player (morale ≤ 30) counts 4 points higher for the rotation and bench order, and 4 points weaker when a squad over the limit is trimmed.
 
 ## 3. Tactics (`TacticPlanner`)
 

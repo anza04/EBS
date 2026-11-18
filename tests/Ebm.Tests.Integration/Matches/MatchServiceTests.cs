@@ -5,6 +5,7 @@ using Ebm.Domain.Matches;
 using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
 using Ebm.Domain.Tactics;
+using Ebm.Services.Chemistry;
 using Ebm.Services.Competitions;
 using Ebm.Services.Matches;
 using Ebm.Services.Tactics;
@@ -79,6 +80,7 @@ public sealed class MatchServiceTests : IAsyncLifetime
 
         var preview = (await Matches.GetPreviewAsync(_fixture.Id))!;
         Assert.Equal(5, preview.Away.Players.Count(p => p.StartingPosition is not null)); // starters picked although no squad roles are stored
+        Assert.Equal((await _db.Services.GetRequiredService<IChemistryService>().RateAsync(preview.Away)).Score, preview.Away.Chemistry); // Step 26
         Assert.Equal(DefensiveSystem.Zone23, preview.Away.Tactics.DefensiveSystem);
 
         var session = await Matches.StartAsync(_fixture.Id, SimulationMode.Live, seed: 3);

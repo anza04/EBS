@@ -1,3 +1,4 @@
+using Ebm.Domain.Chemistry;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Players;
@@ -75,6 +76,12 @@ public sealed record SheetPlayer(Player Player, Position? StartingPosition, int 
 /// <summary>A team's matchday squad and tactics.</summary>
 public sealed record TeamSheet(ClubId ClubId, string Name, IReadOnlyList<SheetPlayer> Players, TeamTactics Tactics)
 {
+    /// <summary>Team chemistry, −1 … +1 (0 = neutral), set from <see cref="ChemistryModel.Team"/> (docs/CHEMISTRY.md §6).</summary>
+    public double Chemistry { get; init; }
+
+    /// <summary>The starters and the first <see cref="ChemistryModel.CoreRotation"/> players off the bench.</summary>
+    public IEnumerable<SheetPlayer> Core => Players.Where(p => p.Priority <= ChemistryModel.CoreRotation);
+
     /// <summary>
     /// Picks the matchday squad from a club's players: unavailable and youth/inactive players are left out; starters,
     /// then the rotation in order, then the bench, up to <see cref="MatchRules.MaxPlayers"/>. Missing starting positions
@@ -147,6 +154,11 @@ public sealed record TeamSheet(ClubId ClubId, string Name, IReadOnlyList<SheetPl
         if (Players.Select(p => p.Player.Id).Distinct().Count() != Players.Count)
         {
             throw new DomainValidationException($"A player is named twice for {Name}.");
+        }
+
+        if (Chemistry is < -1 or > 1 || double.IsNaN(Chemistry))
+        {
+            throw new DomainValidationException($"{Name}'s chemistry must be between -1 and 1.");
         }
 
         var starts = Players.Where(p => p.StartingPosition is not null).Select(p => p.StartingPosition!.Value).ToList();
