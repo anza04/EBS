@@ -42,7 +42,28 @@ public interface IMatchService
 
     /// <summary>A stored match with its box score, or <c>null</c> when it does not exist.</summary>
     Task<MatchReport?> GetReportAsync(MatchId matchId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Every box-score line the club's players recorded for it in a season, across all competitions. Without
+    /// <paramref name="seasonId"/>, the newest season in which the club has played a match (else its newest season).
+    /// <c>null</c> when the club does not exist.
+    /// </summary>
+    Task<ClubSeasonStatistics?> GetClubSeasonStatisticsAsync(ClubId clubId, SeasonId? seasonId = null, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// A club's player statistics in one season (<paramref name="Season"/> is <c>null</c> when the club has no fixtures):
+/// the seasons it has fixtures in (newest first), the competitions it played in that season and one line per player per match.
+/// </summary>
+public sealed record ClubSeasonStatistics(
+    Club Club,
+    IReadOnlyList<Season> Seasons,
+    Season? Season,
+    IReadOnlyList<Competition> Competitions,
+    IReadOnlyList<SeasonStatLine> Lines);
+
+/// <summary>One player's box score in one match of the season. The player may have left the club since.</summary>
+public sealed record SeasonStatLine(PlayerId PlayerId, string Player, CompetitionId CompetitionId, BoxScore BoxScore);
 
 /// <summary>A competition in one season.</summary>
 public sealed record CompetitionSeason(Competition Competition, Season Season)

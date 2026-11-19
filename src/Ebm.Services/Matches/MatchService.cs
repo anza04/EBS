@@ -210,6 +210,50 @@ internal sealed class MatchService(
         return new MatchReport(match, fixture, competition, home, away, Side(home.Id), Side(away.Id));
     }
 
+    public async Task<ClubSeasonStatistics?> GetClubSeasonStatisticsAsync(ClubId clubId, SeasonId? seasonId = null, CancellationToken cancellationToken = default)
+    {
+        using var scope = scopes.CreateScope();
+        var s = scope.ServiceProvider;
+        if (await Repo<Club, ClubId>(s).FindAsync(clubId, cancellationToken).ConfigureAwait(false) is not { } club)
+        {
+            return null;
+        }
+
+        var fixtures = await Repo<Fixture, FixtureId>(s).ListAsync(f => f.HomeClubId == clubId || f.AwayClubId == clubId, cancellationToken).ConfigureAwait(false);
+        var fixtureIds = fixtures.Select(f => f.Id).ToList();
+        var matches = await Repo<Match, MatchId>(s).ListAsync(m => fixtureIds.Contains(m.FixtureId), cancellationToken).ConfigureAwait(false);
+        var seasonIds = fixtures.Select(f => f.SeasonId).Distinct().ToList();
+        var seasons = (await Repo<Season, SeasonId>(s).ListAsync(x => seasonIds.Contains(x.Id), cancellationToken).ConfigureAwait(false))
+            .OrderByDescending(x => x.StartDate).ToList();
+
+        var fixtureById = fixtures.ToDictionary(f => f.Id);
+        var playedSeasons = matches.Select(m => fixtureById[m.FixtureId].SeasonId).ToHashSet();
+        var season = seasonId is { } wanted
+            ? seasons.FirstOrDefault(x => x.Id == wanted)
+            : seasons.FirstOrDefault(x => playedSeasons.Contains(x.Id)) ?? seasons.FirstOrDefault();
+        if (season is null)
+        {
+            return new ClubSeasonStatistics(club, seasons, null, [], []);
+        }
+
+        var seasonMatches = matches.Where(m => fixtureById[m.FixtureId].SeasonId == season.Id).ToDictionary(m => m.Id, m => fixtureById[m.FixtureId].CompetitionId);
+        var matchIds = seasonMatches.Keys.ToList();
+        var lines = await Repo<PlayerMatchStatistics, PlayerMatchStatisticsId>(s)
+            .ListAsync(x => x.ClubId == clubId && matchIds.Contains(x.MatchId), cancellationToken).ConfigureAwait(false);
+        var playerIds = lines.Select(l => l.PlayerId).Distinct().ToList();
+        var names = (await Repo<Player, PlayerId>(s).ListAsync(p => playerIds.Contains(p.Id), cancellationToken).ConfigureAwait(false)).ToDictionary(p => p.Id, p => p.FullName);
+        var competitionIds = fixtures.Where(f => f.SeasonId == season.Id).Select(f => f.CompetitionId).Distinct().ToList();
+        var competitions = (await Repo<Competition, CompetitionId>(s).ListAsync(c => competitionIds.Contains(c.Id), cancellationToken).ConfigureAwait(false))
+            .OrderBy(c => c.Name).ToList();
+
+        return new ClubSeasonStatistics(
+            club,
+            seasons,
+            season,
+            competitions,
+            [.. lines.Select(l => new SeasonStatLine(l.PlayerId, names.GetValueOrDefault(l.PlayerId, "?"), seasonMatches[l.MatchId], l.BoxScore))]);
+    }
+
     private async Task<(Fixture Fixture, string Competition, Match? Result)?> LoadFixtureAsync(FixtureId fixtureId, CancellationToken cancellationToken)
     {
         using var scope = scopes.CreateScope();

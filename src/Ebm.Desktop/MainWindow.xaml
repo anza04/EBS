@@ -72,6 +72,7 @@
       <TabItem Header="Dressing room" Content="{Binding DressingRoom}" />
       <TabItem Header="Finances" Content="{Binding Finances}" />
       <TabItem Header="Matches" Content="{Binding Matches}" />
+      <TabItem Header="Season stats" Content="{Binding SeasonStats}" />
       <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">
         <Grid Margin="16">

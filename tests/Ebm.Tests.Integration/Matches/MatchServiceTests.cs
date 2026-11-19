@@ -77,6 +77,24 @@ public sealed class MatchServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_clubs_season_statistics_hold_its_players_box_scores()
+    {
+        var club = _world.HomeClub.Id;
+        var before = (await Matches.GetClubSeasonStatisticsAsync(club))!;
+        Assert.Equal(_world.Season.Id, before.Season!.Id);
+
+        var report = await Matches.PlayAsync(_fixture.Id, seed: 5);
+
+        var stats = (await Matches.GetClubSeasonStatisticsAsync(club))!;
+        var side = report.Home.Id == club ? report.HomeLines : report.AwayLines;
+        Assert.Equal(before.Lines.Count + side.Count, stats.Lines.Count);
+        Assert.Equal(before.Lines.Sum(l => l.BoxScore.Points) + side.Sum(l => l.BoxScore.Points), stats.Lines.Sum(l => l.BoxScore.Points));
+        Assert.All(side, s => Assert.Contains(stats.Lines, l => l.PlayerId == s.PlayerId && l.CompetitionId == _world.Championship.Id));
+        Assert.Contains(stats.Competitions, c => c.Id == _world.Championship.Id);
+        Assert.Null(await Matches.GetClubSeasonStatisticsAsync(ClubId.New()));
+    }
+
+    [Fact]
     public async Task A_live_match_uses_the_selected_tactics_accepts_interventions_and_is_saved_at_the_end()
     {
         await _db.Services.GetRequiredService<ITacticsService>().SaveAsync(_world.HomeClub.Id, new TacticDraft(

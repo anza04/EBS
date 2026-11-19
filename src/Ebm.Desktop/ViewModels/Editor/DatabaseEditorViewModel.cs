@@ -9,6 +9,7 @@ using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
 using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Scouting;
+using Ebm.Desktop.ViewModels.Statistics;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
@@ -100,6 +101,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         TransferMarket = new TransferMarketViewModel(transfers, contracts, Lookups, ReloadAsync);
         Tactics = new TacticsViewModel(tactics, Lookups);
         Matches = new MatchCenterViewModel(matches, competitions, ReloadAsync);
+        SeasonStats = new SeasonStatsViewModel(matches, Lookups);
         Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
         Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
@@ -138,6 +140,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     public TacticsViewModel Tactics { get; }
 
     public MatchCenterViewModel Matches { get; }
+
+    /// <summary>Season statistics of a club's players.</summary>
+    public SeasonStatsViewModel SeasonStats { get; }
 
     /// <summary>The career screen; <c>null</c> when no career service is available (editor-only tests).</summary>
     public CareerViewModel? Career { get; }
@@ -207,6 +212,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Apply(ClubContracts.ClubId, v => ClubContracts.ClubId = v);
         Apply(TransferMarket.ClubId, v => TransferMarket.ClubId = v);
         Apply(Tactics.ClubId, v => Tactics.ClubId = v);
+        Apply(SeasonStats.ClubId, v => SeasonStats.ClubId = v);
         if (Scouting is not null)
         {
             Apply(Scouting.ClubId, v => Scouting.ClubId = v);
@@ -253,6 +259,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         await TransferMarket.RefreshAsync();
         await Tactics.RefreshAsync();
         await Matches.RefreshAsync();
+        await SeasonStats.RefreshAsync();
         if (Career is not null)
         {
             await Career.RefreshAsync();

@@ -19,6 +19,7 @@
         <ResourceDictionary Source="Themes/Finances.xaml" />
         <ResourceDictionary Source="Themes/Tactics.xaml" />
         <ResourceDictionary Source="Themes/Matches.xaml" />
+        <ResourceDictionary Source="Themes/Statistics.xaml" />
         <ResourceDictionary Source="Themes/Careers.xaml" />
         <ResourceDictionary Source="Themes/Saves.xaml" />
       </ResourceDictionary.MergedDictionaries>
