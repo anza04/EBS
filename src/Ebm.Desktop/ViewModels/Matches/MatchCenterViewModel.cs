@@ -83,6 +83,22 @@ public sealed record BoxRow(string Player, bool OnCourt, BoxScore Box, int? Plus
 /// <summary>A team-statistics comparison row.</summary>
 public sealed record TeamStatRow(string Label, string Home, string Away);
 
+/// <summary>A player's advanced line in the match centre (Step 29).</summary>
+public sealed record AdvancedRow(string Player, BoxScore Box, PlayerAdvancedLine Line)
+{
+    public int Minutes => Box.Minutes;
+
+    public string Defended => Box.DefendedAttempted == 0 ? "—" : $"{Box.DefendedMade}-{Box.DefendedAttempted}";
+
+    public string OffensiveRating => Line.OffensiveRating is { } r ? r.ToString("0", CultureInfo.InvariantCulture) : "—";
+
+    public string DefensiveRating => Line.DefensiveRating is { } r ? r.ToString("0", CultureInfo.InvariantCulture) : "—";
+
+    public string NetRating => Line.NetRating is { } r ? r.ToString("+0;-0;0", CultureInfo.InvariantCulture) : "—";
+
+    public string PlusMinus => Line.PlusMinus.ToString("+0;-0;0", CultureInfo.InvariantCulture);
+}
+
 /// <summary>
 /// The match centre (Step 11): schedule, preview, live match (score, clock, play-by-play, substitutions, timeouts,
 /// tactical changes, live box score) and stored match reports. Matches run on <see cref="IMatchService"/>.
@@ -161,6 +177,27 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     private IReadOnlyList<InfoLine> _report = [];
 
     [ObservableProperty]
+    private IReadOnlyList<AdvancedRow> _homeAdvanced = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<AdvancedRow> _awayAdvanced = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<TeamStatRow> _teamAdvanced = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ShotRecord> _homeShots = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ShotRecord> _awayShots = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ShotZoneRow> _homeZones = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ShotZoneRow> _awayZones = [];
+
+    [ObservableProperty]
     private IReadOnlyList<Option<PlayerId>> _onCourt = [];
 
     [ObservableProperty]
@@ -191,7 +228,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     [ObservableProperty]
     private string? _message;
 
-    /// <summary>Shown view: 0 preview, 1 play-by-play, 2 box score, 3 team stats, 4 report.</summary>
+    /// <summary>Shown view: 0 preview, 1 play-by-play, 2 box score, 3 team stats, 4 advanced, 5 shot chart, 6 report.</summary>
     [ObservableProperty]
     private int _selectedView;
 
@@ -285,6 +322,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         PlayByPlay = [];
         HomeBox = AwayBox = [];
         TeamStats = [];
+        Analyse([], [], null, null);
         HomeSheet = AwaySheet = [];
         if (SelectedFixture is not { } row)
         {
@@ -332,6 +370,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         HomeBox = [.. report.HomeLines.Select(l => new BoxRow(l.Player, false, l.BoxScore, null, null, l.BoxScore.PersonalFouls >= 5))];
         AwayBox = [.. report.AwayLines.Select(l => new BoxRow(l.Player, false, l.BoxScore, null, null, l.BoxScore.PersonalFouls >= 5))];
         TeamStats = Compare(report.HomeStatistics, report.AwayStatistics);
+        Analyse([.. report.HomeLines.Select(l => (l.Player, l.BoxScore))], [.. report.AwayLines.Select(l => (l.Player, l.BoxScore))], null, null);
         Report = ReportLines(HomeName, AwayName, m.HomeScore, m.AwayScore, m.Overtimes, report.HomeLines.Select(l => (l.Player, l.BoxScore)), report.AwayLines.Select(l => (l.Player, l.BoxScore)), notes: report.TacticalNotes);
         HomeInfo = AwayInfo = string.Empty;
     }
@@ -476,6 +515,11 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         var home = TeamStatistics.From(sim.Lines(TeamSide.Home).Select(l => l.ToBoxScore()));
         var away = TeamStatistics.From(sim.Lines(TeamSide.Away).Select(l => l.ToBoxScore()));
         TeamStats = Compare(home, away);
+        Analyse(
+            [.. sim.Lines(TeamSide.Home).Select(l => (l.Player.FullName, l.ToBoxScore()))],
+            [.. sim.Lines(TeamSide.Away).Select(l => (l.Player.FullName, l.ToBoxScore()))],
+            sim.Analytics(TeamSide.Home),
+            sim.Analytics(TeamSide.Away));
         Report = ReportLines(
             HomeName,
             AwayName,
@@ -529,6 +573,74 @@ public sealed partial class MatchCenterViewModel : ObservableObject
             new("Turnovers", $"{h.Turnovers}", $"{a.Turnovers}"),
             new("Fouls", $"{h.PersonalFouls}", $"{a.PersonalFouls}"),
         ];
+    }
+
+    /// <summary>
+    /// Advanced statistics, shot charts and play-type figures (Step 29). Turnover causes, fast-break and second-chance
+    /// points come from the engine, so a stored report shows only what the box scores hold.
+    /// </summary>
+    private void Analyse(IReadOnlyList<(string Player, BoxScore Box)> home, IReadOnlyList<(string Player, BoxScore Box)> away, TeamAnalytics? h, TeamAnalytics? a)
+    {
+        IReadOnlyList<AdvancedRow> Rows(IReadOnlyList<(string Player, BoxScore Box)> team, IReadOnlyList<(string Player, BoxScore Box)> other)
+        {
+            var lines = AdvancedStatistics.Players([.. team.Select(t => t.Box)], other.Select(t => t.Box));
+            return [.. team.Zip(lines).Where(x => x.First.Box.Minutes > 0 || x.First.Box.OffensivePossessions > 0)
+                .Select(x => new AdvancedRow(x.First.Player, x.First.Box, x.Second))];
+        }
+
+        HomeAdvanced = Rows(home, away);
+        AwayAdvanced = Rows(away, home);
+        HomeShots = [.. home.SelectMany(t => t.Box.Shots)];
+        AwayShots = [.. away.SelectMany(t => t.Box.Shots)];
+        HomeZones = ShotZoneRow.From(HomeShots);
+        AwayZones = ShotZoneRow.From(AwayShots);
+        if (home.Count == 0 && away.Count == 0)
+        {
+            TeamAdvanced = [];
+            return;
+        }
+
+        var ht = AdvancedStatistics.Team(home.Select(t => t.Box), away.Select(t => t.Box));
+        var at = AdvancedStatistics.Team(away.Select(t => t.Box), home.Select(t => t.Box));
+        static string P(double v) => v.ToString("P1", CultureInfo.InvariantCulture);
+        static string N(double v) => v.ToString("0.0", CultureInfo.InvariantCulture);
+        static int Points(IEnumerable<ShotRecord> shots, Func<ShotRecord, bool> filter) => shots.Where(s => s.Made && filter(s)).Sum(s => s.Points);
+        static string Contest(IReadOnlyList<ShotRecord> shots, ShotContest c)
+        {
+            var list = shots.Where(s => s.Contest == c).ToList();
+            return list.Count == 0 ? "—" : $"{list.Count(s => s.Made)}-{list.Count} ({(double)list.Count(s => s.Made) / list.Count:P0})";
+        }
+
+        List<TeamStatRow> rows =
+        [
+            new("Possessions (est.)", N(ht.Possessions), N(at.Possessions)),
+            new("Pace (per 40 min)", N(ht.Pace), N(at.Pace)),
+            new("Offensive rating", N(ht.OffensiveRating), N(at.OffensiveRating)),
+            new("Defensive rating", N(ht.DefensiveRating), N(at.DefensiveRating)),
+            new("Net rating", ht.NetRating.ToString("+0.0;-0.0;0", CultureInfo.InvariantCulture), at.NetRating.ToString("+0.0;-0.0;0", CultureInfo.InvariantCulture)),
+            new("True shooting", P(ht.TrueShooting), P(at.TrueShooting)),
+            new("Effective FG%", P(ht.EffectiveFieldGoal), P(at.EffectiveFieldGoal)),
+            new("Turnover rate", P(ht.TurnoverRate), P(at.TurnoverRate)),
+            new("Offensive rebound rate", P(ht.OffensiveReboundRate), P(at.OffensiveReboundRate)),
+            new("Free-throw rate", P(ht.FreeThrowRate), P(at.FreeThrowRate)),
+            new("Points in the paint", $"{Points(HomeShots, s => ShotZones.IsInside(s.Zone))}", $"{Points(AwayShots, s => ShotZones.IsInside(s.Zone))}"),
+            new("Fast-break field-goal points", $"{Points(HomeShots, s => s.FastBreak)}", $"{Points(AwayShots, s => s.FastBreak)}"),
+            new("Clutch field-goal points", $"{Points(HomeShots, s => s.Clutch)}", $"{Points(AwayShots, s => s.Clutch)}"),
+            new("Open shots", Contest(HomeShots, ShotContest.Open), Contest(AwayShots, ShotContest.Open)),
+            new("Contested shots", Contest(HomeShots, ShotContest.Contested), Contest(AwayShots, ShotContest.Contested)),
+            new("Tightly contested shots", Contest(HomeShots, ShotContest.Tight), Contest(AwayShots, ShotContest.Tight)),
+        ];
+        if (h is not null && a is not null)
+        {
+            rows.Add(new("Fast-break points", $"{h.FastBreakPoints}", $"{a.FastBreakPoints}"));
+            rows.Add(new("Second-chance points", $"{h.SecondChancePoints}", $"{a.SecondChancePoints}"));
+            rows.Add(new("Fast breaks / secondary breaks", $"{h.FastBreakPossessions} / {h.SecondaryBreakPossessions}", $"{a.FastBreakPossessions} / {a.SecondaryBreakPossessions}"));
+            rows.Add(new("Shots passed up", $"{h.PassedUpShots}", $"{a.PassedUpShots}"));
+            rows.AddRange(Enum.GetValues<TurnoverCause>().Select(c => new TeamStatRow(
+                $"Turnovers: {PlayerCatalog.DisplayName(c)}", $"{h.Turnovers.GetValueOrDefault(c)}", $"{a.Turnovers.GetValueOrDefault(c)}")));
+        }
+
+        TeamAdvanced = rows;
     }
 
     /// <summary>Score at the end of each period, from the play-by-play.</summary>

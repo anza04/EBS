@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:mt="clr-namespace:Ebm.Desktop.ViewModels.Matches">
+                    xmlns:mt="clr-namespace:Ebm.Desktop.ViewModels.Matches"
+                    xmlns:ctl="clr-namespace:Ebm.Desktop.Controls">
   <!-- Match centre (Step 11). Uses the tokens from Shell.xaml, the styles from Editor.xaml and Players.Lines from Players.xaml. -->
 
   <BooleanToVisibilityConverter x:Key="Matches.Visible" />
@@ -22,6 +23,38 @@
         <DataGridTextColumn Header="PF" Binding="{Binding Fouls}" Width="32" />
         <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinusText}" Width="38" />
         <DataGridTextColumn Header="En." Binding="{Binding EnergyText}" Width="36" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DataTemplate>
+
+  <!-- Step 29: advanced statistics and shot zones. -->
+  <DataTemplate x:Key="Matches.Advanced">
+    <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}" RowHeight="22" FontSize="12">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="120" />
+        <DataGridTextColumn Header="Min" Binding="{Binding Minutes}" Width="36" />
+        <DataGridTextColumn Header="TS%" Binding="{Binding Line.TrueShooting, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="eFG%" Binding="{Binding Line.EffectiveFieldGoal, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="USG%" Binding="{Binding Line.Usage, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="AST%" Binding="{Binding Line.Assist, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="REB%" Binding="{Binding Line.Rebound, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="TOV%" Binding="{Binding Line.TurnoverRate, StringFormat=P0}" Width="44" />
+        <DataGridTextColumn Header="ORtg" Binding="{Binding OffensiveRating}" Width="40" />
+        <DataGridTextColumn Header="DRtg" Binding="{Binding DefensiveRating}" Width="40" />
+        <DataGridTextColumn Header="Net" Binding="{Binding NetRating}" Width="38" />
+        <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinus}" Width="38" />
+        <DataGridTextColumn Header="Def. FG" Binding="{Binding Defended}" Width="50" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DataTemplate>
+
+  <DataTemplate x:Key="Matches.Zones">
+    <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}" RowHeight="20" FontSize="12">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="150" />
+        <DataGridTextColumn Header="FG" Binding="{Binding Shots}" Width="46" />
+        <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat=P0}" Width="42" />
+        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="34" />
       </DataGrid.Columns>
     </DataGrid>
   </DataTemplate>
@@ -148,6 +181,45 @@
                   <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="*" />
                 </DataGrid.Columns>
               </DataGrid>
+            </TabItem>
+            <TabItem Header="Advanced">
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="8">
+                  <TextBlock Text="{Binding HomeName}" Style="{StaticResource Text.Label}" FontWeight="SemiBold" />
+                  <ContentControl Content="{Binding HomeAdvanced}" ContentTemplate="{StaticResource Matches.Advanced}" />
+                  <TextBlock Text="{Binding AwayName}" Style="{StaticResource Text.Label}" FontWeight="SemiBold" Margin="0,8,0,0" />
+                  <ContentControl Content="{Binding AwayAdvanced}" ContentTemplate="{StaticResource Matches.Advanced}" />
+                  <TextBlock Text="Team" Style="{StaticResource Text.Label}" FontWeight="SemiBold" Margin="0,8,0,0" />
+                  <DataGrid ItemsSource="{Binding TeamAdvanced}" Style="{StaticResource Editor.Grid}" RowHeight="20" FontSize="12">
+                    <DataGrid.Columns>
+                      <DataGridTextColumn Header="" Binding="{Binding Label}" Width="220" />
+                      <DataGridTextColumn Header="Home" Binding="{Binding Home}" Width="160" />
+                      <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="160" />
+                    </DataGrid.Columns>
+                  </DataGrid>
+                </StackPanel>
+              </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Shot chart">
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid Margin="8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <TextBlock Text="{Binding HomeName}" Style="{StaticResource Text.Label}" FontWeight="SemiBold" />
+                    <ctl:ShotChartView Shots="{Binding HomeShots}" Margin="0,4,0,8" />
+                    <ContentControl Content="{Binding HomeZones}" ContentTemplate="{StaticResource Matches.Zones}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="{Binding AwayName}" Style="{StaticResource Text.Label}" FontWeight="SemiBold" />
+                    <ctl:ShotChartView Shots="{Binding AwayShots}" Margin="0,4,0,8" />
+                    <ContentControl Content="{Binding AwayZones}" ContentTemplate="{StaticResource Matches.Zones}" />
+                  </StackPanel>
+                </Grid>
+              </ScrollViewer>
             </TabItem>
             <TabItem Header="Report">
               <ContentControl Content="{Binding Report}" ContentTemplate="{StaticResource Players.Lines}" Margin="12" />

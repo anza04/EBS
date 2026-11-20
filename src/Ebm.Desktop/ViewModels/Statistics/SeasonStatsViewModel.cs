@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ebm.Desktop.ViewModels.Editor;
+using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Competitions;
 using Ebm.Domain.Matches;
@@ -43,7 +44,34 @@ public sealed class PlayerSeasonRowViewModel
         ThreePointPercentage = totals.ThreePointPercentage;
         FreeThrows = $"{Value(totals.FreeThrowMade):0.#}-{Value(totals.FreeThrowAttempted):0.#}";
         FreeThrowPercentage = totals.FreeThrowPercentage;
+
+        // Advanced statistics (Step 29); on-court ratings only from box scores that carry them.
+        var sum = AdvancedStatistics.Total(played);
+        TrueShooting = AdvancedStatistics.TrueShooting(totals.Points, totals.FieldGoalsAttempted, totals.FreeThrowAttempted);
+        EffectiveFieldGoal = AdvancedStatistics.EffectiveFieldGoal(totals.FieldGoalsMade, totals.ThreePointMade, totals.FieldGoalsAttempted);
+        TurnoverRate = AdvancedStatistics.TurnoverRate(totals.Turnovers, totals.FieldGoalsAttempted, totals.FreeThrowAttempted);
+        PlusMinus = Value(sum.PlusMinus);
+        OffensiveRating = sum.OffensivePossessions == 0 ? null : 100.0 * sum.PointsFor / sum.OffensivePossessions;
+        DefensiveRating = sum.DefensivePossessions == 0 ? null : 100.0 * sum.PointsAgainst / sum.DefensivePossessions;
+        Shots = [.. played.SelectMany(b => b.Shots)];
     }
+
+    public double TrueShooting { get; }
+
+    public double EffectiveFieldGoal { get; }
+
+    public double TurnoverRate { get; }
+
+    public double PlusMinus { get; }
+
+    public double? OffensiveRating { get; }
+
+    public double? DefensiveRating { get; }
+
+    public double? NetRating => OffensiveRating - DefensiveRating;
+
+    /// <summary>Every field-goal attempt of the season lines (shot chart).</summary>
+    public IReadOnlyList<ShotRecord> Shots { get; }
 
     public string Player { get; }
 
@@ -119,6 +147,14 @@ public sealed partial class SeasonStatsViewModel : ObservableObject
 
     [ObservableProperty]
     private IReadOnlyList<PlayerSeasonRowViewModel> _players = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedZones), nameof(ShotChartTitle))]
+    private PlayerSeasonRowViewModel? _selectedPlayer;
+
+    public IReadOnlyList<ShotZoneRow> SelectedZones => SelectedPlayer is { } p ? ShotZoneRow.From(p.Shots) : [];
+
+    public string ShotChartTitle => SelectedPlayer is { } p ? $"Shot chart · {p.Player} ({p.Shots.Count} attempts)" : "Shot chart · select a player";
 
     public SeasonStatsViewModel(IMatchService matches, EditorLookups lookups)
     {

@@ -62,6 +62,15 @@ public sealed class MatchServiceTests : IAsyncLifetime
         var reopened = (await Matches.GetReportAsync(report.Match.Id))!;
         Assert.Equal(report.HomeLines.Select(l => (l.PlayerId, l.BoxScore.Points, l.BoxScore.Minutes)), reopened.HomeLines.Select(l => (l.PlayerId, l.BoxScore.Points, l.BoxScore.Minutes)));
 
+        // Step 29: shot charts and on-court figures are stored with the box score and match the attempts.
+        Assert.All(reopened.HomeLines.Concat(reopened.AwayLines), l =>
+        {
+            Assert.NotNull(l.BoxScore.ShotData);
+            Assert.Equal(l.BoxScore.TwoPointAttempted + l.BoxScore.ThreePointAttempted, l.BoxScore.Shots.Count);
+        });
+        Assert.Equal(report.HomeLines.Select(l => l.BoxScore.ShotData), reopened.HomeLines.Select(l => l.BoxScore.ShotData));
+        Assert.Equal(5 * (reopened.Match.HomeScore - reopened.Match.AwayScore), reopened.HomeLines.Sum(l => l.BoxScore.PlusMinus));
+
         // Tactical decisions are stored with the result (Step 27): at least each side's game plan.
         Assert.Contains(reopened.TacticalNotes, n => n.Home && n.Period == 1 && n.Text.StartsWith("Game plan", StringComparison.Ordinal));
         Assert.Contains(reopened.TacticalNotes, n => !n.Home && n.Text.StartsWith("Game plan", StringComparison.Ordinal));

@@ -219,6 +219,27 @@ public sealed class PlayerScreensRenderTests
         });
 
         Assert.All(sizes, s => Assert.True(s > 0, "A screen rendered no content."));
+
+        // Step 29: advanced statistics and shot charts of the stored match, and the season shot chart.
+        Assert.Equal(center.HomeBox.Sum(r => r.Box.TwoPointAttempted + r.Box.ThreePointAttempted), center.HomeShots.Count);
+        Assert.NotEmpty(center.HomeAdvanced);
+        Assert.Equal(10, center.HomeZones.Count);
+        Assert.Contains(center.TeamAdvanced, r => r.Label == "Offensive rating");
+        var stats = editor.SeasonStats;
+        stats.ClubId = game.Line.Fixture.HomeClubId;
+        await stats.RefreshAsync();
+        stats.SelectedPlayer = stats.Players.First(p => p.Shots.Count > 0);
+        Assert.Equal(10, stats.SelectedZones.Count);
+        var advanced = RunOnSta(() =>
+        {
+            var resources = System.Windows.Application.Current.Resources;
+            resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/Ebm.Desktop;component/Themes/Statistics.xaml") });
+            center.SelectedView = 4;
+            var total = Render("match-advanced", center);
+            center.SelectedView = 5;
+            return total + Render("match-shot-chart", center) + Render("season-stats", stats);
+        });
+        Assert.True(advanced > 0);
         Assert.Equal(27, editor.Players.Ratings.Count);
         Assert.NotEmpty(editor.Comparison.Rows);
         Assert.NotEmpty(editor.ClubProfile.Details);

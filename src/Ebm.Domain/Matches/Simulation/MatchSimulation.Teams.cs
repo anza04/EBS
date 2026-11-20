@@ -118,6 +118,29 @@ public sealed partial class MatchSimulation
         /// <summary>Period whose closing minutes the coach already reviewed.</summary>
         public int ClosingReviewed { get; set; }
 
+        public int[] TurnoverCauses { get; } = new int[Enum.GetValues<TurnoverCause>().Length];
+
+        public int FastBreakPossessions { get; set; }
+
+        public int SecondaryPossessions { get; set; }
+
+        public int FastBreakPoints { get; set; }
+
+        public int SecondChancePoints { get; set; }
+
+        public int PassedUp { get; set; }
+
+        public double MeanSpeed => OnCourt.Select(r => (double)r.A.Speed).DefaultIfEmpty(50).Average();
+
+        public TeamAnalytics Analytics() => new(
+            Enum.GetValues<TurnoverCause>().ToDictionary(c => c, c => TurnoverCauses[(int)c]),
+            Runners.Sum(r => r.Line.Steals),
+            FastBreakPossessions,
+            SecondaryPossessions,
+            FastBreakPoints,
+            SecondChancePoints,
+            PassedUp);
+
         /// <summary>Situational plays run, by description (summarised in the tactical notes).</summary>
         public SortedDictionary<string, int> Situations { get; } = new(StringComparer.Ordinal);
 

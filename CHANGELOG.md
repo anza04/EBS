@@ -5,6 +5,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.29.0] — 2026-11-20 — STEP 29: Advanced basketball simulation
+
+### Added
+- Shot detail in the match engine (`MatchSimulation.Shots.cs`, docs/MATCH_ENGINE.md §9): FIBA shot zones and court
+  coordinates (`ShotZone`, `ShotZones`, `ShotRecord`), defensive contest quality (open/contested/tight: make, foul and
+  block effects), player decisions (isolation tendency, passing up tight shots), foul drawing, turnover causes
+  (`TurnoverCause`), transition (speed edge, secondary breaks, long rebounds), rebounding position, clutch time and
+  clutch rating, primary-defender attempts (individual matchups).
+- `TeamAnalytics` on `MatchResult`/`MatchSimulation`: turnover causes, fast-break and secondary-break possessions,
+  fast-break and second-chance points, passed-up shots.
+- Box scores store on-court points for/against and possessions, defended attempts and the shot chart (`ShotData`,
+  validated against the attempts); plus/minus is stored through them. Migration `20261120154321_AdvancedSimulation`
+  (add-column only).
+- `AdvancedStatistics`: TS%, eFG%, usage, assist %, rebound %, turnover %, on-court offensive/defensive/net rating,
+  plus/minus; team possessions, pace, ratings, four factors (docs/MATCH_ENGINE.md §10).
+- Match centre *Advanced* and *Shot chart* tabs (`ShotChartView`, zone table); *Season stats* TS%, eFG%, TOV%, +/-,
+  ORtg/DRtg/Net columns and the selected player's season shot chart.
+- Tests: `AdvancedSimulationTests` (8 unit); stored-report shot-chart checks; render of the new screens.
+
+### Changed
+- Fast-break rim edge 0.12 → 0.10, inside block base 0.11 → 0.12 (contest compensation); league averages now 81.7
+  points, 75.7 possessions (docs/MATCH_ENGINE.md §7). A quality gap weighs more (70 vs 55 wins 96%).
+- `PlayerLine.PlusMinus` is derived from `PointsFor`/`PointsAgainst`; steals by interception have their own commentary.
+
 ## [0.28.0] — 2026-11-20 — STEP 28: Coaching and staff management
 
 ### Added

@@ -482,8 +482,11 @@ One box-score line per player per match.
 | Minutes | int | 0–100 |
 | TwoPointMade/Attempted, ThreePointMade/Attempted, FreeThrowMade/Attempted | int | Made ≤ attempted (also checked in schema) |
 | OffensiveRebounds, DefensiveRebounds, Assists, Steals, Blocks, Turnovers, PersonalFouls | int | 0–200 |
+| PointsFor, PointsAgainst, OffensivePossessions, DefensivePossessions | int | 0–500, default 0. On-court team/opponent points and possessions (Step 29; 0 in older rows) |
+| DefendedAttempted / DefendedMade | int | Field goals against the player as primary defender; made ≤ attempted. Default 0 |
+| ShotData | text, nullable | The player's field-goal attempts, `ShotChart` encoding (base64, version byte + 6 bytes a shot: period, clock, x, y, flags). Null before Step 29; when present it must match the two/three-point made/attempted (checked by `BoxScore.Validate`) |
 
-Points = 2 × two-point made + 3 × three-point made + free throws made, computed and not stored.
+Points = 2 × two-point made + 3 × three-point made + free throws made, computed and not stored; plus/minus = PointsFor − PointsAgainst.
 
 ### LeagueStandings
 | Column | Type | Rules |

@@ -83,6 +83,9 @@ public sealed partial class MatchSimulation
 
     public IReadOnlyList<PlayerLine> Lines(TeamSide side) => [.. Get(side).Runners.Select(r => r.Line)];
 
+    /// <summary>Team play-type figures so far (turnover causes, transition, second chances; Step 29).</summary>
+    public TeamAnalytics Analytics(TeamSide side) => Get(side).Analytics();
+
     /// <summary>Tactical decisions and situational summaries so far (Step 27).</summary>
     public IReadOnlyList<TacticalNote> TacticalNotes => _notes;
 
@@ -164,6 +167,8 @@ public sealed partial class MatchSimulation
         return new MatchResult(_home.Score, _away.Score, Overtimes, Lines(TeamSide.Home), Lines(TeamSide.Away), _possessions, _endedByDefault)
         {
             TacticalNotes = [.. _notes],
+            HomeAnalytics = _home.Analytics(),
+            AwayAnalytics = _away.Analytics(),
         };
     }
 

@@ -91,7 +91,26 @@ public sealed class PlayerLine
 
     public int PersonalFouls { get; internal set; }
 
-    public int PlusMinus { get; internal set; }
+    public int PointsFor { get; internal set; }
+
+    public int PointsAgainst { get; internal set; }
+
+    public int PlusMinus => PointsFor - PointsAgainst;
+
+    public int OffensivePossessions { get; internal set; }
+
+    public int DefensivePossessions { get; internal set; }
+
+    public int DefendedAttempted { get; internal set; }
+
+    public int DefendedMade { get; internal set; }
+
+    /// <summary>Field-goal attempts in order (Step 29).</summary>
+    public IReadOnlyList<ShotRecord> Shots => _shots;
+
+    private readonly List<ShotRecord> _shots = [];
+
+    internal void AddShot(ShotRecord shot) => _shots.Add(shot);
 
     /// <summary>Current energy, 0–100: falls on court, recovers on the bench (docs/MATCH_ENGINE.md §4).</summary>
     public double Energy { get; internal set; }
@@ -120,7 +139,38 @@ public sealed class PlayerLine
         Blocks = Blocks,
         Turnovers = Turnovers,
         PersonalFouls = PersonalFouls,
+        PointsFor = PointsFor,
+        PointsAgainst = PointsAgainst,
+        OffensivePossessions = OffensivePossessions,
+        DefensivePossessions = DefensivePossessions,
+        DefendedAttempted = DefendedAttempted,
+        DefendedMade = DefendedMade,
+        ShotData = ShotChart.Encode(_shots),
     };
+}
+
+/// <summary>What caused a turnover (Step 29). Shot-clock violations are team turnovers, not in the box score.</summary>
+public enum TurnoverCause
+{
+    BadPass,
+    LostBall,
+    OffensiveFoul,
+    Travelling,
+    OutOfBounds,
+    ShotClockViolation,
+}
+
+/// <summary>Team play-type figures of a match that the box score does not hold (Step 29).</summary>
+public sealed record TeamAnalytics(
+    IReadOnlyDictionary<TurnoverCause, int> Turnovers,
+    int Steals,
+    int FastBreakPossessions,
+    int SecondaryBreakPossessions,
+    int FastBreakPoints,
+    int SecondChancePoints,
+    int PassedUpShots)
+{
+    public static TeamAnalytics Empty { get; } = new(new Dictionary<TurnoverCause, int>(), 0, 0, 0, 0, 0, 0);
 }
 
 /// <summary>Team totals of a set of box scores, with shooting percentages.</summary>
@@ -193,6 +243,12 @@ public sealed record MatchResult(
 
     /// <summary>Tactical decisions and situational summaries (Step 27), in match order.</summary>
     public IReadOnlyList<TacticalNote> TacticalNotes { get; init; } = [];
+
+    public TeamAnalytics HomeAnalytics { get; init; } = TeamAnalytics.Empty;
+
+    public TeamAnalytics AwayAnalytics { get; init; } = TeamAnalytics.Empty;
+
+    public TeamAnalytics Analytics(TeamSide side) => side == TeamSide.Home ? HomeAnalytics : AwayAnalytics;
 
     public TeamStatistics Statistics(TeamSide side) => TeamStatistics.From(Lines(side).Select(l => l.ToBoxScore()));
 }

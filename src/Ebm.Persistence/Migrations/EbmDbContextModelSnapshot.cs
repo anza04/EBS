@@ -1735,6 +1735,18 @@ namespace Ebm.Persistence.Migrations
                                 .HasColumnType("INTEGER")
                                 .HasColumnName("Blocks");
 
+                            b1.Property<int>("DefendedAttempted")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefendedAttempted");
+
+                            b1.Property<int>("DefendedMade")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefendedMade");
+
+                            b1.Property<int>("DefensivePossessions")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("DefensivePossessions");
+
                             b1.Property<int>("DefensiveRebounds")
                                 .HasColumnType("INTEGER")
                                 .HasColumnName("DefensiveRebounds");
@@ -1751,6 +1763,10 @@ namespace Ebm.Persistence.Migrations
                                 .HasColumnType("INTEGER")
                                 .HasColumnName("Minutes");
 
+                            b1.Property<int>("OffensivePossessions")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("OffensivePossessions");
+
                             b1.Property<int>("OffensiveRebounds")
                                 .HasColumnType("INTEGER")
                                 .HasColumnName("OffensiveRebounds");
@@ -1758,6 +1774,18 @@ namespace Ebm.Persistence.Migrations
                             b1.Property<int>("PersonalFouls")
                                 .HasColumnType("INTEGER")
                                 .HasColumnName("PersonalFouls");
+
+                            b1.Property<int>("PointsAgainst")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("PointsAgainst");
+
+                            b1.Property<int>("PointsFor")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("PointsFor");
+
+                            b1.Property<string>("ShotData")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("ShotData");
 
                             b1.Property<int>("Steals")
                                 .HasColumnType("INTEGER")

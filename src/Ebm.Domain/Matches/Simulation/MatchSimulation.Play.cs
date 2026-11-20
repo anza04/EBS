@@ -11,6 +11,11 @@ public sealed partial class MatchSimulation
     private double _clock;
     private double _elapsed;
     private bool _nextFastBreak;
+    private bool _nextSecondary;
+
+    /// <summary>The possession being played is a fast break / a second chance (for play-type points).</summary>
+    private bool _fastBreakNow;
+    private bool _secondChanceNow;
 
     private enum ShotOutcome
     {
@@ -173,7 +178,21 @@ public sealed partial class MatchSimulation
         _possessions++;
         off.Possessions++;
         var fastBreak = _nextFastBreak;
-        _nextFastBreak = false;
+        var secondary = _nextSecondary && !fastBreak;
+        _nextFastBreak = _nextSecondary = false;
+        _fastBreakNow = fastBreak;
+        _secondChanceNow = false;
+        off.FastBreakPossessions += fastBreak ? 1 : 0;
+        off.SecondaryPossessions += secondary ? 1 : 0;
+        foreach (var r in off.OnCourt)
+        {
+            r.Line.OffensivePossessions++;
+        }
+
+        foreach (var r in def.OnCourt)
+        {
+            r.Line.DefensivePossessions++;
+        }
 
         // A play drawn up in the team's own timeout (only for the possession right after it).
         var edge = 0.0;
@@ -204,7 +223,7 @@ public sealed partial class MatchSimulation
             }
             else
             {
-                var mean = fastBreak ? 5.0 : secondChance ? 6.5 : PossessionMean(off, def);
+                var mean = fastBreak ? 5.0 : secondChance ? 6.5 : PossessionMean(off, def) * (secondary ? 0.6 : 1);
                 seconds = Math.Max(2.0, mean + (Normal(_random) * (fastBreak ? 1.5 : secondChance ? 3.0 : 4.5)));
             }
 
@@ -219,6 +238,7 @@ public sealed partial class MatchSimulation
             Elapse(seconds);
             if (violation)
             {
+                off.TurnoverCauses[(int)TurnoverCause.ShotClockViolation]++;
                 Emit(MatchEventKind.ShotClockViolation, off.Side, null, null, 0, $"Shot-clock violation, {off.Sheet.Name}.");
                 ChangePossession(stolen: false);
                 return;
@@ -250,12 +270,13 @@ public sealed partial class MatchSimulation
                 }
             }
 
-            var outcome = Shot(off, def, fastBreak, lastShot, plan.ForceThree, edge + plan.Edge);
+            var outcome = Shot(off, def, fastBreak, secondary && !secondChance, lastShot, plan.ForceThree, edge + plan.Edge);
             edge = 0;
             if (outcome == ShotOutcome.OffensiveRebound && _clock > 0 && !IsFinished)
             {
                 shotClock = _rules.ResetShotClock;
-                fastBreak = false;
+                fastBreak = _fastBreakNow = false;
+                _secondChanceNow = true;
                 continue;
             }
 
@@ -278,10 +299,16 @@ public sealed partial class MatchSimulation
         return Math.Clamp(mean, 8, 21);
     }
 
-    private void ChangePossession(bool stolen)
+    private void ChangePossession(bool stolen, bool intercepted = false)
     {
         _possession = _possession.Other();
-        _nextFastBreak = stolen && _random.NextDouble() < 0.45;
+        _nextFastBreak = _nextSecondary = false;
+        if (stolen)
+        {
+            // Intercepted passes start more fast breaks than strips (docs/MATCH_ENGINE.md §9.6).
+            var running = Get(_possession);
+            Transition(running, (intercepted ? 0.55 : 0.4) + SpeedEdge(running, Get(_possession.Other())));
+        }
     }
 
     private void Elapse(double seconds)
@@ -556,7 +583,7 @@ public sealed partial class MatchSimulation
         p += StaffRules.CoachEdge(off.Sheet.Coach.TacticalKnowledge);
         p += off.Side == TeamSide.Home && !_neutral ? 0.015 : 0;
         p += 0.05 * (5 - def.OnCourt.Count());
-        p += fastBreak && type == ShotType.Rim ? 0.12 : 0;
+        p += fastBreak && type == ShotType.Rim ? 0.1 : 0;
         p -= lastShot && _clock < 3 ? 0.1 : 0;
         return Math.Clamp(p, 0.05, 0.9);
     }
@@ -632,6 +659,7 @@ public sealed partial class MatchSimulation
             _ => 1.0,
         };
         p *= off.Tactics.Situations.PlayCalling == PlayCalling.SetPlays ? 1.05 : 1;
+        p *= 1.15 - (0.3 * shooter.T.Isolation / 100.0);
         var passers = off.OnCourt.Where(r => r != shooter).ToList();
         if (passers.Count == 0)
         {
@@ -652,15 +680,27 @@ public sealed partial class MatchSimulation
         var stealChance = 0.48 + (0.1 * Level(def.Tactics.Defense.BallPressure));
         if (_random.NextDouble() < stealChance)
         {
-            var thief = Pick(def.OnCourt.ToList(), r => Math.Pow(r.A.Steal, 2) * (1 + (r.T.DefensiveGambling / 100.0)));
+            // Turnover causes (docs/MATCH_ENGINE.md §9.5): passes picked off by positioning, dribbles stripped by gamblers.
+            var pass = PassRisk(off, loser);
+            var intercepted = _random.NextDouble() < pass / (pass + DribbleRisk(loser));
+            var thief = Pick(def.OnCourt.ToList(), r => Math.Pow(r.A.Steal, 2)
+                * (intercepted ? 0.5 + (r.A.DefensivePositioning / 100.0) : 1 + (r.T.DefensiveGambling / 100.0)));
             thief.Line.Steals++;
-            Emit(MatchEventKind.Turnover, off.Side, loser.Player.Id, thief.Player.Id, 0, $"{thief.Name} steals the ball from {loser.Name}.");
-            ChangePossession(stolen: true);
+            off.TurnoverCauses[(int)(intercepted ? TurnoverCause.BadPass : TurnoverCause.LostBall)]++;
+            Emit(
+                MatchEventKind.Turnover,
+                off.Side,
+                loser.Player.Id,
+                thief.Player.Id,
+                0,
+                intercepted ? $"{thief.Name} intercepts a pass from {loser.Name}." : $"{thief.Name} steals the ball from {loser.Name}.");
+            ChangePossession(stolen: true, intercepted);
             return;
         }
 
-        if (_random.NextDouble() < 0.15)
+        if (_random.NextDouble() < 0.15 * (0.6 + (0.8 * loser.T.DriveToBasket / 100.0)))
         {
+            off.TurnoverCauses[(int)TurnoverCause.OffensiveFoul]++;
             Emit(MatchEventKind.Turnover, off.Side, loser.Player.Id, null, 0, $"Offensive foul on {loser.Name}.");
             AddFoul(off, loser, null);
             if (IsFinished)
@@ -670,7 +710,14 @@ public sealed partial class MatchSimulation
         }
         else
         {
-            var what = _random.Next(3) switch { 0 => "throws the ball away", 1 => "is called for travelling", _ => "loses the ball out of bounds" };
+            var cause = DeadBallCause(off, loser);
+            off.TurnoverCauses[(int)cause]++;
+            var what = cause switch
+            {
+                TurnoverCause.BadPass => "throws the ball away",
+                TurnoverCause.Travelling => "is called for travelling",
+                _ => "loses the ball out of bounds",
+            };
             Emit(MatchEventKind.Turnover, off.Side, loser.Player.Id, null, 0, $"{loser.Name} {what}.");
         }
 
@@ -706,20 +753,40 @@ public sealed partial class MatchSimulation
         return true;
     }
 
-    private ShotOutcome Shot(Team off, Team def, bool fastBreak, bool lastShot, bool forceThree, double edge)
+    private ShotOutcome Shot(Team off, Team def, bool fastBreak, bool secondary, bool lastShot, bool forceThree, double edge)
     {
         var guards = TacticalModel.IsManBased(def.Tactics.DefensiveSystem) ? Guards(off, def) : null;
         var hunted = fastBreak ? null : Hunted(off, guards);
-        var shooter = Pick(off.OnCourt.ToList(), r => Usage(off, r) * (r == hunted ? TacticalModel.HuntedUsage : 1) * HotHand(off, r));
+        var clutch = IsClutch();
+        var hurried = lastShot && _clock < 3;
+        double Weight(Runner r) => Usage(off, r) * (r == hunted ? TacticalModel.HuntedUsage : 1) * HotHand(off, r)
+            * IsolationUsage(r) * (clutch ? ClutchUsage(off, r) : 1);
+        var shooter = Pick(off.OnCourt.ToList(), Weight);
         var pickAndRoll = off.Tactics.OffensiveSystem == OffensiveSystem.PickAndRoll
             || _random.NextDouble() < 0.15 * (1 + Level(off.Tactics.Offense.PickAndRollFrequency));
-        var (defender, switched) = guards is null ? (null, false) : ManDefender(off, def, guards, shooter, pickAndRoll && !fastBreak);
-        var type = forceThree ? ShotType.Three : PickShotType(off, def, shooter, defender, shooter == hunted, fastBreak, lastShot);
-        defender ??= SlotDefender(off, def, shooter);
+        var (type, defender, switched) = Attempt(off, def, guards, shooter, hunted, pickAndRoll, fastBreak, lastShot, forceThree ? ShotType.Three : null);
+        var contest = Contest(off, def, shooter, defender, type, fastBreak, secondary, kickOut: false, hurried);
+        Runner? passer = null;
+        if (contest == ShotContest.Tight && !fastBreak && !lastShot && !forceThree && off.OnCourt.Count() > 1
+            && _random.NextDouble() < PassUpChance(off, shooter))
+        {
+            // Player decision-making (docs/MATCH_ENGINE.md §9.3): the tight shot is passed up for a teammate's.
+            off.PassedUp++;
+            passer = shooter;
+            shooter = Pick(off.OnCourt.Where(r => r != passer).ToList(), Weight);
+            (type, defender, switched) = Attempt(off, def, guards, shooter, hunted, pickAndRoll, fastBreak, lastShot, type);
+            contest = Contest(off, def, shooter, defender, type, fastBreak, secondary, kickOut: true, hurried);
+        }
+
+        var zone = PickZone(off, def, shooter, type, fastBreak, hurried);
+        var (x, y) = Spot(zone, hurried);
+        var shot = new ShotContext(type, x, y, contest, fastBreak, clutch, defender, passer);
+        edge += ZoneEdge(type, zone, ShotZones.Distance(x, y)) + ContestEdge(contest) + (clutch ? ClutchEdge(shooter) : 0);
         var chance = MakeChance(off, def, shooter, defender, type, fastBreak, lastShot, pickAndRoll && !switched, edge);
         var points = type == ShotType.Three ? 3 : 2;
 
-        if (defender is not null && _random.NextDouble() < ShootingFoulChance(def, defender, type, fastBreak))
+        var foulChance = defender is null ? 0 : ShootingFoulChance(def, defender, type, fastBreak) * ContestFoulFactor(contest, defender) * FoulDrawing(shooter, type);
+        if (defender is not null && _random.NextDouble() < foulChance)
         {
             var fouler = type is ShotType.Rim or ShotType.Post && _random.NextDouble() < 0.4
                 ? def.OnCourt.MaxBy(r => r.A.Block + r.A.InteriorDefense)!
@@ -733,7 +800,7 @@ public sealed partial class MatchSimulation
             var andOne = _random.NextDouble() < chance * 0.5;
             if (andOne)
             {
-                FieldGoal(off, def, shooter, type, made: true, fastBreak, andOne: true);
+                FieldGoal(off, def, shooter, shot, made: true, andOne: true);
             }
 
             if (FreeThrows(off, shooter, andOne ? 1 : points))
@@ -747,17 +814,29 @@ public sealed partial class MatchSimulation
 
         if (_random.NextDouble() < chance)
         {
-            FieldGoal(off, def, shooter, type, made: true, fastBreak, andOne: false);
+            FieldGoal(off, def, shooter, shot, made: true, andOne: false);
             ChangePossession(stolen: false);
             return ShotOutcome.Scored;
         }
 
-        FieldGoal(off, def, shooter, type, made: false, fastBreak, andOne: false);
-        return ResolveRebound(off, def, type, freeThrow: false);
+        FieldGoal(off, def, shooter, shot, made: false, andOne: false);
+        return ResolveRebound(off, def, type, freeThrow: false, zone, shooter);
     }
 
-    private void FieldGoal(Team off, Team def, Runner shooter, ShotType type, bool made, bool fastBreak, bool andOne)
+    /// <summary>Defender and shot type for a chosen shooter (a kick-out keeps the type of the play).</summary>
+    private (ShotType Type, Runner? Defender, bool Switched) Attempt(
+        Team off, Team def, Dictionary<Runner, Runner>? guards, Runner shooter, Runner? hunted, bool pickAndRoll, bool fastBreak, bool lastShot, ShotType? fixedType)
     {
+        var (defender, switched) = guards is null ? (null, false) : ManDefender(off, def, guards, shooter, pickAndRoll && !fastBreak);
+        var type = fixedType ?? PickShotType(off, def, shooter, defender, shooter == hunted, fastBreak, lastShot);
+        defender ??= SlotDefender(off, def, shooter);
+        return (type, defender, switched);
+    }
+
+    private void FieldGoal(Team off, Team def, Runner shooter, ShotContext shot, bool made, bool andOne)
+    {
+        var type = shot.Type;
+        var fastBreak = shot.FastBreak;
         var three = type == ShotType.Three;
         if (three)
         {
@@ -768,22 +847,37 @@ public sealed partial class MatchSimulation
             shooter.Line.TwoPointAttempted++;
         }
 
+        if (shot.Defender is { } guard)
+        {
+            guard.Line.DefendedAttempted++;
+            guard.Line.DefendedMade += made ? 1 : 0;
+        }
+
+        var distance = ShotZones.Distance(shot.X, shot.Y);
         var what = type switch
         {
-            ShotType.Rim => fastBreak ? "on the fast break" : shooter.A.Dunk > 65 && shooter.Player.HeightCm >= 200 ? "with a dunk" : "on a drive to the rim",
+            ShotType.Rim => fastBreak ? "on the fast break" : shot.Zone == ShotZone.Paint ? "with a floater" : shooter.A.Dunk > 65 && shooter.Player.HeightCm >= 200 ? "with a dunk" : "on a drive to the rim",
             ShotType.Post => "in the post",
             ShotType.MidRange => "from mid-range",
-            _ => "from three",
+            _ when distance > 8.5 => "from deep",
+            _ => shot.Zone switch
+            {
+                ShotZone.CornerThreeLeft or ShotZone.CornerThreeRight => "from the corner",
+                ShotZone.TopThree => "from the top of the key",
+                _ => "from three on the wing",
+            },
         };
         if (!made)
         {
             var blockChance = type switch
             {
-                ShotType.Rim or ShotType.Post => 0.11 + ((def.OnCourt.Max(r => r.A.Block) - 50) * 0.002),
+                ShotType.Rim or ShotType.Post => 0.12 + ((def.OnCourt.Max(r => r.A.Block) - 50) * 0.002),
                 ShotType.MidRange => 0.025,
                 _ => 0.01,
             };
-            if (_random.NextDouble() < Math.Clamp(blockChance, 0, 0.3))
+            var blocked = _random.NextDouble() < Math.Clamp(blockChance * ContestBlockFactor(shot.Contest), 0, 0.4);
+            shooter.Line.AddShot(Record(shot, made: false, assisted: false, blocked));
+            if (blocked)
             {
                 var blocker = Pick(def.OnCourt.ToList(), r => Math.Pow(r.A.Block, 2) * (r.Player.HeightCm / 200.0));
                 blocker.Line.Blocks++;
@@ -810,20 +904,32 @@ public sealed partial class MatchSimulation
         off.FieldGoalPoints += points;
         off.InsidePoints += type is ShotType.Rim or ShotType.Post ? points : 0;
         Runner? passer = null;
-        if (_random.NextDouble() < AssistChance(off, shooter, type, fastBreak))
+        if (shot.KickOutPasser is { } kick && kick.Line.IsOnCourt && _random.NextDouble() < 0.85)
+        {
+            passer = kick;
+        }
+        else if (_random.NextDouble() < AssistChance(off, shooter, type, fastBreak))
         {
             var passers = off.OnCourt.Where(r => r != shooter).ToList();
             passer = Pick(passers, r =>
                 Math.Pow((r.A.Passing + r.A.CourtVision) / 2.0, 2)
                 * (r.Assignment.Role switch { TacticalRole.PrimaryBallHandler => 2.2, TacticalRole.ShotCreator => 1.2, _ => 1.0 })
                 * (0.5 + (r.T.PassFirst / 100.0)));
+        }
+
+        if (passer is not null)
+        {
             passer.Line.Assists++;
         }
 
+        shooter.Line.AddShot(Record(shot, made: true, passer is not null, blocked: false));
         AddPoints(off, points);
         var text = $"{shooter.Name} scores {what}" + (passer is null ? string.Empty : $" (assist {passer.Name})") + (andOne ? ", and one!" : ".");
         Emit(MatchEventKind.FieldGoalMade, off.Side, shooter.Player.Id, passer?.Player.Id, points, text);
     }
+
+    private ShotRecord Record(ShotContext shot, bool made, bool assisted, bool blocked) =>
+        new(Period, (int)Math.Ceiling(_clock), shot.X, shot.Y, made, shot.Contest, assisted, shot.FastBreak, shot.Clutch, blocked);
 
     /// <summary>Shoots free throws; returns <c>true</c> when the last one is missed (a live rebound).</summary>
     private bool FreeThrows(Team off, Runner shooter, int count)
@@ -849,7 +955,7 @@ public sealed partial class MatchSimulation
         return missedLast;
     }
 
-    private ShotOutcome ResolveRebound(Team off, Team def, ShotType type, bool freeThrow)
+    private ShotOutcome ResolveRebound(Team off, Team def, ShotType type, bool freeThrow, ShotZone? zone = null, Runner? shooter = null)
     {
         static double Board(Runner r, bool offensive) =>
             (offensive ? r.A.OffensiveRebound : r.A.DefensiveRebound) + ((r.Player.HeightCm - 195) * 1.2);
@@ -870,17 +976,18 @@ public sealed partial class MatchSimulation
 
         if (_random.NextDouble() < chance)
         {
-            var rebounder = Pick(offCourt, r => Math.Pow(Math.Max(5, Board(r, true) + (r.T.CrashOffensiveGlass * 0.2)), 2) * RoleBoard(r));
+            var rebounder = Pick(offCourt, r => Math.Pow(Math.Max(5, Board(r, true) + (r.T.CrashOffensiveGlass * 0.2)), 2) * RoleBoard(r) * PositionBoard(off, r, zone, shooter));
             rebounder.Line.OffensiveRebounds++;
             Emit(MatchEventKind.OffensiveRebound, off.Side, rebounder.Player.Id, null, 0, $"Offensive rebound {rebounder.Name}.");
             return ShotOutcome.OffensiveRebound;
         }
 
-        var grabber = Pick(defCourt, r => Math.Pow(Math.Max(5, Board(r, false)), 2) * RoleBoard(r));
+        var grabber = Pick(defCourt, r => Math.Pow(Math.Max(5, Board(r, false)), 2) * RoleBoard(r) * PositionBoard(def, r, zone, null));
         grabber.Line.DefensiveRebounds++;
         Emit(MatchEventKind.DefensiveRebound, def.Side, grabber.Player.Id, null, 0, $"{grabber.Name} grabs the defensive rebound.");
         _possession = def.Side;
-        _nextFastBreak = _random.NextDouble() < TacticalModel.FastBreakAfterRebound(def.Tactics, off.Tactics);
+        var longRebound = zone is { } z ? (ShotZones.IsThree(z) ? 0.03 : ShotZones.IsInside(z) ? -0.01 : 0) : 0;
+        Transition(def, TacticalModel.FastBreakAfterRebound(def.Tactics, off.Tactics) + SpeedEdge(def, off) + longRebound);
         return ShotOutcome.DefensiveRebound;
     }
 
@@ -890,14 +997,20 @@ public sealed partial class MatchSimulation
         team.Run += points;
         var other = Get(team.Side.Other());
         other.Run = 0;
+        if (team.Side == _possession)
+        {
+            team.FastBreakPoints += _fastBreakNow ? points : 0;
+            team.SecondChancePoints += _secondChanceNow ? points : 0;
+        }
+
         foreach (var r in team.OnCourt)
         {
-            r.Line.PlusMinus += points;
+            r.Line.PointsFor += points;
         }
 
         foreach (var r in other.OnCourt)
         {
-            r.Line.PlusMinus -= points;
+            r.Line.PointsAgainst += points;
         }
     }
 

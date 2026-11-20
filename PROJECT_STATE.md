@@ -4,20 +4,20 @@
 European Basketball Manager
 
 ## Current milestone
-Milestone 3 — Advanced management and simulation (Milestone 2 completed, release 0.24.0; current version 0.28.0)
+Milestone 3 — Advanced management and simulation (Milestone 2 completed, release 0.24.0; current version 0.29.0)
 
 ## Current step
 None in progress
 
 ## Last completed step
-STEP 28 — Coaching and staff management (2026-11-20)
+STEP 29 — Advanced basketball simulation (2026-11-20)
 
 ## Next step
-STEP 29 — Advanced basketball simulation (docs/ROADMAP.md)
+STEP 30 — Advanced match visualization (docs/ROADMAP.md)
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: unit PASS (459/459); integration fast suite PASS (163, 2026-11-20, Step 28; `Category!=Launch&Category!=Slow`, ~4 min); launch PASS. Slow suite (`Category=Slow`) on `data/real-leagues` since 2026-11-18: `EuropeanTransferWindowTests.Ai_clubs_recruit_…` PASS (1 min 12 s); `MilestoneTwoTests` accepted as PASS (2026-11-18, user decision): season 2026-27 passed every check in ~13 min, season 2027-28 ran through the off-season (1 Jul signings, pre-season window) to 28 Sep 2027 with no failure and 0 clubs in debt, then the run was stopped; `RealLeaguesCompetitionTests`, `RealLeaguesDatasetTests`, `CareerSimulationTests` and the other transfer test not run on this code
+- Tests: unit PASS (467/467, Step 29); Step 29 integration subset PASS (25: `MatchServiceTests`, `DatabaseInitializerTests`, `PlayerScreensRenderTests`, `ContractServiceTests`; full fast suite not run in Step 29 by user decision); integration fast suite last full PASS (163, 2026-11-20, Step 28; `Category!=Launch&Category!=Slow`, ~4 min); launch PASS. Slow suite (`Category=Slow`) on `data/real-leagues` since 2026-11-18: `EuropeanTransferWindowTests.Ai_clubs_recruit_…` PASS (1 min 12 s); `MilestoneTwoTests` accepted as PASS (2026-11-18, user decision): season 2026-27 passed every check in ~13 min, season 2027-28 ran through the off-season (1 Jul signings, pre-season window) to 28 Sep 2027 with no failure and 0 clubs in debt, then the run was stopped; `RealLeaguesCompetitionTests`, `RealLeaguesDatasetTests`, `CareerSimulationTests` and the other transfer test not run on this code
 - Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, scouting, tactics, training, medical, staff, dressing room, match centre, season stats, contracts editor, leagues, competitions, finances, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; scouts, assignments and reports as `IScoutingService`; training, development, fitness and retirement as `IDevelopmentService`; injuries, recovery and medical records as `IMedicalService`; staff, the staff market, hiring and dismissal as `IStaffService`; budgets, the ledger and financial reports as `IFinanceService`; hierarchy, morale, relationships and team chemistry as `IChemistryService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; save files as `ISaveGameService`.
 
 ## Technology stack
@@ -65,11 +65,12 @@ STEP 29 — Advanced basketball simulation (docs/ROADMAP.md)
 - [x] Advanced contract negotiations: player demands (asking value, lengths, expected role, role and release-clause demands), agents with toughness and club relationships, rounds with patience and break-offs, competing offers, playing-time promises reviewed against minutes (morale, relationships), AI clubs meeting demands (Step 25)
 - [x] Advanced roster management and chemistry: squad hierarchy and expected roles, leaders and captain, role satisfaction from minutes, weekly morale, player relationships and conflicts, team chemistry (morale, relationships, leadership, tactical fit) with a controlled match effect, AI squad balance, *Dressing room* tab (Step 26)
 - [x] Coaching and staff management: staff attributes (tactical knowledge, development, motivation, scouting, medical expertise, reputation, experience), coaching styles and tactical preferences, role abilities, development coaches and head coaches, staff market, hiring and dismissal, responsibilities, influence on match engine/tactics/morale/training, AI staff recruitment and head-coach replacement, *Staff* tab (Step 28)
-- [ ] Step 29 onwards (Milestone 3) … see docs/ROADMAP.md
+- [x] Advanced basketball simulation: shot locations (FIBA zones, coordinates), defensive contest quality, player tendencies and decisions (isolation, passing up tight shots), foul drawing, turnover causes, transition (speed, secondary breaks, long rebounds), rebounding position, clutch, primary-defender matchups; shot charts stored per box score; advanced statistics (TS%, eFG%, USG%, AST%, REB%, TOV%, ORtg/DRtg/Net, +/-); *Advanced* and *Shot chart* match views, season advanced columns and shot chart (Step 29)
+- [ ] Step 30 onwards (Milestone 3) … see docs/ROADMAP.md
 
 ## Database
-- Current schema version: `20261120145953_StaffManagement`
-- Latest migration: `20261120145953_StaffManagement` (Staff attribute columns, `Ability` → `TacticalKnowledge`; 33 tables)
+- Current schema version: `20261120154321_AdvancedSimulation`
+- Latest migration: `20261120154321_AdvancedSimulation` (add-column only: `PlayerMatchStatistics` on-court points/possessions, defended attempts, `ShotData`; 33 tables)
 - Data status: empty database created at startup. Sample dataset `data/sample/italy-sample.json` (fictional league: Serie A 8 clubs, Serie A2 6 clubs, season 2026-27 with entries and full competition rules; 37 players with full Step 05 profiles, 4 of them free agents; club profiles; Aurora Milano has a complete 12-player squad and contracts with bonuses, a release clause and options) and templates in `data/templates` can be imported from the Import tab. `data/sample/italy-squads.json` (import after the sample) fills every club to 11 players and adds 12 free agents, so the sample plays as a full career. `data/real-leagues/` (generated by `build/generate-real-leagues-dataset.py` with `build/dataset_common.py`; import all four files into a new game): the full world — 8 real divisions, 18 competitions (8 leagues, 6 domestic cups, 4 international), 138 clubs, 2,598 real players (553 free agents, 12 generated top-ups), 2,045 contracts, 3,807 past spells (`docs/PLAYER_DATABASE.md` §7). The generated European dataset (`data/europe`, `data/italy`) was removed after Step 26. Test-only mock data in `tests/Ebm.Tests.Integration/TestSupport/SampleWorld.cs`.
 
 ## Important architectural decisions
@@ -150,6 +151,7 @@ STEP 29 — Advanced basketball simulation (docs/ROADMAP.md)
 75. Chemistry (Step 26): pure `ChemistryModel` in `Ebm.Domain.Chemistry`; expected roles reuse Step 25 `PromiseRules` so demands and the dressing room agree; morale is updated weekly (Mondays) only for clubs that played, relationships are stored per pair only once they change; the match engine reads one team number (`TeamSheet.Chemistry`, set by `MatchService` through `IChemistryService.RateAsync`) plus each player's morale, with effects capped so perfect chemistry is worth less than six overall points (docs/CHEMISTRY.md §6).
 76. Advanced tactics (Step 27): game management is part of the tactic (`SituationSettings`, owned columns), defensive matchups part of the assignment JSON, so the match engine still reads one `TeamTactics`. The engine's coach is engine logic, not a planner: it acts only for automatic sides whose tactic has *Coach adjusts* (AI plans), changes the in-match `TeamTactics` only (the saved tactic stays), and every decision is a `TacticalNote` stored with the result (`Matches.TacticalNotes`, JSON) — the only play-by-play kept after a match (docs/TACTICS.md §7).
 77. Staff (Step 28): attributes are stored, the role ability is derived (`StaffRules.RoleAbility`), so existing callers of `StaffMember.Ability` (scouting, medical, fitness) keep working; the migration renames `Ability` to `TacticalKnowledge` and copies it into every attribute, keeping each ability. The staff market is every staff member without a running or future contract (no separate table). AI recruitment stays in `StaffHiring` (called by the scouting, development and medical services) and hires from the market first; the managed club is staffed only once at the career start. The head coach reaches the engine as `TeamSheet.Coach` (`CoachProfile`), neutral at 50 so match statistics without staff are unchanged (docs/STAFF.md).
+78. Shot detail (Step 29): every counted field-goal attempt is a `ShotRecord` whose zone and value derive from its court coordinates, stored compactly in the box score (`BoxScore.ShotData`) and validated against the made/attempted counts; advanced statistics are pure formulas (`AdvancedStatistics`) over box scores, player ratings on-court (engine-recorded points and possessions). Engine-only figures (turnover causes, fast-break/second-chance points) live in `MatchResult` analytics and are not stored.
 
 Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`, `docs/INTERNATIONAL_COMPETITIONS.md`, `docs/SCOUTING.md`, `docs/DEVELOPMENT.md`, `docs/INJURIES.md`, `docs/FINANCES.md`.
 
@@ -177,6 +179,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 - Performance: an AI transfer window on the full dataset takes minutes (the market is reloaded for every club); the AI-window test took 43 min 53 s on the former European dataset, 1 min 12 s on `data/real-leagues`. Game days on `data/real-leagues` (2026-11-18, 60-day profile, 841 matches): 356 s before the day-loop fixes, 101 s after (≈ 6 s → 1.7 s a day, a season ≈ 8 min instead of ≈ 29); match simulation (~30 ms a game) is now the largest part, then the daily medical pass over every player (~0.25 s a day, players stay tracked because it changes them).
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
 - Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike fouls or held balls (intentional fouls only as the late-game tactic, always ordinary fouls); off-ball screens and help rotations are not modelled (switches only on pick and rolls); the engine's coach reviews at fixed moments (period starts, its timeouts, four minutes left); Step 27 made a match ~10–20% slower to simulate; chemistry is fixed for a match (substitutions do not change it); injuries are decided after the game from the minutes played; box scores store whole minutes; play-by-play, energy and plus-minus are not stored (only box scores and tactical notes), so past matches show box scores, team stats and tactical notes only; an unfinished live match is lost when the application closes.
+- Simulation (Step 29): stored reports have no turnover causes or fast-break/second-chance points (engine-only); box scores before Step 29 have no shots or on-court figures (shown as —); season USG%/AST%/REB% not shown (need per-match team totals); a stronger team now wins more often (70 vs 55: 96%, was 89%).
 - Tactics: the tactics screen shows enum names (`PickAndRoll`, `Zone23`).
 - Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
@@ -201,7 +204,7 @@ Details: `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPO
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_28_LOG.md
+logs/STEP_29_LOG.md
 
 ## Instructions for continuing
 1. Read this file.
