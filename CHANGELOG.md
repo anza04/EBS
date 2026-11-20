@@ -5,6 +5,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-11-21 — STEP 34: Final optimization and release
+
+### Added
+- Save integrity (docs/SAVE_FILES.md §4): saves are verified (`PRAGMA quick_check`) before they replace an existing
+  save; damaged saves are refused by *Load*.
+- Automatic backups: *Load* and *New game* first keep the replaced career as an `Autobackup <timestamp>` save, and the
+  game is backed up at startup before a database upgrade; the newest five are kept.
+- Startup recovery: a damaged game database is kept aside (`ebm.db.damaged-<timestamp>`) and restored from the newest
+  intact automatic backup.
+- `PRAGMA optimize` when the game closes.
+
+### Changed
+- Performance: the Monday transfer window opens only for AI clubs short of players that can afford a signing (balance
+  for the minimum salary and, above the squad minimum, wage-budget room); clubs that could sign nobody no longer reload
+  the market every week (the season-2 slowdown in the known issues).
+- Zone defences read "2-3 zone", "3-2 zone", "1-3-1 zone" on screen.
+- Version 1.0.0 (Milestone 3 release).
+
 ## [0.33.0] — 2026-11-21 — STEP 33: Modding and custom database support
 
 ### Added

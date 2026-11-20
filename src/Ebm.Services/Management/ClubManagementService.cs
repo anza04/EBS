@@ -217,15 +217,7 @@ internal sealed class ClubManagementService(
         // Best first, read once: a signed player leaves the pool (nothing else in it changes while squads are filled).
         var pool = await contracts.GetFreeAgentsAsync(cancellationToken).ConfigureAwait(false);
         var taken = new HashSet<PlayerId>();
-        Dictionary<ClubId, long> wageBills;
-        using (var scope = scopes.CreateScope())
-        {
-            // The club pays its players' salaries, loans in included; a player it loaned out is paid by the loan club.
-            wageBills = (await Repo<Contract, ContractId>(scope.ServiceProvider).ListUntrackedAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
-                .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)
-                .GroupBy(c => c.ClubId)
-                .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
-        }
+        var wageBills = await WageBillsAsync(today, cancellationToken).ConfigureAwait(false);
 
         var end = today.AddYears(1).AddDays(-1);
         foreach (var roster in await clubs.GetRostersAsync(shortOf, cancellationToken).ConfigureAwait(false))
@@ -374,14 +366,38 @@ internal sealed class ClubManagementService(
 
     public async Task<IReadOnlyList<ClubId>> ClubsShortOfPlayersAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
     {
+        var today = clock.Today;
+        var shortOf = (await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
+            .Where(roster => roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
+                || roster.FirstTeam.Count(p => p.Availability != PlayerAvailability.Unavailable) < SquadRules.Starters
+                || InjuryCover(roster, today) > 0)
+            .ToList();
+        if (shortOf.Count == 0)
+        {
+            return [];
+        }
+
+        // Only clubs that can afford a signing (Step 34): the balance must cover the minimum salary, and above the squad
+        // minimum the wage budget too (FillSquadsAsync's rule), so clubs that could sign nobody do not open a window.
+        var wageBills = await WageBillsAsync(today, cancellationToken).ConfigureAwait(false);
         return
         [
-            .. (await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
-                .Where(roster => roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
-                    || roster.FirstTeam.Count(p => p.Availability != PlayerAvailability.Unavailable) < SquadRules.Starters
-                    || InjuryCover(roster, clock.Today) > 0)
+            .. shortOf
+                .Where(roster => roster.Club.Balance >= ContractNegotiator.MinimumSalary
+                    && (roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
+                        || roster.Club.WageBudget - wageBills.GetValueOrDefault(roster.Club.Id) >= ContractNegotiator.MinimumSalary))
                 .Select(roster => roster.Club.Id),
         ];
+    }
+
+    /// <summary>Each club's running wage bill: its players' salaries, loans in included; a player it loaned out is paid by the loan club.</summary>
+    private async Task<Dictionary<ClubId, long>> WageBillsAsync(DateOnly today, CancellationToken cancellationToken)
+    {
+        using var scope = scopes.CreateScope();
+        return (await Repo<Contract, ContractId>(scope.ServiceProvider).ListUntrackedAsync(Contract.RunningOn(today), cancellationToken).ConfigureAwait(false))
+            .Where(c => c.PlayerId is not null && c.Status != ContractStatus.OnLoan)
+            .GroupBy(c => c.ClubId)
+            .ToDictionary(g => g.Key, g => g.Sum(c => c.AnnualSalary));
     }
 
     public async Task SetObjectivesAsync(SeasonId seasonId, CancellationToken cancellationToken = default)

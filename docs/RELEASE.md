@@ -1,4 +1,4 @@
-# Release and installation (Milestone 1)
+# Release and installation (1.0.0)
 
 ## 1. Building the Windows release
 
@@ -31,9 +31,11 @@ The script:
 4. *Continue* until match day; play the match live in *Matches* (or *Play match* for an instant result), then
    *Continue* again. *Assistant manages (holiday)* lets the assistant run the club and play its matches.
 5. When the season is complete: *Season review*, then *Start next season* and continue through the offseason.
-6. *Saved games*: *Save* a copy of the game, *Load* it later, *New game* to start over.
+6. *Saved games*: *Save* a copy of the game, *Load* it later, *New game* to start over. *Load* and *New game* first
+   keep the replaced career as an `Autobackup …` save (newest five kept); a damaged game database is restored from
+   the newest backup at startup (docs/SAVE_FILES.md §4).
 
-## 4. Release checklist (Step 14)
+## 4. Release checklist (Steps 14 and 34)
 
 | Check | How |
 |---|---|
@@ -42,3 +44,15 @@ The script:
 | Long simulation | `EBM_SIM_SEASONS=6 dotnet test --filter CareerSimulation` |
 | Executable starts on a clean machine profile | `build/publish.ps1` smoke test |
 | Career creation, management, matches, transfers, full season, second season, save/load | `MilestoneOneTests` |
+| Save integrity, automatic backups, startup recovery | `SaveIntegrityTests` |
+| Long-term world (three seasons) | `LongTermWorldTests` (`Category=Slow`) |
+| Real-leagues seasons | `MilestoneTwoTests`, `RealLeaguesCompetitionTests` (`Category=Slow`, in the background) |
+
+## 5. Documentation map
+
+Features are documented in `docs/`: careers and seasons (SEASON_LIFECYCLE), players (PLAYER_MODEL, PLAYER_DATABASE),
+clubs and squads (ROSTER_RULES), contracts and transfers (CONTRACTS, TRANSFERS), scouting, development, injuries,
+staff, finances, chemistry, tactics, match engine and match UI (MATCH_ENGINE, MATCH_UI, MATCH_VISUALIZATION),
+competitions (COMPETITION_FORMATS, CUP_FORMATS, INTERNATIONAL_COMPETITIONS), news, history, AI management, import
+formats, modding, save files and the technical architecture.
+

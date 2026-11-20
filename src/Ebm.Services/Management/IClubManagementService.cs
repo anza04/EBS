@@ -42,7 +42,10 @@ public interface IClubManagementService
     /// <summary>Free agents per club the market keeps (see <see cref="ReplenishFreeAgentsAsync"/>).</summary>
     public const int FreeAgentsPerClub = 2;
 
-    /// <summary>AI clubs below the minimum first team or without five available players.</summary>
+    /// <summary>
+    /// AI clubs below the minimum first team, without five available players or needing long-term injury cover, that can
+    /// afford a signing (balance for the minimum salary; above the squad minimum also room in the wage budget).
+    /// </summary>
     Task<IReadOnlyList<ClubId>> ClubsShortOfPlayersAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 
     /// <summary>Sets every club's board objective for the season from its reputation rank in its league competition.</summary>

@@ -181,5 +181,5 @@ dotnet ef migrations add <Name> --project src/Ebm.Persistence --startup-project 
 * Tests: `Method_or_behaviour_condition_expected` names; one test class per production class; unit tests
   never touch the real `%LOCALAPPDATA%` or the network, they use temporary folders.
 * UI colours, fonts and styles come from `src/Ebm.Desktop/Themes/Shell.xaml` resource keys.
-* Versioning: `0.<step>.<patch>` during Milestone 1 (set in `Directory.Build.props`), `1.0.0` at the Milestone 1 release.
+* Versioning: `0.<step>.<patch>` during development, Steps 01–33 (set in `Directory.Build.props`); `1.0.0` is the Step 34 release (Milestone 3); later changes follow semantic versioning.
 * Each step updates `CHANGELOG.md`, `PROJECT_STATE.md` and adds `logs/STEP_XX_LOG.md`.

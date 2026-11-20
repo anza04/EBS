@@ -97,7 +97,9 @@ public sealed class MilestoneOneTests : IAsyncLifetime
         Assert.Equal(saved.Today, loaded.Today);
         Assert.Equal(saved.Today, Get<GameClock>().Today);
         Assert.True((await _db.ReadAsync(s => s.Repo<Match, MatchId>().ListAsync())).Count < playedLater);
-        Assert.Single(await saves.ListAsync());
+        // The replaced game was kept as an automatic backup (docs/SAVE_FILES.md §4).
+        Assert.Equal(["Milestone save"], (await saves.ListAsync()).Select(s => s.Name).Where(n => !n.StartsWith("Autobackup ", StringComparison.Ordinal)));
+        Assert.Single(await saves.ListAsync(), s => s.Name.StartsWith("Autobackup ", StringComparison.Ordinal));
 
         // The rest of the season, then the second season's first match.
         while (true)

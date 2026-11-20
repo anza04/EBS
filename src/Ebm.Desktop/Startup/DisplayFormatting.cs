@@ -39,9 +39,14 @@ public static class DisplayFormatting
         TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(CultureDateOnlyConverter)));
     }
 
-    /// <summary>"ShootingGuard" → "Shooting guard"; "EUCitizen" → "EU citizen"; flags keep their ", " separator.</summary>
+    /// <summary>"ShootingGuard" → "Shooting guard"; "EUCitizen" → "EU citizen"; "Zone23" → "2-3 zone"; flags keep their ", " separator.</summary>
     public static string Humanize(string name)
     {
+        if (ZoneDigits(name) is { } digits)
+        {
+            return string.Join('-', digits.ToCharArray()) + ZoneSuffix;
+        }
+
         var text = new StringBuilder(name.Length + 8);
         for (var i = 0; i < name.Length; i++)
         {
@@ -61,6 +66,18 @@ public static class DisplayFormatting
         return text.ToString();
     }
 
+    private const string ZoneSuffix = " zone";
+
+    /// <summary>The digits of a zone defence name ("Zone23" → "23"), else <c>null</c>.</summary>
+    private static string? ZoneDigits(string name) =>
+        name.Length > 4 && name.StartsWith("Zone", StringComparison.Ordinal) && name[4..].All(char.IsAsciiDigit) ? name[4..] : null;
+
+    /// <summary>Inverse of <see cref="Humanize"/> for parsing: "2-3 zone" → "Zone23", "Shooting guard" → "Shootingguard" (enum parsing ignores case).</summary>
+    internal static string Dehumanize(string text) =>
+        text.EndsWith(ZoneSuffix, StringComparison.Ordinal) && text[..^ZoneSuffix.Length].Replace("-", string.Empty, StringComparison.Ordinal) is { Length: > 0 } digits && digits.All(char.IsAsciiDigit)
+            ? "Zone" + digits
+            : text.Replace(" ", string.Empty, StringComparison.Ordinal);
+
     private sealed class HumanEnumConverter(Type type) : EnumConverter(type)
     {
         public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType) =>
@@ -69,7 +86,7 @@ public static class DisplayFormatting
                 : base.ConvertTo(context, culture, value, destinationType);
 
         public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) =>
-            value is string text ? base.ConvertFrom(context, culture, text.Replace(" ", string.Empty, StringComparison.Ordinal)) : base.ConvertFrom(context, culture, value);
+            value is string text ? base.ConvertFrom(context, culture, Dehumanize(text)) : base.ConvertFrom(context, culture, value);
     }
 
     private sealed class CultureDateOnlyConverter : DateOnlyConverter

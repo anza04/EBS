@@ -17,7 +17,8 @@ internal sealed class SaveGameStore(
     PersistenceOptions options,
     DatabaseInitializer initializer,
     IServiceScopeFactory scopes,
-    ICareerService careers) : ISaveGameService
+    ICareerService careers,
+    TimeProvider time) : ISaveGameService
 {
     public const string Extension = ".ebmsave";
     public const int NameMaxLength = 60;
@@ -51,13 +52,16 @@ internal sealed class SaveGameStore(
         Directory.CreateDirectory(SavesDirectory);
         var temporary = path + ".tmp";
         File.Delete(temporary);
-        await using (var source = await OpenAsync(options.DatabasePath, cancellationToken).ConfigureAwait(false))
-        await using (var target = await OpenAsync(temporary, cancellationToken).ConfigureAwait(false))
+        cancellationToken.ThrowIfCancellationRequested();
+        DatabaseFiles.Copy(options.DatabasePath, temporary);
+
+        // Verified before it replaces anything (docs/SAVE_FILES.md §4): a damaged copy never overwrites a good save.
+        if (!DatabaseFiles.IsIntact(temporary))
         {
-            source.BackupDatabase(target);
+            File.Delete(temporary);
+            throw new DomainValidationException("The save could not be verified (the game database may be damaged); nothing was overwritten.");
         }
 
-        SqliteConnection.ClearAllPools();
         File.Move(temporary, path, overwrite: true);
         return Describe(path);
     }
@@ -71,14 +75,14 @@ internal sealed class SaveGameStore(
         }
 
         CheckCompatible(path);
-        SqliteConnection.ClearAllPools();
-        await using (var source = await OpenAsync(path, cancellationToken).ConfigureAwait(false))
-        await using (var target = await OpenAsync(options.DatabasePath, cancellationToken).ConfigureAwait(false))
+        if (!DatabaseFiles.IsIntact(path))
         {
-            source.BackupDatabase(target);
+            throw new DomainValidationException($"The save '{name.Trim()}' is damaged and cannot be loaded.");
         }
 
-        SqliteConnection.ClearAllPools();
+        cancellationToken.ThrowIfCancellationRequested();
+        AutoBackup();
+        DatabaseFiles.Copy(path, options.DatabasePath);
         await initializer.InitializeAsync(cancellationToken).ConfigureAwait(false);
         await careers.LoadAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -108,12 +112,8 @@ internal sealed class SaveGameStore(
                 await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            SqliteConnection.ClearAllPools();
-            await using (var source = await OpenAsync(empty, cancellationToken).ConfigureAwait(false))
-            await using (var target = await OpenAsync(options.DatabasePath, cancellationToken).ConfigureAwait(false))
-            {
-                source.BackupDatabase(target);
-            }
+            AutoBackup();
+            DatabaseFiles.Copy(empty, options.DatabasePath);
         }
         finally
         {
@@ -123,6 +123,9 @@ internal sealed class SaveGameStore(
 
         await careers.LoadAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>Keeps the game about to be replaced as an automatic backup (docs/SAVE_FILES.md §4).</summary>
+    private void AutoBackup() => DatabaseFiles.AutoBackup(options.DatabasePath, SavesDirectory, time.GetLocalNow().DateTime);
 
     /// <summary>The save's file; the name may use letters, digits, spaces, '-' and '_'.</summary>
     private string PathOf(string name)
@@ -204,12 +207,5 @@ internal sealed class SaveGameStore(
         using var command = connection.CreateCommand();
         command.CommandText = $"SELECT MigrationId FROM \"{HistoryRepository.DefaultTableName}\" ORDER BY MigrationId DESC LIMIT 1";
         return command.ExecuteScalar() as string;
-    }
-
-    private static async Task<SqliteConnection> OpenAsync(string path, CancellationToken cancellationToken)
-    {
-        var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString());
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-        return connection;
     }
 }

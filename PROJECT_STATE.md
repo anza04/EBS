@@ -4,20 +4,20 @@
 European Basketball Manager
 
 ## Current milestone
-Milestone 3 — Advanced management and simulation (Milestone 2 completed, release 0.24.0; current version 0.33.0)
+Milestone 3 — Advanced management and simulation: completed with release 1.0.0 (Milestone 2 release 0.24.0)
 
 ## Current step
 None in progress
 
 ## Last completed step
-STEP 33 — Modding and custom database support (2026-11-21)
+STEP 34 — Final optimization and release (2026-11-21)
 
 ## Next step
-STEP 34 — Final optimization and release (docs/ROADMAP.md)
+None: the roadmap (Steps 01–34) is complete. Before announcing 1.0.0, run the full fast, launch and slow suites (logs/STEP_34_LOG.md §7).
 
 ## Application status
 - Build: PASS (Debug and Release, 0 warnings, 0 errors)
-- Tests: Step 33: architecture 7 PASS; integration subset 59 PASS (modding 8 new, import, saves, host composition, editor, render tests, database initializer); `NewsServiceTests` failed once when run together with other classes and passed alone (pre-existing ordering/parallelism sensitivity, not investigated). Earlier: unit PASS (Step 30 full run; Step 32 affected areas 113: history, news, management, development, staff, players, architecture); Step 32 integration subset PASS (64: history, news, careers, staff, competitions, cups, international, development, finances, medical, contracts, database initializer, render tests) and slow `LongTermWorldTests` (3 seasons); full fast suite not run in Steps 29–32 by user decision; integration fast suite last full PASS (163, 2026-11-20, Step 28; `Category!=Launch&Category!=Slow`, ~4 min); launch PASS. Slow suite (`Category=Slow`) on `data/real-leagues` since 2026-11-18: `EuropeanTransferWindowTests.Ai_clubs_recruit_…` PASS (1 min 12 s); `MilestoneTwoTests` accepted as PASS (2026-11-18, user decision): season 2026-27 passed every check in ~13 min, season 2027-28 ran through the off-season (1 Jul signings, pre-season window) to 28 Sep 2027 with no failure and 0 clubs in debt, then the run was stopped; `RealLeaguesCompetitionTests`, `RealLeaguesDatasetTests`, `CareerSimulationTests` and the other transfer test not run on this code
+- Tests: Step 34: affected integration classes PASS (saves/integrity 4 new, milestone one, database initializer, medical, host composition, careers, development, display formatting 5 new, screen render); Windows package and smoke test PASS (`artifacts/EuropeanBasketballManager-1.0.0-win-x64.zip`). Step 33: architecture 7 PASS; integration subset 59 PASS (modding 8 new, import, saves, host composition, editor, render tests, database initializer); `NewsServiceTests` failed once when run together with other classes and passed alone (pre-existing ordering/parallelism sensitivity, not investigated). Earlier: unit PASS (Step 30 full run; Step 32 affected areas 113: history, news, management, development, staff, players, architecture); Step 32 integration subset PASS (64: history, news, careers, staff, competitions, cups, international, development, finances, medical, contracts, database initializer, render tests) and slow `LongTermWorldTests` (3 seasons); full fast suite not run in Steps 29–32 by user decision; integration fast suite last full PASS (163, 2026-11-20, Step 28; `Category!=Launch&Category!=Slow`, ~4 min); launch PASS. Slow suite (`Category=Slow`) on `data/real-leagues` since 2026-11-18: `EuropeanTransferWindowTests.Ai_clubs_recruit_…` PASS (1 min 12 s); `MilestoneTwoTests` accepted as PASS (2026-11-18, user decision): season 2026-27 passed every check in ~13 min, season 2027-28 ran through the off-season (1 Jul signings, pre-season window) to 28 Sep 2027 with no failure and 0 clubs in debt, then the run was stopped; `RealLeaguesCompetitionTests`, `RealLeaguesDatasetTests`, `CareerSimulationTests` and the other transfer test not run on this code
 - Run status: Launches (also as the published self-contained `Ebm.Desktop.exe`, `build/publish.ps1`). Creates/migrates the game database at startup, loads the career (its date becomes the game date), applies transfer and contract dates (loan returns, expiries, contracts starting) and opens the main window (career, saved games, players, player profile, player comparison, clubs, club profile, squad, club contracts, transfer market, scouting, tactics, training, medical, staff, dressing room, news, history, match centre, season stats, contracts editor, leagues, competitions, finances, import). The competition engine (leagues, domestic cups and international competitions, qualification, calendar conflicts) is available as `ICompetitionService`; player ratings as `PlayerRatingCalculator` / `IPlayerProfileService`; clubs and squads as `IClubService`; contracts as `IContractService`; the player market, loan agreements, registration windows and AI recruitment as `ITransferService`; scouts, assignments and reports as `IScoutingService`; training, development, fitness and retirement as `IDevelopmentService`; injuries, recovery and medical records as `IMedicalService`; staff, the staff market, hiring and dismissal as `IStaffService`; budgets, the ledger and financial reports as `IFinanceService`; hierarchy, morale, relationships and team chemistry as `IChemistryService`; club tactics as `ITacticsService` (`GetMatchTacticsAsync` for the match engine); the match engine as `MatchSimulation` (domain) and `IMatchService` (play, live sessions, storage, box scores, forfeits); the career and calendar as `ICareerService` with the game date in `GameClock`; AI clubs as `IClubManagementService`; news, fans and club reputation history as `INewsService`; awards, hall of fame, careers, records, youth intake and league evolution as `IHistoryService`; save files as `ISaveGameService`; custom databases as `IDatabaseExportService` (export), `IDatabaseValidator` (whole-database checks) and `IModPackageService` (community `.ebmpack` packages, mods folder `<DataRoot>\mods`).
 
 ## Technology stack
@@ -70,6 +70,7 @@ STEP 34 — Final optimization and release (docs/ROADMAP.md)
 - [x] News, media and club reputation: match previews/reviews, press conferences, interviews, streaks, upsets, transfer and injury news, contract rumours, fan expectations and mood, every reputation change stored with its event; *News* tab with history and filters (Step 31)
 - [x] Long-term world and historical records: season awards, hall of fame, coaching careers of retired players, yearly youth intake with AI promotions, reputation drift and league snapshots, player careers, club honours, competition winners and records; *History* tab (Step 32)
 - [x] Modding and custom databases: database export in the import format (round-trips), whole-database validation, community packages (`.ebmpack`: manifest + import files) checked by dry run and installed as a new game or into the current game behind an automatic restore point; *Mods and export* tab; UI refresh (Courtside Light theme, grouped sidebar) (Step 33)
+- [x] Release hardening: verified saves, automatic backups before load/new game/upgrade, startup recovery of a damaged game database, `PRAGMA optimize` at close, cheaper Monday transfer window; Windows package 1.0.0 (Step 34)
 - [ ] Step 34 (Milestone 3 release) … see docs/ROADMAP.md
 
 ## Database
@@ -164,7 +165,7 @@ STEP 34 — Final optimization and release (docs/ROADMAP.md)
 Details: `docs/MODDING.md`, `docs/HISTORY.md`, `docs/NEWS.md`, `docs/MATCH_VISUALIZATION.md`, `docs/TECHNICAL_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/IMPORT_FORMATS.md`, `docs/COMPETITION_FORMATS.md`, `docs/PLAYER_MODEL.md`, `docs/ROSTER_RULES.md`, `docs/CONTRACTS.md`, `docs/TRANSFERS.md`, `docs/TACTICS.md`, `docs/MATCH_ENGINE.md`, `docs/MATCH_UI.md`, `docs/SEASON_LIFECYCLE.md`, `docs/AI_MANAGEMENT.md`, `docs/SAVE_FILES.md`, `docs/RELEASE.md`, `docs/COUNTRY_REPORT.md`, `docs/PLAYER_DATABASE.md`, `docs/CUP_FORMATS.md`, `docs/INTERNATIONAL_COMPETITIONS.md`, `docs/SCOUTING.md`, `docs/DEVELOPMENT.md`, `docs/INJURIES.md`, `docs/FINANCES.md`.
 
 ## Known issues
-- Season 2 of a real-leagues career is slow (≈ 9.5 s per game day after the off-season vs ≈ 2.8 s in season 1, not profiled): suspected the Monday window, which reloads the whole market and runs the AI window whenever any club is short of players (long-term injuries, or below the minimum without money), even when that club can sign nobody; also history tables grow every season. Next: skip the Monday window for clubs that cannot sign (no wage room above the minimum) and profile a season-2 day.
+- Season 2 of a real-leagues career was slow (≈ 9.5 s per game day vs ≈ 2.8 s in season 1). Step 34 stops the Monday window for AI clubs that cannot afford a signing (suspected cause); the speed-up is not yet measured. History tables still grow every season.
 - AI: no youth intake (generated free agents keep the market supplied); first-season sponsorship is sized to fund each dataset wage budget (docs/FINANCES.md §3); AI makes no loans or bids for the user's players; the three-season simulation test takes about two minutes.
 - Career: one career per database; `StartNextSeasonAsync` is repeatable but not atomic.
 - The launch integration test opens a real window for about one second and needs an interactive desktop session. Skip it on headless machines with `--filter "Category!=Launch"`.
@@ -188,11 +189,11 @@ Details: `docs/MODDING.md`, `docs/HISTORY.md`, `docs/NEWS.md`, `docs/MATCH_VISUA
 - A player with an open club spell but no contract counts as a free agent; signing him elsewhere ends that spell.
 - Match engine: substitutions and timeouts only between possessions; no technical/unsportsmanlike fouls or held balls (intentional fouls only as the late-game tactic, always ordinary fouls); off-ball screens and help rotations are not modelled (switches only on pick and rolls); the engine's coach reviews at fixed moments (period starts, its timeouts, four minutes left); Step 27 made a match ~10–20% slower to simulate; chemistry is fixed for a match (substitutions do not change it); injuries are decided after the game from the minutes played; box scores store whole minutes; play-by-play, energy and plus-minus are not stored (only box scores and tactical notes), so past matches show box scores, team stats and tactical notes only; an unfinished live match is lost when the application closes.
 - Simulation (Step 29): stored reports have no turnover causes or fast-break/second-chance points (engine-only); box scores before Step 29 have no shots or on-court figures (shown as —); season USG%/AST%/REB% not shown (need per-match team totals); a stronger team now wins more often (70 vs 55: 96%, was 89%).
+- Saves (Step 34): automatic backups are ordinary saves named `Autobackup …` (newest five); startup recovery uses them only and reports through the log, not a dialog (docs/SAVE_FILES.md §4).
 - Modding (Step 33): staff, tactics, fixtures and history are not in the package format; package installs update records by ID, so a package can change the club a career manages; database validation is a fixed rule set (docs/MODDING.md).
 - History (Step 32): awards for leagues only (no playoff MVP); records only from seasons played in the game; youth positions random; AI-only youth promotion (docs/HISTORY.md §9).
 - News (Step 31): detailed stories for the career club only; quotes follow the result (no press-conference choices); rumours only about expiring contracts; English only (docs/NEWS.md §7).
 - Court (Step 30): live matches only (stored reports keep no play-by-play); no off-ball paths, passes or screens; one-frame wrong orientation on offensive fouls (docs/MATCH_VISUALIZATION.md §6).
-- Tactics: the tactics screen shows enum names (`PickAndRoll`, `Zone23`).
 - Off-screen renders of the editor grids collapse star-width columns (render-test artefact, not seen in the running app).
 - Player, club profile and squad screens are verified by an off-screen render test (screenshots reviewed in Steps 05–06); the other editor tabs only by the smoke-test launch and view-model tests.
 
@@ -216,7 +217,7 @@ Details: `docs/MODDING.md`, `docs/HISTORY.md`, `docs/NEWS.md`, `docs/MATCH_VISUA
 | coverlet.collector | 6.0.4 | Tests |
 
 ## Last completed step log
-logs/STEP_33_LOG.md
+logs/STEP_34_LOG.md
 
 ## Instructions for continuing
 1. Read this file.
