@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Ebm.Desktop.ViewModels"
+        xmlns:c="clr-namespace:Ebm.Desktop.Controls"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         Title="{Binding WindowTitle}"
@@ -59,29 +60,29 @@
     <!-- Content area: grouped sidebar navigation. Tag = group label shown above the first item of each group. -->
     <TabControl DataContext="{Binding Editor}" Style="{StaticResource Nav.TabControl}" Padding="8,8,8,4"
                 ItemContainerStyle="{StaticResource Nav.Item}">
-      <TabItem Tag="GAME" Header="Career" Content="{Binding Career}" />
-      <TabItem Header="News" Content="{Binding News}" />
-      <TabItem Header="Saved games" Content="{Binding Saves}" />
-      <TabItem Tag="CLUB" Header="Club profile" Content="{Binding ClubProfile}" />
-      <TabItem Header="Finances" Content="{Binding Finances}" />
-      <TabItem Header="Staff" Content="{Binding Staff}" />
-      <TabItem Header="Club contracts" Content="{Binding ClubContracts}" />
-      <TabItem Tag="TEAM" Header="Squad" Content="{Binding Squad}" />
-      <TabItem Header="Tactics" Content="{Binding Tactics}" />
-      <TabItem Header="Training" Content="{Binding Training}" />
-      <TabItem Header="Medical" Content="{Binding Medical}" />
-      <TabItem Header="Dressing room" Content="{Binding DressingRoom}" />
-      <TabItem Tag="PLAYERS AND MARKET" Header="Players" Content="{Binding Players}" />
-      <TabItem Header="Player profile" Content="{Binding Profile}" />
-      <TabItem Header="Compare players" Content="{Binding Comparison}" />
-      <TabItem Header="Transfer market" Content="{Binding TransferMarket}" />
-      <TabItem Header="Scouting" Content="{Binding Scouting}" />
-      <TabItem Tag="SEASON" Header="Matches" Content="{Binding Matches}" />
-      <TabItem Header="Season stats" Content="{Binding SeasonStats}" />
-      <TabItem Header="History" Content="{Binding History}" />
-      <TabItem Tag="DATABASE" Header="Clubs" Content="{Binding Clubs}" />
-      <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
-      <TabItem Header="Leagues and competitions">
+      <TabItem Tag="GAME" Header="Career" c:Ui.Icon="&#xE80F;" Content="{Binding Career}" />
+      <TabItem Header="News" c:Ui.Icon="&#xE715;" Content="{Binding News}" />
+      <TabItem Header="Saved games" c:Ui.Icon="&#xE74E;" Content="{Binding Saves}" />
+      <TabItem Tag="CLUB" Header="Club profile" c:Ui.Icon="&#xE825;" Content="{Binding ClubProfile}" />
+      <TabItem Header="Finances" c:Ui.Icon="&#xE8EF;" Content="{Binding Finances}" />
+      <TabItem Header="Staff" c:Ui.Icon="&#xE716;" Content="{Binding Staff}" />
+      <TabItem Header="Club contracts" c:Ui.Icon="&#xE8A5;" Content="{Binding ClubContracts}" />
+      <TabItem Tag="TEAM" Header="Squad" c:Ui.Icon="&#xE902;" Content="{Binding Squad}" />
+      <TabItem Header="Tactics" c:Ui.Icon="&#xE7C1;" Content="{Binding Tactics}" />
+      <TabItem Header="Training" c:Ui.Icon="&#xE9D9;" Content="{Binding Training}" />
+      <TabItem Header="Medical" c:Ui.Icon="&#xE95E;" Content="{Binding Medical}" />
+      <TabItem Header="Dressing room" c:Ui.Icon="&#xE76E;" Content="{Binding DressingRoom}" />
+      <TabItem Tag="PLAYERS AND MARKET" Header="Players" c:Ui.Icon="&#xE77B;" Content="{Binding Players}" />
+      <TabItem Header="Player profile" c:Ui.Icon="&#xE779;" Content="{Binding Profile}" />
+      <TabItem Header="Compare players" c:Ui.Icon="&#xE8AB;" Content="{Binding Comparison}" />
+      <TabItem Header="Transfer market" c:Ui.Icon="&#xE719;" Content="{Binding TransferMarket}" />
+      <TabItem Header="Scouting" c:Ui.Icon="&#xE721;" Content="{Binding Scouting}" />
+      <TabItem Tag="SEASON" Header="Matches" c:Ui.Icon="&#xE787;" Content="{Binding Matches}" />
+      <TabItem Header="Season stats" c:Ui.Icon="&#xE9D2;" Content="{Binding SeasonStats}" />
+      <TabItem Header="History" c:Ui.Icon="&#xE81C;" Content="{Binding History}" />
+      <TabItem Tag="DATABASE" Header="Clubs" c:Ui.Icon="&#xE8F1;" Content="{Binding Clubs}" />
+      <TabItem Header="Contracts (editor)" c:Ui.Icon="&#xE70F;" Content="{Binding Contracts}" />
+      <TabItem Header="Leagues and competitions" c:Ui.Icon="&#xE8FD;">
         <Grid Margin="16">
           <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -92,7 +93,7 @@
           <ContentControl Grid.Row="2" Content="{Binding Competitions}" />
         </Grid>
       </TabItem>
-      <TabItem Header="Import" Content="{Binding Import}" />
+      <TabItem Header="Import" c:Ui.Icon="&#xE898;" Content="{Binding Import}" />
     </TabControl>
   </DockPanel>
 </Window>

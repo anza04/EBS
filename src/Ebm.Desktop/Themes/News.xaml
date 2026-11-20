@@ -28,7 +28,7 @@
           <DataGrid.Columns>
             <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="120" />
             <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120" />
-            <DataGridTextColumn Header="" Binding="{Binding Tone}" Width="30" />
+            <DataGridTextColumn Header="" Binding="{Binding Tone}" Width="38" />
             <DataGridTextColumn Header="Headline" Binding="{Binding Headline}" Width="*" MinWidth="200" />
           </DataGrid.Columns>
         </DataGrid>
@@ -47,7 +47,7 @@
           <DataGrid Grid.Row="2" ItemsSource="{Binding Reputation}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="100" />
-              <DataGridTextColumn Header="Event" Binding="{Binding Cause}" Width="*" />
+              <DataGridTextColumn Header="Event" Binding="{Binding Cause}" Width="*" MinWidth="110" />
               <DataGridTextColumn Header="Reputation" Binding="{Binding Change}" Width="120" />
             </DataGrid.Columns>
           </DataGrid>

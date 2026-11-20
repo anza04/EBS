@@ -17,7 +17,7 @@ internal static class Money
 {
     public static string Euros(long value) => $"€ {value.ToString("N0", CultureInfo.CurrentCulture)}";
 
-    public static string Date(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    public static string Date(DateOnly date) => date.ToString("d", CultureInfo.CurrentCulture);
 
     public static long Parse(string? text, string field) =>
         ParseOptional(text, field) ?? throw new DomainValidationException($"{field} is required.");
@@ -381,7 +381,7 @@ public sealed partial class ClubContractsViewModel : ObservableObject
 
         if (t.BrokenOffUntil is { } until)
         {
-            lines.Add($"He refuses to talk until {until:yyyy-MM-dd}.");
+            lines.Add($"He refuses to talk until {Money.Date(until)}.");
         }
 
         return string.Join(Environment.NewLine, lines);

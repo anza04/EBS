@@ -31,45 +31,45 @@
           </Grid.RowDefinitions>
           <TextBlock Text="Player search" Style="{StaticResource Text.Title}" Margin="0,0,0,6" />
           <WrapPanel Grid.Row="1" Margin="0,0,0,8">
-            <TextBox Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Width="150" ToolTip="Name contains" Margin="0,0,8,6" />
+            <TextBox Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Width="150" Tag="Player name" ToolTip="Name contains" Margin="0,0,8,6" />
             <ComboBox ItemsSource="{Binding PositionOptions}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SearchPosition}" Width="130" ToolTip="Position (primary or secondary)" Margin="0,0,8,6" />
-            <TextBox Text="{Binding MinAge, UpdateSourceTrigger=PropertyChanged}" Width="55" ToolTip="Minimum age" Margin="0,0,4,6" />
+            <TextBox Text="{Binding MinAge, UpdateSourceTrigger=PropertyChanged}" Width="72" Tag="Min age" ToolTip="Minimum age" Margin="0,0,4,6" />
             <TextBlock Text="–" VerticalAlignment="Center" Margin="0,0,4,6" />
-            <TextBox Text="{Binding MaxAge, UpdateSourceTrigger=PropertyChanged}" Width="55" ToolTip="Maximum age" Margin="0,0,8,6" />
-            <TextBox Text="{Binding MinOverall, UpdateSourceTrigger=PropertyChanged}" Width="60" ToolTip="Minimum overall" Margin="0,0,8,6" />
+            <TextBox Text="{Binding MaxAge, UpdateSourceTrigger=PropertyChanged}" Width="72" Tag="Max age" ToolTip="Maximum age" Margin="0,0,8,6" />
+            <TextBox Text="{Binding MinOverall, UpdateSourceTrigger=PropertyChanged}" Width="72" Tag="Min ovr" ToolTip="Minimum overall" Margin="0,0,8,6" />
             <ComboBox ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter}" Width="140" ToolTip="Who to show" Margin="0,0,8,6" />
-            <TextBox Text="{Binding MaxFee, UpdateSourceTrigger=PropertyChanged}" Width="100" ToolTip="Maximum fee (€)" Margin="0,0,8,6" />
-            <TextBox Text="{Binding MaxSalary, UpdateSourceTrigger=PropertyChanged}" Width="100" ToolTip="Maximum salary he would ask (€ a year)" Margin="0,0,8,6" />
-            <Button Content="Search" Command="{Binding SearchCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
+            <TextBox Text="{Binding MaxFee, UpdateSourceTrigger=PropertyChanged}" Width="110" Tag="Max fee €" ToolTip="Maximum fee (€)" Margin="0,0,8,6" />
+            <TextBox Text="{Binding MaxSalary, UpdateSourceTrigger=PropertyChanged}" Width="120" Tag="Max salary €/yr" ToolTip="Maximum salary he would ask (€ a year)" Margin="0,0,8,6" />
+            <Button Content="Search" Command="{Binding SearchCommand}" Style="{StaticResource Button.Primary}" IsDefault="True" Margin="0,0,8,6" />
             <Button Content="Clear" Command="{Binding ClearFiltersCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,0,6" />
           </WrapPanel>
           <DataGrid Grid.Row="2" ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedPlayer}" Style="{StaticResource Editor.Grid}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="130" />
-              <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="95" />
-              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
-              <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="40" />
-              <DataGridTextColumn Header="Pot" Binding="{Binding Potential}" Width="40" />
+              <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="103" />
+              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" />
+              <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="48" ElementStyle="{StaticResource Cell.Rating}" />
+              <DataGridTextColumn Header="Pot" Binding="{Binding Potential}" Width="48" ElementStyle="{StaticResource Cell.Rating}" />
               <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="140" />
               <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" />
-              <DataGridTextColumn Header="Until" Binding="{Binding ContractEnd}" Width="85" />
-              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="90" />
-              <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="95" />
-              <DataGridTextColumn Header="Asking fee" Binding="{Binding Fee}" Width="95" />
-              <DataGridTextColumn Header="Clause" Binding="{Binding ReleaseClause}" Width="95" />
+              <DataGridTextColumn Header="Until" Binding="{Binding ContractEnd}" Width="93" />
+              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="98" />
+              <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="103" />
+              <DataGridTextColumn Header="Asking fee" Binding="{Binding Fee}" Width="103" />
+              <DataGridTextColumn Header="Clause" Binding="{Binding ReleaseClause}" Width="103" />
               <DataGridTextColumn Header="Loan" Binding="{Binding Loan}" Width="110" />
-              <DataGridTextColumn Header="Would ask" Binding="{Binding AskingSalary}" Width="95" />
+              <DataGridTextColumn Header="Would ask" Binding="{Binding AskingSalary}" Width="103" />
             </DataGrid.Columns>
           </DataGrid>
           <TextBlock Grid.Row="3" Text="Transfer history of your club" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
           <DataGrid Grid.Row="4" ItemsSource="{Binding History}" Style="{StaticResource Editor.Grid}">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="85" />
+              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="93" />
               <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="130" />
               <DataGridTextColumn Header="From" Binding="{Binding From}" Width="140" />
               <DataGridTextColumn Header="To" Binding="{Binding To}" Width="140" />
               <DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="200" />
-              <DataGridTextColumn Header="Fee" Binding="{Binding Fee}" Width="95" />
+              <DataGridTextColumn Header="Fee" Binding="{Binding Fee}" Width="103" />
             </DataGrid.Columns>
           </DataGrid>
         </Grid>
@@ -116,9 +116,9 @@
                 <WrapPanel Margin="0,10,0,0">
                   <Button Content="Ask the player" Command="{Binding AskPlayerCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
                   <Button Content="Use his counter" Command="{Binding UsePlayerCounterCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
-                  <Button Content="Sign the free agent" Command="{Binding SignFreeAgentCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6"
+                  <Button Content="Sign the free agent" Command="{Binding SignFreeAgentCommand}" Style="{StaticResource Button.Primary}" Margin="0,0,8,6"
                           Visibility="{Binding SelectedIsFreeAgent, Converter={StaticResource Transfers.Visible}}" />
-                  <Button Content="Buy" Command="{Binding BuyCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6"
+                  <Button Content="Buy" Command="{Binding BuyCommand}" Style="{StaticResource Button.Primary}" Margin="0,0,8,6"
                           Visibility="{Binding SelectedUnderContract, Converter={StaticResource Transfers.Visible}}" />
                   <Button Content="Pay the release clause" Command="{Binding PayReleaseClauseCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6"
                           Visibility="{Binding SelectedHasClause, Converter={StaticResource Transfers.Visible}}" />
@@ -156,7 +156,7 @@
                   <WrapPanel Margin="0,10,0,0">
                     <Button Content="Ask the club" Command="{Binding AskLoanCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
                     <Button Content="Use its counter" Command="{Binding UseLoanCounterCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
-                    <Button Content="Take on loan" Command="{Binding LoanCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,6" />
+                    <Button Content="Take on loan" Command="{Binding LoanCommand}" Style="{StaticResource Button.Primary}" Margin="0,0,8,6" />
                   </WrapPanel>
                 </StackPanel>
                 <TextBlock Text="{Binding Negotiation}" Style="{StaticResource Text.Body}" TextWrapping="Wrap" Margin="0,8,0,0" />
@@ -168,19 +168,19 @@
                 <TextBlock Text="Your players out on loan" Style="{StaticResource Text.Title}" Margin="0,0,0,6" />
                 <DataGrid ItemsSource="{Binding LoansOut}" SelectedItem="{Binding SelectedLoan}" Style="{StaticResource Editor.Grid}" MaxHeight="140">
                   <DataGrid.Columns>
-                    <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
+                    <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
                     <DataGridTextColumn Header="At" Binding="{Binding To}" Width="120" />
-                    <DataGridTextColumn Header="Until" Binding="{Binding LoanEnd}" Width="85" />
+                    <DataGridTextColumn Header="Until" Binding="{Binding LoanEnd}" Width="93" />
                   </DataGrid.Columns>
                 </DataGrid>
                 <Button Content="Recall the selected player" Command="{Binding RecallCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" />
                 <TextBlock Text="Players on loan with you" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
                 <DataGrid ItemsSource="{Binding LoansIn}" SelectedItem="{Binding SelectedLoanIn}" Style="{StaticResource Editor.Grid}" MaxHeight="140">
                   <DataGrid.Columns>
-                    <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
+                    <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
                     <DataGridTextColumn Header="From" Binding="{Binding From}" Width="120" />
-                    <DataGridTextColumn Header="Until" Binding="{Binding LoanEnd}" Width="85" />
-                    <DataGridTextColumn Header="Option" Binding="{Binding Option}" Width="95" />
+                    <DataGridTextColumn Header="Until" Binding="{Binding LoanEnd}" Width="93" />
+                    <DataGridTextColumn Header="Option" Binding="{Binding Option}" Width="103" />
                   </DataGrid.Columns>
                 </DataGrid>
                 <Button Content="Exercise the option to buy" Command="{Binding ExerciseOptionCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0"

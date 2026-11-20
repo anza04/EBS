@@ -304,6 +304,7 @@ public sealed class PlayerScreensRenderTests
         {
             try
             {
+                Ebm.Desktop.Startup.DisplayFormatting.Apply();
                 result = work();
             }
             catch (Exception ex)

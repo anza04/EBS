@@ -20,6 +20,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        DisplayFormatting.Apply();
 
         var launch = LaunchOptions.Parse(e.Args);
 

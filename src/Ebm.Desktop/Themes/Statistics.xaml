@@ -33,29 +33,29 @@
       <DataGrid ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="150" />
-          <DataGridTextColumn Header="GP" Binding="{Binding Games}" Width="40" />
-          <DataGridTextColumn Header="MIN" Binding="{Binding Minutes, StringFormat=0.#}" Width="50" />
-          <DataGridTextColumn Header="PTS" Binding="{Binding Points, StringFormat=0.#}" Width="50" />
-          <DataGridTextColumn Header="REB" Binding="{Binding Rebounds, StringFormat=0.#}" Width="50" />
-          <DataGridTextColumn Header="OREB" Binding="{Binding OffensiveRebounds, StringFormat=0.#}" Width="50" />
-          <DataGridTextColumn Header="AST" Binding="{Binding Assists, StringFormat=0.#}" Width="50" />
-          <DataGridTextColumn Header="STL" Binding="{Binding Steals, StringFormat=0.#}" Width="45" />
-          <DataGridTextColumn Header="BLK" Binding="{Binding Blocks, StringFormat=0.#}" Width="45" />
-          <DataGridTextColumn Header="TO" Binding="{Binding Turnovers, StringFormat=0.#}" Width="45" />
-          <DataGridTextColumn Header="PF" Binding="{Binding Fouls, StringFormat=0.#}" Width="45" />
-          <DataGridTextColumn Header="FG" Binding="{Binding FieldGoals}" Width="80" SortMemberPath="FieldGoalPercentage" />
-          <DataGridTextColumn Header="FG%" Binding="{Binding FieldGoalPercentage, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="3P" Binding="{Binding Threes}" Width="70" SortMemberPath="ThreePointPercentage" />
-          <DataGridTextColumn Header="3P%" Binding="{Binding ThreePointPercentage, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="FT" Binding="{Binding FreeThrows}" Width="70" SortMemberPath="FreeThrowPercentage" />
-          <DataGridTextColumn Header="FT%" Binding="{Binding FreeThrowPercentage, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="TS%" Binding="{Binding TrueShooting, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="eFG%" Binding="{Binding EffectiveFieldGoal, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="TOV%" Binding="{Binding TurnoverRate, StringFormat=P1}" Width="55" />
-          <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinus, StringFormat=+0.#;-0.#;0}" Width="50" />
-          <DataGridTextColumn Header="ORtg" Binding="{Binding OffensiveRating, StringFormat=0.0, TargetNullValue=—}" Width="50" />
-          <DataGridTextColumn Header="DRtg" Binding="{Binding DefensiveRating, StringFormat=0.0, TargetNullValue=—}" Width="50" />
-          <DataGridTextColumn Header="Net" Binding="{Binding NetRating, StringFormat=+0.0;-0.0;0, TargetNullValue=—}" Width="50" />
+          <DataGridTextColumn Header="GP" Binding="{Binding Games}" Width="48" />
+          <DataGridTextColumn Header="MIN" Binding="{Binding Minutes, StringFormat=0.#}" Width="58" />
+          <DataGridTextColumn Header="PTS" Binding="{Binding Points, StringFormat=0.#}" Width="58" />
+          <DataGridTextColumn Header="REB" Binding="{Binding Rebounds, StringFormat=0.#}" Width="58" />
+          <DataGridTextColumn Header="OREB" Binding="{Binding OffensiveRebounds, StringFormat=0.#}" Width="58" />
+          <DataGridTextColumn Header="AST" Binding="{Binding Assists, StringFormat=0.#}" Width="58" />
+          <DataGridTextColumn Header="STL" Binding="{Binding Steals, StringFormat=0.#}" Width="53" />
+          <DataGridTextColumn Header="BLK" Binding="{Binding Blocks, StringFormat=0.#}" Width="53" />
+          <DataGridTextColumn Header="TO" Binding="{Binding Turnovers, StringFormat=0.#}" Width="53" />
+          <DataGridTextColumn Header="PF" Binding="{Binding Fouls, StringFormat=0.#}" Width="53" />
+          <DataGridTextColumn Header="FG" Binding="{Binding FieldGoals}" Width="88" SortMemberPath="FieldGoalPercentage" />
+          <DataGridTextColumn Header="FG%" Binding="{Binding FieldGoalPercentage, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="3P" Binding="{Binding Threes}" Width="78" SortMemberPath="ThreePointPercentage" />
+          <DataGridTextColumn Header="3P%" Binding="{Binding ThreePointPercentage, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="FT" Binding="{Binding FreeThrows}" Width="78" SortMemberPath="FreeThrowPercentage" />
+          <DataGridTextColumn Header="FT%" Binding="{Binding FreeThrowPercentage, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="TS%" Binding="{Binding TrueShooting, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="eFG%" Binding="{Binding EffectiveFieldGoal, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="TOV%" Binding="{Binding TurnoverRate, StringFormat=P1}" Width="63" />
+          <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinus, StringFormat=+0.#;-0.#;0}" Width="58" />
+          <DataGridTextColumn Header="ORtg" Binding="{Binding OffensiveRating, StringFormat=0.0, TargetNullValue=—}" Width="58" />
+          <DataGridTextColumn Header="DRtg" Binding="{Binding DefensiveRating, StringFormat=0.0, TargetNullValue=—}" Width="58" />
+          <DataGridTextColumn Header="Net" Binding="{Binding NetRating, StringFormat=+0.0;-0.0;0, TargetNullValue=—}" Width="58" />
         </DataGrid.Columns>
       </DataGrid>
       </Grid>

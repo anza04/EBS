@@ -25,16 +25,16 @@
         </Grid.RowDefinitions>
         <DataGrid Grid.Row="0" ItemsSource="{Binding Players}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
           <DataGrid.Columns>
-            <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="35" />
+            <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="43" />
             <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="160" />
-            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="95" />
-            <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="80" />
+            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="103" />
+            <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="88" />
             <DataGridTextColumn Header="Expected min" Binding="{Binding Expected}" Width="110" />
-            <DataGridTextColumn Header="Recent min" Binding="{Binding Recent}" Width="80" />
-            <DataGridTextColumn Header="Satisfaction" Binding="{Binding Satisfaction}" Width="90" />
-            <DataGridTextColumn Header="Morale" Binding="{Binding Morale}" Width="60" />
-            <DataGridTextColumn Header="Leadership" Binding="{Binding Leadership}" Width="80" />
-            <DataGridTextColumn Header="Conflict" Binding="{Binding Conflict}" Width="80" />
+            <DataGridTextColumn Header="Recent min" Binding="{Binding Recent}" Width="88" />
+            <DataGridTextColumn Header="Satisfaction" Binding="{Binding Satisfaction}" Width="98" />
+            <DataGridTextColumn Header="Morale" Binding="{Binding Morale}" Width="68" />
+            <DataGridTextColumn Header="Leadership" Binding="{Binding Leadership}" Width="88" />
+            <DataGridTextColumn Header="Conflict" Binding="{Binding Conflict}" Width="88" />
           </DataGrid.Columns>
         </DataGrid>
         <TextBlock Grid.Row="1" Text="Relationships (strongest and weakest)" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
@@ -42,7 +42,7 @@
           <DataGrid.Columns>
             <DataGridTextColumn Header="Player" Binding="{Binding First}" Width="*" MinWidth="140" />
             <DataGridTextColumn Header="Teammate" Binding="{Binding Second}" Width="*" MinWidth="140" />
-            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="60" />
+            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="68" />
           </DataGrid.Columns>
         </DataGrid>
       </Grid>

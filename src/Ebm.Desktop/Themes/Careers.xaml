@@ -29,7 +29,7 @@
           </ComboBox>
           <TextBlock Text="Manager name" Style="{StaticResource Form.Label}" Margin="0,8,0,0" />
           <TextBox Text="{Binding ManagerName, UpdateSourceTrigger=PropertyChanged}" />
-          <Button Content="Start career" Command="{Binding StartCareerCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,12,0,0" />
+          <Button Content="Start career" Command="{Binding StartCareerCommand}" Style="{StaticResource Button.Primary}" HorizontalAlignment="Left" Margin="0,12,0,0" />
         </StackPanel>
 
         <!-- Running career -->
@@ -41,7 +41,7 @@
           </Grid.ColumnDefinitions>
           <DockPanel>
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-              <Button Content="Continue" Command="{Binding ContinueCommand}" Style="{StaticResource Button.Secondary}" />
+              <Button Content="Continue" Command="{Binding ContinueCommand}" Style="{StaticResource Button.Primary}" />
               <Button Content="Next day" Command="{Binding AdvanceDayCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
               <Button Content="Play match" Command="{Binding PlayMatchCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
               <Button Content="Season review" Command="{Binding ReviewSeasonCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
@@ -55,11 +55,11 @@
             <TextBlock DockPanel.Dock="Bottom" Text="Club history" Style="{StaticResource Text.Label}" Margin="0,12,0,4" />
             <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding History}" Style="{StaticResource Editor.Grid}" Height="130">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season.Name}" Width="70" />
-                <DataGridTextColumn Header="Competition" Binding="{Binding Competition.Name}" Width="*" />
-                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="40" />
-                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="36" />
-                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="36" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season.Name}" Width="78" />
+                <DataGridTextColumn Header="Competition" Binding="{Binding Competition.Name}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" />
+                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="44" />
+                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="44" />
                 <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="120" />
               </DataGrid.Columns>
             </DataGrid>
@@ -67,20 +67,20 @@
                       Visibility="{Binding HasCup, Converter={StaticResource Careers.Visible}}">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="Cup" Binding="{Binding Date}" Width="110" />
-                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" />
+                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
             <DataGrid ItemsSource="{Binding Standings}" Style="{StaticResource Editor.Grid}">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="30" />
-                <DataGridTextColumn Header="Club" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="P" Binding="{Binding Played}" Width="34" />
-                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="34" />
-                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="34" />
-                <DataGridTextColumn Header="PF" Binding="{Binding PointsFor}" Width="46" />
-                <DataGridTextColumn Header="PA" Binding="{Binding PointsAgainst}" Width="46" />
-                <DataGridTextColumn Header="+/-" Binding="{Binding Difference}" Width="46" />
-                <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="38" />
+                <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="38" />
+                <DataGridTextColumn Header="Club" Binding="{Binding Name}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="P" Binding="{Binding Played}" Width="42" />
+                <DataGridTextColumn Header="W" Binding="{Binding Won}" Width="42" />
+                <DataGridTextColumn Header="L" Binding="{Binding Lost}" Width="42" />
+                <DataGridTextColumn Header="PF" Binding="{Binding PointsFor}" Width="54" />
+                <DataGridTextColumn Header="PA" Binding="{Binding PointsAgainst}" Width="54" />
+                <DataGridTextColumn Header="+/-" Binding="{Binding Difference}" Width="54" />
+                <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="46" />
               </DataGrid.Columns>
             </DataGrid>
           </DockPanel>
@@ -89,7 +89,7 @@
             <DataGrid ItemsSource="{Binding News}" Style="{StaticResource Editor.Grid}">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="110" />
-                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" />
+                <DataGridTextColumn Header="" Binding="{Binding Text}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
           </DockPanel>

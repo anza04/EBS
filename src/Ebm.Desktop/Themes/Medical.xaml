@@ -26,26 +26,26 @@
         <DataGrid Grid.Row="0" ItemsSource="{Binding Players}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="140" />
-            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="95" />
-            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" />
-            <DataGridTextColumn Header="Fitness" Binding="{Binding Fitness}" Width="60" />
-            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85" />
+            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="103" />
+            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="53" />
+            <DataGridTextColumn Header="Fitness" Binding="{Binding Fitness}" Width="68" />
+            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="93" />
             <DataGridTextColumn Header="Injury" Binding="{Binding Injury}" Width="*" MinWidth="160" />
             <DataGridTextColumn Header="Phase" Binding="{Binding Phase}" Width="105" />
             <DataGridTextColumn Header="Training" Binding="{Binding Training}" Width="110" />
-            <DataGridTextColumn Header="Return" Binding="{Binding Return}" Width="95" />
-            <DataGridTextColumn Header="Risk" Binding="{Binding Risk}" Width="50" />
-            <DataGridTextColumn Header="Injuries (year)" Binding="{Binding RecentInjuries}" Width="95" />
+            <DataGridTextColumn Header="Return" Binding="{Binding Return}" Width="103" />
+            <DataGridTextColumn Header="Risk" Binding="{Binding Risk}" Width="58" />
+            <DataGridTextColumn Header="Injuries (year)" Binding="{Binding RecentInjuries}" Width="103" />
           </DataGrid.Columns>
         </DataGrid>
         <TextBlock Grid.Row="1" Text="Injury history (last year)" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
         <DataGrid Grid.Row="2" ItemsSource="{Binding History}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
           <DataGrid.Columns>
-            <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="95" />
+            <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="103" />
             <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="140" />
             <DataGridTextColumn Header="Injury" Binding="{Binding Injury}" Width="*" MinWidth="140" />
-            <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="80" />
-            <DataGridTextColumn Header="Where" Binding="{Binding Source}" Width="75" />
+            <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="88" />
+            <DataGridTextColumn Header="Where" Binding="{Binding Source}" Width="83" />
             <DataGridTextColumn Header="Back" Binding="{Binding Back}" Width="140" />
           </DataGrid.Columns>
         </DataGrid>

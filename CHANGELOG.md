@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- UI refresh ("Courtside Light", plain WPF, no new packages): restyled buttons (primary, secondary, destructive), text
+  boxes with placeholders, combo boxes, check boxes, tables, sub-tabs, scroll bars and tooltips; grouped sidebar
+  navigation with icons instead of the 25-tab strip; one type scale and card padding across screens.
+- Values read the same everywhere: enum values as words ("Shooting guard", "Under contract"), dates in the user's
+  short-date format, numbers in the user's culture; ratings shown as coloured badges; narrow grid columns widened.
+
 ## [0.32.0] — 2026-11-20 — STEP 32: Long-term world simulation and historical records
 
 ### Added

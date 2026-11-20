@@ -51,8 +51,8 @@
                 <DataGrid ItemsSource="{Binding Positions}" Style="{StaticResource Editor.Grid}">
                   <DataGrid.Columns>
                     <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="140" />
-                    <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="70" />
-                    <DataGridTextColumn Header="Effective" Binding="{Binding EffectiveRating}" Width="70" />
+                    <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="78" ElementStyle="{StaticResource Cell.Rating}" />
+                    <DataGridTextColumn Header="Effective" Binding="{Binding EffectiveRating}" Width="78" />
                     <DataGridTextColumn Header="Familiarity" Binding="{Binding Familiarity}" Width="100" />
                     <DataGridTextColumn Header="Suitability" Binding="{Binding Suitability}" Width="100" />
                   </DataGrid.Columns>
@@ -83,7 +83,7 @@
                   <DataGrid.Columns>
                     <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" MinWidth="120" />
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="105" />
-                    <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="85" />
+                    <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="93" />
                     <DataGridTextColumn Header="End" Binding="{Binding End}" Width="150" />
                     <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="100" />
                     <DataGridTextColumn Header="Options" Binding="{Binding Options}" Width="130" />

@@ -30,42 +30,42 @@
           <DataGrid Grid.Row="1" ItemsSource="{Binding Scouts}" Style="{StaticResource Editor.Grid}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Scout" Binding="{Binding Name}" Width="180" />
-              <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="60" />
+              <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="68" />
               <DataGridTextColumn Header="Contract until" Binding="{Binding ContractEnd}" Width="100" />
-              <DataGridTextColumn Header="Doing" Binding="{Binding Doing}" Width="*" />
+              <DataGridTextColumn Header="Doing" Binding="{Binding Doing}" Width="*" MinWidth="110" />
             </DataGrid.Columns>
           </DataGrid>
           <TextBlock Grid.Row="2" Text="Assignments" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
           <DataGrid Grid.Row="3" ItemsSource="{Binding Assignments}" SelectedItem="{Binding SelectedAssignment}" Style="{StaticResource Editor.Grid}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Scout" Binding="{Binding Scout}" Width="160" />
-              <DataGridTextColumn Header="Target" Binding="{Binding Target}" Width="*" />
-              <DataGridTextColumn Header="Started" Binding="{Binding Started}" Width="85" />
-              <DataGridTextColumn Header="Reports on" Binding="{Binding Due}" Width="85" />
-              <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85" />
-              <DataGridTextColumn Header="Reports" Binding="{Binding Reports}" Width="60" />
+              <DataGridTextColumn Header="Target" Binding="{Binding Target}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="Started" Binding="{Binding Started}" Width="93" />
+              <DataGridTextColumn Header="Reports on" Binding="{Binding Due}" Width="93" />
+              <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="93" />
+              <DataGridTextColumn Header="Reports" Binding="{Binding Reports}" Width="68" />
             </DataGrid.Columns>
           </DataGrid>
           <TextBlock Grid.Row="4" Text="Scouted players (estimates)" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
           <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,0,0,6">
-            <TextBox Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Width="150" ToolTip="Name contains" />
+            <TextBox Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Width="150" Tag="Player name" ToolTip="Name contains" />
             <ComboBox ItemsSource="{Binding PositionOptions}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SearchPosition}" Width="130" Margin="8,0,0,0" />
-            <TextBox Text="{Binding SearchMaxAge, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="8,0,0,0" ToolTip="Maximum age" />
-            <TextBox Text="{Binding SearchMinOverall, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="8,0,0,0" ToolTip="Minimum estimated overall" />
-            <Button Content="Search" Command="{Binding SearchCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
+            <TextBox Text="{Binding SearchMaxAge, UpdateSourceTrigger=PropertyChanged}" Width="72" Margin="8,0,0,0" Tag="Max age" ToolTip="Maximum age" />
+            <TextBox Text="{Binding SearchMinOverall, UpdateSourceTrigger=PropertyChanged}" Width="72" Margin="8,0,0,0" Tag="Min ovr" ToolTip="Minimum estimated overall" />
+            <Button Content="Search" Command="{Binding SearchCommand}" Style="{StaticResource Button.Primary}" Margin="8,0,0,0" />
           </StackPanel>
           <DataGrid Grid.Row="6" ItemsSource="{Binding Reports}" SelectedItem="{Binding SelectedReport}" Style="{StaticResource Editor.Grid}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="130" />
               <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="100" />
-              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
+              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" />
               <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="130" />
-              <DataGridTextColumn Header="Overall" Binding="{Binding Overall}" Width="60" />
-              <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="65" />
-              <DataGridTextColumn Header="Accuracy" Binding="{Binding Accuracy}" Width="65" />
+              <DataGridTextColumn Header="Overall" Binding="{Binding Overall}" Width="68" ElementStyle="{StaticResource Cell.Rating}" />
+              <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="73" ElementStyle="{StaticResource Cell.Rating}" />
+              <DataGridTextColumn Header="Accuracy" Binding="{Binding Accuracy}" Width="73" />
               <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="100" />
-              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="95" />
-              <DataGridTextColumn Header="Report" Binding="{Binding Date}" Width="85" />
+              <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="103" />
+              <DataGridTextColumn Header="Report" Binding="{Binding Date}" Width="93" />
             </DataGrid.Columns>
           </DataGrid>
         </Grid>
@@ -90,7 +90,7 @@
                 <TextBlock Text="Maximum age" Style="{StaticResource Form.Label}" />
                 <TextBox Text="{Binding MaxAge, UpdateSourceTrigger=PropertyChanged}" Width="80" HorizontalAlignment="Left" />
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                  <Button Content="Send the scout" Command="{Binding AssignCommand}" />
+                  <Button Style="{StaticResource Button.Primary}" Content="Send the scout" Command="{Binding AssignCommand}" />
                   <Button Content="Cancel selected assignment" Command="{Binding CancelAssignmentCommand}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
                 </StackPanel>
               </StackPanel>

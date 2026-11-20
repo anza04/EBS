@@ -64,12 +64,12 @@
       </Grid.ColumnDefinitions>
       <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Last name" Binding="{Binding LastName}" Width="*" />
-          <DataGridTextColumn Header="First name" Binding="{Binding FirstName}" Width="*" />
+          <DataGridTextColumn Header="Last name" Binding="{Binding LastName}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="First name" Binding="{Binding FirstName}" Width="*" MinWidth="110" />
           <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="110" />
-          <DataGridTextColumn Header="Born" Binding="{Binding DateOfBirth}" Width="90" />
-          <DataGridTextColumn Header="Height" Binding="{Binding HeightCm}" Width="60" />
-          <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="70" />
+          <DataGridTextColumn Header="Born" Binding="{Binding DateOfBirth}" Width="98" />
+          <DataGridTextColumn Header="Height" Binding="{Binding HeightCm}" Width="68" />
+          <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="78" ElementStyle="{StaticResource Cell.Rating}" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -191,10 +191,10 @@
       </Grid.ColumnDefinitions>
       <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
-          <DataGridTextColumn Header="Founded" Binding="{Binding FoundedYear}" Width="70" />
-          <DataGridTextColumn Header="Reputation" Binding="{Binding Reputation}" Width="80" />
+          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="78" />
+          <DataGridTextColumn Header="Founded" Binding="{Binding FoundedYear}" Width="78" />
+          <DataGridTextColumn Header="Reputation" Binding="{Binding Reputation}" Width="88" />
           <DataGridTextColumn Header="Wage budget (€)" Binding="{Binding WageBudget, StringFormat=N0}" Width="120" />
         </DataGrid.Columns>
       </DataGrid>
@@ -246,12 +246,12 @@
       </Grid.ColumnDefinitions>
       <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
-          <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
-          <DataGridTextColumn Header="Start" Binding="{Binding Contract.StartDate}" Width="90" />
-          <DataGridTextColumn Header="End" Binding="{Binding Contract.EndDate}" Width="90" />
+          <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Start" Binding="{Binding Contract.StartDate}" Width="98" />
+          <DataGridTextColumn Header="End" Binding="{Binding Contract.EndDate}" Width="98" />
           <DataGridTextColumn Header="Salary (€)" Binding="{Binding Contract.AnnualSalary, StringFormat=N0}" Width="100" />
-          <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85" />
+          <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="93" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -295,8 +295,8 @@
       </Grid.ColumnDefinitions>
       <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="League" Binding="{Binding Name}" Width="*" />
-          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
+          <DataGridTextColumn Header="League" Binding="{Binding Name}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="78" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -322,9 +322,9 @@
       </Grid.ColumnDefinitions>
       <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource Editor.Grid}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Competition" Binding="{Binding Name}" Width="*" />
-          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="70" />
-          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="90" />
+          <DataGridTextColumn Header="Competition" Binding="{Binding Name}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Short" Binding="{Binding ShortName}" Width="78" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="98" />
         </DataGrid.Columns>
       </DataGrid>
       <Border Grid.Column="1" Style="{StaticResource Form.Panel}">
@@ -381,7 +381,7 @@
             <CheckBox Content="Validate only (save nothing)" IsChecked="{Binding DryRun}" Margin="0,0,20,6" />
             <CheckBox Content="All or nothing" IsChecked="{Binding AllOrNothing}" Margin="0,0,20,6" />
           </WrapPanel>
-          <Button Content="Import" Command="{Binding ImportCommand}" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+          <Button Content="Import" Command="{Binding ImportCommand}" Style="{StaticResource Button.Primary}" HorizontalAlignment="Left" Margin="0,8,0,0" />
           <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Margin="0,12,0,0" />
           <TextBlock Text="{Binding LogFile, StringFormat=Log: {0}}" Style="{StaticResource Text.Mono}" Margin="0,4,0,0" />
           <ItemsControl ItemsSource="{Binding Problems}" Margin="0,6,0,0">
@@ -395,11 +395,11 @@
       </Border>
       <DataGrid ItemsSource="{Binding Results}" Style="{StaticResource Editor.Grid}" Margin="0,12,0,0">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="80" />
-          <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="90" />
+          <DataGridTextColumn Header="Outcome" Binding="{Binding Outcome}" Width="88" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="98" />
           <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="200" />
           <DataGridTextColumn Header="Record" Binding="{Binding Label}" Width="180" />
-          <DataGridTextColumn Header="Messages" Binding="{Binding Messages}" Width="*" />
+          <DataGridTextColumn Header="Messages" Binding="{Binding Messages}" Width="*" MinWidth="110" />
         </DataGrid.Columns>
       </DataGrid>
     </DockPanel>

@@ -18,7 +18,7 @@
             <ComboBox ItemsSource="{Binding Focuses}" SelectedItem="{Binding TeamFocus}" Width="150" />
             <TextBlock Text="Intensity" Style="{StaticResource Form.Label}" VerticalAlignment="Center" Margin="20,0,8,0" />
             <ComboBox ItemsSource="{Binding Intensities}" SelectedItem="{Binding Intensity}" Width="120" />
-            <Button Content="Save training plan" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" Margin="20,0,0,0" />
+            <Button Content="Save training plan" Command="{Binding SaveCommand}" Style="{StaticResource Button.Primary}" Margin="20,0,0,0" />
           </StackPanel>
           <TextBlock Text="{Binding StaffText}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
           <TextBlock Text="Outlook: expected overall change over a year with the saved plan, at average luck. Hard training develops more but recovers less fitness."
@@ -28,13 +28,13 @@
       <DataGrid ItemsSource="{Binding Players}" Style="{StaticResource Editor.Grid}" IsReadOnly="False" CanUserAddRows="False">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Player" Binding="{Binding Name}" IsReadOnly="True" Width="*" MinWidth="140" />
-          <DataGridTextColumn Header="Pos" Binding="{Binding Position}" IsReadOnly="True" Width="95" />
-          <DataGridTextColumn Header="Age" Binding="{Binding Age}" IsReadOnly="True" Width="45" />
-          <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" IsReadOnly="True" Width="45" />
-          <DataGridTextColumn Header="Pot" Binding="{Binding Potential}" IsReadOnly="True" Width="45" />
-          <DataGridTextColumn Header="Fitness" Binding="{Binding Fitness}" IsReadOnly="True" Width="60" />
-          <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" IsReadOnly="True" Width="45" />
-          <DataGridTextColumn Header="Outlook" Binding="{Binding Outlook}" IsReadOnly="True" Width="65" />
+          <DataGridTextColumn Header="Pos" Binding="{Binding Position}" IsReadOnly="True" Width="103" />
+          <DataGridTextColumn Header="Age" Binding="{Binding Age}" IsReadOnly="True" Width="53" />
+          <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" IsReadOnly="True" Width="53" ElementStyle="{StaticResource Cell.Rating}" />
+          <DataGridTextColumn Header="Pot" Binding="{Binding Potential}" IsReadOnly="True" Width="53" ElementStyle="{StaticResource Cell.Rating}" />
+          <DataGridTextColumn Header="Fitness" Binding="{Binding Fitness}" IsReadOnly="True" Width="68" />
+          <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" IsReadOnly="True" Width="53" />
+          <DataGridTextColumn Header="Outlook" Binding="{Binding Outlook}" IsReadOnly="True" Width="73" />
           <DataGridTemplateColumn Header="Individual focus" Width="150">
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>

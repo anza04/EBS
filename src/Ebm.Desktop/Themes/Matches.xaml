@@ -10,19 +10,19 @@
     <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}" RowHeight="22" FontSize="12">
       <DataGrid.Columns>
         <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="120" />
-        <DataGridTextColumn Header="Min" Binding="{Binding Minutes}" Width="36" />
-        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="36" />
-        <DataGridTextColumn Header="FG" Binding="{Binding FieldGoals}" Width="46" />
-        <DataGridTextColumn Header="3P" Binding="{Binding Threes}" Width="40" />
-        <DataGridTextColumn Header="FT" Binding="{Binding FreeThrows}" Width="40" />
-        <DataGridTextColumn Header="Reb" Binding="{Binding Rebounds}" Width="36" />
-        <DataGridTextColumn Header="Ast" Binding="{Binding Assists}" Width="36" />
-        <DataGridTextColumn Header="Stl" Binding="{Binding Steals}" Width="34" />
-        <DataGridTextColumn Header="Blk" Binding="{Binding Blocks}" Width="34" />
-        <DataGridTextColumn Header="TO" Binding="{Binding Turnovers}" Width="32" />
-        <DataGridTextColumn Header="PF" Binding="{Binding Fouls}" Width="32" />
-        <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinusText}" Width="38" />
-        <DataGridTextColumn Header="En." Binding="{Binding EnergyText}" Width="36" />
+        <DataGridTextColumn Header="Min" Binding="{Binding Minutes}" Width="44" />
+        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="44" />
+        <DataGridTextColumn Header="FG" Binding="{Binding FieldGoals}" Width="54" />
+        <DataGridTextColumn Header="3P" Binding="{Binding Threes}" Width="48" />
+        <DataGridTextColumn Header="FT" Binding="{Binding FreeThrows}" Width="48" />
+        <DataGridTextColumn Header="Reb" Binding="{Binding Rebounds}" Width="44" />
+        <DataGridTextColumn Header="Ast" Binding="{Binding Assists}" Width="44" />
+        <DataGridTextColumn Header="Stl" Binding="{Binding Steals}" Width="42" />
+        <DataGridTextColumn Header="Blk" Binding="{Binding Blocks}" Width="42" />
+        <DataGridTextColumn Header="TO" Binding="{Binding Turnovers}" Width="40" />
+        <DataGridTextColumn Header="PF" Binding="{Binding Fouls}" Width="40" />
+        <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinusText}" Width="46" />
+        <DataGridTextColumn Header="En." Binding="{Binding EnergyText}" Width="44" />
       </DataGrid.Columns>
     </DataGrid>
   </DataTemplate>
@@ -32,18 +32,18 @@
     <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}" RowHeight="22" FontSize="12">
       <DataGrid.Columns>
         <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="120" />
-        <DataGridTextColumn Header="Min" Binding="{Binding Minutes}" Width="36" />
-        <DataGridTextColumn Header="TS%" Binding="{Binding Line.TrueShooting, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="eFG%" Binding="{Binding Line.EffectiveFieldGoal, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="USG%" Binding="{Binding Line.Usage, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="AST%" Binding="{Binding Line.Assist, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="REB%" Binding="{Binding Line.Rebound, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="TOV%" Binding="{Binding Line.TurnoverRate, StringFormat=P0}" Width="44" />
-        <DataGridTextColumn Header="ORtg" Binding="{Binding OffensiveRating}" Width="40" />
-        <DataGridTextColumn Header="DRtg" Binding="{Binding DefensiveRating}" Width="40" />
-        <DataGridTextColumn Header="Net" Binding="{Binding NetRating}" Width="38" />
-        <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinus}" Width="38" />
-        <DataGridTextColumn Header="Def. FG" Binding="{Binding Defended}" Width="50" />
+        <DataGridTextColumn Header="Min" Binding="{Binding Minutes}" Width="44" />
+        <DataGridTextColumn Header="TS%" Binding="{Binding Line.TrueShooting, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="eFG%" Binding="{Binding Line.EffectiveFieldGoal, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="USG%" Binding="{Binding Line.Usage, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="AST%" Binding="{Binding Line.Assist, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="REB%" Binding="{Binding Line.Rebound, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="TOV%" Binding="{Binding Line.TurnoverRate, StringFormat=P0}" Width="52" />
+        <DataGridTextColumn Header="ORtg" Binding="{Binding OffensiveRating}" Width="48" />
+        <DataGridTextColumn Header="DRtg" Binding="{Binding DefensiveRating}" Width="48" />
+        <DataGridTextColumn Header="Net" Binding="{Binding NetRating}" Width="46" />
+        <DataGridTextColumn Header="+/-" Binding="{Binding PlusMinus}" Width="46" />
+        <DataGridTextColumn Header="Def. FG" Binding="{Binding Defended}" Width="58" />
       </DataGrid.Columns>
     </DataGrid>
   </DataTemplate>
@@ -52,9 +52,9 @@
     <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}" RowHeight="20" FontSize="12">
       <DataGrid.Columns>
         <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="150" />
-        <DataGridTextColumn Header="FG" Binding="{Binding Shots}" Width="46" />
-        <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat=P0}" Width="42" />
-        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="34" />
+        <DataGridTextColumn Header="FG" Binding="{Binding Shots}" Width="54" />
+        <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat=P0}" Width="50" />
+        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="42" />
       </DataGrid.Columns>
     </DataGrid>
   </DataTemplate>
@@ -62,10 +62,10 @@
   <DataTemplate x:Key="Matches.Sheet">
     <DataGrid ItemsSource="{Binding}" Style="{StaticResource Editor.Grid}">
       <DataGrid.Columns>
-        <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" />
+        <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
         <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="100" />
-        <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="70" />
-        <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="40" />
+        <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="78" />
+        <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="48" ElementStyle="{StaticResource Cell.Rating}" />
       </DataGrid.Columns>
     </DataGrid>
   </DataTemplate>
@@ -93,17 +93,17 @@
             <ComboBox ItemsSource="{Binding Sides}" SelectedItem="{Binding Managed}" IsEnabled="{Binding CanStart}" />
             <TextBlock Text="None = follow the commentary; the engine coaches both teams." Style="{StaticResource Text.Muted}" TextWrapping="Wrap" />
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-              <Button Content="Start match" Command="{Binding StartMatchCommand}" IsEnabled="{Binding CanStart}" Style="{StaticResource Button.Secondary}" />
+              <Button Content="Start match" Command="{Binding StartMatchCommand}" IsEnabled="{Binding CanStart}" Style="{StaticResource Button.Primary}" />
               <Button Content="Play instantly" Command="{Binding PlayInstantlyCommand}" IsEnabled="{Binding CanStart}" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" />
             </StackPanel>
           </StackPanel>
           <DataGrid ItemsSource="{Binding Fixtures}" SelectedItem="{Binding SelectedFixture}" Style="{StaticResource Editor.Grid}" IsEnabled="{Binding CanBrowse}">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="72" />
-              <DataGridTextColumn Header="Rd" Binding="{Binding Round}" Width="28" />
-              <DataGridTextColumn Header="Home" Binding="{Binding Home}" Width="80" />
-              <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="80" />
-              <DataGridTextColumn Header="Result" Binding="{Binding Result}" Width="50" />
+              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="80" />
+              <DataGridTextColumn Header="Rd" Binding="{Binding Round}" Width="36" />
+              <DataGridTextColumn Header="Home" Binding="{Binding Home}" Width="88" />
+              <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="88" />
+              <DataGridTextColumn Header="Result" Binding="{Binding Result}" Width="58" />
             </DataGrid.Columns>
           </DataGrid>
         </DockPanel>
@@ -152,10 +152,10 @@
             <TabItem Header="Play-by-play">
               <DataGrid ItemsSource="{Binding PlayByPlay}" Style="{StaticResource Editor.Grid}" Margin="8" RowHeight="22" FontSize="12">
                 <DataGrid.Columns>
-                  <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="72" />
-                  <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="56" />
+                  <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="80" />
+                  <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="64" />
                   <DataGridTextColumn Header="Team" Binding="{Binding Team}" Width="130" />
-                  <DataGridTextColumn Header="Play" Binding="{Binding Text}" Width="*" />
+                  <DataGridTextColumn Header="Play" Binding="{Binding Text}" Width="*" MinWidth="110" />
                 </DataGrid.Columns>
               </DataGrid>
             </TabItem>
@@ -177,8 +177,8 @@
               <DataGrid ItemsSource="{Binding TeamStats}" Style="{StaticResource Editor.Grid}" Margin="8">
                 <DataGrid.Columns>
                   <DataGridTextColumn Header="" Binding="{Binding Label}" Width="140" />
-                  <DataGridTextColumn Header="Home" Binding="{Binding Home}" Width="*" />
-                  <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="*" />
+                  <DataGridTextColumn Header="Home" Binding="{Binding Home}" Width="*" MinWidth="110" />
+                  <DataGridTextColumn Header="Away" Binding="{Binding Away}" Width="*" MinWidth="110" />
                 </DataGrid.Columns>
               </DataGrid>
             </TabItem>

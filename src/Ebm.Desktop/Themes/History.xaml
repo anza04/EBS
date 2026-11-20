@@ -26,39 +26,39 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Winners" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
             <DataGrid Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Winners}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="90" />
-                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" />
-                <DataGridTextColumn Header="Runner-up" Binding="{Binding RunnerUp}" Width="*" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="98" />
+                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Runner-up" Binding="{Binding RunnerUp}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="0" Grid.Column="2" Text="Records" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
             <DataGrid Grid.Row="1" Grid.Column="2" ItemsSource="{Binding Records}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Record" Binding="{Binding Record}" Width="*" />
-                <DataGridTextColumn Header="Holder" Binding="{Binding Holder}" Width="*" />
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="90" />
-                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" />
+                <DataGridTextColumn Header="Record" Binding="{Binding Record}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Holder" Binding="{Binding Holder}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="98" />
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Awards" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
             <DataGrid Grid.Row="3" Grid.Column="0" ItemsSource="{Binding Awards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
-                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" />
-                <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
-                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="88" />
               </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Grid.Column="2" Text="League evolution" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
             <DataGrid Grid.Row="3" Grid.Column="2" ItemsSource="{Binding Evolution}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-                <DataGridTextColumn Header="Clubs" Binding="{Binding Clubs}" Width="50" />
-                <DataGridTextColumn Header="Mean rep." Binding="{Binding MeanReputation}" Width="70" />
-                <DataGridTextColumn Header="Top rep." Binding="{Binding TopReputation}" Width="70" />
-                <DataGridTextColumn Header="Mean overall" Binding="{Binding MeanOverall}" Width="90" />
-                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+                <DataGridTextColumn Header="Clubs" Binding="{Binding Clubs}" Width="58" />
+                <DataGridTextColumn Header="Mean rep." Binding="{Binding MeanReputation}" Width="78" />
+                <DataGridTextColumn Header="Top rep." Binding="{Binding TopReputation}" Width="78" />
+                <DataGridTextColumn Header="Mean overall" Binding="{Binding MeanOverall}" Width="98" />
+                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
           </Grid>
@@ -67,14 +67,14 @@
       <TabItem Header="Hall of fame">
         <DataGrid Margin="0,12,0,0" ItemsSource="{Binding HallOfFame}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
           <DataGrid.Columns>
-            <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" />
-            <DataGridTextColumn Header="Inducted" Binding="{Binding InductedOn, StringFormat=yyyy}" Width="80" />
-            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="60" />
-            <DataGridTextColumn Header="Seasons" Binding="{Binding Seasons}" Width="70" />
-            <DataGridTextColumn Header="Games" Binding="{Binding Games}" Width="70" />
-            <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="70" />
-            <DataGridTextColumn Header="Titles" Binding="{Binding Titles}" Width="60" />
-            <DataGridTextColumn Header="Awards" Binding="{Binding Awards}" Width="70" />
+            <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="110" />
+            <DataGridTextColumn Header="Inducted" Binding="{Binding InductedOn, StringFormat=yyyy}" Width="88" />
+            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="68" />
+            <DataGridTextColumn Header="Seasons" Binding="{Binding Seasons}" Width="78" />
+            <DataGridTextColumn Header="Games" Binding="{Binding Games}" Width="78" />
+            <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="78" />
+            <DataGridTextColumn Header="Titles" Binding="{Binding Titles}" Width="68" />
+            <DataGridTextColumn Header="Awards" Binding="{Binding Awards}" Width="78" />
           </DataGrid.Columns>
         </DataGrid>
       </TabItem>
@@ -89,24 +89,24 @@
           </StackPanel>
           <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding PlayerAwards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False" MaxHeight="200" Margin="0,12,0,0">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" />
-              <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
-              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
-              <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="" Binding="{Binding Value}" Width="88" />
             </DataGrid.Columns>
           </DataGrid>
           <DataGrid ItemsSource="{Binding Career}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" />
-              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
-              <DataGridTextColumn Header="G" Binding="{Binding Games}" Width="50" />
-              <DataGridTextColumn Header="MPG" Binding="{Binding MinutesPerGame}" Width="60" />
-              <DataGridTextColumn Header="PPG" Binding="{Binding PointsPerGame}" Width="60" />
-              <DataGridTextColumn Header="RPG" Binding="{Binding ReboundsPerGame}" Width="60" />
-              <DataGridTextColumn Header="APG" Binding="{Binding AssistsPerGame}" Width="60" />
-              <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="60" />
+              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" MinWidth="110" />
+              <DataGridTextColumn Header="G" Binding="{Binding Games}" Width="58" />
+              <DataGridTextColumn Header="MPG" Binding="{Binding MinutesPerGame}" Width="68" />
+              <DataGridTextColumn Header="PPG" Binding="{Binding PointsPerGame}" Width="68" />
+              <DataGridTextColumn Header="RPG" Binding="{Binding ReboundsPerGame}" Width="68" />
+              <DataGridTextColumn Header="APG" Binding="{Binding AssistsPerGame}" Width="68" />
+              <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="68" />
             </DataGrid.Columns>
           </DataGrid>
         </DockPanel>
@@ -128,16 +128,16 @@
             </Grid.ColumnDefinitions>
             <DataGrid Grid.Column="0" ItemsSource="{Binding Trophies}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-                <DataGridTextColumn Header="Trophy" Binding="{Binding Competition}" Width="*" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+                <DataGridTextColumn Header="Trophy" Binding="{Binding Competition}" Width="*" MinWidth="110" />
               </DataGrid.Columns>
             </DataGrid>
             <DataGrid Grid.Column="2" ItemsSource="{Binding ClubAwards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
-                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
-                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" />
-                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="88" />
+                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="88" />
               </DataGrid.Columns>
             </DataGrid>
           </Grid>

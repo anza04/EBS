@@ -55,7 +55,7 @@
         <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="20,0,0,0" />
       </StackPanel>
       <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Content="Save squad" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0" />
+        <Button Content="Save squad" Command="{Binding SaveCommand}" Style="{StaticResource Button.Primary}" Margin="0,0,8,0" />
         <Button Content="Discard changes" Command="{Binding RevertCommand}" Style="{StaticResource Button.Secondary}" />
         <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Status}" Margin="16,0,0,0" VerticalAlignment="Center" />
       </StackPanel>
@@ -74,11 +74,11 @@
             <DataGrid.Columns>
               <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" MinWidth="140" />
               <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="100" />
-              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
+              <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" />
               <DataGridTextColumn Header="Nationality" Binding="{Binding Nationality}" Width="120" />
-              <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="40" />
-              <DataGridTextColumn Header="Availability" Binding="{Binding Availability}" Width="85" />
-              <DataGridTextColumn Header="Contract" Binding="{Binding Contract}" Width="60" />
+              <DataGridTextColumn Header="Ovr" Binding="{Binding Overall}" Width="48" ElementStyle="{StaticResource Cell.Rating}" />
+              <DataGridTextColumn Header="Availability" Binding="{Binding Availability}" Width="93" />
+              <DataGridTextColumn Header="Contract" Binding="{Binding Contract}" Width="68" />
               <DataGridTemplateColumn Header="Role" Width="100">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
@@ -95,7 +95,7 @@
                   </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
               </DataGridTemplateColumn>
-              <DataGridTemplateColumn Header="Rotation #" Width="75">
+              <DataGridTemplateColumn Header="Rotation #" Width="83">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                     <TextBox Text="{Binding RotationOrder, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsRotation}" />
@@ -106,7 +106,7 @@
           </DataGrid>
           <DataGrid Grid.Row="2" ItemsSource="{Binding Issues}" Style="{StaticResource Editor.Grid}" RowStyle="{StaticResource Clubs.IssueRow}">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="70" />
+              <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="78" />
               <DataGridTextColumn Header="Applies to" Binding="{Binding Scope}" Width="130" />
               <DataGridTextColumn Header="Problem" Binding="{Binding Message}" Width="*" MinWidth="420" />
             </DataGrid.Columns>
@@ -118,10 +118,10 @@
               <TextBlock Text="Starting five" Style="{StaticResource Text.Title}" Margin="0,0,0,8" />
               <DataGrid ItemsSource="{Binding Lineup}" Style="{StaticResource Editor.Grid}">
                 <DataGrid.Columns>
-                  <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="95" />
+                  <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="103" />
                   <DataGridTextColumn Header="Player" Binding="{Binding Player}" Width="*" MinWidth="110" />
-                  <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="48" />
-                  <DataGridTextColumn Header="Fit" Binding="{Binding Familiarity}" Width="68" />
+                  <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="56" ElementStyle="{StaticResource Cell.Rating}" />
+                  <DataGridTextColumn Header="Fit" Binding="{Binding Familiarity}" Width="76" />
                 </DataGrid.Columns>
               </DataGrid>
               <TextBlock Text="Rating = effective rating at the lineup position. Rotation players come in by rotation number."

@@ -49,7 +49,7 @@
           <TextBlock DockPanel.Dock="Top" Text="Latest bookings" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
           <DataGrid ItemsSource="{Binding Transactions}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
             <DataGrid.Columns>
-              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
+              <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="98" />
               <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="140" />
               <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" MinWidth="160" />
               <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="120" />

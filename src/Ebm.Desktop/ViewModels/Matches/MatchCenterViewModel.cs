@@ -27,7 +27,7 @@ public enum ManagedSide
 /// <summary>One fixture in the schedule grid.</summary>
 public sealed record FixtureRow(FixtureLine Line)
 {
-    public string Date => Line.Fixture.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    public string Date => Line.Fixture.Date.ToString("d", CultureInfo.CurrentCulture);
 
     public string Round => Line.Fixture.Stage switch
     {
@@ -392,7 +392,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         var m = report.Match;
         HomeName = report.Home.Name;
         AwayName = report.Away.Name;
-        Title = $"Match report · {report.Competition} · {report.Fixture.Date:yyyy-MM-dd}";
+        Title = $"Match report · {report.Competition} · {report.Fixture.Date.ToString("d", CultureInfo.CurrentCulture)}";
         SelectedView = 2;
         ScoreText = $"{m.HomeScore} – {m.AwayScore}";
         ClockText = m.Overtimes > 0 ? $"Final ({m.Overtimes} OT)" : "Final";
@@ -613,7 +613,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
 
         HomeName = sim.TeamName(TeamSide.Home);
         AwayName = sim.TeamName(TeamSide.Away);
-        Title = $"{(sim.IsFinished ? "Final" : "Live")} · {_session.Competition} · {_session.Fixture.Date:yyyy-MM-dd}";
+        Title = $"{(sim.IsFinished ? "Final" : "Live")} · {_session.Competition} · {_session.Fixture.Date.ToString("d", CultureInfo.CurrentCulture)}";
         ScoreText = $"{sim.HomeScore} – {sim.AwayScore}";
         ClockText = sim.IsFinished
             ? sim.Overtimes > 0 ? $"Final ({sim.Overtimes} OT)" : "Final"

@@ -29,19 +29,19 @@
           <DataGrid.Columns>
             <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="140" />
             <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="120" />
-            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
-            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="55" />
-            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="40" />
-            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="40" />
-            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="40" />
-            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="40" />
-            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="40" />
-            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="40" />
-            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="40" />
+            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" />
+            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="63" />
+            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="48" />
+            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="48" />
+            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="48" />
+            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="48" />
+            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="48" />
+            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="48" />
+            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="48" />
             <DataGridTextColumn Header="Style" Binding="{Binding Style}" Width="120" />
             <DataGridTextColumn Header="Prefers" Binding="{Binding Preferences}" Width="150" />
-            <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="95" />
-            <DataGridTextColumn Header="Until" Binding="{Binding Until}" Width="85" />
+            <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="103" />
+            <DataGridTextColumn Header="Until" Binding="{Binding Until}" Width="93" />
           </DataGrid.Columns>
         </DataGrid>
         <TextBlock Grid.Row="2" Text="Responsibilities" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
@@ -49,8 +49,8 @@
           <DataGrid.Columns>
             <DataGridTextColumn Header="Duty" Binding="{Binding Name}" Width="190" />
             <DataGridTextColumn Header="In charge" Binding="{Binding Lead}" Width="170" />
-            <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="55" />
-            <DataGridTextColumn Header="Influences" Binding="{Binding Influence}" Width="*" />
+            <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="63" />
+            <DataGridTextColumn Header="Influences" Binding="{Binding Influence}" Width="*" MinWidth="110" />
           </DataGrid.Columns>
         </DataGrid>
         <DockPanel Grid.Row="4" Margin="0,12,0,6">
@@ -63,18 +63,18 @@
           <DataGrid.Columns>
             <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="140" />
             <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="120" />
-            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
-            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="55" />
-            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="40" />
-            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="40" />
-            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="40" />
-            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="40" />
-            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="40" />
-            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="40" />
-            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="40" />
+            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" />
+            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="63" />
+            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="48" />
+            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="48" />
+            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="48" />
+            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="48" />
+            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="48" />
+            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="48" />
+            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="48" />
             <DataGridTextColumn Header="Style" Binding="{Binding Style}" Width="120" />
             <DataGridTextColumn Header="Prefers" Binding="{Binding Preferences}" Width="150" />
-            <DataGridTextColumn Header="Asks" Binding="{Binding Demand}" Width="95" />
+            <DataGridTextColumn Header="Asks" Binding="{Binding Demand}" Width="103" />
             <DataGridTextColumn Header="Joins" Binding="{Binding Joins}" Width="110" />
           </DataGrid.Columns>
         </DataGrid>
@@ -83,7 +83,7 @@
           <TextBox Text="{Binding OfferSalary, UpdateSourceTrigger=PropertyChanged}" Width="120" />
           <TextBlock Text="Years" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="16,0,8,0" />
           <TextBox Text="{Binding OfferYears, UpdateSourceTrigger=PropertyChanged}" Width="50" />
-          <Button Content="Hire selected" Command="{Binding HireCommand}" Margin="16,0,0,0" />
+          <Button Style="{StaticResource Button.Primary}" Content="Hire selected" Command="{Binding HireCommand}" Margin="16,0,0,0" />
         </StackPanel>
       </Grid>
     </DockPanel>
