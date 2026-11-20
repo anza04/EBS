@@ -39,7 +39,7 @@
     </DockPanel>
   </DataTemplate>
 
-  <Style x:Key="Clubs.IssueRow" TargetType="DataGridRow">
+  <Style x:Key="Clubs.IssueRow" TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
     <Style.Triggers>
       <DataTrigger Binding="{Binding IsError}" Value="True">
         <Setter Property="Foreground" Value="{StaticResource Brush.Error}" />

@@ -2,8 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:ed="clr-namespace:Ebm.Desktop.ViewModels.Editor">
   <!-- Database editor: form styles and one data template per editor page. Uses the tokens from Shell.xaml. -->
-  <SolidColorBrush x:Key="Brush.Error" Color="#B42318" />
-  <SolidColorBrush x:Key="Brush.Success" Color="#1E7B34" />
 
   <Style x:Key="Form.Label" TargetType="TextBlock" BasedOn="{StaticResource Text.Label}">
     <Setter Property="Margin" Value="0,10,0,3" />
@@ -12,24 +10,10 @@
     <Setter Property="Padding" Value="20" />
     <Setter Property="Margin" Value="12,0,0,0" />
   </Style>
-  <Style TargetType="TextBox">
-    <Setter Property="Padding" Value="4,3" />
-    <Setter Property="FontSize" Value="13" />
-  </Style>
-  <Style TargetType="ComboBox">
-    <Setter Property="Padding" Value="6,3" />
-    <Setter Property="FontSize" Value="13" />
-  </Style>
-  <Style x:Key="Editor.Grid" TargetType="DataGrid">
+  <Style x:Key="Editor.Grid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
     <Setter Property="AutoGenerateColumns" Value="False" />
     <Setter Property="IsReadOnly" Value="True" />
     <Setter Property="SelectionMode" Value="Single" />
-    <Setter Property="HeadersVisibility" Value="Column" />
-    <Setter Property="GridLinesVisibility" Value="Horizontal" />
-    <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource Brush.Border}" />
-    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
-    <Setter Property="Background" Value="{StaticResource Brush.Surface}" />
-    <Setter Property="RowHeight" Value="26" />
     <Setter Property="FontSize" Value="13" />
   </Style>
   <Style x:Key="Text.Status" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
@@ -46,7 +30,7 @@
   <ControlTemplate x:Key="Editor.Actions" TargetType="ContentControl">
     <StackPanel Margin="0,18,0,0">
       <StackPanel Orientation="Horizontal">
-        <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0" IsDefault="True" />
+        <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource Button.Primary}" Margin="0,0,8,0" IsDefault="True" />
         <Button Content="New" Command="{Binding StartNewCommand}" Style="{StaticResource Button.Secondary}" />
       </StackPanel>
       <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Status}" />

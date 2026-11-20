@@ -14,68 +14,72 @@
     <BooleanToVisibilityConverter x:Key="Shell.Visible" />
   </Window.Resources>
   <DockPanel>
-    <!-- Header bar -->
-    <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Header}" Padding="24,14">
+    <!-- Top bar -->
+    <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Surface}" BorderBrush="{StaticResource Brush.Border}"
+            BorderThickness="0,0,0,1" Padding="18,10">
       <DockPanel>
         <TextBlock DockPanel.Dock="Right" Text="{Binding VersionText}" Style="{StaticResource Text.Muted}"
-                   Foreground="{StaticResource Brush.HeaderMuted}" VerticalAlignment="Center" Margin="24,0,0,0" />
+                   VerticalAlignment="Center" Margin="24,0,0,0" />
 
         <!-- Locked club: preselected in every screen that works on one club -->
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" DataContext="{Binding Editor}">
-          <TextBlock Text="My club" Style="{StaticResource Text.Muted}" Foreground="{StaticResource Brush.HeaderMuted}"
-                     VerticalAlignment="Center" Margin="0,0,8,0" />
+          <TextBlock Text="My club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
           <StackPanel Orientation="Horizontal" Visibility="{Binding IsClubUnlocked, Converter={StaticResource Shell.Visible}}">
             <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id"
                       SelectedValue="{Binding ClubToLock}" Width="240" VerticalAlignment="Center" />
-            <Button Content="🔒 Lock" Command="{Binding LockClubCommand}" Style="{StaticResource Button.Secondary}"
-                    Padding="10,2" Margin="8,0,0,0" ToolTip="Preselect this club in every tab, also in future sessions" />
+            <Button Content="🔒 Lock" Command="{Binding LockClubCommand}" Style="{StaticResource Button.Primary}"
+                    Padding="12,4" Margin="8,0,0,0" ToolTip="Preselect this club in every tab, also in future sessions" />
           </StackPanel>
           <StackPanel Orientation="Horizontal" Visibility="{Binding IsClubLocked, Converter={StaticResource Shell.Visible}}">
-            <TextBlock Text="{Binding LockedClubName, StringFormat='🔒 {0}'}" Style="{StaticResource Text.Body}"
-                       Foreground="{StaticResource Brush.HeaderText}" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Content="Unlock" Command="{Binding UnlockClubCommand}" Style="{StaticResource Button.Secondary}"
-                    Padding="10,2" Margin="8,0,0,0" />
+            <Border Background="{StaticResource Brush.AccentSoft}" CornerRadius="12" Padding="10,3" VerticalAlignment="Center">
+              <TextBlock Text="{Binding LockedClubName, StringFormat='🔒 {0}'}" Style="{StaticResource Text.Body}" FontSize="13"
+                         Foreground="{StaticResource Brush.AccentText}" FontWeight="SemiBold" />
+            </Border>
+            <Button Content="Unlock" Command="{Binding UnlockClubCommand}" Padding="12,4" Margin="8,0,0,0" />
           </StackPanel>
         </StackPanel>
-        <TextBlock Text="{Binding ProductName}" Style="{StaticResource Text.Title}"
-                   Foreground="{StaticResource Brush.HeaderText}" />
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Ellipse Width="20" Height="20" Fill="{StaticResource Brush.Accent}" Margin="0,0,10,0" />
+          <TextBlock Text="{Binding ProductName}" Style="{StaticResource Text.Title}" FontSize="17" VerticalAlignment="Center" />
+        </StackPanel>
       </DockPanel>
     </Border>
 
     <!-- Status bar -->
     <Border DockPanel.Dock="Bottom" Background="{StaticResource Brush.Surface}"
-            BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0" Padding="24,6">
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0" Padding="18,6">
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="Open logs folder" Command="{Binding OpenLogsFolderCommand}"
-                Style="{StaticResource Button.Secondary}" Padding="10,2" />
+        <Button DockPanel.Dock="Right" Content="Open logs folder" Command="{Binding OpenLogsFolderCommand}" Padding="10,2" />
         <TextBlock Style="{StaticResource Text.Muted}" VerticalAlignment="Center">
           <Run Text="{Binding Editor.Counts, Mode=OneWay}" /> <Run Text=" · Data folder:" /> <Run Text="{Binding DataFolder, Mode=OneWay}" />
         </TextBlock>
       </DockPanel>
     </Border>
 
-    <!-- Content area: the database editor (game screens are added by later steps) -->
-    <TabControl DataContext="{Binding Editor}" Margin="12" Padding="0" FontSize="13">
-      <TabItem Header="Career" Content="{Binding Career}" />
+    <!-- Content area: grouped sidebar navigation. Tag = group label shown above the first item of each group. -->
+    <TabControl DataContext="{Binding Editor}" Style="{StaticResource Nav.TabControl}" Padding="8,8,8,4"
+                ItemContainerStyle="{StaticResource Nav.Item}">
+      <TabItem Tag="GAME" Header="Career" Content="{Binding Career}" />
       <TabItem Header="News" Content="{Binding News}" />
-      <TabItem Header="History" Content="{Binding History}" />
-      <TabItem Header="Players" Content="{Binding Players}" />
-      <TabItem Header="Player profile" Content="{Binding Profile}" />
-      <TabItem Header="Compare players" Content="{Binding Comparison}" />
-      <TabItem Header="Clubs" Content="{Binding Clubs}" />
-      <TabItem Header="Club profile" Content="{Binding ClubProfile}" />
-      <TabItem Header="Squad" Content="{Binding Squad}" />
+      <TabItem Header="Saved games" Content="{Binding Saves}" />
+      <TabItem Tag="CLUB" Header="Club profile" Content="{Binding ClubProfile}" />
+      <TabItem Header="Finances" Content="{Binding Finances}" />
+      <TabItem Header="Staff" Content="{Binding Staff}" />
       <TabItem Header="Club contracts" Content="{Binding ClubContracts}" />
-      <TabItem Header="Transfer market" Content="{Binding TransferMarket}" />
-      <TabItem Header="Scouting" Content="{Binding Scouting}" />
+      <TabItem Tag="TEAM" Header="Squad" Content="{Binding Squad}" />
       <TabItem Header="Tactics" Content="{Binding Tactics}" />
       <TabItem Header="Training" Content="{Binding Training}" />
       <TabItem Header="Medical" Content="{Binding Medical}" />
-      <TabItem Header="Staff" Content="{Binding Staff}" />
       <TabItem Header="Dressing room" Content="{Binding DressingRoom}" />
-      <TabItem Header="Finances" Content="{Binding Finances}" />
-      <TabItem Header="Matches" Content="{Binding Matches}" />
+      <TabItem Tag="PLAYERS AND MARKET" Header="Players" Content="{Binding Players}" />
+      <TabItem Header="Player profile" Content="{Binding Profile}" />
+      <TabItem Header="Compare players" Content="{Binding Comparison}" />
+      <TabItem Header="Transfer market" Content="{Binding TransferMarket}" />
+      <TabItem Header="Scouting" Content="{Binding Scouting}" />
+      <TabItem Tag="SEASON" Header="Matches" Content="{Binding Matches}" />
       <TabItem Header="Season stats" Content="{Binding SeasonStats}" />
+      <TabItem Header="History" Content="{Binding History}" />
+      <TabItem Tag="DATABASE" Header="Clubs" Content="{Binding Clubs}" />
       <TabItem Header="Contracts (editor)" Content="{Binding Contracts}" />
       <TabItem Header="Leagues and competitions">
         <Grid Margin="16">
@@ -89,7 +93,6 @@
         </Grid>
       </TabItem>
       <TabItem Header="Import" Content="{Binding Import}" />
-      <TabItem Header="Saved games" Content="{Binding Saves}" />
     </TabControl>
   </DockPanel>
 </Window>
