@@ -19,6 +19,7 @@ public sealed class AppPaths
         DatabaseFile = Path.Combine(DatabasesDirectory, DatabaseFileName);
         ImportLogsDirectory = Path.Combine(LogsDirectory, "imports");
         SavesDirectory = Path.Combine(dataRoot, "saves");
+        ModsDirectory = Path.Combine(dataRoot, "mods");
     }
 
     public string DataRoot { get; }
@@ -32,6 +33,9 @@ public sealed class AppPaths
 
     /// <summary>Save files (copies of the game database).</summary>
     public string SavesDirectory { get; }
+
+    /// <summary>Community database packages (<c>*.ebmpack</c>, docs/MODDING.md).</summary>
+    public string ModsDirectory { get; }
 
     /// <summary>SQLite game database.</summary>
     public string DatabaseFile { get; }
@@ -58,5 +62,6 @@ public sealed class AppPaths
         Directory.CreateDirectory(DatabasesDirectory);
         Directory.CreateDirectory(ImportLogsDirectory);
         Directory.CreateDirectory(SavesDirectory);
+        Directory.CreateDirectory(ModsDirectory);
     }
 }

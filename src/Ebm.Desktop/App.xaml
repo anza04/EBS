@@ -1,4 +1,4 @@
-﻿<Application x:Class="Ebm.Desktop.App"
+<Application x:Class="Ebm.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnMainWindowClose">
@@ -25,6 +25,7 @@
         <ResourceDictionary Source="Themes/Statistics.xaml" />
         <ResourceDictionary Source="Themes/Careers.xaml" />
         <ResourceDictionary Source="Themes/Saves.xaml" />
+        <ResourceDictionary Source="Themes/Mods.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

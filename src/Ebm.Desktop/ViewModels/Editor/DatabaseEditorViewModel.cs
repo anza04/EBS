@@ -7,6 +7,7 @@ using Ebm.Desktop.ViewModels.Clubs;
 using Ebm.Desktop.ViewModels.Contracts;
 using Ebm.Desktop.ViewModels.Matches;
 using Ebm.Desktop.ViewModels.Players;
+using Ebm.Desktop.ViewModels.Modding;
 using Ebm.Desktop.ViewModels.Saves;
 using Ebm.Desktop.ViewModels.Scouting;
 using Ebm.Desktop.ViewModels.Statistics;
@@ -33,6 +34,7 @@ using Ebm.Services.Medical;
 using Ebm.Services.History;
 using Ebm.Services.News;
 using Ebm.Services.Players;
+using Ebm.Services.Modding;
 using Ebm.Services.Saves;
 using Ebm.Services.Scouting;
 using Ebm.Services.Tactics;
@@ -87,7 +89,10 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         ClubLockStore? clubLock = null,
         IStaffService? staff = null,
         INewsService? news = null,
-        IHistoryService? history = null)
+        IHistoryService? history = null,
+        IModPackageService? mods = null,
+        IDatabaseExportService? export = null,
+        IDatabaseValidator? validator = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -112,6 +117,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         SeasonStats = new SeasonStatsViewModel(matches, Lookups);
         Career = careers is null ? null : new CareerViewModel(careers, competitions, Lookups, ReloadAsync);
         Saves = saves is null ? null : new SaveGamesViewModel(saves, ReloadAsync);
+        Mods = mods is null || export is null || validator is null ? null : new ModsViewModel(mods, export, validator, filePicker, ReloadAsync);
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
         Training = development is null ? null : new TrainingViewModel(development, Lookups);
         Medical = medical is null ? null : new MedicalViewModel(medical, Lookups);
@@ -160,6 +166,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     /// <summary>The saved-games screen; <c>null</c> without a save service (editor-only tests).</summary>
     public SaveGamesViewModel? Saves { get; }
+
+    /// <summary>Community packages, database export and validation (Step 33).</summary>
+    public ModsViewModel? Mods { get; }
 
     /// <summary>The scouting screen; <c>null</c> without a scouting service (editor-only tests).</summary>
     public ScoutingViewModel? Scouting { get; }
@@ -302,6 +311,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Saves is not null)
         {
             await Saves.RefreshAsync();
+        }
+
+        if (Mods is not null)
+        {
+            await Mods.RefreshAsync();
         }
 
         if (Scouting is not null)

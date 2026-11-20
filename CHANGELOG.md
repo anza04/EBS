@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.33.0] — 2026-11-21 — STEP 33: Modding and custom database support
+
+### Added
+- Database export (docs/MODDING.md §3): the whole importable world as one `ebm-dataset` JSON file in the import
+  format; it imports into a new game unchanged and exports back identically.
+- Whole-database validation (§4): overlapping or post-retirement contracts, short squads in current competitions,
+  unreadable competition rules, unlinked leagues and country mismatches, as errors and warnings.
+- Community database packages (`.ebmpack`, §2): a zip with an `ebmpack.json` manifest and import files, kept in
+  `<DataRoot>\mods`. Packages are checked by a dry-run import, installed as a new game or into the current game, and
+  created from the current database.
+- Install protection (§5): the game in progress is saved as a restore point first; a failed import or new validation
+  errors load it back. Saved careers are separate copies and never change.
+- *Mods and export* tab (packages, check, install, create, export, database check).
+
 ### Changed
 - UI refresh ("Courtside Light", plain WPF, no new packages): restyled buttons (primary, secondary, destructive), text
   boxes with placeholders, combo boxes, check boxes, tables, sub-tabs, scroll bars and tooltips; grouped sidebar

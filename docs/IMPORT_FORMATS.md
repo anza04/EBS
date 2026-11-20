@@ -173,6 +173,8 @@ attributes); a blank wingspan means "same as height". *Player profile* and *Comp
 and *Squad* use `IClubService` (`docs/ROSTER_RULES.md`). *Contracts (editor)* edits every negotiable term; club and
 player are fixed once created. *Club contracts* signs, renews and terminates through `IContractService` (`docs/CONTRACTS.md`).
 
+Export, community packages (`.ebmpack`) and whole-database validation: docs/MODDING.md (Step 33, tab *Mods and export*).
+
 ## 7. Known data limitations
 
 * Importable types: countries, arenas, clubs, leagues, divisions, competitions, seasons, competition

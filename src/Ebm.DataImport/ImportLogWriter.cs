@@ -71,4 +71,6 @@ internal sealed class ImportLogWriter
 }
 
 /// <param name="LogDirectory">Folder that receives one log file per import.</param>
-public sealed record DataImportOptions(string LogDirectory);
+/// <param name="LogDirectory">Folder that receives one log file per import.</param>
+/// <param name="ModsDirectory">Folder scanned for community database packages (docs/MODDING.md).</param>
+public sealed record DataImportOptions(string LogDirectory, string ModsDirectory);

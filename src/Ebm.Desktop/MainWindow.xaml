@@ -1,4 +1,4 @@
-﻿<Window x:Class="Ebm.Desktop.MainWindow"
+<Window x:Class="Ebm.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -94,6 +94,7 @@
         </Grid>
       </TabItem>
       <TabItem Header="Import" c:Ui.Icon="&#xE898;" Content="{Binding Import}" />
+      <TabItem Header="Mods and export" c:Ui.Icon="&#xEA86;" Content="{Binding Mods}" />
     </TabControl>
   </DockPanel>
 </Window>

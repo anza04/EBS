@@ -50,7 +50,7 @@ public static class EbmHost
         builder.Services
             .AddGameServices()
             .AddPersistence(paths.DatabaseFile, paths.SavesDirectory)
-            .AddDataImport(paths.ImportLogsDirectory);
+            .AddDataImport(paths.ImportLogsDirectory, paths.ModsDirectory);
 
         return builder;
     }
