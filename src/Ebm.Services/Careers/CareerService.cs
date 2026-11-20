@@ -16,6 +16,7 @@ using Ebm.Services.Finances;
 using Ebm.Services.Medical;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
+using Ebm.Services.News;
 using Ebm.Services.Scouting;
 using Ebm.Services.Transfers;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +39,7 @@ internal sealed class CareerService(
     IContractService contracts,
     IChemistryService chemistry,
     IStaffService staff,
+    INewsService news,
     FinanceModel financeModel,
     GameClock clock) : ICareerService
 {
@@ -122,6 +124,7 @@ internal sealed class CareerService(
         await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
         await finances.PlanBudgetsAsync(season.Id, null, cancellationToken).ConfigureAwait(false);
         await management.PlanTrainingAsync([clubId], cancellationToken).ConfigureAwait(false);
+        await news.ProcessSeasonStartAsync(season.Id, clubId, career.CurrentDate, cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 
@@ -226,7 +229,10 @@ internal sealed class CareerService(
             renewals = await management.RenewContractsAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay, promises, chemistryWeek);
+        // News (docs/NEWS.md): written last, from everything that happened today.
+        var newsDay = await news.ProcessDayAsync(today, career.SeasonId, career.ClubId, cancellationToken).ConfigureAwait(false);
+
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay, promises, chemistryWeek, newsDay);
     }
 
     /// <summary>The matches played (not forfeited) on <paramref name="day"/>.</summary>
@@ -325,6 +331,9 @@ internal sealed class CareerService(
             .GroupBy(o => o.Club.Id)
             .ToDictionary(g => g.Key, g => g.All(o => o.Met));
 
+        // The season's verdict moves every club's reputation before next season's objectives are set (docs/NEWS.md §4).
+        await news.ProcessSeasonEndAsync(current.Id, objectivesMet, career.CurrentDate, cancellationToken).ConfigureAwait(false);
+
         // AI clubs that missed their objectives replace the head coach (docs/STAFF.md §6).
         if (await staff.ReviewHeadCoachesAsync(objectivesMet, career.AssistantManages ? [] : [career.ClubId], cancellationToken).ConfigureAwait(false) > 0)
         {
@@ -405,6 +414,7 @@ internal sealed class CareerService(
             career = stored;
         }
 
+        await news.ProcessSeasonStartAsync(next.Id, career.ClubId, career.CurrentDate, cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
     }
 

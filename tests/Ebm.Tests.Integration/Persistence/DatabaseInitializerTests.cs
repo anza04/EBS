@@ -14,13 +14,13 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_AdvancedSimulation";
+    private const string LatestMigration = "_NewsAndReputation";
 
     private static readonly string[] ExpectedTables =
     [
         "AgentRelationships", "Agents", "Arenas", "Careers", "ClubBudgets", "Clubs", "CompetitionParticipants", "Competitions", "ContractNegotiations", "Contracts", "Countries", "Divisions", "FinancialTransactions",
-        "Fixtures", "Injuries", "LeagueStandings", "Leagues", "Matches", "PlayerAttributes", "PlayerClubHistory",
-        "PlayerMatchStatistics", "PlayerRelationships", "PlayerTendencies", "Players", "RosterSpots", "ScoutReportAttributes", "ScoutReports", "ScoutingAssignments", "Seasons", "Staff", "Tactics", "TrainingPlans", "Transfers",
+        "Fixtures", "Injuries", "LeagueStandings", "Leagues", "Matches", "NewsItems", "PlayerAttributes", "PlayerClubHistory",
+        "PlayerMatchStatistics", "PlayerRelationships", "PlayerTendencies", "Players", "ReputationChanges", "RosterSpots", "ScoutReportAttributes", "ScoutReports", "ScoutingAssignments", "Seasons", "Staff", "Tactics", "TrainingPlans", "Transfers",
     ];
 
     [Fact]

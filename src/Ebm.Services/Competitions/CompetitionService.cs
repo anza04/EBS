@@ -6,6 +6,7 @@ using Ebm.Domain.Competitions.Rules;
 using Ebm.Domain.Countries;
 using Ebm.Domain.Finances;
 using Ebm.Domain.Matches;
+using Ebm.Domain.News;
 using Ebm.Domain.Seasons;
 using Ebm.Domain.Standings;
 using Ebm.Services.Data;
@@ -516,7 +517,14 @@ internal sealed class CompetitionService : ICompetitionService
             if (await clubs.FindAsync(entry.ClubId, cancellationToken).ConfigureAwait(false) is { } club)
             {
                 Ledger.Book(services, club, paidOn, FinanceCategory.PrizeMoney, reward.Prize, $"{data.Competition.Name} {data.SeasonEntity.Name}");
+                var before = club.Reputation;
                 club.ChangeReputation(reward.Reputation);
+                if (club.Reputation != before)
+                {
+                    // Every reputation change is stored with its event (docs/NEWS.md §4).
+                    Repo<ReputationChange, ReputationChangeId>(services).Add(new ReputationChange(
+                        ReputationChangeId.New(), $"reputation:{data.Competition.Id}:{data.SeasonEntity.Id}:{club.Id}:reward", club.Id, paidOn, ReputationCause.CompetitionReward, before, club.Reputation, data.SeasonEntity.Id, null));
+                }
             }
         }
 

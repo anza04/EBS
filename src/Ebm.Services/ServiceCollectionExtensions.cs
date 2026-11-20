@@ -16,6 +16,7 @@ using Ebm.Services.Medical;
 using Ebm.Services.Editing;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
+using Ebm.Services.News;
 using Ebm.Services.Players;
 using Ebm.Services.Scouting;
 using Ebm.Services.Tactics;
@@ -64,6 +65,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ITacticsService, TacticsService>();
         services.TryAddSingleton<IChemistryService, ChemistryService>();
         services.TryAddSingleton<IMatchService, MatchService>();
+        services.TryAddSingleton<INewsService, NewsService>();
         services.TryAddSingleton<IClubManagementService, ClubManagementService>();
         services.TryAddSingleton<ICareerService, CareerService>();
 

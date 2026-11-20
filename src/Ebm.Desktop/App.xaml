@@ -17,6 +17,7 @@
         <ResourceDictionary Source="Themes/Medical.xaml" />
         <ResourceDictionary Source="Themes/Staff.xaml" />
         <ResourceDictionary Source="Themes/DressingRoom.xaml" />
+        <ResourceDictionary Source="Themes/News.xaml" />
         <ResourceDictionary Source="Themes/Finances.xaml" />
         <ResourceDictionary Source="Themes/Tactics.xaml" />
         <ResourceDictionary Source="Themes/Matches.xaml" />

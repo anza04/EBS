@@ -5,6 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.31.0] — 2026-11-20 — STEP 31: News, media and club reputation
+
+### Added
+- News written from stored game events (docs/NEWS.md): match reviews, press conferences, player interviews, streaks
+  and previews for the career club; upsets, headline transfers and serious injuries for every club; contract rumours;
+  fan expectations (season start) and mood changes; season reputation verdicts. Each story is keyed by its event, so
+  nothing is reported twice; stories are kept forever and filterable by club, category and date.
+- Club reputation history: `ReputationChange` rows for upsets, league titles, cup wins, promotion, relegation, board
+  objectives and competition rewards, chaining from one value to the next.
+- `INewsService` (`ProcessDayAsync`, `ProcessSeasonEndAsync`, `ProcessSeasonStartAsync`, `GetNewsAsync`,
+  `GetReputationHistoryAsync`, `GetFansAsync`); the career calendar calls it each day and at season start/end;
+  `GameDayReport.News`.
+- *News* tab: stories by club and category, story text, fans line and reputation history.
+- Migration `NewsAndReputation` (tables `NewsItems`, `ReputationChanges`).
+- Tests: `MediaRulesTests` (5 unit); `NewsServiceTests` (a played season and the next season's start: no duplicates,
+  stories match matches/transfers/injuries/contracts, reputation chains, history filters, repeat-safe, News screen
+  and render); `InternationalCompetitionTests` checks reward reputation changes.
+
+### Changed
+- Competition reputation rewards (Step 18) are now stored as `ReputationChange` rows (`CompetitionReward`).
+
 ## [0.30.0] — 2026-11-20 — STEP 30: Advanced match visualization
 
 ### Added

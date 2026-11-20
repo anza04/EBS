@@ -25,6 +25,7 @@ Schema version: **`20261120145953_StaffManagement`** (Step 28).
 | `20261118090203_PlayerChemistry` | 26 | New table `PlayerRelationships` (create-table only) |
 | `20261118133803_TacticalEngine` | 27 | Tactics: twelve `Situation*` columns (add-column with defaults; existing "AI plan" tactics get coach adjustments and two-for-ones). Matches: `TacticalNotes` (JSON, nullable) |
 | `20261120145953_StaffManagement` | 28 | Staff: `Ability` renamed `TacticalKnowledge`; new `Development`, `Motivation`, `Scouting`, `MedicalExpertise`, `Reputation` (filled from the old ability, so every role ability is unchanged), `Experience` (0), `Style` (`Balanced`), `PreferredOffense`/`PreferredDefense` (nullable). Rename and add-column only: no table rebuild |
+| `20261120170405_NewsAndReputation` | 31 | New tables `NewsItems` and `ReputationChanges` (create-table only; links are plain IDs without foreign keys, docs/NEWS.md) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -496,6 +497,34 @@ Points = 2 × two-point made + 3 × three-point made + free throws made, compute
 | Won / Lost | int | ≥ 0; played = won + lost (no draws) |
 | PointsFor / PointsAgainst | int | ≥ 0 |
 | StandingPoints | int | ≥ 0. Awarded per result according to the competition rules, passed in by the caller |
+
+### NewsItems
+One news story (Step 31, docs/NEWS.md). Never edited or deleted.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| Key | text(160) | The event reported. **Unique**: an event is reported once |
+| Date | date | Index |
+| Category | text(24) | `NewsCategory` |
+| Headline / Body | text(200) / text(2000) | Required |
+| Sentiment | int | −2…+2 |
+| ClubId / OtherClubId / PlayerId | id? | Plain IDs, no FK (stories outlive deleted records). Indexed |
+| SeasonId / FixtureId / MatchId / TransferId / InjuryId / ReputationChangeId | id? | Plain IDs, no FK: the event behind the story |
+
+### ReputationChanges
+One change of a club's reputation with its event (Step 31). Never deleted.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| Key | text(160) | The event. **Unique**: an event moves a reputation once |
+| ClubId | id | Plain ID. Index (`ClubId, Date`) |
+| Date | date | |
+| Cause | text(24) | `ReputationCause` |
+| Before / After | int | 1–100; `After − Before` = points |
+| SeasonId | id | Plain ID |
+| MatchId | id? | The match of an upset; null for season results and competition rewards |
 
 ## 4. Historical data guarantees
 

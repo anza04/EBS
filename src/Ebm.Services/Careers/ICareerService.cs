@@ -9,6 +9,7 @@ using Ebm.Services.Competitions;
 using Ebm.Services.Development;
 using Ebm.Services.Medical;
 using Ebm.Services.Matches;
+using Ebm.Services.News;
 using Ebm.Services.Scouting;
 using Ebm.Services.Transfers;
 
@@ -110,7 +111,8 @@ public sealed record GameDayReport(
     SeasonDevelopment? SeasonEnd = null,
     MedicalDay? Medical = null,
     PromiseReview? Promises = null,
-    ChemistryWeek? Chemistry = null);
+    ChemistryWeek? Chemistry = null,
+    NewsDay? News = null);
 
 /// <summary>Why <see cref="ICareerService.ContinueAsync"/> stopped.</summary>
 public enum CalendarStop

@@ -13,6 +13,7 @@ using Ebm.Desktop.ViewModels.Statistics;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
+using Ebm.Desktop.ViewModels.News;
 using Ebm.Desktop.ViewModels.Staff;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
@@ -28,6 +29,7 @@ using Ebm.Services.Import;
 using Ebm.Services.Matches;
 using Ebm.Services.Finances;
 using Ebm.Services.Medical;
+using Ebm.Services.News;
 using Ebm.Services.Players;
 using Ebm.Services.Saves;
 using Ebm.Services.Scouting;
@@ -81,7 +83,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IFinanceService? finances = null,
         IChemistryService? chemistry = null,
         ClubLockStore? clubLock = null,
-        IStaffService? staff = null)
+        IStaffService? staff = null,
+        INewsService? news = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -112,6 +115,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Staff = staff is null ? null : new StaffViewModel(staff, Lookups, ReloadAsync);
         Finances = finances is null ? null : new FinancesViewModel(finances, Lookups);
         DressingRoom = chemistry is null ? null : new DressingRoomViewModel(chemistry, Lookups);
+        News = news is null ? null : new NewsViewModel(news, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -166,6 +170,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     public FinancesViewModel? Finances { get; }
 
     public DressingRoomViewModel? DressingRoom { get; }
+
+    /// <summary>The news screen; <c>null</c> without a news service (editor-only tests).</summary>
+    public NewsViewModel? News { get; }
 
     public bool IsClubLocked => LockedClubId is not null;
 
@@ -248,6 +255,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
             Apply(DressingRoom.ClubId, v => DressingRoom.ClubId = v);
         }
 
+        if (News is not null)
+        {
+            Apply(News.ClubId, v => News.ClubId = v);
+        }
+
         Career?.PreselectClub(id);
     }
 
@@ -308,6 +320,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (DressingRoom is not null)
         {
             await DressingRoom.RefreshAsync();
+        }
+
+        if (News is not null)
+        {
+            await News.RefreshAsync();
         }
 
         ApplyLockedClub(onlyEmpty: true);

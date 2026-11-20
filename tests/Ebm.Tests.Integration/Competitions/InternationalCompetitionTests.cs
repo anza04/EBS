@@ -126,6 +126,12 @@ public sealed class InternationalCompetitionTests : IAsyncLifetime
         Assert.True(winnerEntry.PrizeMoney >= 100_000 + 50_000 + 500_000 + 10_000);
         Assert.Equal(1 + 3, winnerEntry.ReputationGain);
         Assert.Equal(1 + 2, paid.Single(p => p.ClubId == cupA.RunnerUp).ReputationGain);
+
+        // Step 31: each reward is a stored reputation change linked to the competition (docs/NEWS.md §4).
+        var rewards = await _db.ReadAsync(s => s.Repo<Ebm.Domain.News.ReputationChange, Ebm.Domain.News.ReputationChangeId>()
+            .ListAsync(c => c.Cause == Ebm.Domain.News.ReputationCause.CompetitionReward && c.SeasonId == _season.Id));
+        var winnerReward = Assert.Single(rewards, c => c.ClubId == winnerA && c.Key.StartsWith($"reputation:{euroA}:", StringComparison.Ordinal));
+        Assert.Equal(1 + 3, winnerReward.Points);
         var champion = (await Service.GetOutcomeAsync(_serieA.Id, _season.Id)).Champion;
 
         // Next season: the holder and the Serie A champion qualify from the finished season.

@@ -839,6 +839,123 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("Injuries", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.News.NewsItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("FixtureId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Headline")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("InjuryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("MatchId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("OtherClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ReputationChangeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Sentiment")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("TransferId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("Date");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.HasIndex("OtherClubId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("NewsItems", (string)null);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.News.ReputationChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("After")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Before")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cause")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("MatchId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.HasIndex("ClubId", "Date");
+
+                    b.ToTable("ReputationChanges", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Players.Player", b =>
                 {
                     b.Property<Guid>("Id")
