@@ -58,6 +58,7 @@
     <TabControl DataContext="{Binding Editor}" Margin="12" Padding="0" FontSize="13">
       <TabItem Header="Career" Content="{Binding Career}" />
       <TabItem Header="News" Content="{Binding News}" />
+      <TabItem Header="History" Content="{Binding History}" />
       <TabItem Header="Players" Content="{Binding Players}" />
       <TabItem Header="Player profile" Content="{Binding Profile}" />
       <TabItem Header="Compare players" Content="{Binding Comparison}" />

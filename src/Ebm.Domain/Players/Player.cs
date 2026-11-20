@@ -1,3 +1,4 @@
+using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Countries;
 
@@ -134,6 +135,9 @@ public sealed class Player : Entity<PlayerId>
     public DateOnly? RetiredOn { get; private set; }
 
     public bool IsRetired => RetiredOn is not null;
+
+    /// <summary>The club whose academy produced the player (youth intake, docs/HISTORY.md §6); <c>null</c> for other players. Plain ID, no foreign key.</summary>
+    public ClubId? YouthClubId { get; init; }
 
     /// <summary>Age in whole years on <paramref name="date"/>.</summary>
     public int AgeOn(DateOnly date)

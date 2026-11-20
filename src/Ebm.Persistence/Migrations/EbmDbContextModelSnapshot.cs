@@ -656,6 +656,120 @@ namespace Ebm.Persistence.Migrations
                     b.ToTable("FinancialTransactions", (string)null);
                 });
 
+            modelBuilder.Entity("Ebm.Domain.History.HallOfFameEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Awards")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Games")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("InductedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Seasons")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Titles")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("HallOfFame", (string)null);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.History.LeagueSeasonSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Champion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Clubs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("CompetitionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MeanOverall")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MeanReputation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TopReputation")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompetitionId", "SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("LeagueSeasonSnapshots", (string)null);
+                });
+
+            modelBuilder.Entity("Ebm.Domain.History.SeasonAward", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CompetitionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PlayerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("StaffMemberId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("SeasonId", "CompetitionId", "Kind", "Rank")
+                        .IsUnique();
+
+                    b.ToTable("SeasonAwards", (string)null);
+                });
+
             modelBuilder.Entity("Ebm.Domain.Matches.Fixture", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1059,6 +1173,9 @@ namespace Ebm.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
+                    b.Property<Guid?>("YouthClubId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NationalityId");
@@ -1320,6 +1437,9 @@ namespace Ebm.Persistence.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("FormerPlayerId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")

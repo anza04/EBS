@@ -13,6 +13,7 @@ using Ebm.Services.Competitions;
 using Ebm.Services.Data;
 using Ebm.Services.Development;
 using Ebm.Services.Finances;
+using Ebm.Services.History;
 using Ebm.Services.Medical;
 using Ebm.Services.Management;
 using Ebm.Services.Matches;
@@ -40,6 +41,7 @@ internal sealed class CareerService(
     IChemistryService chemistry,
     IStaffService staff,
     INewsService news,
+    IHistoryService history,
     FinanceModel financeModel,
     GameClock clock) : ICareerService
 {
@@ -193,6 +195,14 @@ internal sealed class CareerService(
         var medicalDay = await medical.ProcessDayAsync(playedToday, cancellationToken).ConfigureAwait(false);
         var seasonEnd = seasonEnds ? await development.ProcessSeasonEndAsync(cancellationToken).ConfigureAwait(false) : null;
 
+        // The long-term world (docs/HISTORY.md): retired players enter the hall of fame or start coaching; academies produce youth players.
+        WorldYear? world = null;
+        if (seasonEnd is not null)
+        {
+            var retirements = await history.ProcessRetirementsAsync([.. seasonEnd.Retired.Select(r => r.PlayerId)], today, cancellationToken).ConfigureAwait(false);
+            world = new WorldYear(retirements, await history.ProcessYouthIntakeAsync(today, managed, cancellationToken).ConfigureAwait(false));
+        }
+
         var money = await MoveCareerAsync(career.Id, today, cancellationToken).ConfigureAwait(false);
         var changes = await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         var scoutingDay = await scouting.ProcessDayAsync(cancellationToken).ConfigureAwait(false);
@@ -232,7 +242,7 @@ internal sealed class CareerService(
         // News (docs/NEWS.md): written last, from everything that happened today.
         var newsDay = await news.ProcessDayAsync(today, career.SeasonId, career.ClubId, cancellationToken).ConfigureAwait(false);
 
-        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay, promises, chemistryWeek, newsDay);
+        return new GameDayReport(today, results, scheduled, changes, window, new ManagementDay(lineups, planned, renewals, releases, emergency, created, money.Salaries, money.Income, money.Costs), scoutingDay, developmentDay, seasonEnd, medicalDay, promises, chemistryWeek, newsDay, world);
     }
 
     /// <summary>The matches played (not forfeited) on <paramref name="day"/>.</summary>
@@ -330,6 +340,9 @@ internal sealed class CareerService(
             .SelectMany(c => c.Objectives)
             .GroupBy(o => o.Club.Id)
             .ToDictionary(g => g.Key, g => g.All(o => o.Met));
+
+        // Awards (judged on the reputations the season started from), league snapshots and reputation drift (docs/HISTORY.md).
+        await history.ProcessSeasonEndAsync(current.Id, career.CurrentDate, cancellationToken).ConfigureAwait(false);
 
         // The season's verdict moves every club's reputation before next season's objectives are set (docs/NEWS.md §4).
         await news.ProcessSeasonEndAsync(current.Id, objectivesMet, career.CurrentDate, cancellationToken).ConfigureAwait(false);

@@ -7,6 +7,7 @@ using Ebm.Domain.Seasons;
 using Ebm.Services.Chemistry;
 using Ebm.Services.Competitions;
 using Ebm.Services.Development;
+using Ebm.Services.History;
 using Ebm.Services.Medical;
 using Ebm.Services.Matches;
 using Ebm.Services.News;
@@ -112,7 +113,11 @@ public sealed record GameDayReport(
     MedicalDay? Medical = null,
     PromiseReview? Promises = null,
     ChemistryWeek? Chemistry = null,
-    NewsDay? News = null);
+    NewsDay? News = null,
+    WorldYear? World = null);
+
+/// <summary>The yearly turn of the world on the season's last day: retirements' honours and the youth intake.</summary>
+public sealed record WorldYear(RetirementHistory Retirements, YouthIntake Youth);
 
 /// <summary>Why <see cref="ICareerService.ContinueAsync"/> stopped.</summary>
 public enum CalendarStop

@@ -23,6 +23,9 @@ public enum ReputationCause
 
     /// <summary>A competition's reputation reward, paid when it ends (docs/INTERNATIONAL_COMPETITIONS.md).</summary>
     CompetitionReward,
+
+    /// <summary>The yearly pull of every reputation back towards the middle (docs/HISTORY.md §7).</summary>
+    LongTermDrift,
 }
 
 public readonly record struct ReputationChangeId(Guid Value) : IEntityId<ReputationChangeId>

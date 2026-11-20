@@ -191,6 +191,7 @@ public static class NewsWriter
         ReputationCause.Relegation => "Dropping a division damages the name.",
         ReputationCause.ObjectiveMet => "The board's objective was met.",
         ReputationCause.CompetitionReward => "A good run in a competition.",
+        ReputationCause.LongTermDrift => "Past glories fade; new names rise.",
         _ => "The board's objective was missed.",
     };
 

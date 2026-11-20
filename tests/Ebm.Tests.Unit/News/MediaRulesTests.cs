@@ -17,7 +17,7 @@ public sealed class MediaRulesTests
         Assert.True(MediaRules.IsUpset(40, 40 + MediaRules.UpsetGap));
         Assert.False(MediaRules.IsUpset(40, 40 + MediaRules.UpsetGap - 1));
         Assert.False(MediaRules.IsUpset(80, 40));
-        Assert.All(Enum.GetValues<ReputationCause>().Where(c => c != ReputationCause.CompetitionReward), c => Assert.NotEqual(0, MediaRules.Points(c)));
+        Assert.All(Enum.GetValues<ReputationCause>().Where(c => c is not (ReputationCause.CompetitionReward or ReputationCause.LongTermDrift)), c => Assert.NotEqual(0, MediaRules.Points(c)));
         Assert.True(MediaRules.Points(ReputationCause.LeagueTitle) > MediaRules.Points(ReputationCause.ObjectiveMet));
         Assert.True(MediaRules.Points(ReputationCause.Relegation) < MediaRules.Points(ReputationCause.UpsetDefeat));
     }

@@ -126,7 +126,7 @@ are left out of development, the free-agent list, the transfer market, scouting 
   his own weakest area (skipped when equal to the team focus).
 
 ## 7. Limitations
-* No youth intake: retirements are replaced by generated free agents (Step 13) and transfers.
+* Youth intake since Step 32 (docs/HISTORY.md §6); generated free agents (Step 13) and transfers still fill the market.
 * Development history is not stored (only current attributes); scout reports are snapshots and age (`docs/SCOUTING.md`).
 * Matches change fitness, not morale. Injuries: docs/INJURIES.md (Step 22).
 * Formulas are code (`PlayerDevelopment` properties and tables), not a data file; only retirement is configurable.

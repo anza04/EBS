@@ -5,6 +5,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.32.0] — 2026-11-20 — STEP 32: Long-term world simulation and historical records
+
+### Added
+- Long-term world (docs/HISTORY.md): season awards per league (MVP, top scorer/rebounder/passer, best defender, young
+  player, all-league team, coach of the season); hall of fame for retired players; retired players with the right
+  attributes start coaching careers (new staff on the market); yearly youth intake for every club (academy players
+  on youth contracts, AI promotions); reputation drift towards the middle and league snapshots for long-term evolution.
+- `IHistoryService`: player careers (retired players included), club honours, awards, hall of fame, winners, records,
+  league evolution. The career calendar runs it at season end, after retirements and for the youth intake;
+  `GameDayReport.World`.
+- *History* tab: competition (winners, awards, records, evolution), hall of fame, player career, club honours.
+- Migration `LongTermHistory` (tables `SeasonAwards`, `HallOfFame`, `LeagueSeasonSnapshots`; `Players.YouthClubId`,
+  `Staff.FormerPlayerId`).
+- Tests: `HistoryRulesTests` (14 unit); `HistoryServiceTests` (a season: awards, records, winners, snapshots, drift,
+  hall of fame, coaching career, youth intake, repeat-safety, screen and render); `LongTermWorldTests` (slow: three
+  seasons of the sample world).
+
 ## [0.31.0] — 2026-11-20 — STEP 31: News, media and club reputation
 
 ### Added

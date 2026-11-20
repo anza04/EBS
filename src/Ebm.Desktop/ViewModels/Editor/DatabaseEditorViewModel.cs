@@ -13,6 +13,7 @@ using Ebm.Desktop.ViewModels.Statistics;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
+using Ebm.Desktop.ViewModels.History;
 using Ebm.Desktop.ViewModels.News;
 using Ebm.Desktop.ViewModels.Staff;
 using Ebm.Desktop.ViewModels.Training;
@@ -29,6 +30,7 @@ using Ebm.Services.Import;
 using Ebm.Services.Matches;
 using Ebm.Services.Finances;
 using Ebm.Services.Medical;
+using Ebm.Services.History;
 using Ebm.Services.News;
 using Ebm.Services.Players;
 using Ebm.Services.Saves;
@@ -84,7 +86,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IChemistryService? chemistry = null,
         ClubLockStore? clubLock = null,
         IStaffService? staff = null,
-        INewsService? news = null)
+        INewsService? news = null,
+        IHistoryService? history = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -116,6 +119,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Finances = finances is null ? null : new FinancesViewModel(finances, Lookups);
         DressingRoom = chemistry is null ? null : new DressingRoomViewModel(chemistry, Lookups);
         News = news is null ? null : new NewsViewModel(news, Lookups);
+        History = history is null ? null : new HistoryViewModel(history, Lookups);
     }
 
     public EditorLookups Lookups { get; } = new();
@@ -173,6 +177,9 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
 
     /// <summary>The news screen; <c>null</c> without a news service (editor-only tests).</summary>
     public NewsViewModel? News { get; }
+
+    /// <summary>The history screen; <c>null</c> without a history service (editor-only tests).</summary>
+    public HistoryViewModel? History { get; }
 
     public bool IsClubLocked => LockedClubId is not null;
 
@@ -260,6 +267,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
             Apply(News.ClubId, v => News.ClubId = v);
         }
 
+        if (History is not null)
+        {
+            Apply(History.ClubId, v => History.ClubId = v);
+        }
+
         Career?.PreselectClub(id);
     }
 
@@ -325,6 +337,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (News is not null)
         {
             await News.RefreshAsync();
+        }
+
+        if (History is not null)
+        {
+            await History.RefreshAsync();
         }
 
         ApplyLockedClub(onlyEmpty: true);

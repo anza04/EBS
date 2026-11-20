@@ -1,0 +1,148 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:hi="clr-namespace:Ebm.Desktop.ViewModels.History">
+  <!-- History (Step 32). Uses the tokens from Shell.xaml and the styles from Editor.xaml. -->
+
+  <DataTemplate DataType="{x:Type hi:HistoryViewModel}">
+    <TabControl Margin="16">
+      <TabItem Header="Competition">
+        <DockPanel Margin="0,12,0,0">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="Competition" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <ComboBox ItemsSource="{Binding Lookups.Competitions}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding CompetitionId}" Width="280" />
+          </StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Winners" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
+            <DataGrid Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Winners}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="90" />
+                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" />
+                <DataGridTextColumn Header="Runner-up" Binding="{Binding RunnerUp}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Records" Style="{StaticResource Text.Label}" Margin="0,0,0,6" />
+            <DataGrid Grid.Row="1" Grid.Column="2" ItemsSource="{Binding Records}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Record" Binding="{Binding Record}" Width="*" />
+                <DataGridTextColumn Header="Holder" Binding="{Binding Holder}" Width="*" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="90" />
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Awards" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
+            <DataGrid Grid.Row="3" Grid.Column="0" ItemsSource="{Binding Awards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
+                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" />
+                <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
+                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="League evolution" Style="{StaticResource Text.Label}" Margin="0,12,0,6" />
+            <DataGrid Grid.Row="3" Grid.Column="2" ItemsSource="{Binding Evolution}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+                <DataGridTextColumn Header="Clubs" Binding="{Binding Clubs}" Width="50" />
+                <DataGridTextColumn Header="Mean rep." Binding="{Binding MeanReputation}" Width="70" />
+                <DataGridTextColumn Header="Top rep." Binding="{Binding TopReputation}" Width="70" />
+                <DataGridTextColumn Header="Mean overall" Binding="{Binding MeanOverall}" Width="90" />
+                <DataGridTextColumn Header="Champion" Binding="{Binding Champion}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </Grid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Hall of fame">
+        <DataGrid Margin="0,12,0,0" ItemsSource="{Binding HallOfFame}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="*" />
+            <DataGridTextColumn Header="Inducted" Binding="{Binding InductedOn, StringFormat=yyyy}" Width="80" />
+            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="60" />
+            <DataGridTextColumn Header="Seasons" Binding="{Binding Seasons}" Width="70" />
+            <DataGridTextColumn Header="Games" Binding="{Binding Games}" Width="70" />
+            <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="70" />
+            <DataGridTextColumn Header="Titles" Binding="{Binding Titles}" Width="60" />
+            <DataGridTextColumn Header="Awards" Binding="{Binding Awards}" Width="70" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </TabItem>
+      <TabItem Header="Player career">
+        <DockPanel Margin="0,12,0,0">
+          <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="Player" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <ComboBox ItemsSource="{Binding Lookups.Players}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding PlayerId}" Width="280" IsTextSearchEnabled="True" />
+            </StackPanel>
+            <TextBlock Text="{Binding CareerText}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          </StackPanel>
+          <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding PlayerAwards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False" MaxHeight="200" Margin="0,12,0,0">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" />
+              <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
+              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
+              <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <DataGrid ItemsSource="{Binding Career}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+              <DataGridTextColumn Header="Competition" Binding="{Binding Competition}" Width="*" />
+              <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
+              <DataGridTextColumn Header="G" Binding="{Binding Games}" Width="50" />
+              <DataGridTextColumn Header="MPG" Binding="{Binding MinutesPerGame}" Width="60" />
+              <DataGridTextColumn Header="PPG" Binding="{Binding PointsPerGame}" Width="60" />
+              <DataGridTextColumn Header="RPG" Binding="{Binding ReboundsPerGame}" Width="60" />
+              <DataGridTextColumn Header="APG" Binding="{Binding AssistsPerGame}" Width="60" />
+              <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="60" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Club honours">
+        <DockPanel Margin="0,12,0,0">
+          <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+            </StackPanel>
+            <TextBlock Text="{Binding ClubText}" Style="{StaticResource Text.Muted}" Margin="0,8,0,0" />
+          </StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Trophies}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+                <DataGridTextColumn Header="Trophy" Binding="{Binding Competition}" Width="*" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid Grid.Column="2" ItemsSource="{Binding ClubAwards}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" AutoGenerateColumns="False">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="80" />
+                <DataGridTextColumn Header="Award" Binding="{Binding Award}" Width="*" />
+                <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="*" />
+                <DataGridTextColumn Header="" Binding="{Binding Value}" Width="80" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </Grid>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DataTemplate>
+</ResourceDictionary>

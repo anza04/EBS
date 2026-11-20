@@ -25,6 +25,7 @@ Schema version: **`20261120145953_StaffManagement`** (Step 28).
 | `20261118090203_PlayerChemistry` | 26 | New table `PlayerRelationships` (create-table only) |
 | `20261118133803_TacticalEngine` | 27 | Tactics: twelve `Situation*` columns (add-column with defaults; existing "AI plan" tactics get coach adjustments and two-for-ones). Matches: `TacticalNotes` (JSON, nullable) |
 | `20261120145953_StaffManagement` | 28 | Staff: `Ability` renamed `TacticalKnowledge`; new `Development`, `Motivation`, `Scouting`, `MedicalExpertise`, `Reputation` (filled from the old ability, so every role ability is unchanged), `Experience` (0), `Style` (`Balanced`), `PreferredOffense`/`PreferredDefense` (nullable). Rename and add-column only: no table rebuild |
+| `20261120184921_LongTermHistory` | 32 | New tables `SeasonAwards`, `HallOfFame`, `LeagueSeasonSnapshots`; `Players.YouthClubId` and `Staff.FormerPlayerId` (nullable add-columns). Create-table and add-column only; plain IDs, no foreign keys (docs/HISTORY.md) |
 | `20261120170405_NewsAndReputation` | 31 | New tables `NewsItems` and `ReputationChanges` (create-table only; links are plain IDs without foreign keys, docs/NEWS.md) |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
@@ -525,6 +526,38 @@ One change of a club's reputation with its event (Step 31). Never deleted.
 | Before / After | int | 1–100; `After − Before` = points |
 | SeasonId | id | Plain ID |
 | MatchId | id? | The match of an upset; null for season results and competition rewards |
+
+### SeasonAwards
+One award of a league season (Step 32, docs/HISTORY.md §3). Never changed.
+
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| SeasonId / CompetitionId | id | Plain IDs. **Unique** (`SeasonId, CompetitionId, Kind, Rank`) |
+| Kind | text(24) | `AwardKind` |
+| Rank | int | 1, or 1–5 in the all-league team |
+| ClubId | id | The winner's club. Index |
+| PlayerId | id? | Required except for the coach award. Index |
+| StaffMemberId | id? | The coach award's head coach (null: the career manager or no coach) |
+| Value | int | The figure ×10 (places gained for the coach) |
+
+### HallOfFame
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| PlayerId | id | **Unique** |
+| InductedOn | date | |
+| Score / Seasons / Games / Points / Titles / Awards | int | Career figures at induction |
+
+### LeagueSeasonSnapshots
+| Column | Type | Rules |
+|---|---|---|
+| Id | id | PK |
+| CompetitionId / SeasonId | id | **Unique** pair |
+| Clubs / MeanReputation / TopReputation / MeanOverall | int | League strength at season end |
+| Champion | id | Plain ID |
+
+Players gain `YouthClubId` (id?, the academy club) and Staff `FormerPlayerId` (id?, the player who became a coach).
 
 ## 4. Historical data guarantees
 

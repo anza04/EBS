@@ -1,5 +1,6 @@
 using Ebm.Domain.Common;
 using Ebm.Domain.Countries;
+using Ebm.Domain.Players;
 using Ebm.Domain.Tactics;
 
 namespace Ebm.Domain.Staff;
@@ -83,6 +84,9 @@ public sealed class StaffMember : Entity<StaffMemberId>
     public OffensiveSystem? PreferredOffense { get; private set; }
 
     public DefensiveSystem? PreferredDefense { get; private set; }
+
+    /// <summary>The retired player who started this coaching career (docs/HISTORY.md §5); <c>null</c> otherwise. Plain ID, no foreign key.</summary>
+    public PlayerId? FormerPlayerId { get; init; }
 
     public StaffProfile Profile => new(TacticalKnowledge, Development, Motivation, Scouting, MedicalExpertise, Reputation, Experience, Style, PreferredOffense, PreferredDefense);
 
