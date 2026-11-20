@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.30.0] — 2026-11-20 — STEP 30: Advanced match visualization
+
+### Added
+- 2D court for live matches (docs/MATCH_VISUALIZATION.md): `CourtTracker` places every play-by-play event on a FIBA
+  court (half-court formations, matchups, recorded shot spots, contest distance, blocks, rebounds, steals, fouls, free
+  throws, substitutions, tip-off); `CourtPlayback` tweens the frames over time with pause, resume, skip and speed.
+- `MatchEvent.Shot`: field-goal events carry their `ShotRecord` (no new random draws; results unchanged).
+- Match centre *Court* tab (`CourtView`): players with initials, ball with arc and shadow, current play line; pause,
+  skip to latest, speed 0.5–4×, *Watch the match* (possessions play at the court's pace, paused with it). Live
+  matches open on the court.
+- Tests: `MatchVisualizationTests` (6 unit: sync with the engine, positions vs events, ends switching at half time,
+  identical results with/without visualization and across modes, playback pause/resume/skip, determinism);
+  render-test checks of the court and watch/pause in the match centre.
+
 ## [0.29.0] — 2026-11-20 — STEP 29: Advanced basketball simulation
 
 ### Added

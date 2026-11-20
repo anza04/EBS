@@ -46,6 +46,9 @@ public sealed record MatchEvent(
     public string Time => $"{PeriodName(Period)} {Clock / 60:00}:{Clock % 60:00}";
 
     public static string PeriodName(int period) => period <= 4 ? $"Q{period}" : $"OT{period - 4}";
+
+    /// <summary>The attempt of a field-goal event (its spot on the court, contest, block; Step 30); null otherwise.</summary>
+    public ShotRecord? Shot { get; init; }
 }
 
 /// <summary>A player's running statistics and condition during a simulated match.</summary>

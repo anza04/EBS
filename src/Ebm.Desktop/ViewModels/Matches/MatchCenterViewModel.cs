@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ebm.Desktop.ViewModels.Editor;
@@ -6,6 +7,7 @@ using Ebm.Desktop.ViewModels.Players;
 using Ebm.Domain.Common;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Matches.Simulation;
+using Ebm.Domain.Matches.Visualization;
 using Ebm.Domain.Players;
 using Ebm.Domain.Tactics;
 using Ebm.Services.Competitions;
@@ -110,6 +112,9 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     private readonly Func<Task> _reloadAll;
     private MatchSession? _session;
     private MatchPreview? _preview;
+    private CourtTracker? _tracker;
+    private DispatcherTimer? _watchTimer;
+    private bool _advancing;
 
     [ObservableProperty]
     private IReadOnlyList<CompetitionSeason> _competitionSeasons = [];
@@ -228,12 +233,27 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     [ObservableProperty]
     private string? _message;
 
-    /// <summary>Shown view: 0 preview, 1 play-by-play, 2 box score, 3 team stats, 4 advanced, 5 shot chart, 6 report.</summary>
+    /// <summary>Shown view: 0 preview, 1 play-by-play, 2 box score, 3 team stats, 4 advanced, 5 shot chart, 6 report, 7 court.</summary>
     [ObservableProperty]
     private int _selectedView;
 
     [ObservableProperty]
     private bool _isError;
+
+    /// <summary>Full names of both squads, for the court's initials (Step 30).</summary>
+    [ObservableProperty]
+    private IReadOnlyDictionary<PlayerId, string> _courtNames = new Dictionary<PlayerId, string>();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PauseText))]
+    private bool _courtPaused;
+
+    /// <summary>Watch mode: the match plays itself possession by possession at the court's pace.</summary>
+    [ObservableProperty]
+    private bool _watching;
+
+    [ObservableProperty]
+    private double _courtSpeed = 1;
 
     public MatchCenterViewModel(IMatchService matches, ICompetitionService competitions, Func<Task> reloadAll)
     {
@@ -254,6 +274,13 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     public IReadOnlyList<int> Levels { get; } = TacticLevel.All;
 
     public bool IsLive => InProgress;
+
+    /// <summary>The 2D court playback of the live match (Step 30): it only consumes the engine's events.</summary>
+    public CourtPlayback Court { get; } = new();
+
+    public IReadOnlyList<double> CourtSpeeds { get; } = [0.5, 1, 2, 4];
+
+    public string PauseText => CourtPaused ? "Resume" : "Pause";
 
     /// <summary>Other fixtures can be opened while no match is in progress.</summary>
     public bool CanBrowse => !InProgress;
@@ -316,6 +343,8 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     public async Task ShowSelectedAsync()
     {
         _preview = null;
+        _tracker = null;
+        Court.Clear();
         Message = null;
         IsError = false;
         Report = [];
@@ -401,6 +430,11 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         var row = SelectedFixture ?? throw new DomainValidationException("Choose a fixture.");
         _session = await _matches.StartAsync(row.Line.Fixture.Id, ManagedTeam is null ? SimulationMode.Commentary : SimulationMode.Live);
         var sim = _session.Simulation;
+        _tracker = CourtTracker.For(sim);
+        Court.Clear();
+        CourtPaused = false;
+        Court.Resume();
+        CourtNames = sim.Lines(TeamSide.Home).Concat(sim.Lines(TeamSide.Away)).ToDictionary(l => l.Player.Id, l => l.Player.FullName);
         if (ManagedTeam is { } side)
         {
             sim.SetAutomatic(side, false);
@@ -409,7 +443,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         }
 
         InProgress = true;
-        SelectedView = 1;
+        SelectedView = 7;
         Report = [];
         sim.Step();
         UpdateLive();
@@ -420,10 +454,10 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     private Task NextPossessionAsync() => AdvanceAsync(sim => sim.Step());
 
     [RelayCommand]
-    private Task ToEndOfQuarterAsync() => AdvanceAsync(sim => sim.RunToEndOfPeriod());
+    private Task ToEndOfQuarterAsync() => AdvanceAsync(sim => sim.RunToEndOfPeriod(), skipCourt: true);
 
     [RelayCommand]
-    private Task ToEndOfMatchAsync() => AdvanceAsync(sim => sim.RunToEnd());
+    private Task ToEndOfMatchAsync() => AdvanceAsync(sim => sim.RunToEnd(), skipCourt: true);
 
     [RelayCommand]
     private Task SubstituteAsync() => Intervene((sim, side) =>
@@ -462,24 +496,105 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         return Task.FromResult<string?>(done);
     });
 
-    private Task AdvanceAsync(Action<MatchSimulation> advance) => RunAsync(async () =>
+    /// <summary>Pauses or resumes the court (and watch mode with it); the simulation itself never waits on it.</summary>
+    [RelayCommand]
+    private void ToggleCourtPause()
+    {
+        if (Court.IsPaused)
+        {
+            Court.Resume();
+        }
+        else
+        {
+            Court.Pause();
+        }
+
+        CourtPaused = Court.IsPaused;
+    }
+
+    /// <summary>Shows the latest play at once.</summary>
+    [RelayCommand]
+    private void SkipCourt() => Court.SkipToEnd();
+
+    partial void OnCourtSpeedChanged(double value) => Court.Speed = value;
+
+    partial void OnWatchingChanged(bool value)
+    {
+        if (!value)
+        {
+            _watchTimer?.Stop();
+            return;
+        }
+
+        if (_watchTimer is null)
+        {
+            _watchTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(150) };
+            _watchTimer.Tick += async (_, _) => await WatchTickAsync();
+        }
+
+        _watchTimer.Start();
+    }
+
+    /// <summary>Watch mode: plays the next possession once the court has shown the previous one (not while paused).</summary>
+    public async Task WatchTickAsync()
+    {
+        if (!InProgress)
+        {
+            Watching = false;
+            return;
+        }
+
+        if (_advancing || Court.IsPaused || Court.IsPlaying)
+        {
+            return;
+        }
+
+        await NextPossessionAsync();
+    }
+
+    private Task AdvanceAsync(Action<MatchSimulation> advance, bool skipCourt = false) => RunAsync(async () =>
     {
         var session = _session ?? throw new DomainValidationException("Start a match first.");
+        if (_advancing)
+        {
+            return null;
+        }
+
         advance(session.Simulation);
         UpdateLive();
+        if (skipCourt)
+        {
+            Court.SkipToEnd();
+        }
+
         if (!session.Simulation.IsFinished)
         {
             return null;
         }
 
+        _advancing = true;
+        Watching = false;
+        try
+        {
+            await SaveFinishedAsync(session);
+        }
+        finally
+        {
+            _advancing = false;
+        }
+
+        return $"Final: {HomeName} {session.Simulation.HomeScore}–{session.Simulation.AwayScore} {AwayName}. Result saved; the box score can be reopened from the schedule.";
+    });
+
+    private async Task SaveFinishedAsync(MatchSession session)
+    {
         // The result is saved as soon as the match ends; the final live view (play-by-play, quarters) stays on screen.
         await _matches.SaveAsync(session);
         await _reloadAll();
         await LoadFixturesAsync();
         InProgress = false;
         UpdateLive();
-        return $"Final: {HomeName} {session.Simulation.HomeScore}–{session.Simulation.AwayScore} {AwayName}. Result saved; the box score can be reopened from the schedule.";
-    });
+    }
 
     private async Task AfterSaveAsync()
     {
@@ -510,6 +625,10 @@ public sealed partial class MatchCenterViewModel : ObservableObject
             $"{e.HomeScore}–{e.AwayScore}",
             e.Side switch { TeamSide.Home => HomeName, TeamSide.Away => AwayName, _ => string.Empty },
             e.Text))];
+        if (_tracker is not null)
+        {
+            Court.Enqueue(_tracker.Update(sim.Events));
+        }
         HomeBox = Box(sim.Lines(TeamSide.Home));
         AwayBox = Box(sim.Lines(TeamSide.Away));
         var home = TeamStatistics.From(sim.Lines(TeamSide.Home).Select(l => l.ToBoxScore()));

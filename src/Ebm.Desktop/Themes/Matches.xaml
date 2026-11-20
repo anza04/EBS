@@ -224,6 +224,21 @@
             <TabItem Header="Report">
               <ContentControl Content="{Binding Report}" ContentTemplate="{StaticResource Players.Lines}" Margin="12" />
             </TabItem>
+            <TabItem Header="Court">
+              <DockPanel Margin="8">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+                  <Button Content="{Binding PauseText}" Command="{Binding ToggleCourtPauseCommand}" Style="{StaticResource Button.Secondary}" MinWidth="72" />
+                  <Button Content="Skip to latest" Command="{Binding SkipCourtCommand}" Style="{StaticResource Button.Secondary}" Margin="6,0,0,0" />
+                  <TextBlock Text="Speed" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="12,0,4,0" />
+                  <ComboBox ItemsSource="{Binding CourtSpeeds}" SelectedItem="{Binding CourtSpeed}" ItemStringFormat="{}{0}×" Width="64" />
+                  <CheckBox Content="Watch the match" IsChecked="{Binding Watching}" IsEnabled="{Binding IsLive}" VerticalAlignment="Center" Margin="12,0,0,0"
+                            ToolTip="Plays the next possession when the court has shown the last one; pausing the court pauses the match." />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Text.Muted}" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Text="Positions follow the engine's play-by-play (home in blue attacks right in the first half). Stored reports have no court replay." />
+                <ctl:CourtView Playback="{Binding Court}" Names="{Binding CourtNames}" />
+              </DockPanel>
+            </TabItem>
           </TabControl>
         </DockPanel>
 

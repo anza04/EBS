@@ -167,10 +167,26 @@ public sealed class PlayerScreensRenderTests
         await center.StartMatchCommand.ExecuteAsync(null);
         Assert.False(center.IsError, center.Message);
         Assert.True(center.CanIntervene);
+        Assert.Equal(7, center.SelectedView); // Step 30: live matches open on the court
+        Assert.NotNull(center.Court.Current);
         for (var i = 0; i < 10; i++)
         {
             await center.NextPossessionCommand.ExecuteAsync(null);
         }
+
+        // The court queues every event; pausing it holds watch mode, resuming lets the next possession play.
+        var live = center.Session!.Simulation;
+        center.SkipCourtCommand.Execute(null);
+        Assert.Same(live.Events[^1], center.Court.Current!.Event);
+        center.ToggleCourtPauseCommand.Execute(null);
+        Assert.Equal("Resume", center.PauseText);
+        var played = live.Events.Count;
+        await center.WatchTickAsync();
+        Assert.Equal(played, live.Events.Count);
+        center.ToggleCourtPauseCommand.Execute(null);
+        Assert.Equal("Pause", center.PauseText);
+        await center.WatchTickAsync();
+        Assert.True(live.Events.Count > played);
 
         center.SubOut = center.OnCourt[0].Id;
         center.SubIn = center.Bench[0].Id;
@@ -188,6 +204,8 @@ public sealed class PlayerScreensRenderTests
         Assert.False(center.IsError, center.Message);
         Assert.StartsWith("Final", center.Message, StringComparison.Ordinal);
         Assert.False(center.InProgress);
+        Assert.Equal(Ebm.Domain.Matches.Simulation.MatchEventKind.GameEnd, center.Court.Current!.Event.Kind);
+        Assert.Equal(0, center.Court.Pending);
         Assert.Contains(center.Report, l => l.Label == "Q4");
         Assert.NotEqual("—", center.Fixtures.Single(f => f.Line.Fixture.Id == game.Line.Fixture.Id).Result); // saved
 
@@ -237,7 +255,19 @@ public sealed class PlayerScreensRenderTests
             center.SelectedView = 4;
             var total = Render("match-advanced", center);
             center.SelectedView = 5;
-            return total + Render("match-shot-chart", center) + Render("season-stats", stats);
+            total += Render("match-shot-chart", center) + Render("season-stats", stats);
+
+            // Step 30: the court late in the first shot of the live match (ball still in the air).
+            var tracker = Ebm.Domain.Matches.Visualization.CourtTracker.For(live);
+            var playback = new Ebm.Domain.Matches.Visualization.CourtPlayback();
+            var frames = tracker.Update(live.Events);
+            playback.Enqueue(frames.TakeWhile(f => f.Action != Ebm.Domain.Matches.Visualization.CourtAction.Shot).TakeLast(1));
+            playback.SkipToEnd();
+            playback.Enqueue(frames.Where(f => f.Action == Ebm.Domain.Matches.Visualization.CourtAction.Shot).Take(1));
+            playback.Tick(0.0001);
+            playback.Tick(1.1);
+            var names = live.Lines(Ebm.Domain.Matches.Simulation.TeamSide.Home).Concat(live.Lines(Ebm.Domain.Matches.Simulation.TeamSide.Away)).ToDictionary(l => l.Player.Id, l => l.Player.FullName);
+            return total + Render("match-court", new Ebm.Desktop.Controls.CourtView { Playback = playback, Names = names, Margin = new Thickness(16) });
         });
         Assert.True(advanced > 0);
         Assert.Equal(27, editor.Players.Ratings.Count);

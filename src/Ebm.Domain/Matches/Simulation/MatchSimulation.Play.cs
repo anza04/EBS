@@ -876,16 +876,17 @@ public sealed partial class MatchSimulation
                 _ => 0.01,
             };
             var blocked = _random.NextDouble() < Math.Clamp(blockChance * ContestBlockFactor(shot.Contest), 0, 0.4);
-            shooter.Line.AddShot(Record(shot, made: false, assisted: false, blocked));
+            var missed = Record(shot, made: false, assisted: false, blocked);
+            shooter.Line.AddShot(missed);
             if (blocked)
             {
                 var blocker = Pick(def.OnCourt.ToList(), r => Math.Pow(r.A.Block, 2) * (r.Player.HeightCm / 200.0));
                 blocker.Line.Blocks++;
-                Emit(MatchEventKind.FieldGoalMissed, off.Side, shooter.Player.Id, blocker.Player.Id, 0, $"{blocker.Name} blocks {shooter.Name} {what}.");
+                Emit(MatchEventKind.FieldGoalMissed, off.Side, shooter.Player.Id, blocker.Player.Id, 0, $"{blocker.Name} blocks {shooter.Name} {what}.", missed);
             }
             else
             {
-                Emit(MatchEventKind.FieldGoalMissed, off.Side, shooter.Player.Id, null, 0, $"{shooter.Name} misses {what}.");
+                Emit(MatchEventKind.FieldGoalMissed, off.Side, shooter.Player.Id, null, 0, $"{shooter.Name} misses {what}.", missed);
             }
 
             return;
@@ -922,10 +923,11 @@ public sealed partial class MatchSimulation
             passer.Line.Assists++;
         }
 
-        shooter.Line.AddShot(Record(shot, made: true, passer is not null, blocked: false));
+        var record = Record(shot, made: true, passer is not null, blocked: false);
+        shooter.Line.AddShot(record);
         AddPoints(off, points);
         var text = $"{shooter.Name} scores {what}" + (passer is null ? string.Empty : $" (assist {passer.Name})") + (andOne ? ", and one!" : ".");
-        Emit(MatchEventKind.FieldGoalMade, off.Side, shooter.Player.Id, passer?.Player.Id, points, text);
+        Emit(MatchEventKind.FieldGoalMade, off.Side, shooter.Player.Id, passer?.Player.Id, points, text, record);
     }
 
     private ShotRecord Record(ShotContext shot, bool made, bool assisted, bool blocked) =>
@@ -1218,8 +1220,8 @@ public sealed partial class MatchSimulation
 
     // ---------------------------------------------------------------- play-by-play
 
-    private void Emit(MatchEventKind kind, TeamSide? side, PlayerId? player, PlayerId? other, int points, string text) =>
-        _events.Add(new MatchEvent(Period, SecondsLeft, kind, side, player, other, points, _home.Score, _away.Score, text));
+    private void Emit(MatchEventKind kind, TeamSide? side, PlayerId? player, PlayerId? other, int points, string text, ShotRecord? shot = null) =>
+        _events.Add(new MatchEvent(Period, SecondsLeft, kind, side, player, other, points, _home.Score, _away.Score, text) { Shot = shot });
 
     private static string Ordinal(int n) => n switch { 1 => "first", 2 => "second", 3 => "third", _ => "fourth" };
 }

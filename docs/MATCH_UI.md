@@ -9,7 +9,7 @@ Everything runs through `IMatchService` (`docs/MATCH_ENGINE.md` §6); the screen
 |---|---|
 | Top bar | Competition season (`GetCompetitionSeasonsAsync`), *Create schedule* (`ICompetitionService.GenerateScheduleAsync`), title |
 | Left | Schedule grid (date, round — playoffs as `PO round-game` —, home, away, result); *You manage* (None / Home / Away); *Start match*, *Play instantly* |
-| Centre | Scoreboard (teams, score, period and game clock, team fouls and timeouts left) and five views: *Preview*, *Play-by-play*, *Box score*, *Team stats*, *Report* |
+| Centre | Scoreboard (teams, score, period and game clock, team fouls and timeouts left) and the views *Preview*, *Play-by-play*, *Box score*, *Team stats*, *Advanced*, *Shot chart*, *Report* and *Court* (2D court of the live match, Step 30: pause/resume, skip to latest, speed, *Watch the match*; docs/MATCH_VISUALIZATION.md) |
 | Right (live only) | Game controls; for a managed side: substitution, timeout and tactics |
 
 ## 2. Flow
@@ -20,7 +20,8 @@ Everything runs through `IMatchService` (`docs/MATCH_ENGINE.md` §6); the screen
 2. **Play instantly**: `PlayAsync` simulates and stores the match; the stored report opens.
 3. **Start match**: `StartAsync` in `Live` mode when a side is managed (that side's automatic coach is switched off:
    only forced substitutions happen without the user), otherwise `Commentary` mode (the engine coaches both sides).
-   Controls: *Next possession*, *To the end of the quarter*, *To the end of the match*. After every step the scoreboard,
+   The *Court* view opens first. Controls: *Next possession*, *To the end of the quarter*, *To the end of the match*
+   (the last two skip the court to the latest play); on the court, *Watch the match* plays possessions at its pace. After every step the scoreboard,
    play-by-play (newest first: time, score, team, commentary line), live box scores (● = on court, energy, plus-minus,
    fouled-out marker), team statistics and the report (leaders, quarter scores) are rebuilt from the simulation.
 4. **In-game controls** (managed side, between possessions): *Substitute* (out: on-court players with energy and
