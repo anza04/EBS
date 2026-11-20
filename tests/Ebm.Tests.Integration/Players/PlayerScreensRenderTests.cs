@@ -226,7 +226,7 @@ public sealed class PlayerScreensRenderTests
         Assert.Equal(5, editor.Squad.Lineup.Count);
     }
 
-    private static int Render(string name, object viewModel)
+    internal static int Render(string name, object viewModel)
     {
         var host = new ContentControl { Content = viewModel, Width = 1280, Height = 900, Background = Brushes.White };
         host.Measure(new Size(1280, 900));
@@ -245,7 +245,7 @@ public sealed class PlayerScreensRenderTests
         return VisualTreeHelper.GetChildrenCount(host);
     }
 
-    private static T RunOnSta<T>(Func<T> work)
+    internal static T RunOnSta<T>(Func<T> work)
     {
         T result = default!;
         Exception? error = null;

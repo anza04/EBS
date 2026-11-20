@@ -8,6 +8,7 @@ using Ebm.Domain.Management;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Seasons;
 using Ebm.Services.Chemistry;
+using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
 using Ebm.Services.Data;
 using Ebm.Services.Development;
@@ -36,6 +37,7 @@ internal sealed class CareerService(
     IFinanceService finances,
     IContractService contracts,
     IChemistryService chemistry,
+    IStaffService staff,
     FinanceModel financeModel,
     GameClock clock) : ICareerService
 {
@@ -112,10 +114,12 @@ internal sealed class CareerService(
         clock.Set(career.CurrentDate);
         await transfers.ProcessTransferDatesAsync(cancellationToken).ConfigureAwait(false);
         await management.SetObjectivesAsync(season.Id, cancellationToken).ConfigureAwait(false);
-        await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
+        // Staff first (docs/STAFF.md §6): the head coaches shape the AI tactics.
+        await staff.SupplyMarketAsync(cancellationToken).ConfigureAwait(false);
         await scouting.HireMissingScoutsAsync(cancellationToken).ConfigureAwait(false);
         await development.HireMissingCoachesAsync(cancellationToken).ConfigureAwait(false);
         await medical.HireMissingPhysiosAsync(cancellationToken).ConfigureAwait(false);
+        await management.PlanTacticsAsync([clubId], cancellationToken).ConfigureAwait(false);
         await finances.PlanBudgetsAsync(season.Id, null, cancellationToken).ConfigureAwait(false);
         await management.PlanTrainingAsync([clubId], cancellationToken).ConfigureAwait(false);
         return await StateAsync(career, cancellationToken).ConfigureAwait(false);
@@ -173,6 +177,8 @@ internal sealed class CareerService(
         ClubId[] managed = career.AssistantManages ? [] : [career.ClubId];
         if (today.DayOfWeek == DayOfWeek.Monday)
         {
+            // The staff market is topped up before the AI clubs recruit staff (docs/STAFF.md §6).
+            await staff.SupplyMarketAsync(cancellationToken).ConfigureAwait(false);
             await management.PlanTrainingAsync(managed, cancellationToken).ConfigureAwait(false);
         }
 
@@ -318,6 +324,13 @@ internal sealed class CareerService(
             .SelectMany(c => c.Objectives)
             .GroupBy(o => o.Club.Id)
             .ToDictionary(g => g.Key, g => g.All(o => o.Met));
+
+        // AI clubs that missed their objectives replace the head coach (docs/STAFF.md §6).
+        if (await staff.ReviewHeadCoachesAsync(objectivesMet, career.AssistantManages ? [] : [career.ClubId], cancellationToken).ConfigureAwait(false) > 0)
+        {
+            await development.HireMissingCoachesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         Season next;
         Dictionary<CompetitionId, List<ClubId>> nextEntries;
         Dictionary<CompetitionId, int> firstRoundOffsets = [];

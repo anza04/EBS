@@ -13,6 +13,7 @@ using Ebm.Desktop.ViewModels.Statistics;
 using Ebm.Desktop.ViewModels.Tactical;
 using Ebm.Desktop.ViewModels.Finances;
 using Ebm.Desktop.ViewModels.Medical;
+using Ebm.Desktop.ViewModels.Staff;
 using Ebm.Desktop.ViewModels.Training;
 using Ebm.Desktop.ViewModels.Transfers;
 using Ebm.Domain.Clubs;
@@ -79,7 +80,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         IMedicalService? medical = null,
         IFinanceService? finances = null,
         IChemistryService? chemistry = null,
-        ClubLockStore? clubLock = null)
+        ClubLockStore? clubLock = null,
+        IStaffService? staff = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(importer);
@@ -107,6 +109,7 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         Scouting = scouting is null ? null : new ScoutingViewModel(scouting, Lookups, ReloadAsync);
         Training = development is null ? null : new TrainingViewModel(development, Lookups);
         Medical = medical is null ? null : new MedicalViewModel(medical, Lookups);
+        Staff = staff is null ? null : new StaffViewModel(staff, Lookups, ReloadAsync);
         Finances = finances is null ? null : new FinancesViewModel(finances, Lookups);
         DressingRoom = chemistry is null ? null : new DressingRoomViewModel(chemistry, Lookups);
     }
@@ -157,6 +160,8 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
     public TrainingViewModel? Training { get; }
 
     public MedicalViewModel? Medical { get; }
+
+    public StaffViewModel? Staff { get; }
 
     public FinancesViewModel? Finances { get; }
 
@@ -228,6 +233,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
             Apply(Medical.ClubId, v => Medical.ClubId = v);
         }
 
+        if (Staff is not null)
+        {
+            Apply(Staff.ClubId, v => Staff.ClubId = v);
+        }
+
         if (Finances is not null)
         {
             Apply(Finances.ClubId, v => Finances.ClubId = v);
@@ -283,6 +293,11 @@ public sealed partial class DatabaseEditorViewModel : ObservableObject
         if (Medical is not null)
         {
             await Medical.RefreshAsync();
+        }
+
+        if (Staff is not null)
+        {
+            await Staff.RefreshAsync();
         }
 
         if (Finances is not null)

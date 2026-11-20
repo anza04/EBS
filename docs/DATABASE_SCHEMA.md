@@ -1,7 +1,7 @@
 # Database Schema
 
 Game database: one SQLite file, `<DataRoot>\databases\ebm.db`. It is managed by EF Core 10 with versioned migrations.
-Schema version: **`20261118133803_TacticalEngine`** (Step 27).
+Schema version: **`20261120145953_StaffManagement`** (Step 28).
 
 | Migration | Step | Change |
 |---|---|---|
@@ -24,6 +24,7 @@ Schema version: **`20261118133803_TacticalEngine`** (Step 27).
 | `20261118081325_ContractNegotiations` | 25 | New tables `Agents`, `AgentRelationships`, `ContractNegotiations`; `Contracts` gains `PromisedRole`, `PromisedMinutes`, `PromiseStatus` (default `None`), `PromiseReviewedOn` (add-column, nullable or defaulted) |
 | `20261118090203_PlayerChemistry` | 26 | New table `PlayerRelationships` (create-table only) |
 | `20261118133803_TacticalEngine` | 27 | Tactics: twelve `Situation*` columns (add-column with defaults; existing "AI plan" tactics get coach adjustments and two-for-ones). Matches: `TacticalNotes` (JSON, nullable) |
+| `20261120145953_StaffManagement` | 28 | Staff: `Ability` renamed `TacticalKnowledge`; new `Development`, `Motivation`, `Scouting`, `MedicalExpertise`, `Reputation` (filled from the old ability, so every role ability is unchanged), `Experience` (0), `Style` (`Balanced`), `PreferredOffense`/`PreferredDefense` (nullable). Rename and add-column only: no table rebuild |
 
 Entities are plain C# classes in `src/Ebm.Domain`. Their mapping (tables, keys, indexes, constraints) lives in
 `src/Ebm.Persistence/Configurations`. The domain validates every value on construction, and the schema
@@ -191,8 +192,13 @@ Step 05 columns are checked by the domain only: adding check constraints to an e
 | FirstName / LastName | text(60) | Required |
 | DateOfBirth | date | |
 | NationalityId | id | FK Countries |
-| Role | text | `HeadCoach`, `AssistantCoach`, `Scout`, `Physio`, `FitnessCoach` |
-| Ability | int | 1–100, default 50: how good he is at his job; for scouts, report accuracy (Step 20) |
+| Role | text | `HeadCoach`, `AssistantCoach`, `Scout`, `Physio`, `FitnessCoach`, `DevelopmentCoach` (Step 28) |
+| TacticalKnowledge / Development / Motivation / Scouting / MedicalExpertise / Reputation | int | 1–100, default 50 (Step 28; `TacticalKnowledge` is the Step 20 `Ability` column). The role ability is derived, not stored (`docs/STAFF.md` §3) |
+| Experience | int | 0–50 years, default 0 |
+| Style | text | `CoachingStyle`, default `Balanced` |
+| PreferredOffense / PreferredDefense | text? | Head coach's preferred systems (`OffensiveSystem` / `DefensiveSystem`) |
+
+Staff without a running or future contract form the staff market. Staff contracts are rows of `Contracts` with `StaffMemberId` set.
 
 ### Contracts
 | Column | Type | Rules |

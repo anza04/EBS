@@ -89,7 +89,19 @@ internal sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffM
         builder.Property(x => x.FirstName).HasMaxLength(StaffMember.NameMaxLength).IsRequired();
         builder.Property(x => x.LastName).HasMaxLength(StaffMember.NameMaxLength).IsRequired();
         builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(32);
-        builder.Property(x => x.Ability).HasDefaultValue(StaffMember.DefaultAbility); // Step 20
+        // Step 28 attributes replace the Step 20 Ability column (now derived from the role, docs/STAFF.md §3).
+        builder.Property(x => x.TacticalKnowledge).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.Development).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.Motivation).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.Scouting).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.MedicalExpertise).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.Reputation).HasDefaultValue(StaffMember.DefaultAbility);
+        builder.Property(x => x.Experience).HasDefaultValue(0);
+        builder.Property(x => x.Style).HasConversion<string>().HasMaxLength(32).HasDefaultValue(CoachingStyle.Balanced);
+        builder.Property(x => x.PreferredOffense).HasConversion<string>().HasMaxLength(32);
+        builder.Property(x => x.PreferredDefense).HasConversion<string>().HasMaxLength(32);
+        builder.Ignore(x => x.Ability);
+        builder.Ignore(x => x.Profile);
         builder.Ignore(x => x.FullName);
         builder.HasOne<Country>().WithMany().HasForeignKey(x => x.NationalityId);
     }

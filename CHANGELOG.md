@@ -5,6 +5,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.28.0] — 2026-11-20 — STEP 28: Coaching and staff management
+
+### Added
+- Staff attributes (`StaffProfile`): tactical knowledge, development, motivation, scouting, medical expertise,
+  reputation, experience (+1 per four years to every attribute, at most +5), coaching style and a head coach's preferred
+  offense/defense. Role ability derived per role (`StaffRules.RoleAbility`). New role `DevelopmentCoach`. `docs/STAFF.md`.
+- `IStaffService`: club staff and responsibilities, staff market (topped up at the career start and on Mondays), hiring
+  (demand from ability and reputation, reputation gap, per-role maximum, 1–5 years) and dismissal (remaining salary
+  booked as a settlement).
+- Head coaches for every club; AI clubs recruit every role from the market (else generated) and replace head coaches
+  who missed the board objectives at season end; the user's club is staffed once at the career start.
+- Influence: head coach tactical knowledge in the match engine (±1% make probability, game plan from 40, earlier
+  timeouts from 70, late closing review below 40); motivation and style in the weekly morale; style in growth (youth
+  development ×1.10 up to 23, disciplinarian ×1.05) and in AI tactics (`TacticPlanner`); preferred systems.
+- *Staff* tab: staff with attributes and contracts, responsibilities with the ratings used, market with hire/dismiss.
+- Migration `20261120145953_StaffManagement` (`Ability` → `TacticalKnowledge`, new attribute columns filled from it).
+- Tests: `StaffRulesTests` (7 unit), `StaffServiceTests` (6 integration), Step 28 upgrade test.
+
+### Changed
+- Coaching ability of training = mean effective development of head, assistant and development coaches (was the mean
+  ability of head and assistant coaches); staff salaries come from `StaffRules` (same rates for existing roles).
+- Career start hires staff before planning AI tactics.
+
 ## [0.27.0] — 2026-11-18 — STEP 27: Advanced tactical engine
 
 ### Added

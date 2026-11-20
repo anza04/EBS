@@ -1,4 +1,5 @@
 using Ebm.Domain.Chemistry;
+using Ebm.Domain.Staff;
 using Ebm.Domain.Players;
 using Ebm.Domain.Tactics;
 
@@ -81,7 +82,10 @@ public sealed partial class MatchSimulation
             {
                 if (Period == 1)
                 {
-                    Prepare(team);
+                    if (StaffRules.PreparesGamePlan(team.Sheet.Coach.TacticalKnowledge))
+                    {
+                        Prepare(team);
+                    }
                 }
                 else
                 {
@@ -549,6 +553,7 @@ public sealed partial class MatchSimulation
         p += defender is null ? 0 : (100 - defender.Energy) * 0.0006;
         p += shooter.Form;
         p += ChemistryModel.MakeEdge * off.Sheet.Chemistry;
+        p += StaffRules.CoachEdge(off.Sheet.Coach.TacticalKnowledge);
         p += off.Side == TeamSide.Home && !_neutral ? 0.015 : 0;
         p += 0.05 * (5 - def.OnCourt.Count());
         p += fastBreak && type == ShotType.Rim ? 0.12 : 0;
@@ -935,7 +940,7 @@ public sealed partial class MatchSimulation
     /// <summary>The engine's coach stops a run of eight unanswered points (at most one timeout every three minutes).</summary>
     private void AutoTimeout(Team team)
     {
-        if (_periodRunning && team.TimeoutsLeft > 0 && Get(team.Side.Other()).Run >= 8 && _elapsed - team.LastTimeout >= 180)
+        if (_periodRunning && team.TimeoutsLeft > 0 && Get(team.Side.Other()).Run >= StaffRules.TimeoutRun(team.Sheet.Coach.TacticalKnowledge) && _elapsed - team.LastTimeout >= 180)
         {
             Timeout(team);
             if (team.Tactics.Situations.CoachAdjusts)

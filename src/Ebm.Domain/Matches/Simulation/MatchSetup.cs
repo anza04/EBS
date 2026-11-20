@@ -1,4 +1,5 @@
 using Ebm.Domain.Chemistry;
+using Ebm.Domain.Staff;
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Players;
@@ -78,6 +79,9 @@ public sealed record TeamSheet(ClubId ClubId, string Name, IReadOnlyList<SheetPl
 {
     /// <summary>Team chemistry, −1 … +1 (0 = neutral), set from <see cref="ChemistryModel.Team"/> (docs/CHEMISTRY.md §6).</summary>
     public double Chemistry { get; init; }
+
+    /// <summary>The club's head coach (Step 28, docs/STAFF.md §5); <see cref="CoachProfile.Neutral"/> changes nothing.</summary>
+    public CoachProfile Coach { get; init; } = CoachProfile.Neutral;
 
     /// <summary>The starters and the first <see cref="ChemistryModel.CoreRotation"/> players off the bench.</summary>
     public IEnumerable<SheetPlayer> Core => Players.Where(p => p.Priority <= ChemistryModel.CoreRotation);

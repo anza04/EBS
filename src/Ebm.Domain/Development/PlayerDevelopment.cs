@@ -14,6 +14,9 @@ public sealed record TrainingConditions(TrainingFocus TeamFocus, TrainingFocus? 
     /// <summary>A player without a club trains alone: no focus, light, no coaches.</summary>
     public static TrainingConditions Alone { get; } = new(TrainingFocus.Balanced, null, TrainingIntensity.Light, MissingCoachAbility, MissingCoachAbility);
 
+    /// <summary>The head coach's coaching style (Step 28, docs/STAFF.md §5): a growth multiplier by age.</summary>
+    public CoachingStyle Style { get; init; } = CoachingStyle.Balanced;
+
     public bool Focuses(TrainingFocus focus) => TeamFocus == focus || IndividualFocus == focus;
 }
 
@@ -165,6 +168,7 @@ public sealed class PlayerDevelopment
         var recovery = training.Focuses(TrainingFocus.Recovery) ? 0.85 : 1.0;
         return gap * GrowthShare(input.Age)
             * CoachingFactor(training.CoachAbility)
+            * StaffRules.StyleGrowthFactor(training.Style, input.Age)
             * IntensityFactor(training.Intensity)
             * recovery
             * PlayingTimeFactor(input.PlayingTimeShare)

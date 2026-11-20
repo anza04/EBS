@@ -7,13 +7,14 @@ screen *Scouting* in the desktop app.
 ## 1. Scouts
 
 A scout is a `StaffMember` with role `Scout` and a contract running today at the club. `StaffMember.Ability`
-(1–100, default 50; migration `Scouting`) is how good he is.
+(1–100) is how good he is: since Step 28 his *Scouting* attribute plus the experience bonus (docs/STAFF.md §3).
 
 The datasets have no staff, so clubs hire their scouts themselves (`HireMissingScoutsAsync`, run when a career starts
 and at the start of every game day's scouting): a club employs `1 + reputation / 40` scouts (1–3). Each new scout gets
 ability `25 + 0.55 × reputation ± 10`, a name recombined from the players of the club's country, an age of 35–60, a
 three-year contract and a salary of € 20,000 + € 600 per ability point (paid like every contract). When a contract
-ends the club hires a replacement the next day.
+ends the club hires a replacement the next day. Since Step 28 the AI hires from the staff market first and the user
+hires his own club's staff after the career start (docs/STAFF.md §6).
 
 ## 2. Assignments
 

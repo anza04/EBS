@@ -6,6 +6,7 @@ using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Seasons;
+using Ebm.Domain.Staff;
 using Ebm.Services.Chemistry;
 using Ebm.Services.Clubs;
 using Ebm.Services.Competitions;
@@ -293,8 +294,16 @@ internal sealed class MatchService(
             teamTactics,
             calculator);
 
-        // Team chemistry (docs/CHEMISTRY.md §6) of the named core.
-        return sheet with { Chemistry = (await chemistry.RateAsync(sheet, cancellationToken).ConfigureAwait(false)).Score };
+        // Team chemistry (docs/CHEMISTRY.md §6) of the named core; the head coach (docs/STAFF.md §5).
+        CoachProfile coach;
+        using (var scope = scopes.CreateScope())
+        {
+            var s = scope.ServiceProvider;
+            coach = (await StaffHiring.StaffAsync(s, s.GetRequiredService<GameClock>().Today, clubId, [StaffRole.HeadCoach], cancellationToken).ConfigureAwait(false))
+                .Select(x => x.Member).MaxBy(m => m.Ability) is { } head ? CoachProfile.Of(head) : CoachProfile.Neutral;
+        }
+
+        return sheet with { Chemistry = (await chemistry.RateAsync(sheet, cancellationToken).ConfigureAwait(false)).Score, Coach = coach };
     }
 
     private static IRepository<TEntity, TId> Repo<TEntity, TId>(IServiceProvider services)

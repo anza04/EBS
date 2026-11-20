@@ -138,7 +138,7 @@ internal sealed class ScoutingService(
     public async Task<int> HireMissingScoutsAsync(CancellationToken cancellationToken = default)
     {
         using var scope = scopes.CreateScope();
-        return await StaffHiring.HireMissingAsync(scope.ServiceProvider, Today, StaffRole.Scout, c => ScoutingRules.ScoutsFor(c.Reputation), ScoutSalary, 0, cancellationToken).ConfigureAwait(false);
+        return await StaffHiring.HireMissingAsync(scope.ServiceProvider, Today, StaffRole.Scout, 0, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<ScoutingDay> ProcessDayAsync(CancellationToken cancellationToken = default)
@@ -194,7 +194,7 @@ internal sealed class ScoutingService(
     }
 
     /// <summary>Annual salary of a scout: € 20,000 plus € 600 per ability point.</summary>
-    public static long ScoutSalary(int ability) => 20_000 + (600L * ability);
+    public static long ScoutSalary(int ability) => StaffRules.BaseSalary(StaffRole.Scout, ability);
 
     /// <summary>The players an assignment reports on: its target, or up to <see cref="ScoutingRules.ReportsPerAssignment"/> of the most visible players of its group not recently reported on.</summary>
     private static IEnumerable<Player> Targets(World world, ScoutingAssignment assignment, Club club, Dictionary<(ClubId, PlayerId), ScoutReport> known)

@@ -1,0 +1,91 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:st="clr-namespace:Ebm.Desktop.ViewModels.Staff">
+  <!-- Staff screen (Step 28). Uses the tokens from Shell.xaml and the styles from Editor.xaml. -->
+
+  <DataTemplate DataType="{x:Type st:StaffViewModel}">
+    <DockPanel Margin="16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+        <TextBlock Text="Club" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <ComboBox ItemsSource="{Binding Lookups.Clubs}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding ClubId}" Width="280" />
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" Margin="20,0,0,0" />
+      </StackPanel>
+      <TextBlock DockPanel.Dock="Bottom" Text="{Binding Message}" Style="{StaticResource Text.Status}" TextWrapping="Wrap" Margin="0,12,0,0" />
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="2*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="3*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Margin="0,0,0,6">
+          <Button DockPanel.Dock="Right" Content="Dismiss selected" Command="{Binding DismissCommand}" Style="{StaticResource Button.Secondary}" />
+          <TextBlock Text="Staff under contract" Style="{StaticResource Text.Title}" />
+        </DockPanel>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Members}" SelectedItem="{Binding SelectedMember}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="140" />
+            <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="120" />
+            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
+            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="55" />
+            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="40" />
+            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="40" />
+            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="40" />
+            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="40" />
+            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="40" />
+            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="40" />
+            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="40" />
+            <DataGridTextColumn Header="Style" Binding="{Binding Style}" Width="120" />
+            <DataGridTextColumn Header="Prefers" Binding="{Binding Preferences}" Width="150" />
+            <DataGridTextColumn Header="Salary" Binding="{Binding Salary}" Width="95" />
+            <DataGridTextColumn Header="Until" Binding="{Binding Until}" Width="85" />
+          </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock Grid.Row="2" Text="Responsibilities" Style="{StaticResource Text.Title}" Margin="0,12,0,6" />
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Duties}" Style="{StaticResource Editor.Grid}" IsReadOnly="True" MaxHeight="190">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Duty" Binding="{Binding Name}" Width="190" />
+            <DataGridTextColumn Header="In charge" Binding="{Binding Lead}" Width="170" />
+            <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" Width="55" />
+            <DataGridTextColumn Header="Influences" Binding="{Binding Influence}" Width="*" />
+          </DataGrid.Columns>
+        </DataGrid>
+        <DockPanel Grid.Row="4" Margin="0,12,0,6">
+          <TextBlock DockPanel.Dock="Left" Text="Staff market" Style="{StaticResource Text.Title}" VerticalAlignment="Center" />
+          <ComboBox DockPanel.Dock="Left" ItemsSource="{Binding RoleOptions}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding MarketRole}" Width="170" Margin="16,0,0,0" />
+          <TextBlock Text="Ability: the rating in his role (docs/STAFF.md §3). A staff member joins a club whose reputation is at most 20 below his own."
+                     Style="{StaticResource Text.Muted}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="16,0,0,0" />
+        </DockPanel>
+        <DataGrid Grid.Row="5" ItemsSource="{Binding Market}" SelectedItem="{Binding SelectedCandidate}" Style="{StaticResource Editor.Grid}" IsReadOnly="True">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="140" />
+            <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="120" />
+            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="40" />
+            <DataGridTextColumn Header="Ability" Binding="{Binding Ability}" Width="55" />
+            <DataGridTextColumn Header="Tac" Binding="{Binding Tactical}" Width="40" />
+            <DataGridTextColumn Header="Dev" Binding="{Binding Development}" Width="40" />
+            <DataGridTextColumn Header="Mot" Binding="{Binding Motivation}" Width="40" />
+            <DataGridTextColumn Header="Sct" Binding="{Binding Scouting}" Width="40" />
+            <DataGridTextColumn Header="Med" Binding="{Binding Medical}" Width="40" />
+            <DataGridTextColumn Header="Rep" Binding="{Binding Reputation}" Width="40" />
+            <DataGridTextColumn Header="Exp" Binding="{Binding Experience}" Width="40" />
+            <DataGridTextColumn Header="Style" Binding="{Binding Style}" Width="120" />
+            <DataGridTextColumn Header="Prefers" Binding="{Binding Preferences}" Width="150" />
+            <DataGridTextColumn Header="Asks" Binding="{Binding Demand}" Width="95" />
+            <DataGridTextColumn Header="Joins" Binding="{Binding Joins}" Width="110" />
+          </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,12,0,0">
+          <TextBlock Text="Salary (€ a year)" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <TextBox Text="{Binding OfferSalary, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+          <TextBlock Text="Years" Style="{StaticResource Text.Label}" VerticalAlignment="Center" Margin="16,0,8,0" />
+          <TextBox Text="{Binding OfferYears, UpdateSourceTrigger=PropertyChanged}" Width="50" />
+          <Button Content="Hire selected" Command="{Binding HireCommand}" Margin="16,0,0,0" />
+        </StackPanel>
+      </Grid>
+    </DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

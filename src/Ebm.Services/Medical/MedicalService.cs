@@ -23,12 +23,12 @@ internal sealed class MedicalService(IServiceScopeFactory scopes, InjuryRules ru
     private static readonly StaffRole[] PhysioRole = [StaffRole.Physio];
 
     /// <summary>Annual salary of a generated physio: € 20,000 + € 600 per ability point.</summary>
-    public static long PhysioSalary(int ability) => 20_000 + (600L * ability);
+    public static long PhysioSalary(int ability) => StaffRules.BaseSalary(StaffRole.Physio, ability);
 
     public async Task<int> HireMissingPhysiosAsync(CancellationToken cancellationToken = default)
     {
         using var scope = scopes.CreateScope();
-        return await StaffHiring.HireMissingAsync(scope.ServiceProvider, clock.Today, StaffRole.Physio, _ => 1, PhysioSalary, 0x4000, cancellationToken).ConfigureAwait(false);
+        return await StaffHiring.HireMissingAsync(scope.ServiceProvider, clock.Today, StaffRole.Physio, 0x4000, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<MedicalDay> ProcessDayAsync(IReadOnlyCollection<MatchId> playedToday, CancellationToken cancellationToken = default)

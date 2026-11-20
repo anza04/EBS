@@ -15,7 +15,8 @@ docs/SEASON_LIFECYCLE.md) decides when. Recruitment itself is the Step 08 `ClubR
 | Last day of a season, 14 days before a season (every AI club); any Monday an AI club is short of players (those clubs only, Step 24) | Transfer window: free-agent replenishment, `RunAiTransferWindowAsync`, releases above the squad limit, emergency signings, AI tactics re-planned |
 | Mondays | Dressing room: morale and relationships of every club that played that week (docs/CHEMISTRY.md §3–4); training plans (`TrainingPlanner`, docs/DEVELOPMENT.md §6; injured players handled as in docs/INJURIES.md §5) |
 | Last day of each month | Contract renewals |
-| Next season | Board objectives for the new season |
+| Career start, Mondays | Staff market topped up, missing staff of every role hired from the market (docs/STAFF.md §6) |
+| Next season | Head coaches of AI clubs that missed their objectives dismissed and replaced (docs/STAFF.md §6); board objectives for the new season |
 
 "Short of players" = first team below `SquadRules.MinPlayers` (10), fewer than five available players, or fewer than 10
 players once those expected back from injury in more than 28 days are left out (docs/INJURIES.md §5).
@@ -39,6 +40,10 @@ the club's tactic "AI plan" and selected.
 Game management (Step 27): *Coach adjusts* on (the engine's coach builds a game plan against each opponent and adjusts
 during the match, docs/TACTICS.md §7.3), two-for-ones at the end of quarters, and the rotation by depth: bench (players
 6–9) within 4 overall points of the starters → *Deep*, 12 or more below → *Tight*, else *Standard*.
+
+Head coach (Step 28, docs/STAFF.md §5): when no category picks a system, his preferred offense and defense are played;
+*Attacking* raises tempo and spacing to 4, *Defensive* intensity and ball pressure to 4, *Youth development* plays a
+*Deep* rotation, *Disciplinarian* a *Tight* one and protects players in foul trouble.
 
 ## 4. Contracts
 

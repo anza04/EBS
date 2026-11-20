@@ -69,6 +69,7 @@
       <TabItem Header="Tactics" Content="{Binding Tactics}" />
       <TabItem Header="Training" Content="{Binding Training}" />
       <TabItem Header="Medical" Content="{Binding Medical}" />
+      <TabItem Header="Staff" Content="{Binding Staff}" />
       <TabItem Header="Dressing room" Content="{Binding DressingRoom}" />
       <TabItem Header="Finances" Content="{Binding Finances}" />
       <TabItem Header="Matches" Content="{Binding Matches}" />

@@ -155,3 +155,6 @@ Runs only for sides that are automatic (not the user's side in live mode) with *
 
 Each change is applied at once (`TacticsChanged` event) and written to the tactical notes. The AI's saved tactic
 (`TacticPlanner`) is unchanged by in-match adjustments.
+
+The club's head coach (Step 28, docs/STAFF.md §5) sets how well this works: below tactical knowledge 40 there is no game
+plan and the closing review comes with two minutes left; from 70 the automatic timeout stops a 6–0 run (else 8–0).

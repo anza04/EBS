@@ -1,6 +1,7 @@
 using Ebm.Domain.Clubs;
 using Ebm.Domain.Common;
 using Ebm.Domain.Players;
+using Ebm.Domain.Staff;
 using Ebm.Hosting;
 using Ebm.Persistence;
 using Ebm.Tests.Integration.TestSupport;
@@ -13,7 +14,7 @@ namespace Ebm.Tests.Integration.Persistence;
 
 public sealed class DatabaseInitializerTests
 {
-    private const string LatestMigration = "_TacticalEngine";
+    private const string LatestMigration = "_StaffManagement";
 
     private static readonly string[] ExpectedTables =
     [
@@ -113,6 +114,30 @@ public sealed class DatabaseInitializerTests
         Assert.Equal((66, 66, 66, 66), (a.Concentration, a.Leadership, a.Consistency, a.WorkRate));
         Assert.Equal(PlayerTendencies.Suggest(a).ToDictionary(), player.Tendencies.ToDictionary());
         Assert.Empty(await db.QueryStringsAsync("SELECT name FROM sqlite_master WHERE name LIKE 'PlayerAttributes_%'"));
+    }
+
+    [Fact]
+    public async Task Step_28_staff_upgrade_keeping_their_ability()
+    {
+        await using var db = await TestDatabase.CreateAsync();
+        await db.ReadAsync(async s =>
+        {
+            await s.Services.GetRequiredService<EbmDbContext>().Database.MigrateAsync("20261118133803_TacticalEngine");
+            return 0;
+        });
+        const string scout = "77777777-7777-7777-7777-777777777777", physio = "88888888-8888-8888-8888-888888888888";
+        await db.ExecuteSqlAsync($"""
+            INSERT INTO Countries (Id, Code, Name) VALUES ('33333333-3333-3333-3333-333333333333', 'ITA', 'Italy');
+            INSERT INTO Staff (Id, FirstName, LastName, DateOfBirth, NationalityId, Role, Ability) VALUES
+              ('{scout}', 'Old', 'Scout', '1970-01-01', '33333333-3333-3333-3333-333333333333', 'Scout', 73),
+              ('{physio}', 'Old', 'Physio', '1972-01-01', '33333333-3333-3333-3333-333333333333', 'Physio', 41);
+            """);
+
+        Assert.EndsWith(LatestMigration, await db.Initializer.InitializeAsync(), StringComparison.Ordinal);
+        var staff = (await db.ReadAsync(s => s.Repo<StaffMember, StaffMemberId>().ListAsync())).ToDictionary(m => m.Id.Value.ToString());
+        Assert.Equal((73, 73, 73, 0, CoachingStyle.Balanced), (staff[scout].Ability, staff[scout].Scouting, staff[scout].Reputation, staff[scout].Experience, staff[scout].Style));
+        Assert.Equal((41, 41, 41), (staff[physio].Ability, staff[physio].MedicalExpertise, staff[physio].TacticalKnowledge));
+        Assert.Null(staff[physio].PreferredOffense);
     }
 
     [Fact]

@@ -58,6 +58,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IDevelopmentService, DevelopmentService>();
         services.TryAddSingleton(InjuryRules.Default);
         services.TryAddSingleton<IMedicalService, MedicalService>();
+        services.TryAddSingleton<IStaffService, StaffService>();
         services.TryAddSingleton(FinanceModel.Default);
         services.TryAddSingleton<IFinanceService, FinanceService>();
         services.TryAddSingleton<ITacticsService, TacticsService>();

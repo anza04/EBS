@@ -40,10 +40,10 @@ over all attributes, so a focus moves development to its attributes without addi
 decline at 70 % of the normal rate.
 
 ### 2.3 Staff
-Coaching ability = mean ability of the club's head and assistant coaches under contract; fitness coach ability = best
-fitness coach; a missing coach counts as 30. The game hires generated coaches where missing (datasets have no
-staff): `1 + reputation / 50` assistant coaches (1–3) and one fitness coach, ability `25 + 0.55 × reputation ± 10`
-(as scouts), three-year contracts, salary € 25,000 + € 700 × ability.
+Coaching ability = mean effective *Development* attribute (with the experience bonus) of the club's head, assistant
+and development coaches under contract (Step 28); fitness coach ability = best fitness coach's role ability; a missing
+coach counts as 30. The head coach's coaching style multiplies growth (§4.1). Staff counts, hiring from the market and
+salaries: docs/STAFF.md.
 
 ## 3. Fitness and recovery (daily)
 
@@ -55,7 +55,9 @@ A player without a club trains alone (light, coaches 30). Fitness caps the match
 ## 4. Weekly development
 
 ### 4.1 Growth
-`growth/year = (potential − overall) × share(age) × coaching × intensity × recovery × playing time × competition × professionalism × condition`
+`growth/year = (potential − overall) × share(age) × coaching × style × intensity × recovery × playing time × competition × professionalism × condition`
+
+Style (Step 28): *Youth development* × 1.10 up to age 23, *Disciplinarian* × 1.05, other styles × 1.
 
 | Age | ≤ 18 | 19–20 | 21–22 | 23–24 | 25–26 | 27–28 | ≥ 29 |
 |---|---|---|---|---|---|---|---|

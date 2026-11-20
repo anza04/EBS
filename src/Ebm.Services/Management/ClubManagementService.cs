@@ -9,6 +9,7 @@ using Ebm.Domain.Players;
 using Ebm.Domain.Players.Ratings;
 using Ebm.Domain.Rosters;
 using Ebm.Domain.Seasons;
+using Ebm.Domain.Staff;
 using Ebm.Services.Clubs;
 using Ebm.Services.Contracts;
 using Ebm.Services.Data;
@@ -57,10 +58,17 @@ internal sealed class ClubManagementService(
     public async Task<int> PlanTacticsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
     {
         var planned = 0;
+        Dictionary<ClubId, StaffMember> coaches;
+        using (var scope = scopes.CreateScope())
+        {
+            coaches = (await StaffHiring.StaffAsync(scope.ServiceProvider, clock.Today, null, [StaffRole.HeadCoach], cancellationToken).ConfigureAwait(false))
+                .GroupBy(x => x.Contract.ClubId).ToDictionary(g => g.Key, g => g.MaxBy(x => x.Member.Ability).Member);
+        }
+
         foreach (var roster in await clubs.GetRostersAsync(await AiClubsAsync(managedClubs, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
         {
             var clubId = roster.Club.Id;
-            var plan = TacticPlanner.Plan([.. roster.FirstTeam.Select(p => (p.Player, p.Evaluation))]);
+            var plan = TacticPlanner.Plan([.. roster.FirstTeam.Select(p => (p.Player, p.Evaluation))], coaches.GetValueOrDefault(clubId));
             var existing = (await tactics.GetClubTacticsAsync(clubId, cancellationToken).ConfigureAwait(false))?.Tactics.FirstOrDefault(t => t.Name == IClubManagementService.AiTacticName);
             var tactic = await tactics.SaveAsync(
                 clubId,

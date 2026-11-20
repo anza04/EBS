@@ -13,7 +13,7 @@ namespace Ebm.Services.Development;
 public interface IDevelopmentService
 {
     /// <summary>Assistant coaches per club: one, plus one per 50 reputation points (1–3).</summary>
-    static int AssistantCoachesFor(int clubReputation) => 1 + (Math.Clamp(clubReputation, 0, 100) / 50);
+    static int AssistantCoachesFor(int clubReputation) => StaffRules.Wanted(StaffRole.AssistantCoach, clubReputation);
 
     /// <summary>The club's training plan (the default plan when none is saved), squad and coaches; <c>null</c> for an unknown club.</summary>
     Task<ClubTraining?> GetClubTrainingAsync(ClubId clubId, CancellationToken cancellationToken = default);
@@ -21,7 +21,7 @@ public interface IDevelopmentService
     /// <summary>Saves the club's training plan. Individual programmes are for players of the club's squad only.</summary>
     Task<TrainingPlan> SavePlanAsync(ClubId clubId, TrainingPlanDraft draft, CancellationToken cancellationToken = default);
 
-    /// <summary>Hires generated assistant coaches and a fitness coach where a club has fewer than it needs.</summary>
+    /// <summary>Hires head, assistant, development and fitness coaches (from the staff market, else generated) where a club has fewer than it needs (docs/STAFF.md §6).</summary>
     Task<int> HireMissingCoachesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>

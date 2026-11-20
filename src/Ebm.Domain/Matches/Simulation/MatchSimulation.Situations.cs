@@ -1,4 +1,5 @@
 using Ebm.Domain.Players;
+using Ebm.Domain.Staff;
 using Ebm.Domain.Tactics;
 
 namespace Ebm.Domain.Matches.Simulation;
@@ -268,7 +269,7 @@ public sealed partial class MatchSimulation
     /// <summary>Once per period, with four minutes left in the fourth quarter or an overtime.</summary>
     private void ClosingReview(Team team)
     {
-        if (team.Tactics.Situations.CoachAdjusts && Period >= _rules.Periods && _clock <= 240 && team.ClosingReviewed != Period)
+        if (team.Tactics.Situations.CoachAdjusts && Period >= _rules.Periods && _clock <= StaffRules.ClosingReviewSeconds(team.Sheet.Coach.TacticalKnowledge) && team.ClosingReviewed != Period)
         {
             team.ClosingReviewed = Period;
             Review(team);

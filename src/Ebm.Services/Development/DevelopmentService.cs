@@ -29,7 +29,7 @@ internal sealed class DevelopmentService(
     /// <summary>A club without league division develops its players like a second division.</summary>
     public const int DefaultDivisionLevel = 2;
 
-    private static readonly StaffRole[] CoachRoles = [StaffRole.HeadCoach, StaffRole.AssistantCoach, StaffRole.FitnessCoach];
+    private static readonly StaffRole[] CoachRoles = [StaffRole.HeadCoach, StaffRole.AssistantCoach, StaffRole.DevelopmentCoach, StaffRole.FitnessCoach];
 
     private DateOnly Today => clock.Today;
 
@@ -89,13 +89,17 @@ internal sealed class DevelopmentService(
     {
         using var scope = scopes.CreateScope();
         var s = scope.ServiceProvider;
-        var assistants = await StaffHiring.HireMissingAsync(s, Today, StaffRole.AssistantCoach, c => IDevelopmentService.AssistantCoachesFor(c.Reputation), CoachSalary, 0x1000, cancellationToken).ConfigureAwait(false);
-        var fitness = await StaffHiring.HireMissingAsync(s, Today, StaffRole.FitnessCoach, _ => 1, CoachSalary, 0x2000, cancellationToken).ConfigureAwait(false);
-        return assistants + fitness;
+        var hired = 0;
+        foreach (var (role, salt) in new[] { (StaffRole.HeadCoach, 0x0800), (StaffRole.AssistantCoach, 0x1000), (StaffRole.DevelopmentCoach, 0x1800), (StaffRole.FitnessCoach, 0x2000) })
+        {
+            hired += await StaffHiring.HireMissingAsync(s, Today, role, salt, cancellationToken).ConfigureAwait(false);
+        }
+
+        return hired;
     }
 
     /// <summary>Annual salary of a generated coach: € 25,000 + € 700 per ability point.</summary>
-    public static long CoachSalary(int ability) => 25_000 + (700L * ability);
+    public static long CoachSalary(int ability) => StaffRules.BaseSalary(StaffRole.AssistantCoach, ability);
 
     public async Task<DevelopmentDay> ProcessDayAsync(IReadOnlyCollection<MatchId> playedToday, CancellationToken cancellationToken = default)
     {
@@ -237,23 +241,30 @@ internal sealed class DevelopmentService(
         where TId : struct, IEntityId<TId> =>
         services.GetRequiredService<IRepository<TEntity, TId>>();
 
-    /// <summary>Coaching ability per club.</summary>
+    /// <summary>
+    /// Coaching per club (docs/STAFF.md §5): the coaching ability is the mean effective development attribute of the
+    /// head, assistant and development coaches; the fitness coach's role ability; the head coach's style.
+    /// </summary>
     private sealed class Staff
     {
         private readonly Dictionary<ClubId, int> _coaches;
         private readonly Dictionary<ClubId, int> _fitness;
+        private readonly Dictionary<ClubId, CoachingStyle> _styles;
 
-        private Staff(Dictionary<ClubId, int> coaches, Dictionary<ClubId, int> fitness)
+        private Staff(Dictionary<ClubId, int> coaches, Dictionary<ClubId, int> fitness, Dictionary<ClubId, CoachingStyle> styles)
         {
             _coaches = coaches;
             _fitness = fitness;
+            _styles = styles;
         }
 
         public static Staff From(IReadOnlyList<(StaffMember Member, Contract Contract)> staff) => new(
-            staff.Where(x => x.Member.Role is StaffRole.HeadCoach or StaffRole.AssistantCoach).GroupBy(x => x.Contract.ClubId)
-                .ToDictionary(g => g.Key, g => (int)Math.Round(g.Average(x => x.Member.Ability), MidpointRounding.AwayFromZero)),
+            staff.Where(x => StaffRules.CoachingRoles.Contains(x.Member.Role)).GroupBy(x => x.Contract.ClubId)
+                .ToDictionary(g => g.Key, g => (int)Math.Round(g.Average(x => StaffRules.Effective(x.Member.Development, x.Member.Experience)), MidpointRounding.AwayFromZero)),
             staff.Where(x => x.Member.Role == StaffRole.FitnessCoach).GroupBy(x => x.Contract.ClubId)
-                .ToDictionary(g => g.Key, g => g.Max(x => x.Member.Ability)));
+                .ToDictionary(g => g.Key, g => g.Max(x => x.Member.Ability)),
+            staff.Where(x => x.Member.Role == StaffRole.HeadCoach).GroupBy(x => x.Contract.ClubId)
+                .ToDictionary(g => g.Key, g => g.MaxBy(x => x.Member.Ability).Member.Style));
 
         public int CoachAbility(ClubId club) => _coaches.GetValueOrDefault(club, TrainingConditions.MissingCoachAbility);
 
@@ -265,7 +276,10 @@ internal sealed class DevelopmentService(
             plan?.FocusOf(player),
             plan?.Intensity ?? TrainingIntensity.Normal,
             CoachAbility(club),
-            FitnessCoachAbility(club));
+            FitnessCoachAbility(club))
+        {
+            Style = _styles.GetValueOrDefault(club),
+        };
     }
 
     /// <summary>What a week of development needs about every player and club, loaded once.</summary>

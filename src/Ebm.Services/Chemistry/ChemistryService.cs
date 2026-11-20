@@ -5,6 +5,7 @@ using Ebm.Domain.Contracts;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
+using Ebm.Domain.Staff;
 using Ebm.Services.Clubs;
 using Ebm.Services.Data;
 using Ebm.Services.Tactics;
@@ -39,6 +40,8 @@ internal sealed class ChemistryService(IServiceScopeFactory scopes, IClubService
         var relationships = Repo<PlayerRelationship, PlayerRelationshipId>(s);
         var pairs = (await relationships.ListAsync(r => ids.Contains(r.PlayerAId) && ids.Contains(r.PlayerBId), cancellationToken).ConfigureAwait(false))
             .ToDictionary(r => (r.PlayerAId, r.PlayerBId));
+        var coaches = (await StaffHiring.StaffAsync(s, today, null, [StaffRole.HeadCoach], cancellationToken).ConfigureAwait(false))
+            .GroupBy(x => x.Contract.ClubId).ToDictionary(g => g.Key, g => g.MaxBy(x => x.Member.Ability).Member);
         int moraleChanges = 0, relationshipChanges = 0;
         var conflicts = new List<SquadConflict>();
         foreach (var roster in rosters)
@@ -52,6 +55,7 @@ internal sealed class ChemistryService(IServiceScopeFactory scopes, IClubService
             var places = ChemistryModel.Hierarchy([.. roster.FirstTeam.Where(p => players.ContainsKey(p.Player.Id))
                 .Select(p => new HierarchyInput(players[p.Player.Id], p.Evaluation.Overall, p.Age, Promised(promised, p.Player.Id, clubId)))]);
             var hasLeader = places.Any(p => p.IsLeader);
+            var coach = coaches.GetValueOrDefault(clubId);
             var inConflict = new HashSet<PlayerId>();
             var conflictPairs = new HashSet<(PlayerId, PlayerId)>();
             foreach (var place in places)
@@ -60,6 +64,13 @@ internal sealed class ChemistryService(IServiceScopeFactory scopes, IClubService
                 var satisfaction = Satisfaction(place, minutes);
                 var isPromised = Promised(promised, player.Id, clubId) is not null;
                 var change = ChemistryModel.MoraleChange(player.Morale, place.Role, isPromised ? RoleSatisfaction.NotJudged : satisfaction, wins, losses, hasLeader);
+                if (coach is not null)
+                {
+                    // The head coach's motivation and style (docs/STAFF.md §5).
+                    var coached = Math.Clamp(player.Morale + change + StaffRules.MoraleEffect(player.Morale + change, StaffRules.Effective(coach.Motivation, coach.Experience), coach.Style), Player.MinRating, Player.MaxRating);
+                    change = coached - player.Morale;
+                }
+
                 if (change != 0)
                 {
                     player.UpdateCondition(player.Fitness, player.Morale + change, player.InjuryStatus, player.InjuryReturnDate);
