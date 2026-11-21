@@ -68,7 +68,9 @@ script (Step 14), UI consistency pass and global value formatting (Step 33 UI co
   `RealLeagues*`, `EuropeanTransferWindowTests` …). `MilestoneTwoTests` FAIL: both seasons completed (season 1 in
   33 min, season 2 in 54 min with 49 window days, no 1 July stall) but 76 forfeits of 3,382 matches (limit 33).
 - After the squad-minimum fix: management, transfer window, medical, careers, development tests 21 PASS;
-  `MilestoneTwoTests` re-run pending (`artifacts/test-results/milestone2b.log`).
+  `MilestoneTwoTests` re-run started, then stopped by the user and accepted as PASS (2026-11-21, user decision; not
+  completed on this code).
+- Windows package rebuilt with the release-testing fixes (§3).
 
 ## 6. Known limitations
 - Recovery uses automatic backups only (not the user's own saves) and tells the user through the log, not a dialog.
@@ -81,4 +83,5 @@ script (Step 14), UI consistency pass and global value formatting (Step 33 UI co
 - Look into the `NewsServiceTests` order sensitivity reported in Step 33.
 
 ## 8. Outstanding issues
-- `MilestoneTwoTests` must pass again after the squad-minimum fix before 1.0.0 is final.
+- None blocking. `MilestoneTwoTests` was accepted without a completed run after the squad-minimum fix (user decision);
+  re-run it after the next change to AI squad management.
