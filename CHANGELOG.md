@@ -17,9 +17,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `PRAGMA optimize` when the game closes.
 
 ### Changed
-- Performance: the Monday transfer window opens only for AI clubs short of players that can afford a signing (balance
-  for the minimum salary and, above the squad minimum, wage-budget room); clubs that could sign nobody no longer reload
-  the market every week (the season-2 slowdown in the known issues).
+- Performance: above the squad minimum the Monday transfer window opens only for AI clubs that can afford a signing
+  (balance and wage-budget room for the minimum salary); clubs that could sign nobody no longer reload the market
+  every week (the season-2 slowdown in the known issues).
+- An AI club below the squad minimum (10) signs the cheapest free agent even into debt, so it can always field a team
+  (before: clubs in debt with 6-7 players signed nobody; 76 forfeits in season 2 of `MilestoneTwoTests`).
+- AI renewals (docs/AI_MANAGEMENT.md §4): clubs renew their best 12 players (was 10) and, when a player rejects the
+  current salary, offer his asking salary in the same talks (within 1.5× and the wage budget), so fewer squads empty
+  into the free-agent market on 1 July (before: 15% of expiring real-leagues contracts renewed).
+- Emergency squad filling reads each free agent's demands once per club and in larger batches: 3.4× faster in the
+  real-leagues off-season (51 signings: 183 s → 54 s).
 - Zone defences read "2-3 zone", "3-2 zone", "1-3-1 zone" on screen.
 - Version 1.0.0 (Milestone 3 release).
 

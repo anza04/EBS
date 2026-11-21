@@ -79,7 +79,7 @@ public static class ClubFinances
 /// </summary>
 public static class RenewalPolicy
 {
-    public const int CoreSquad = 10;
+    public const int CoreSquad = 12;
     public const int MaxAge = 33;
     public const int NoticeDays = 150;
     public const double MaxRaise = 1.5;

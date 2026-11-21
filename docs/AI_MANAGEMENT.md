@@ -47,11 +47,16 @@ Head coach (Step 28, docs/STAFF.md §5): when no category picks a system, his pr
 
 ## 4. Contracts
 
-* Renewals (`RenewalPolicy`): players among the club's best 10 by overall, aged ≤ 33, whose contract ends within 150 days.
-  Length 3 years (< 27), 2 (< 31), else 1. Offer: the current salary; a counter-offer is accepted up to 1.5× the
-  current salary if the wage bill stays within the wage budget and it is at most one year longer (Step 25: it may
-  carry the promises and release clause the player insists on; each attempt is a round of talks,
-  docs/CONTRACTS.md §4.7).
+* Renewals (`RenewalPolicy`, checked on the last day of each month): players among the club's best 12 by overall, aged
+  ≤ 33, whose contract ends within 150 days. Length 3 years (< 27), 2 (< 31), else 1. Offer: the current salary; if
+  the player rejects it, a second offer at his asking salary in the same talks (Step 34). A counter-offer (or the
+  second offer) is accepted up to 1.5× the current salary if the wage bill stays within the wage budget and it is at
+  most one year longer (Step 25: it may carry the promises and release clause the player insists on; each attempt is
+  a round of talks, docs/CONTRACTS.md §4.7). Before Step 34 only 15% of expiring contracts were renewed on the
+  real-leagues dataset (190 of 1,262 at the end of 2026-27, 517 talks broken off after a repeated current-salary
+  offer), so most squads went to the free-agent market on 1 July.
+* Emergency squad filling (`FillSquadsAsync`): a free agent's demands are read once per club and window (Step 34),
+  in batches of 100; on the real-leagues off-season, 51 emergency signings took 54 s instead of 183 s.
 * Expiries: contracts end on their date (`ProcessContractDatesAsync`); the player becomes a free agent.
 * Releases: above `SquadRules.MaxPlayers` (18) the weakest players with a single, own contract leave by mutual agreement.
 
@@ -82,9 +87,10 @@ Head coach (Step 28, docs/STAFF.md §5): when no category picks a system, his pr
 * Emergency signings: a club still below 10 players after a window (long-term injured players not counted, at most 18
   in the squad) signs the best free agents whose salary fits both its balance (for a year) and the wage budget left
   (budget minus running salaries; loaned-out players excluded). When none fits and the club is below the squad minimum,
-  it signs the cheapest free agent its balance covers, so the calendar never blocks; injury cover above the minimum is
-  signed only within the wage budget (since 2026-11-18: ignoring the budget put 27 of 138 real-leagues clubs in debt
-  in the second season of `MilestoneTwoTests`).
+  it signs the cheapest free agent even into debt, so it can always field a team (Step 34: requiring the balance left
+  clubs in debt with 6-7 players, and the second season of `MilestoneTwoTests` had 76 forfeits); injury cover above the
+  minimum is signed only within the balance and the wage budget (since 2026-11-18: ignoring the budget put 27 of 138
+  real-leagues clubs in debt in the second season of `MilestoneTwoTests`).
   Step 25: the club reads the player's demands without a round and meets them (`ContractNegotiator.Meet`); players who
   broke off talks with it are skipped.
 

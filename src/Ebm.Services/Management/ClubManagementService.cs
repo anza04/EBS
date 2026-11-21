@@ -32,7 +32,7 @@ internal sealed class ClubManagementService(
     public const int LongTermInjuryDays = 28;
 
     /// <summary>Free agents whose demands are read together when an AI club fills its squad.</summary>
-    private const int NegotiationChunk = 25;
+    private const int NegotiationChunk = 100;
 
     public async Task<int> PrepareMatchdayAsync(IReadOnlyCollection<ClubId> clubIds, CancellationToken cancellationToken = default)
     {
@@ -140,17 +140,28 @@ internal sealed class ClubManagementService(
                     continue;
                 }
 
+                // A counter-offer may ask for promises, a release clause or a longer deal: the club accepts at most one
+                // year more, up to MaxRaise times the current salary, within the wage budget.
+                bool Affordable(ContractTerms t) =>
+                    t.Years <= RenewalPolicy.Years(ranked.p.Age) + 1.01
+                    && t.AnnualSalary <= contract.AnnualSalary * RenewalPolicy.MaxRaise
+                    && wageBill + t.AnnualSalary - contract.AnnualSalary <= roster.Club.WageBudget;
+
                 var start = contract.EndDate.AddDays(1);
                 var offer = new ContractTerms(start, start.AddYears(RenewalPolicy.Years(ranked.p.Age)).AddDays(-1), contract.AnnualSalary);
                 var answer = await contracts.NegotiateRenewalAsync(contract.Id, offer, cancellationToken).ConfigureAwait(false);
-                var terms = answer.IsAccepted ? offer
-                    : answer is { Outcome: NegotiationOutcome.CounterOffer, CounterOffer: { } counter } ? counter
-                    : null;
-                // A counter-offer may ask for promises, a release clause or a longer deal: the club accepts at most one year more.
-                if (terms is null
-                    || terms.Years > RenewalPolicy.Years(ranked.p.Age) + 1.01
-                    || terms.AnnualSalary > contract.AnnualSalary * RenewalPolicy.MaxRaise
-                    || wageBill + terms.AnnualSalary - contract.AnnualSalary > roster.Club.WageBudget)
+                var terms = Agreed(answer, offer);
+                if (terms is null && answer.Outcome == NegotiationOutcome.Rejected && answer.Talks is not { BrokenOffUntil: not null }
+                    && answer.AskingSalary > offer.AnnualSalary
+                    && Affordable(offer with { AnnualSalary = answer.AskingSalary }))
+                {
+                    // Step 34: a second round at the player's asking salary, so core players are kept before their
+                    // contracts expire instead of all joining the free-agent market on 1 July.
+                    offer = offer with { AnnualSalary = answer.AskingSalary };
+                    terms = Agreed(await contracts.NegotiateRenewalAsync(contract.Id, offer, cancellationToken).ConfigureAwait(false), offer);
+                }
+
+                if (terms is null || !Affordable(terms))
                 {
                     continue;
                 }
@@ -163,6 +174,10 @@ internal sealed class ClubManagementService(
 
         return renewed;
     }
+
+    /// <summary>The terms both sides agreed on in <paramref name="answer"/> to <paramref name="offer"/>, or <c>null</c>.</summary>
+    private static ContractTerms? Agreed(NegotiationResponse answer, ContractTerms offer) =>
+        answer.IsAccepted ? offer : answer is { Outcome: NegotiationOutcome.CounterOffer, CounterOffer: { } counter } ? counter : null;
 
     public async Task<int> ReleaseSurplusAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default)
     {
@@ -228,16 +243,19 @@ internal sealed class ClubManagementService(
             var balance = roster.Club.Balance;
             var room = roster.Club.WageBudget - wageBills.GetValueOrDefault(clubId);
             var next = 0;
+            // Demands are read once per player for this club (Step 34): after each signing the pool is searched again,
+            // and reading demands is the expensive part (docs/AI_MANAGEMENT.md §4).
+            var demands = new Dictionary<PlayerId, NegotiationOverview>();
             while (missing > 0)
             {
-                // The best free agent whose salary fits the wage budget left (and the balance); the cheapest one the
-                // balance covers only while the club is below the squad minimum (docs/AI_MANAGEMENT.md).
-                var (pick, fallback) = await FindSigningAsync(clubId, pool, taken, next, today, end, balance, room, cancellationToken).ConfigureAwait(false);
+                // The best free agent whose salary fits the wage budget left (and the balance); the cheapest one only
+                // while the club is below the squad minimum, even into debt, so it can field a team (docs/AI_MANAGEMENT.md).
+                var (pick, fallback) = await FindSigningAsync(clubId, pool, taken, demands, next, today, end, balance, room, cancellationToken).ConfigureAwait(false);
                 var below = firstTeam < SquadRules.Default.MinPlayers;
                 if (pick is null && below && next > 0)
                 {
                     // The cheapest player may be among those skipped before the last signing.
-                    (_, fallback) = await FindSigningAsync(clubId, pool, taken, 0, today, end, balance, room, cancellationToken).ConfigureAwait(false);
+                    (_, fallback) = await FindSigningAsync(clubId, pool, taken, demands, 0, today, end, balance, room, cancellationToken).ConfigureAwait(false);
                 }
                 if ((pick ?? (below ? fallback : null)) is not { } choice)
                 {
@@ -271,12 +289,13 @@ internal sealed class ClubManagementService(
 
     /// <summary>
     /// From pool position <paramref name="from"/>: the first (best) free agent whose demands fit the balance and the wage
-    /// budget left, else the cheapest one the balance covers. Demands are read in chunks (<see cref="NegotiationChunk"/>).
+    /// budget left, else the cheapest one (signed only below the squad minimum, even into debt). Demands are read in chunks (<see cref="NegotiationChunk"/>).
     /// </summary>
     private async Task<(Signing? Pick, Signing? Fallback)> FindSigningAsync(
         ClubId clubId,
         IReadOnlyList<FreeAgent> pool,
         HashSet<PlayerId> taken,
+        Dictionary<PlayerId, NegotiationOverview> known,
         int from,
         DateOnly today,
         DateOnly end,
@@ -302,16 +321,26 @@ internal sealed class ClubManagementService(
                 break;
             }
 
-            var talks = await contracts.GetNegotiationsAsync(clubId, [.. chunk.Select(j => pool[j].Player.Id)], cancellationToken).ConfigureAwait(false);
+            List<PlayerId> unknown = [.. chunk.Select(j => pool[j].Player.Id).Where(id => !known.ContainsKey(id))];
+            if (unknown.Count > 0)
+            {
+                var read = await contracts.GetNegotiationsAsync(clubId, unknown, cancellationToken).ConfigureAwait(false);
+                for (var i = 0; i < unknown.Count; i++)
+                {
+                    known[unknown[i]] = read[i];
+                }
+            }
+
             for (var i = 0; i < chunk.Count; i++)
             {
-                var terms = negotiator.Meet(new ContractTerms(today, end, 0), talks[i].Demands);
-                if (terms.AnnualSalary > balance || talks[i].Talks.BrokenOffUntil is not null)
+                var talks = known[pool[chunk[i]].Player.Id];
+                var terms = negotiator.Meet(new ContractTerms(today, end, 0), talks.Demands);
+                if (talks.Talks.BrokenOffUntil is not null)
                 {
                     continue;
                 }
 
-                if (terms.AnnualSalary <= room)
+                if (terms.AnnualSalary <= balance && terms.AnnualSalary <= room)
                 {
                     return (new Signing(chunk[i], terms), fallback);
                 }
@@ -377,15 +406,15 @@ internal sealed class ClubManagementService(
             return [];
         }
 
-        // Only clubs that can afford a signing (Step 34): the balance must cover the minimum salary, and above the squad
-        // minimum the wage budget too (FillSquadsAsync's rule), so clubs that could sign nobody do not open a window.
+        // Only clubs that can sign (Step 34): below the squad minimum always (FillSquadsAsync signs even into debt), above
+        // it the balance and the wage budget left must cover the minimum salary (FillSquadsAsync's rule).
         var wageBills = await WageBillsAsync(today, cancellationToken).ConfigureAwait(false);
         return
         [
             .. shortOf
-                .Where(roster => roster.Club.Balance >= ContractNegotiator.MinimumSalary
-                    && (roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
-                        || roster.Club.WageBudget - wageBills.GetValueOrDefault(roster.Club.Id) >= ContractNegotiator.MinimumSalary))
+                .Where(roster => roster.FirstTeam.Count() < SquadRules.Default.MinPlayers
+                    || (roster.Club.Balance >= ContractNegotiator.MinimumSalary
+                        && roster.Club.WageBudget - wageBills.GetValueOrDefault(roster.Club.Id) >= ContractNegotiator.MinimumSalary))
                 .Select(roster => roster.Club.Id),
         ];
     }

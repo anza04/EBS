@@ -28,8 +28,8 @@ public interface IClubManagementService
     Task<int> ReleaseSurplusAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Last resort for AI clubs still below the minimum first team after a transfer window: signs the best free agents
-    /// whose asking salary the club can pay for a year from its balance, ignoring the wage budget. Returns the signings.
+    /// Last resort for AI clubs short of players after a transfer window: signs the best free agents whose salary fits the
+    /// balance and the wage budget left; below the minimum first team, else the cheapest one, even into debt. Returns the signings.
     /// </summary>
     Task<int> FillSquadsAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 
@@ -43,8 +43,8 @@ public interface IClubManagementService
     public const int FreeAgentsPerClub = 2;
 
     /// <summary>
-    /// AI clubs below the minimum first team, without five available players or needing long-term injury cover, that can
-    /// afford a signing (balance for the minimum salary; above the squad minimum also room in the wage budget).
+    /// AI clubs below the minimum first team (always), or without five available players or needing long-term injury
+    /// cover when the balance and the wage budget left cover the minimum salary.
     /// </summary>
     Task<IReadOnlyList<ClubId>> ClubsShortOfPlayersAsync(IReadOnlyCollection<ClubId> managedClubs, CancellationToken cancellationToken = default);
 
