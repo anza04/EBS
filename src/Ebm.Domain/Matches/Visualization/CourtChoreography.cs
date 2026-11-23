@@ -159,6 +159,9 @@ internal sealed class PossessionScript
     private readonly Dictionary<PlayerId, CourtPoint> _pos = [];
     private readonly Dictionary<PlayerId, CourtPoint> _start;
     private readonly HashSet<PlayerId> _pinned = [];
+
+    /// <summary>Attackers the play placed in the key being built (the others are spaced around them).</summary>
+    private readonly HashSet<PlayerId> _moved = [];
     private readonly List<(double Weight, CourtKey Key)> _keys = [];
     private readonly CourtPoint _rim;
     private readonly int _sign;
@@ -682,18 +685,39 @@ internal sealed class PossessionScript
         if (target is { } t && _pos.ContainsKey(t) && _holder != t)
         {
             _holder = t;
-            Key(0.6, BallFlight.Pass);
+            Key(0.6, BallFlight.Pass, final: true);
         }
         else
         {
-            Key(0.6);
+            Key(0.6, final: true);
         }
     }
 
     // ---------------------------------------------------------------- keys
 
-    private void Key(double weight, BallFlight flight = BallFlight.Held, PlayerId? screener = null)
+    /// <summary>
+    /// Snapshots a key: crowded attackers the play did not place spread to free spots, defenders follow their men
+    /// (unless the play put them somewhere), nobody overlaps. The <paramref name="final"/> key is the event's own
+    /// layout, already spaced by the tracker, and stays exactly as it is.
+    /// </summary>
+    private void Key(double weight, BallFlight flight = BallFlight.Held, PlayerId? screener = null, bool final = false)
     {
+        HashSet<PlayerId> anchored = [.. _pinned];
+        foreach (var id in new[] { _holder, screener })
+        {
+            if (id is { } p)
+            {
+                anchored.Add(p);
+            }
+        }
+
+        if (!final)
+        {
+            var spread = Snapshot();
+            CourtSpacing.Spread(spread, _c.Offense, _c.Event.Period, new HashSet<PlayerId>([.. _moved, .. anchored]));
+            Apply(spread);
+        }
+
         for (var s = 0; s < 5; s++)
         {
             if (_c.Defence[s] is not { } d || _pinned.Contains(d) || !_pos.ContainsKey(d) || Slot(s) is not { } man)
@@ -704,13 +728,31 @@ internal sealed class PossessionScript
             _pos[d] = CourtTracker.Clamp(CourtTracker.Between(_pos[man], _rim, man == _holder ? 1.0 : 1.4));
         }
 
+        if (!final)
+        {
+            var settled = Snapshot();
+            CourtSpacing.Separate(settled, anchored);
+            Apply(settled);
+        }
+
         _pinned.Clear();
+        _moved.Clear();
         if (_holder is { } h)
         {
             _ball = _pos[h];
         }
 
-        _keys.Add((weight, new CourtKey(0, [.. _c.Final.Select(p => p with { Position = _pos[p.Player] })], _ball, _holder, flight) { Screener = screener }));
+        _keys.Add((weight, new CourtKey(0, Snapshot(), _ball, _holder, flight) { Screener = screener }));
+    }
+
+    private List<CourtPlayer> Snapshot() => [.. _c.Final.Select(p => p with { Position = _pos[p.Player] })];
+
+    private void Apply(List<CourtPlayer> players)
+    {
+        foreach (var p in players)
+        {
+            _pos[p.Player] = p.Position;
+        }
     }
 
     private void Pass(PlayerId? to, double weight)
@@ -780,6 +822,7 @@ internal sealed class PossessionScript
         if (id is { } p && _pos.ContainsKey(p))
         {
             _pos[p] = At(across, depth);
+            _moved.Add(p);
         }
     }
 

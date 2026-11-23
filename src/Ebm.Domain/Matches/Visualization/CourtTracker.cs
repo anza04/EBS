@@ -271,8 +271,11 @@ public sealed class CourtTracker
         return new CourtFrame(index, e, CourtAction.TipOff, _offense, players, e.Kind == MatchEventKind.JumpBall ? centre : lastBall, ball, holder, false);
     }
 
-    /// <summary>The offense in its formation and each defender between his man and the basket.</summary>
-    private List<CourtPlayer> HalfCourt(int index, MatchEvent e, TeamSide offense, Func<int, (double A, double D)?>? spot = null)
+    /// <summary>
+    /// The offense in its formation (<paramref name="anchor"/> on his spot, crowded teammates spaced away from him) and
+    /// each defender between his man and the basket.
+    /// </summary>
+    private List<CourtPlayer> HalfCourt(int index, MatchEvent e, TeamSide offense, Func<int, (double A, double D)?>? spot = null, (PlayerId? Player, CourtPoint At)? anchor = null)
     {
         var players = new List<CourtPlayer>(10);
         var attack = Slots(offense);
@@ -287,6 +290,17 @@ public sealed class CourtTracker
             var formation = Formation(offense);
             var (a, d) = spot?.Invoke(s) ?? (formation[s].A + Jitter(index, s, 0), formation[s].D + Jitter(index, s, 1));
             players.Add(new CourtPlayer(id, offense, s, Clamp(ToCourt(offense, e.Period, a, d))));
+        }
+
+        if (spot is null)
+        {
+            HashSet<PlayerId> anchored = [];
+            if (anchor is { Player: { } fixedId, At: var at } && Move(players, fixedId, at) is not null)
+            {
+                anchored.Add(fixedId);
+            }
+
+            CourtSpacing.Spread(players, offense, e.Period, anchored);
         }
 
         var defence = Slots(Other(offense));
@@ -308,9 +322,10 @@ public sealed class CourtTracker
     private CourtFrame Shot(int index, MatchEvent e, TeamSide offense)
     {
         _offense = offense;
-        var players = HalfCourt(index, e, offense);
         var rim = Rim(offense, e.Period);
-        var shooter = Move(players, e.Player, e.Shot is { } shot ? ShotSpot(offense, shot) : Between(rim, new CourtPoint(Length / 2, Width / 2), -1.2));
+        var players = HalfCourt(index, e, offense, anchor: (e.Player, e.Shot is { } shot ? ShotSpot(offense, shot) : Between(rim, new CourtPoint(Length / 2, Width / 2), -1.2)));
+        var shooter = e.Player is { } shooterId ? players.FirstOrDefault(p => p.Player == shooterId) : null;
+        CourtPlayer? contest = null;
         if (shooter is not null)
         {
             // The shooter's closest defender: the blocker, or his matchup at the contest distance.
@@ -320,9 +335,11 @@ public sealed class CourtTracker
                 : players.FirstOrDefault(p => p.Side != offense && p.Slot == shooter.Slot);
             if (defender is not null)
             {
-                Move(players, defender.Player, Between(shooter.Position, rim, e.Shot?.Blocked == true ? 0.4 : gap));
+                contest = Move(players, defender.Player, Between(shooter.Position, rim, e.Shot?.Blocked == true ? 0.4 : gap));
             }
         }
+
+        Settle(players, shooter?.Player, contest?.Player);
 
         var frame = new CourtFrame(index, e, CourtAction.Shot, offense, players, shooter?.Position ?? rim, rim, null, true);
         return Scripted(frame, e.Player, e.Kind == MatchEventKind.FieldGoalMade ? e.OtherPlayer : null);
@@ -348,9 +365,10 @@ public sealed class CourtTracker
     /// <summary>A rebound at the basket <paramref name="attacked"/> was attacking; the ball goes to the rebounder.</summary>
     private CourtFrame Rebound(int index, MatchEvent e, TeamSide attacked, CourtPoint lastBall)
     {
-        var players = HalfCourt(index, e, attacked);
         var spot = ToCourt(attacked, e.Period, Jitter(index, 7, 0) * 2.5, 2.4 + Math.Abs(Jitter(index, 7, 1) * 2));
+        var players = HalfCourt(index, e, attacked);
         var rebounder = Move(players, e.Player, spot);
+        Settle(players, rebounder?.Player, null);
         _offense = e.Side;
         return new CourtFrame(index, e, CourtAction.Rebound, e.Side, players, lastBall, rebounder?.Position ?? spot, e.Player, false);
     }
@@ -370,6 +388,8 @@ public sealed class CourtTracker
             to = stealer?.Position ?? from;
         }
 
+        Settle(players, loser?.Player, holder);
+
         _offense = Other(offense);
         return Scripted(new CourtFrame(index, e, CourtAction.Turnover, offense, players, from, to, holder, false), loser?.Player, null);
     }
@@ -386,6 +406,8 @@ public sealed class CourtTracker
         {
             Move(players, fouler, Between(fouled.Position, Rim(offense, e.Period), 0.6));
         }
+
+        Settle(players, fouled?.Player, e.Player);
 
         var ball = fouled?.Position ?? players.FirstOrDefault(p => p.Side == offense)?.Position ?? Rim(offense, e.Period);
         _offense = offense;
@@ -438,6 +460,21 @@ public sealed class CourtTracker
         var formation = Formation(offense);
         var spot = ToCourt(offense, period, formation[slot].A + Jitter(index, slot, 0), formation[slot].D + Jitter(index, slot, 1));
         return side == offense ? spot : Between(spot, Rim(offense, period), 1.3);
+    }
+
+    /// <summary>Nobody on top of anybody else; the event's players (and the ball) stay where the event puts them.</summary>
+    private static void Settle(List<CourtPlayer> players, PlayerId? first, PlayerId? second)
+    {
+        HashSet<PlayerId> anchored = [];
+        foreach (var id in new[] { first, second })
+        {
+            if (id is { } p)
+            {
+                anchored.Add(p);
+            }
+        }
+
+        CourtSpacing.Separate(players, anchored);
     }
 
     /// <summary>Moves a player of the list and returns his new entry.</summary>

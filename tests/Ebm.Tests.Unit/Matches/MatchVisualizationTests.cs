@@ -427,4 +427,61 @@ public sealed class MatchVisualizationTests
         Assert.InRange(maxPlayer, 0, 0.3); // < 18 m/s at 60 fps: no teleporting
         Assert.InRange(maxBall, 0, 0.8);
     }
+
+    [Fact]
+    public void Shots_come_from_in_front_of_the_backboard_and_the_floor_is_spaced()
+    {
+        var (shots, frames, keys) = (0, 0, 0);
+        var closestAttackers = new List<double>();
+        for (var seed = 0; seed < 8; seed++)
+        {
+            var (sim, tracker) = Watch(seed);
+            foreach (var e in sim.Events.Where(e => e.Shot is not null))
+            {
+                var shot = e.Shot!.Value;
+                Assert.False(ShotZones.IsBehindBackboard(shot.X, shot.Y), $"{shot.X},{shot.Y} {shot.Zone}");
+                shots++;
+            }
+
+            foreach (var frame in tracker.Frames.Where(f => f.Action is CourtAction.Shot or CourtAction.Rebound or CourtAction.Turnover or CourtAction.Foul))
+            {
+                // Nobody on top of anybody: only a defender on his man, or the event's own two players, may be closer.
+                HashSet<Ebm.Domain.Players.PlayerId?> involved = [frame.Event.Player, frame.Event.OtherPlayer, frame.BallHolder];
+                AssertSpaced(frame.Players, (a, b) => involved.Contains(a.Player) && involved.Contains(b.Player));
+                frames++;
+                if (frame.Action == CourtAction.Shot)
+                {
+                    var attackers = frame.Players.Where(p => p.Side == frame.Offense).ToList();
+                    closestAttackers.Add(attackers.SelectMany(a => attackers.Where(b => b != a).Select(b => a.Position.DistanceTo(b.Position))).DefaultIfEmpty(9).Min());
+                }
+
+                foreach (var key in frame.Lead.SkipLast(1))
+                {
+                    AssertSpaced(key.Players, (a, b) => a.Player == key.BallHolder || b.Player == key.BallHolder || a.Player == key.Screener || b.Player == key.Screener || a.Side != b.Side);
+                    keys++;
+                }
+            }
+        }
+
+        Assert.True(shots > 800 && frames > 1500 && keys > 5000, $"{shots} {frames} {keys}");
+        Assert.True(closestAttackers.Average() > 2.6, $"{closestAttackers.Average():0.00}");
+        Assert.True(closestAttackers.Count(d => d < 1.5) < closestAttackers.Count / 20);
+
+        static void AssertSpaced(IReadOnlyList<CourtPlayer> players, Func<CourtPlayer, CourtPlayer, bool> exempt)
+        {
+            for (var i = 0; i < players.Count; i++)
+            {
+                for (var j = i + 1; j < players.Count; j++)
+                {
+                    var (a, b) = (players[i], players[j]);
+                    if ((a.Side != b.Side && a.Slot == b.Slot) || exempt(a, b))
+                    {
+                        continue;
+                    }
+
+                    Assert.True(a.Position.DistanceTo(b.Position) >= 0.7, $"{a} {b}");
+                }
+            }
+        }
+    }
 }

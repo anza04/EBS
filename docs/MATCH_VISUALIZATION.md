@@ -83,6 +83,14 @@ frozen), so the same match always draws the same way. `MatchVisualizationTests` 
 tracker's line-ups equal `MatchSimulation.OnCourt`, that every event has its frame, and that the shooter, rebounder,
 thief and ball sit where the events say.
 
+### 3.3 Spacing
+
+`CourtSpacing` keeps the floor readable. In every event layout and possession key, an attacker within 3 m of a
+teammate the play did not place there moves to the free spacing spot (top, wings, corners, slots, short corners,
+elbows) that spaces him best near where he was; defenders then follow their men; finally nobody stands closer than
+0.75 m to anybody else, except a defender on his man and the event's own players (shooter and contest, fouler and
+fouled, thief and ball handler), and the ball handler and screener, which the play places on purpose.
+
 ## 4. Independence from the result
 
 The tracker and playback only read events. The match plays identically with or without them and in commentary or live

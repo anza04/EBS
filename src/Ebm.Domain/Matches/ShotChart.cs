@@ -100,6 +100,13 @@ public static class ShotZones
         return y > RimY && Math.Abs(angle) <= 30 ? ShotZone.MidRangeCenter : x < 0 ? ShotZone.MidRangeLeft : ShotZone.MidRangeRight;
     }
 
+    /// <summary>Plane of the backboard (1.2 m from the baseline) and half its reach across, in decimetres.</summary>
+    public const int BackboardY = 12;
+    public const int BehindHalfWidth = 25;
+
+    /// <summary>Under or behind the backboard: nobody shoots from there (baseline jumpers wider out are fine).</summary>
+    public static bool IsBehindBackboard(int x, int y) => y < BackboardY && Math.Abs(x) < BehindHalfWidth;
+
     public static bool IsOnCourt(int x, int y) => x is >= -HalfWidth and <= HalfWidth && y is >= 0 and <= Length;
 
     public static string Label(ShotZone zone) => zone switch

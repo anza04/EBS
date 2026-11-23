@@ -265,6 +265,8 @@ FIBA half court in decimetres: x −75…75, y 0…140 from the baseline, rim at
 y = 29.9 (corners), else distance ≥ 6.75 m. Zones (`ShotZones.Classify`): restricted area (≤ 1.25 m), paint
 (|x| ≤ 2.4 m, y ≤ 5.8 m), mid-range left/centre (within 30° of the axis)/right, corner threes, wing threes, top of
 the key (within 22.5°). Zone and value always come from the coordinates, so a chart cannot disagree with the points.
+The spot inside a zone is sampled uniformly, never under or behind the backboard (`ShotZones.IsBehindBackboard`:
+y < 1.2 m with |x| < 2.5 m); baseline jumpers wider out remain.
 
 | Shot type | Zones |
 |---|---|

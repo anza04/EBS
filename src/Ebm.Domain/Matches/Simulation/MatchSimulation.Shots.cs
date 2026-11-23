@@ -170,13 +170,16 @@ public sealed partial class MatchSimulation
             : ShotZone.CornerThreeRight;
     }
 
-    /// <summary>A random spot inside the zone (rejection sampling; jumpers within realistic distance).</summary>
+    /// <summary>
+    /// A random spot inside the zone (rejection sampling; jumpers within realistic distance, never from under or behind
+    /// the backboard).
+    /// </summary>
     private (int X, int Y) Spot(ShotZone zone, bool hurried)
     {
         var (x0, x1, y0, y1, fallback) = zone switch
         {
-            ShotZone.RestrictedArea => (-12, 12, 4, 28, (0, 12)),
-            ShotZone.Paint => (-24, 24, 0, 58, (0, 45)),
+            ShotZone.RestrictedArea => (-12, 12, ShotZones.BackboardY, 28, (0, 20)),
+            ShotZone.Paint => (-24, 24, ShotZones.BackboardY, 58, (0, 45)),
             ShotZone.MidRangeLeft => (-65, -1, 0, 70, (-45, 20)),
             ShotZone.MidRangeCenter => (-35, 35, 30, 82, (0, 70)),
             ShotZone.MidRangeRight => (1, 65, 0, 70, (45, 20)),
@@ -191,7 +194,7 @@ public sealed partial class MatchSimulation
         {
             var x = _random.Next(x0, x1 + 1);
             var y = _random.Next(y0, y1 + 1);
-            if (ShotZones.Classify(x, y) == zone && ShotZones.Distance(x, y) <= maxDistance)
+            if (ShotZones.Classify(x, y) == zone && ShotZones.Distance(x, y) <= maxDistance && !ShotZones.IsBehindBackboard(x, y))
             {
                 return (x, y);
             }
