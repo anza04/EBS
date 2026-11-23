@@ -5,6 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-11-23
+
+### Fixed
+- Contracts screen: the offer/renewal action buttons wrap instead of pushing "Submit" off the side panel.
+
 ## [1.0.0] — 2026-11-21 — STEP 34: Final optimization and release
 
 ### Added
