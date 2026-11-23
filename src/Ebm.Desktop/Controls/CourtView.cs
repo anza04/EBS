@@ -162,6 +162,11 @@ public sealed class CourtView : FrameworkElement
             dc.DrawText(name, new Point(box.X + 3, box.Y + 1));
         }
 
+        if (playback.Finish is { } finish)
+        {
+            DrawFinish(dc, finish, P(finish.At), scale, dpi);
+        }
+
         var (ball, height) = playback.Ball();
         var ground = P(ball);
         var ballRadius = Math.Max(3, 0.18 * scale) * (1 + (height * 0.06));
@@ -169,18 +174,56 @@ public sealed class CourtView : FrameworkElement
         dc.DrawEllipse(BallBrush, BallPen, new Point(ground.X, ground.Y - (height * scale * 0.35)), ballRadius, ballRadius);
 
         var line = (CourtTracker.Width * scale) + 4;
-        if (CourtPlays.Describe(frame, id => Surname(Names?.GetValueOrDefault(id))) is { } play)
+        if (CourtPlays.Describe(frame, id => Surname(Names?.GetValueOrDefault(id)), detailed: playback.EventStarted) is { } play)
         {
             var band = Text(play, 12, Brushes.White, dpi);
             dc.DrawRoundedRectangle(BandBrush, null, new Rect(left, line, band.Width + 10, band.Height + 2), 3, 3);
             dc.DrawText(band, new Point(left + 5, line + 1));
         }
 
-        var caption = Text($"{frame.Event.Time}  {frame.Event.HomeScore}–{frame.Event.AwayScore}   {frame.Event.Text}", 12, TryFindResource("Brush.Text") as Brush ?? Brushes.Black, dpi);
+        // The play-by-play (and the score) of an event waits until it is revealed; until then the previous line stays.
+        var shown = playback.Revealed ? frame.Event : playback.Previous?.Event;
+        var caption = Text(shown is null ? frame.Event.Time : $"{shown.Time}  {shown.HomeScore}–{shown.AwayScore}   {shown.Text}", 12, TryFindResource("Brush.Text") as Brush ?? Brushes.Black, dpi);
         caption.MaxTextWidth = Math.Max(1, ActualWidth - 8);
         caption.MaxLineCount = 1;
         caption.Trimming = TextTrimming.CharacterEllipsis;
         dc.DrawText(caption, new Point(left, line + 20));
+    }
+
+    /// <summary>Made: a ripple through the net and the points rising; missed: the rim rattles; blocked: a burst and a tag.</summary>
+    private static void DrawFinish(DrawingContext dc, ShotFinish finish, Point at, double scale, double dpi)
+    {
+        var fade = 1 - finish.Progress;
+        var alpha = (byte)(fade * 230);
+        switch (finish.Result)
+        {
+            case ShotResult.Made:
+                var ring = new Pen(new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0xD7, 0x00)), 2.5);
+                var r = (0.25 + (finish.Progress * 1.1)) * scale;
+                dc.DrawEllipse(null, ring, at, r, r);
+                dc.DrawEllipse(new SolidColorBrush(Color.FromArgb((byte)(alpha / 3), 0xFF, 0xFF, 0xFF)), null, at, 0.3 * scale, 0.3 * scale);
+                var team = finish.Side == TeamSide.Home ? Color.FromRgb(0x2F, 0x6F, 0xD6) : Color.FromRgb(0xE0, 0x7A, 0x1F);
+                var points = Text($"+{finish.Points}", 0.9 * scale, new SolidColorBrush(Color.FromArgb(alpha, team.R, team.G, team.B)), dpi);
+                dc.DrawText(points, new Point(at.X - (points.Width / 2), at.Y - (1.2 * scale) - (finish.Progress * 0.9 * scale) - points.Height));
+                break;
+            case ShotResult.Missed:
+                var shake = Math.Sin(finish.Progress * Math.PI * 10) * 0.08 * scale * fade;
+                var rim = new Pen(new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0x45, 0x00)), 3);
+                dc.DrawEllipse(null, rim, new Point(at.X + shake, at.Y), 0.3 * scale, 0.3 * scale);
+                break;
+            case ShotResult.Blocked:
+                var burst = new Pen(new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0xFF, 0xFF)), 2);
+                for (var i = 0; i < 8; i++)
+                {
+                    var angle = i * Math.PI / 4;
+                    var (inner, outer) = ((0.25 + (finish.Progress * 0.3)) * scale, (0.55 + (finish.Progress * 0.5)) * scale);
+                    dc.DrawLine(burst, new Point(at.X + (Math.Cos(angle) * inner), at.Y + (Math.Sin(angle) * inner)), new Point(at.X + (Math.Cos(angle) * outer), at.Y + (Math.Sin(angle) * outer)));
+                }
+
+                var tag = Text("BLOCK", 0.55 * scale, new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0xFF, 0xFF)), dpi);
+                dc.DrawText(tag, new Point(at.X - (tag.Width / 2), at.Y - (1.3 * scale) - tag.Height));
+                break;
+        }
     }
 
     private void OnFrame(object? sender, EventArgs e)

@@ -1,9 +1,21 @@
+using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
 
 namespace Ebm.Domain.Matches.Visualization;
 
 /// <summary>A player drawn at an instant of the playback.</summary>
 public readonly record struct DrawnPlayer(CourtPlayer Player, CourtPoint Position, bool Entering);
+
+/// <summary>How a shot or free throw finishes.</summary>
+public enum ShotResult
+{
+    Made,
+    Missed,
+    Blocked,
+}
+
+/// <summary>The finish of a shot being drawn: <see cref="Progress"/> 0–1 from the ball reaching the rim (or the block).</summary>
+public readonly record struct ShotFinish(ShotResult Result, CourtPoint At, double Progress, int Points, TeamSide Side);
 
 /// <summary>A pass drawn as a fading trail.</summary>
 public readonly record struct PassTrail(CourtPoint From, CourtPoint To, double Opacity);
@@ -16,6 +28,14 @@ public readonly record struct PassTrail(CourtPoint From, CourtPoint To, double O
 public sealed class CourtPlayback
 {
     private const double TrailSeconds = 1.2;
+
+    /// <summary>Share of a shot's segment spent in the air before it reaches the rim; the rest is the finish.</summary>
+    private const double Arrival = 0.6;
+
+    /// <summary>Share of a blocked shot's segment before the block.</summary>
+    private const double BlockAt = 0.22;
+
+    private const double RimHeight = 3.05;
 
     private readonly Queue<CourtFrame> _queue = new();
     private CourtFrame? _from;
@@ -59,11 +79,55 @@ public sealed class CourtPlayback
 
     private double Total => _ends.Length == 0 ? 1 : _ends[^1];
 
+    /// <summary>The frame shown before the current one (its play-by-play stands until the current one is revealed).</summary>
+    public CourtFrame? Previous => _from;
+
+    /// <summary>The event itself is playing (the lead-up is over): the shot is up, the turnover or foul happens.</summary>
+    public bool EventStarted => Segment() is var (k, _) && k == _keys.Length - 1;
+
+    /// <summary>
+    /// The current event's outcome can be shown: a shot once it reaches the rim (or is blocked), anything else once
+    /// the event starts. Captions wait for this so they never give the finish away.
+    /// </summary>
+    public bool Revealed => Segment() is var (k, u) && k == _keys.Length - 1 && (Result is not { } r || u >= (r == ShotResult.Blocked ? BlockAt : Arrival));
+
+    /// <summary>The finish of the current shot while it plays (swish, rim-out, block); null otherwise.</summary>
+    public ShotFinish? Finish
+    {
+        get
+        {
+            if (Result is not { } result || Segment() is not var (k, u) || k != _keys.Length - 1)
+            {
+                return null;
+            }
+
+            var start = result == ShotResult.Blocked ? BlockAt : Arrival;
+            if (u < start)
+            {
+                return null;
+            }
+
+            var e = Current!.Event;
+            var at = result == ShotResult.Blocked ? BlockPoint(BallFrom(k), _keys[k].Ball) : _keys[k].Ball;
+            return new ShotFinish(result, at, (u - start) / (1 - start), Math.Max(1, e.Points), e.Side ?? TeamSide.Home);
+        }
+    }
+
+    /// <summary>How the current frame's shot or free throw ends; null for other frames.</summary>
+    private ShotResult? Result => Current?.Action is CourtAction.Shot or CourtAction.FreeThrow
+        ? Current.Event.Kind switch
+        {
+            MatchEventKind.FieldGoalMade or MatchEventKind.FreeThrowMade => ShotResult.Made,
+            MatchEventKind.FieldGoalMissed when Current.Event.Shot?.Blocked == true => ShotResult.Blocked,
+            _ => ShotResult.Missed,
+        }
+        : null;
+
     /// <summary>Seconds a frame's event takes at speed 1 (without its lead-up).</summary>
     public static double BaseDuration(CourtAction action) => action switch
     {
-        CourtAction.Shot => 1.4,
-        CourtAction.FreeThrow => 1.0,
+        CourtAction.Shot => 2.1,
+        CourtAction.FreeThrow => 1.6,
         CourtAction.TipOff => 1.0,
         CourtAction.Turnover => 0.9,
         CourtAction.Rebound => 0.8,
@@ -166,13 +230,11 @@ public sealed class CourtPlayback
     }
 
     /// <summary>The ball at this instant and its height in metres (dribbled, passed, shot or loose).</summary>
-    public (CourtPoint Position, double Height) Ball()
-    {
-        if (Current is null || Segment() is not var (k, u) || k < 0)
-        {
-            return (new CourtPoint(CourtTracker.Length / 2, CourtTracker.Width / 2), 0);
-        }
+    public (CourtPoint Position, double Height) Ball() =>
+        Current is null || Segment() is not var (k, u) || k < 0 ? (new CourtPoint(CourtTracker.Length / 2, CourtTracker.Width / 2), 0) : BallAt(k, u);
 
+    private (CourtPoint Position, double Height) BallAt(int k, double u)
+    {
         var key = _keys[k];
         var from = BallFrom(k);
         switch (key.Flight)
@@ -186,6 +248,8 @@ public sealed class CourtPlayback
                 return (from.Lerp(key.Ball, u), 0);
             case BallFlight.Pass:
                 return (from.Lerp(key.Ball, u), 1.2 + (0.6 * 4 * u * (1 - u)));
+            case BallFlight.Shot when k == _keys.Length - 1 && Result is { } result:
+                return ShotBall(result, from, key.Ball, u);
             case BallFlight.Shot:
                 return (from.Lerp(key.Ball, u), 1.5 + (Math.Min(4, 1 + (from.DistanceTo(key.Ball) / 3)) * 4 * u * (1 - u)));
             default:
@@ -223,8 +287,63 @@ public sealed class CourtPlayback
         return trails;
     }
 
+    /// <summary>
+    /// A shot from release to finish: an arc onto the rim, then through the net and down (made), off the rim and away
+    /// (missed), or swatted early and knocked to the floor (blocked).
+    /// </summary>
+    private (CourtPoint Position, double Height) ShotBall(ShotResult result, CourtPoint from, CourtPoint rim, double u)
+    {
+        if (result == ShotResult.Blocked)
+        {
+            var block = BlockPoint(from, rim);
+            if (u < BlockAt)
+            {
+                var s = u / BlockAt;
+                return (from.Lerp(block, s), 2.2 + (0.7 * s));
+            }
+
+            var t = (u - BlockAt) / (1 - BlockAt);
+            var away = Away(block, from, 2.6);
+            return (block.Lerp(away, Math.Sqrt(t)), Math.Max(0, (2.9 * (1 - t)) + (0.8 * 4 * t * (1 - t)) - (0.6 * t)));
+        }
+
+        if (u < Arrival)
+        {
+            var s = u / Arrival;
+            var apex = Math.Min(3.5, 0.8 + (from.DistanceTo(rim) / 3));
+            return (from.Lerp(rim, s), 2.2 + ((RimHeight - 2.2) * s) + (apex * 4 * s * (1 - s)));
+        }
+
+        var f = (u - Arrival) / (1 - Arrival);
+        if (result == ShotResult.Made)
+        {
+            // Through the net, then a short drop to the floor under the basket.
+            return (rim, Math.Max(0, RimHeight * (1 - (f * f))));
+        }
+
+        // Rattles out: a hop off the rim towards where the rebound will be.
+        return (rim.Lerp(Away(rim, Current!.BallFrom, 1.6), f), RimHeight + (0.9 * 4 * f * (1 - f)));
+    }
+
+    private static CourtPoint BlockPoint(CourtPoint from, CourtPoint rim) =>
+        CourtTracker.Between(from, rim, Math.Min(1.1, from.DistanceTo(rim) * 0.4));
+
+    /// <summary>
+    /// <paramref name="metres"/> from <paramref name="at"/>, roughly back towards <paramref name="towards"/> and turned
+    /// by an angle from the event index, inside the court.
+    /// </summary>
+    private CourtPoint Away(CourtPoint at, CourtPoint towards, double metres)
+    {
+        var (dx, dy) = (towards.X - at.X, towards.Y - at.Y);
+        var length = Math.Sqrt((dx * dx) + (dy * dy));
+        var angle = length < 1e-6 ? 0 : Math.Atan2(dy, dx);
+        angle += (CourtTracker.Jitter(Current!.Index, 9, 2) * 2.4) + (length < 1e-6 ? Math.PI / 2 : 0);
+        return CourtTracker.Clamp(new CourtPoint(at.X + (Math.Cos(angle) * metres), at.Y + (Math.Sin(angle) * metres)));
+    }
+
     private void Next()
     {
+        var endBall = Current is null || _keys.Length == 0 ? (CourtPoint?)null : BallAt(_keys.Length - 1, 1).Position;
         _from = Current;
         Current = _queue.Dequeue();
         _elapsed = 0;
@@ -255,7 +374,10 @@ public sealed class CourtPlayback
             _tracks[id] = track;
         }
 
-        _startBall = frame.Lead.Count == 0 ? frame.BallFrom : _from?.Ball ?? frame.BallFrom;
+        // A loose ball (rebound) starts where the last frame left it (off the rim, off the block).
+        _startBall = frame.Lead.Count == 0
+            ? frame.Flight == BallFlight.Bounce && endBall is { } loose ? loose : frame.BallFrom
+            : endBall ?? frame.BallFrom;
     }
 
     private CourtPoint BallFrom(int k) => k == _keys.Length - 1 && Current is { } f && f.Lead.Count > 0

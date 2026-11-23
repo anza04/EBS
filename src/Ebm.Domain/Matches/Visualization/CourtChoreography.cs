@@ -67,14 +67,22 @@ public static class CourtPlays
         _ => string.Empty,
     };
 
-    /// <summary>"Pick-and-roll → Rossi · corner three"; null for frames without a play.</summary>
-    public static string? Describe(CourtFrame frame, Func<PlayerId, string?> name)
+    /// <summary>
+    /// "Pick-and-roll → Rossi · corner three"; just "Pick-and-roll" while <paramref name="detailed"/> is false (the
+    /// lead-up, so the caption does not tell who ends the play and how); null for frames without a play.
+    /// </summary>
+    public static string? Describe(CourtFrame frame, Func<PlayerId, string?> name, bool detailed = true)
     {
         ArgumentNullException.ThrowIfNull(frame);
         ArgumentNullException.ThrowIfNull(name);
         if (frame.Play == CourtPlay.None)
         {
             return null;
+        }
+
+        if (!detailed)
+        {
+            return Name(frame.Play);
         }
 
         var e = frame.Event;

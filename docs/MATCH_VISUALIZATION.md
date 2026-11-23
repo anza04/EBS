@@ -60,6 +60,18 @@ Before a field goal, turnover, shot-clock violation or foul the tracker scripts 
    a screen, trailing a cutter).
 4. **The event** itself (shot, turnover, foul) as in the table above.
 
+### 3.2 Shot finishes and captions
+
+A shot or free throw arcs onto the rim (60% of its segment), then finishes: **made** — the ball drops through the net,
+a gold ripple and "+2/+3" in the team colour rise from the rim; **missed** — the rim rattles and the ball hops off it
+about 1.6 m back towards the floor, where the rebound frame picks it up; **blocked** — the ball is stopped about a
+metre out of the shooter's hand, a burst and "BLOCK" mark the spot, and it is knocked to the floor.
+
+Captions never give the finish away. During the lead-up the label under the court shows only the play ("Pick-and-roll");
+once the event starts it names the player and the shot ("Pick-and-roll → Rossi · corner three"). The play-by-play line
+and score stay on the previous event until `CourtPlayback.Revealed`: when the ball reaches the rim (or is blocked) for
+shots, when the event starts for anything else.
+
 Timing follows the game clock: the lead-up lasts 0.5 s + 0.11 s per game second used (0.9–3.4 s at 1×), and no key is
 shorter than its longest run at `CourtTracker.MaxRunSpeed` (9 m per playback second); the event's own segment is
 stretched the same way (free-throw line-ups, tip-offs). `CourtPlayback` runs a possession at an even pace with a short
@@ -85,7 +97,7 @@ latest frame.
   possession (not timed separately: the six `MatchVisualizationTests`, which place 40+ full matches, run in < 1 s).
 - Rendering uses frozen brushes/pens and immediate-mode `DrawingContext`; it redraws only while a tween runs or when the
   playback changes (`CourtPlayback.Version`), so an idle court costs nothing.
-- Event durations at 1×: shot 1.4 s, free throw/tip-off 1.0 s, turnover 0.9 s, rebound/foul 0.8 s, substitution
+- Event durations at 1×: shot 2.1 s, free throw 1.6 s (flight and finish), tip-off 1.0 s, turnover 0.9 s, rebound/foul 0.8 s, substitution
   0.6 s, dead ball 0.5 s (longer when players have far to go), plus the possession's lead-up (§3.1). A possession
   shows in about 3–6 s.
 

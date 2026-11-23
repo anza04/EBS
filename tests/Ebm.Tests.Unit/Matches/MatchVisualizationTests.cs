@@ -231,8 +231,73 @@ public sealed class MatchVisualizationTests
         }
 
         Assert.True(released && arced);
-        playback.SkipToEnd();
-        Assert.InRange(shot.Ball.DistanceTo(playback.Ball().Position), 0, 1e-9);
+    }
+
+    [Fact]
+    public void Shots_finish_as_made_missed_or_blocked_and_captions_wait_for_the_finish()
+    {
+        var (_, tracker) = Watch(4);
+        var results = new HashSet<ShotResult>();
+        foreach (var shot in tracker.Frames.Where(f => f.Action == CourtAction.Shot && f.Lead.Count > 0).Take(60))
+        {
+            var e = shot.Event;
+            var expected = e.Kind == MatchEventKind.FieldGoalMade ? ShotResult.Made : e.Shot!.Value.Blocked ? ShotResult.Blocked : ShotResult.Missed;
+            var playback = new CourtPlayback();
+            playback.Enqueue([tracker.Frames[shot.Index - 1]]);
+            playback.SkipToEnd();
+            playback.Enqueue([shot]);
+            playback.Tick(0.001);
+            Assert.Same(shot, playback.Current);
+            Assert.Same(tracker.Frames[shot.Index - 1], playback.Previous);
+
+            ShotFinish? finish = null;
+            while (playback.IsPlaying)
+            {
+                // Nothing tells the outcome before the ball gets there: no finish, no play-by-play, no score.
+                if (!playback.Revealed)
+                {
+                    Assert.Null(playback.Finish);
+                    Assert.Equal(!playback.EventStarted, CourtPlays.Describe(shot, _ => "X", playback.EventStarted) == CourtPlays.Name(shot.Play));
+                }
+
+                finish ??= playback.Finish;
+                playback.Tick(1 / 60.0);
+            }
+
+            Assert.Equal(expected, finish!.Value.Result);
+            Assert.True(playback.Revealed);
+            results.Add(expected);
+            var (end, height) = playback.Ball();
+            var rim = CourtTracker.Rim(e.Side!.Value, e.Period);
+            switch (expected)
+            {
+                case ShotResult.Made:
+                    Assert.Equal(rim, end);
+                    Assert.Equal(0, height, 3); // through the net and down
+                    Assert.Equal(e.Points, finish.Value.Points);
+                    break;
+                case ShotResult.Missed:
+                    Assert.InRange(end.DistanceTo(rim), 1.0, 1.7); // off the rim
+                    break;
+                case ShotResult.Blocked:
+                    Assert.True(end.DistanceTo(rim) > shot.BallFrom.DistanceTo(rim) - 1.2); // knocked away, never near the rim
+                    break;
+            }
+        }
+
+        Assert.Contains(ShotResult.Made, results);
+        Assert.Contains(ShotResult.Missed, results);
+
+        // The rebound picks the ball up where the miss left it.
+        var miss = tracker.Frames.First(f => f.Event.Kind == MatchEventKind.FieldGoalMissed && !f.Event.Shot!.Value.Blocked && tracker.Frames[f.Index + 1].Action == CourtAction.Rebound);
+        var replay = new CourtPlayback();
+        replay.Enqueue([miss]);
+        replay.SkipToEnd();
+        var left = replay.Ball().Position;
+        replay.Enqueue([tracker.Frames[miss.Index + 1]]);
+        replay.Tick(0.0001);
+        Assert.Same(tracker.Frames[miss.Index + 1], replay.Current);
+        Assert.InRange(replay.Ball().Position.DistanceTo(left), 0, 0.01);
     }
 
     [Fact]
