@@ -93,6 +93,9 @@ public sealed partial class MatchSimulation
 
         public bool Automatic { get; set; } = true;
 
+        /// <summary>The engine's coach makes rotation substitutions even while the user manages the side.</summary>
+        public bool AutoSubstitutions { get; set; }
+
         public int Score { get; set; }
 
         public int PeriodFouls { get; set; }

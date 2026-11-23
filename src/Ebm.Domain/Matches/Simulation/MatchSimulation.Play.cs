@@ -1088,7 +1088,7 @@ public sealed partial class MatchSimulation
             }
         }
 
-        if (!team.Automatic || forcedOnly)
+        if (!(team.Automatic || team.AutoSubstitutions) || forcedOnly)
         {
             return;
         }

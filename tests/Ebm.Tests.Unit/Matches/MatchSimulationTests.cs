@@ -169,6 +169,20 @@ public sealed class MatchSimulationTests
     }
 
     [Fact]
+    public void A_managed_side_with_automatic_substitutions_rotates_but_keeps_its_timeouts()
+    {
+        var sim = new MatchSimulation(Setup(5), SimulationMode.Live);
+        sim.SetAutomatic(TeamSide.Home, false);
+        sim.SetAutoSubstitutions(TeamSide.Home, true);
+        Assert.True(sim.HasAutoSubstitutions(TeamSide.Home));
+        sim.RunToEnd();
+
+        Assert.True(sim.Lines(TeamSide.Home).Count(l => l.SecondsPlayed > 0) > 5);
+        Assert.DoesNotContain(sim.Events, e => e.Kind == MatchEventKind.Timeout && e.Side == TeamSide.Home);
+        Assert.Throws<DomainValidationException>(() => new MatchSimulation(Setup(5)).SetAutoSubstitutions(TeamSide.Home, true));
+    }
+
+    [Fact]
     public void Interventions_need_live_mode()
     {
         var sim = new MatchSimulation(Setup(1), SimulationMode.Commentary);

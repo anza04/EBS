@@ -13,7 +13,7 @@ namespace Ebm.Domain.Matches.Simulation;
 /// <see cref="Step"/> plays one possession (or a period transition) and returns its play-by-play; <see cref="RunToEnd"/>
 /// is the instant mode. Between steps the ball is dead, so substitutions, timeouts and tactic changes apply there.
 /// Sides with <see cref="IsAutomatic"/> make their own substitutions and timeouts; a managed side only gets forced
-/// substitutions (fouled-out players).
+/// substitutions (fouled-out players) unless <see cref="HasAutoSubstitutions"/> is on.
 /// </remarks>
 public sealed partial class MatchSimulation
 {
@@ -105,6 +105,15 @@ public sealed partial class MatchSimulation
     {
         RequireLive();
         Get(side).Automatic = automatic;
+    }
+
+    public bool HasAutoSubstitutions(TeamSide side) => Get(side).AutoSubstitutions;
+
+    /// <summary>Live mode: lets the engine's coach rotate a managed side's players (rest, fouls, minutes).</summary>
+    public void SetAutoSubstitutions(TeamSide side, bool enabled)
+    {
+        RequireLive();
+        Get(side).AutoSubstitutions = enabled;
     }
 
     /// <summary>Plays the next possession (or starts/ends a period) and returns its play-by-play.</summary>

@@ -255,6 +255,18 @@ public sealed partial class MatchCenterViewModel : ObservableObject
     [ObservableProperty]
     private double _courtSpeed = 1;
 
+    /// <summary>The engine rotates the managed side's players; the user can still substitute by hand.</summary>
+    [ObservableProperty]
+    private bool _autoSubstitutions = true;
+
+    partial void OnAutoSubstitutionsChanged(bool value)
+    {
+        if (_session?.Simulation is { IsFinished: false, Mode: SimulationMode.Live } sim && ManagedTeam is { } side)
+        {
+            sim.SetAutoSubstitutions(side, value);
+        }
+    }
+
     public MatchCenterViewModel(IMatchService matches, ICompetitionService competitions, Func<Task> reloadAll)
     {
         ArgumentNullException.ThrowIfNull(matches);
@@ -438,6 +450,7 @@ public sealed partial class MatchCenterViewModel : ObservableObject
         if (ManagedTeam is { } side)
         {
             sim.SetAutomatic(side, false);
+            sim.SetAutoSubstitutions(side, AutoSubstitutions);
             var t = sim.Tactics(side);
             (LiveOffense, LiveDefense, LiveTempo, LiveIntensity) = (t.OffensiveSystem, t.DefensiveSystem, t.Offense.Tempo, t.Defense.Intensity);
         }
