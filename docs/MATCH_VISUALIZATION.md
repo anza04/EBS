@@ -13,10 +13,11 @@ MatchSimulation ──Events──▶ CourtTracker ──CourtFrame[]──▶ C
 
 | Piece | Role |
 |---|---|
-| `MatchEvent.Shot` | The engine's `ShotRecord` of a field-goal event (spot, contest, block). Set at emission; no extra random draws. |
-| `CourtTracker` (`Matches/Visualization`) | Turns each `MatchEvent` into one `CourtFrame`: players with positions, ball from/to, holder, ball in the air. Keeps both line-ups by slot from `Substitution`/`FouledOut` events. `Update(events)` places only the events not placed yet, so it follows a live match incrementally. |
-| `CourtPlayback` | Queue of frames played over real time: each frame tweens (smoothstep) from the previous layout. Pause, resume, skip to latest, speed 0.25–8×. |
-| `CourtView` (`Controls`) | `FrameworkElement` drawing court, players (home blue, away orange, initials), ball with shadow and arc height, and the current play-by-play line. Ticks the playback from `CompositionTarget.Rendering`. |
+| `MatchEvent.Shot` / `MatchEvent.Offense` | The engine's `ShotRecord` of a field-goal event (spot, contest, block), and the new offensive system on a `TacticsChanged` event. Set at emission; no extra random draws. |
+| `CourtTracker` (`Matches/Visualization`) | Turns each `MatchEvent` into one `CourtFrame`: players with positions, ball from/to, holder, ball in the air, and for shots, turnovers and fouls the possession leading to it (`Lead`, `Play`). Keeps both line-ups by slot from `Substitution`/`FouledOut` events and each side's offensive system (tip-off tactics, then `TacticsChanged`). `Update(events)` places only the events not placed yet, so it follows a live match incrementally. |
+| `PossessionScript` (`CourtChoreography.cs`) | Scripts a possession as `CourtKey`s (§3.1). |
+| `CourtPlayback` | Queue of frames played over real time: each frame's keys, then the event. Players follow smooth paths, the ball stays with its holder and flies on passes and shots; pass trails, current holder and screener for the view. Pause, resume, skip to latest, speed 0.25–8×. |
+| `CourtView` (`Controls`) | `FrameworkElement` drawing court, players (home blue, away orange, initials), the ball handler (gold ring, surname tag), screens (a bar facing the ball), pass trails (dashed, fading), the ball with shadow and arc height, and under the court the play being run ("Pick-and-roll → Rossi · corner three") and the play-by-play line. Ticks the playback from `CompositionTarget.Rendering`. |
 | `MatchCenterViewModel` | Owns tracker and playback for the live session; enqueues new frames after every advance; *Watch the match* mode. |
 
 ## 2. Court model
@@ -40,6 +41,31 @@ MatchSimulation ──Events──▶ CourtTracker ──CourtFrame[]──▶ C
 | `FouledOut` | The player leaves the court; the following substitution fills the slot. |
 | Others (timeout, tactics, situation, period end, final) | Dead ball: previous layout. |
 
+A foul right after a shot or free throw (on the rebound, intentional) is drawn where the players stand, with no lead-up.
+
+### 3.1 Possessions
+
+Before a field goal, turnover, shot-clock violation or foul the tracker scripts the possession as keyframes
+(`CourtFrame.Lead`), ending exactly in the event's layout (the shooter on the recorded spot with the ball). Phases:
+
+1. **Getting the ball** (when it is not already in the frontcourt): outlet pass to the guard after a defensive
+   rebound, inbound under the basket after a score, from the sideline after other dead balls; then the guard brings it
+   up while the others run to their spots. Fast-break shots (`ShotRecord.FastBreak`) push at once with the lanes filled.
+2. **Set**: the offense in its system's formation (standard; five-out/isolation spread; four-out one-in; post).
+3. **The play**, picked deterministically (hash of the event index) from candidates that fit the event, weighted by
+   the offensive system: pick-and-roll, pick-and-pop, drive and kick, post-up, hand-off, off a screen, ball movement,
+   isolation, backdoor cut, early offense, late clock; putbacks right after an offensive rebound have no lead-up.
+   Assisted shots (`OtherPlayer` on a made field goal) end with the pass to the shooter; unassisted ones with his
+   dribble into the spot. Defenders stay goal-side of their man unless the play moves them (help on a drive, hedge on
+   a screen, trailing a cutter).
+4. **The event** itself (shot, turnover, foul) as in the table above.
+
+Timing follows the game clock: the lead-up lasts 0.5 s + 0.11 s per game second used (0.9–3.4 s at 1×), and no key is
+shorter than its longest run at `CourtTracker.MaxRunSpeed` (9 m per playback second); the event's own segment is
+stretched the same way (free-throw line-ups, tip-offs). `CourtPlayback` runs a possession at an even pace with a short
+speed-up and slow-down, players on cubic paths through the keys (time-aware tangents capped at a sprint), so motion
+never stops dead between keys or jumps (`Playback_moves_players_and_ball_smoothly`: < 0.3 m per 60 fps frame).
+
 Positions are a deterministic function of the events (a hash-based ±0.5 m jitter keeps formations from looking
 frozen), so the same match always draws the same way. `MatchVisualizationTests` checks that after every `Step()` the
 tracker's line-ups equal `MatchSimulation.OnCourt`, that every event has its frame, and that the shooter, rebounder,
@@ -59,12 +85,13 @@ latest frame.
   possession (not timed separately: the six `MatchVisualizationTests`, which place 40+ full matches, run in < 1 s).
 - Rendering uses frozen brushes/pens and immediate-mode `DrawingContext`; it redraws only while a tween runs or when the
   playback changes (`CourtPlayback.Version`), so an idle court costs nothing.
-- Frame durations at 1×: shot 1.4 s, free throw/tip-off 1.0 s, turnover 0.9 s, rebound/foul 0.8 s, substitution
-  0.6 s, dead ball 0.5 s. A possession shows in about 2–4 s.
+- Event durations at 1×: shot 1.4 s, free throw/tip-off 1.0 s, turnover 0.9 s, rebound/foul 0.8 s, substitution
+  0.6 s, dead ball 0.5 s (longer when players have far to go), plus the possession's lead-up (§3.1). A possession
+  shows in about 3–6 s.
 
 ## 6. Limitations
 
 - Stored reports have no play-by-play, so the court is only available for matches played live in the session.
-- Off-ball movement, screens and passes are not in the events: players move between event layouts, not along real
-  play paths; assists are not drawn as passes.
+- Plays, screens and passes other than the assist are not in the events: the lead-up is a plausible illustration
+  consistent with the event (shooter, assist, spot, clock, system), not a record of what the engine computed.
 - An offensive foul is drawn with the fouling team's opponents on offense for that one frame.

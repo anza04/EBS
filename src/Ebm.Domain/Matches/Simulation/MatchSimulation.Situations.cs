@@ -439,5 +439,6 @@ public sealed partial class MatchSimulation
         var text = $"{what}: {string.Join("; ", reasons)}.";
         Note(team, text);
         Emit(MatchEventKind.TacticsChanged, team.Side, null, null, 0, $"{team.Sheet.Name} — {text}");
+        _events[^1] = _events[^1] with { Offense = tactics.OffensiveSystem };
     }
 }

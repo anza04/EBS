@@ -236,6 +236,7 @@ public sealed partial class MatchSimulation
         var text = $"switch to {PlayerCatalog.DisplayName(tactics.OffensiveSystem)} on offense and {PlayerCatalog.DisplayName(tactics.DefensiveSystem)} on defense.";
         Note(team, $"Coach's change: {text}");
         Emit(MatchEventKind.TacticsChanged, side, null, null, 0, $"{team.Sheet.Name} {text}");
+        _events[^1] = _events[^1] with { Offense = tactics.OffensiveSystem };
     }
 
     private Team Get(TeamSide side) => side == TeamSide.Home ? _home : _away;

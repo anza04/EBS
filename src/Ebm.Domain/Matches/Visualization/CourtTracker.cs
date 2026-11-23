@@ -1,5 +1,6 @@
-using Ebm.Domain.Matches.Simulation;
+﻿using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Players;
+using Ebm.Domain.Tactics;
 
 namespace Ebm.Domain.Matches.Visualization;
 
@@ -33,6 +34,7 @@ public sealed record CourtPlayer(PlayerId Player, TeamSide Side, int Slot, Court
 /// <summary>
 /// One play-by-play event placed on the court: the ten players, and the ball moving from <see cref="BallFrom"/> to
 /// <see cref="Ball"/> (in the air for shots and free throws). <see cref="Index"/> is the event's index in the match.
+/// <see cref="Lead"/> is the possession leading to it (bring-up, play, catch), played before the event's own layout.
 /// </summary>
 public sealed record CourtFrame(
     int Index,
@@ -46,6 +48,23 @@ public sealed record CourtFrame(
     bool BallInAir)
 {
     public CourtPlayer? Find(PlayerId player) => Players.FirstOrDefault(p => p.Player == player);
+
+    /// <summary>Keyframes of the possession before the event; empty for events drawn on their own.</summary>
+    public IReadOnlyList<CourtKey> Lead { get; init; } = [];
+
+    /// <summary>The play the lead-up shows.</summary>
+    public CourtPlay Play { get; init; }
+
+    /// <summary>
+    /// Playback seconds at 1× of the event itself: its action's base time, longer when players have far to go (a
+    /// free-throw line-up, a tip-off) so nobody outruns <see cref="CourtTracker.MaxRunSpeed"/>.
+    /// </summary>
+    public double EventDuration { get; init; }
+
+    /// <summary>How the ball travels in the event itself.</summary>
+    public BallFlight Flight => BallInAir
+        ? BallFlight.Shot
+        : BallFrom.DistanceTo(Ball) < 0.05 ? BallFlight.Held : Action == CourtAction.Turnover ? BallFlight.Pass : BallFlight.Bounce;
 }
 
 /// <summary>
@@ -60,8 +79,8 @@ public sealed class CourtTracker
     public const double Width = 15;
     public const double RimDistance = 1.575;
 
-    /// <summary>Half-court spots (across, depth from the baseline) of the five slots: PG, SG, SF, PF, C.</summary>
-    private static readonly (double A, double D)[] Formation = [(0.0, 8.2), (-5.4, 6.0), (6.6, 0.9), (3.2, 4.6), (-2.4, 2.2)];
+    /// <summary>Fastest a player runs in a possession's keys, in metres per playback second at 1×.</summary>
+    public const double MaxRunSpeed = 9;
 
     /// <summary>Free-throw lane spots: defenders nearest the basket, then attackers, then the second defender pair.</summary>
     private static readonly (double A, double D)[] DefenceLane = [(-2.65, 1.75), (2.65, 1.75), (-2.65, 3.95), (0.0, 9.5), (2.65, 3.95)];
@@ -71,12 +90,20 @@ public sealed class CourtTracker
     private readonly PlayerId?[] _away = new PlayerId?[5];
     private readonly List<CourtFrame> _frames = [];
     private TeamSide? _offense;
+    private OffensiveSystem _homeSystem;
+    private OffensiveSystem _awaySystem;
 
     /// <param name="homeStarters">Home starters in slot order (PG, SG, SF, PF, C); a null leaves the slot empty.</param>
-    public CourtTracker(IReadOnlyList<PlayerId?> homeStarters, IReadOnlyList<PlayerId?> awayStarters)
+    /// <param name="homeSystem">Offensive system at tip-off (formations and plays); later changes come from the events.</param>
+    public CourtTracker(
+        IReadOnlyList<PlayerId?> homeStarters,
+        IReadOnlyList<PlayerId?> awayStarters,
+        OffensiveSystem homeSystem = OffensiveSystem.MotionOffense,
+        OffensiveSystem awaySystem = OffensiveSystem.MotionOffense)
     {
         ArgumentNullException.ThrowIfNull(homeStarters);
         ArgumentNullException.ThrowIfNull(awayStarters);
+        (_homeSystem, _awaySystem) = (homeSystem, awaySystem);
         for (var i = 0; i < 5; i++)
         {
             _home[i] = i < homeStarters.Count ? homeStarters[i] : null;
@@ -88,7 +115,11 @@ public sealed class CourtTracker
     public static CourtTracker For(MatchSimulation simulation)
     {
         ArgumentNullException.ThrowIfNull(simulation);
-        return new CourtTracker(Starters(simulation.Lines(TeamSide.Home)), Starters(simulation.Lines(TeamSide.Away)));
+        return new CourtTracker(
+            Starters(simulation.Lines(TeamSide.Home)),
+            Starters(simulation.Lines(TeamSide.Away)),
+            simulation.Setup.Home.Tactics.OffensiveSystem,
+            simulation.Setup.Away.Tactics.OffensiveSystem);
     }
 
     /// <summary>The frames placed so far, one per event.</summary>
@@ -104,7 +135,10 @@ public sealed class CourtTracker
         var first = _frames.Count;
         for (var i = first; i < events.Count; i++)
         {
-            _frames.Add(Place(i, events[i]));
+            var frame = Place(i, events[i]);
+            var before = frame.Lead.Count > 0 ? frame.Lead[^1].Players : _frames.Count > 0 ? _frames[^1].Players : frame.Players;
+            var run = frame.Players.Select(p => before.FirstOrDefault(b => b.Player == p.Player) is { } b ? b.Position.DistanceTo(p.Position) : 0).DefaultIfEmpty(0).Max();
+            _frames.Add(frame with { EventDuration = Math.Round(Math.Max(CourtPlayback.BaseDuration(frame.Action), run / (MaxRunSpeed * 0.8)), 3) });
         }
 
         return _frames[first..];
@@ -139,8 +173,43 @@ public sealed class CourtTracker
 
     private PlayerId?[] Slots(TeamSide side) => side == TeamSide.Home ? _home : _away;
 
+    private OffensiveSystem System(TeamSide side) => side == TeamSide.Home ? _homeSystem : _awaySystem;
+
+    private (double A, double D)[] Formation(TeamSide offense) => CourtFormations.For(System(offense));
+
+    /// <summary>Scripts the possession leading to an event placed in <paramref name="players"/>.</summary>
+    private CourtFrame Scripted(CourtFrame frame, PlayerId? target, PlayerId? passer)
+    {
+        var e = frame.Event;
+        var offense = frame.Offense!.Value;
+        var previous = _frames.Count > 0 ? _frames[^1] : null;
+        var live = _frames.LastOrDefault(f => f.Action is not (CourtAction.Substitution or CourtAction.DeadBall));
+        if (frame.Action == CourtAction.Foul && live?.Action is CourtAction.Shot or CourtAction.FreeThrow)
+        {
+            return frame; // a foul on the rebound or between free throws: no possession to show (see Foul)
+        }
+
+        var seconds = live is not null && live.Event.Period == e.Period ? Math.Max(0, live.Event.Clock - e.Clock) : 0;
+        var (lead, play) = PossessionScript.Build(new PlayContext(
+            frame.Index, e, offense, Slots(offense), Slots(Other(offense)), previous, live, frame.Players, target, passer,
+            System(offense), seconds, Formation(offense)));
+        return frame with { Lead = lead, Play = play };
+    }
+
     private CourtFrame Place(int index, MatchEvent e)
     {
+        if (e is { Kind: MatchEventKind.TacticsChanged, Offense: { } system, Side: { } changed })
+        {
+            if (changed == TeamSide.Home)
+            {
+                _homeSystem = system;
+            }
+            else
+            {
+                _awaySystem = system;
+            }
+        }
+
         var previous = _frames.Count > 0 ? _frames[^1] : null;
         var lastBall = previous?.Ball ?? new CourtPoint(Length / 2, Width / 2);
         switch (e.Kind)
@@ -215,7 +284,8 @@ public sealed class CourtTracker
                 continue;
             }
 
-            var (a, d) = spot?.Invoke(s) ?? (Formation[s].A + Jitter(index, s, 0), Formation[s].D + Jitter(index, s, 1));
+            var formation = Formation(offense);
+            var (a, d) = spot?.Invoke(s) ?? (formation[s].A + Jitter(index, s, 0), formation[s].D + Jitter(index, s, 1));
             players.Add(new CourtPlayer(id, offense, s, Clamp(ToCourt(offense, e.Period, a, d))));
         }
 
@@ -254,7 +324,8 @@ public sealed class CourtTracker
             }
         }
 
-        return new CourtFrame(index, e, CourtAction.Shot, offense, players, shooter?.Position ?? rim, rim, null, true);
+        var frame = new CourtFrame(index, e, CourtAction.Shot, offense, players, shooter?.Position ?? rim, rim, null, true);
+        return Scripted(frame, e.Player, e.Kind == MatchEventKind.FieldGoalMade ? e.OtherPlayer : null);
     }
 
     private CourtFrame FreeThrow(int index, MatchEvent e, TeamSide offense)
@@ -300,12 +371,16 @@ public sealed class CourtTracker
         }
 
         _offense = Other(offense);
-        return new CourtFrame(index, e, CourtAction.Turnover, offense, players, from, to, holder, false);
+        return Scripted(new CourtFrame(index, e, CourtAction.Turnover, offense, players, from, to, holder, false), loser?.Player, null);
     }
 
     private CourtFrame Foul(int index, MatchEvent e, TeamSide offense)
     {
-        var players = HalfCourt(index, e, offense);
+        // A foul on the rebound or between free throws happens where everybody already stands.
+        var settled = _frames.LastOrDefault(f => f.Action is not (CourtAction.Substitution or CourtAction.DeadBall))?.Action is CourtAction.Shot or CourtAction.FreeThrow;
+        var players = settled && _frames.Count > 0
+            ? [.. Still(index, e, CourtAction.Foul, _frames[^1], _frames[^1].Ball).Players]
+            : HalfCourt(index, e, offense);
         var fouled = e.OtherPlayer is { } id ? players.FirstOrDefault(p => p.Player == id) : null;
         if (fouled is not null && e.Player is { } fouler)
         {
@@ -313,7 +388,8 @@ public sealed class CourtTracker
         }
 
         var ball = fouled?.Position ?? players.FirstOrDefault(p => p.Side == offense)?.Position ?? Rim(offense, e.Period);
-        return new CourtFrame(index, e, CourtAction.Foul, offense, players, ball, ball, fouled?.Player, false);
+        _offense = offense;
+        return Scripted(new CourtFrame(index, e, CourtAction.Foul, offense, players, ball, ball, fouled?.Player, false), fouled?.Player, null);
     }
 
     private CourtFrame Substitution(int index, MatchEvent e, CourtFrame? previous, CourtPoint lastBall)
@@ -357,9 +433,10 @@ public sealed class CourtTracker
         return new CourtFrame(index, e, action, _offense, players, lastBall, lastBall, holder, false);
     }
 
-    private static CourtPoint HalfCourtSpot(int index, int period, TeamSide offense, TeamSide side, int slot)
+    private CourtPoint HalfCourtSpot(int index, int period, TeamSide offense, TeamSide side, int slot)
     {
-        var spot = ToCourt(offense, period, Formation[slot].A + Jitter(index, slot, 0), Formation[slot].D + Jitter(index, slot, 1));
+        var formation = Formation(offense);
+        var spot = ToCourt(offense, period, formation[slot].A + Jitter(index, slot, 0), formation[slot].D + Jitter(index, slot, 1));
         return side == offense ? spot : Between(spot, Rim(offense, period), 1.3);
     }
 
@@ -377,16 +454,16 @@ public sealed class CourtTracker
     }
 
     /// <summary><paramref name="distance"/> metres from <paramref name="from"/> towards <paramref name="towards"/>.</summary>
-    private static CourtPoint Between(CourtPoint from, CourtPoint towards, double distance)
+    internal static CourtPoint Between(CourtPoint from, CourtPoint towards, double distance)
     {
         var length = from.DistanceTo(towards);
         return length < 1e-6 ? from : from.Lerp(towards, Math.Min(distance / length, 1));
     }
 
-    private static CourtPoint Clamp(CourtPoint p) => new(Math.Clamp(p.X, 0.1, Length - 0.1), Math.Clamp(p.Y, 0.1, Width - 0.1));
+    internal static CourtPoint Clamp(CourtPoint p) => new(Math.Clamp(p.X, 0.1, Length - 0.1), Math.Clamp(p.Y, 0.1, Width - 0.1));
 
     /// <summary>A small deterministic offset (±0.5 m) so the formation breathes from play to play.</summary>
-    private static double Jitter(int index, int slot, int axis)
+    internal static double Jitter(int index, int slot, int axis)
     {
         unchecked
         {

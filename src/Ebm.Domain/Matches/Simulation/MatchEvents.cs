@@ -1,4 +1,5 @@
 using Ebm.Domain.Players;
+using Ebm.Domain.Tactics;
 
 namespace Ebm.Domain.Matches.Simulation;
 
@@ -49,6 +50,9 @@ public sealed record MatchEvent(
 
     /// <summary>The attempt of a field-goal event (its spot on the court, contest, block; Step 30); null otherwise.</summary>
     public ShotRecord? Shot { get; init; }
+
+    /// <summary>The side's offensive system after a <see cref="MatchEventKind.TacticsChanged"/> event (for the court); null otherwise.</summary>
+    public OffensiveSystem? Offense { get; init; }
 }
 
 /// <summary>A player's running statistics and condition during a simulated match.</summary>

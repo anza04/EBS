@@ -1,4 +1,4 @@
-using System.Runtime.ExceptionServices;
+﻿using System.Runtime.ExceptionServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -265,7 +265,7 @@ public sealed class PlayerScreensRenderTests
             playback.SkipToEnd();
             playback.Enqueue(frames.Where(f => f.Action == Ebm.Domain.Matches.Visualization.CourtAction.Shot).Take(1));
             playback.Tick(0.0001);
-            playback.Tick(1.1);
+            playback.Tick(playback.Current!.Lead.Sum(k => k.Duration) + 0.7); // through the lead-up, ball in the air
             var names = live.Lines(Ebm.Domain.Matches.Simulation.TeamSide.Home).Concat(live.Lines(Ebm.Domain.Matches.Simulation.TeamSide.Away)).ToDictionary(l => l.Player.Id, l => l.Player.FullName);
             return total + Render("match-court", new Ebm.Desktop.Controls.CourtView { Playback = playback, Names = names, Margin = new Thickness(16) });
         });

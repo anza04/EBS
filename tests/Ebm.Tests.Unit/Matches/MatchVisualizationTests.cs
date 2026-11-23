@@ -1,7 +1,8 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Ebm.Domain.Matches;
 using Ebm.Domain.Matches.Simulation;
 using Ebm.Domain.Matches.Visualization;
+using Ebm.Domain.Tactics;
 
 namespace Ebm.Tests.Unit.Matches;
 
@@ -188,8 +189,10 @@ public sealed class MatchVisualizationTests
         Assert.Same(frames[1], playback.Current);
 
         // Double speed halves the time a frame takes.
+        playback.Tick(CourtPlayback.Duration(frames[1]) - playback.Progress * CourtPlayback.Duration(frames[1]) - 0.0001);
+        Assert.Same(frames[1], playback.Current);
         playback.Speed = 2;
-        playback.Tick((CourtPlayback.BaseDuration(frames[1].Action) / 2) + 0.001);
+        playback.Tick(0.001);
         Assert.Same(frames[2], playback.Current);
 
         playback.SkipToEnd();
@@ -215,13 +218,148 @@ public sealed class MatchVisualizationTests
             tracker.Frames.Select(f => string.Join(";", f.Players) + f.Ball),
             again.Frames.Select(f => string.Join(";", f.Players) + f.Ball));
 
-        var shot = tracker.Frames.First(f => f.Action == CourtAction.Shot);
+        var shot = tracker.Frames.First(f => f.Action == CourtAction.Shot && f.Lead.Count > 0);
         var playback = new CourtPlayback();
         playback.Enqueue([shot]);
-        Assert.Equal(shot.BallFrom, playback.Ball().Position);
-        playback.Tick(CourtPlayback.BaseDuration(CourtAction.Shot) / 2);
-        Assert.True(playback.Ball().Height > 2);
+        // The lead-up ends with the shooter holding the ball on his spot; then it flies in an arc.
+        var (released, arced) = (false, false);
+        while (playback.IsPlaying)
+        {
+            playback.Tick(1 / 60.0);
+            released |= playback.Holder == shot.Event.Player && shot.BallFrom.DistanceTo(playback.Players().First(p => p.Player.Player == shot.Event.Player).Position) < 0.05;
+            arced |= released && playback.Holder is null && playback.Ball().Height > 2;
+        }
+
+        Assert.True(released && arced);
         playback.SkipToEnd();
         Assert.InRange(shot.Ball.DistanceTo(playback.Ball().Position), 0, 1e-9);
+    }
+
+    [Fact]
+    public void Possessions_are_scripted_into_the_event_layout()
+    {
+        var scripted = 0;
+        for (var seed = 0; seed < 6; seed++)
+        {
+            var (_, tracker) = Watch(seed);
+            foreach (var frame in tracker.Frames.Where(f => f.Lead.Count > 0))
+            {
+                scripted++;
+                var e = frame.Event;
+                CourtFrame? before = frame.Index > 0 ? tracker.Frames[frame.Index - 1] : null;
+                var from = frame.Players.ToDictionary(p => p.Player, p => before?.Find(p.Player)?.Position ?? frame.Lead[0].Find(p.Player)!.Position);
+                foreach (var key in frame.Lead)
+                {
+                    Assert.True(key.Duration > 0);
+                    Assert.Equal(frame.Players.Select(p => p.Player), key.Players.Select(p => p.Player));
+                    Assert.All(key.Players, p =>
+                    {
+                        Assert.InRange(p.Position.X, 0, CourtTracker.Length);
+                        Assert.InRange(p.Position.Y, 0, CourtTracker.Width);
+
+                        // Nobody runs faster than the cap (durations are rounded to milliseconds).
+                        Assert.True(from[p.Player].DistanceTo(p.Position) <= (CourtTracker.MaxRunSpeed * key.Duration) + 0.01);
+                    });
+                    if (key.BallHolder is { } holder && key.Flight is BallFlight.Held or BallFlight.Pass)
+                    {
+                        Assert.Equal(key.Ball, key.Find(holder)!.Position);
+                        Assert.Equal(frame.Offense, key.Find(holder)!.Side);
+                    }
+
+                    from = key.Players.ToDictionary(p => p.Player, p => p.Position);
+                }
+
+                // The last key hands over to the event: the offense in place and the ball with its player.
+                var last = frame.Lead[^1];
+                Assert.All(frame.Players.Where(p => p.Side == frame.Offense), p => Assert.Equal(p.Position, last.Find(p.Player)!.Position));
+                if (frame.Action == CourtAction.Shot)
+                {
+                    Assert.Equal(e.Player, last.BallHolder);
+                    Assert.Equal(frame.BallFrom, last.Ball);
+                    if (e.Kind == MatchEventKind.FieldGoalMade && e.OtherPlayer is { } passer)
+                    {
+                        Assert.Equal(BallFlight.Pass, last.Flight); // the assist is drawn
+                        Assert.Equal(passer, frame.Lead[^2].BallHolder);
+                    }
+                }
+            }
+
+            // Every half-court shot has its possession; only putbacks are drawn on their own.
+            Assert.All(tracker.Frames.Where(f => f.Action == CourtAction.Shot), f => Assert.True(f.Lead.Count > 0 || f.Play == CourtPlay.Putback));
+        }
+
+        Assert.True(scripted > 500);
+    }
+
+    [Fact]
+    public void Plays_vary_and_follow_the_offensive_system()
+    {
+        static MatchSetup Systems(int seed, OffensiveSystem home, OffensiveSystem away) => new(
+            SimulationTeams.Team("Home", 60, seed * 2, TeamTactics.Default with { OffensiveSystem = home }),
+            SimulationTeams.Team("Away", 60, (seed * 2) + 1, TeamTactics.Default with { OffensiveSystem = away }),
+            seed);
+
+        var plays = new List<(TeamSide? Side, CourtPlay Play)>();
+        for (var seed = 0; seed < 8; seed++)
+        {
+            var (_, tracker) = Watch(seed, setup: Systems(seed, OffensiveSystem.PickAndRoll, OffensiveSystem.PostOriented));
+            plays.AddRange(tracker.Frames.Where(f => f.Action == CourtAction.Shot).Select(f => (f.Offense, f.Play)));
+        }
+
+        Assert.True(plays.Select(p => p.Play).Distinct().Count() >= 10);
+        double Share(TeamSide side, params CourtPlay[] kinds) =>
+            plays.Count(p => p.Side == side && kinds.Contains(p.Play)) / (double)plays.Count(p => p.Side == side);
+        Assert.True(Share(TeamSide.Home, CourtPlay.PickAndRoll, CourtPlay.PickAndPop) > Share(TeamSide.Away, CourtPlay.PickAndRoll, CourtPlay.PickAndPop));
+        Assert.True(Share(TeamSide.Away, CourtPlay.PostUp) > Share(TeamSide.Home, CourtPlay.PostUp));
+
+        // Long possessions take longer to show than fast breaks.
+        var (_, one) = Watch(5);
+        double Lead(CourtPlay play) => one.Frames.Where(f => f.Play == play).Select(f => f.Lead.Sum(k => k.Duration)).DefaultIfEmpty(0).Average();
+        Assert.True(Lead(CourtPlay.LateClock) > Lead(CourtPlay.FastBreak));
+
+        var shot = one.Frames.First(f => f.Action == CourtAction.Shot && f.Play != CourtPlay.None);
+        var caption = CourtPlays.Describe(shot, _ => "Rossi")!;
+        Assert.StartsWith(CourtPlays.Name(shot.Play), caption, StringComparison.Ordinal);
+        Assert.Contains("→ Rossi · " + CourtPlays.ShotText(shot.Event.Shot!.Value), caption, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Playback_moves_players_and_ball_smoothly()
+    {
+        var (_, tracker) = Watch(2);
+        var playback = new CourtPlayback();
+        playback.Enqueue(tracker.Frames.Take(400));
+        var players = new Dictionary<Ebm.Domain.Players.PlayerId, CourtPoint>();
+        var (ball, frame) = (playback.Ball().Position, playback.Current);
+        var (maxPlayer, maxBall) = (0.0, 0.0);
+        while (playback.IsPlaying)
+        {
+            playback.Tick(1 / 60.0);
+            foreach (var p in playback.Players())
+            {
+                if (!p.Entering && players.TryGetValue(p.Player.Player, out var was))
+                {
+                    maxPlayer = Math.Max(maxPlayer, was.DistanceTo(p.Position));
+                }
+
+                players[p.Player.Player] = p.Position;
+            }
+
+            var now = playback.Ball().Position;
+            if (playback.Current == frame)
+            {
+                maxBall = Math.Max(maxBall, ball.DistanceTo(now));
+            }
+
+            if (playback.Holder is { } holder)
+            {
+                Assert.InRange(playback.Players().First(p => p.Player.Player == holder).Position.DistanceTo(now), 0, 0.35); // dribbled, not left behind
+            }
+
+            (ball, frame) = (now, playback.Current);
+        }
+
+        Assert.InRange(maxPlayer, 0, 0.3); // < 18 m/s at 60 fps: no teleporting
+        Assert.InRange(maxBall, 0, 0.8);
     }
 }

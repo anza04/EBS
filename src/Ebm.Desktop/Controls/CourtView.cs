@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -10,8 +10,9 @@ namespace Ebm.Desktop.Controls;
 
 /// <summary>
 /// The 2D court (Step 30): draws a <see cref="CourtPlayback"/> — FIBA full court, the ten players (home blue, away
-/// orange, labelled by initials), the ball with its arc height, and the current play-by-play line. While loaded it
-/// ticks the playback on the render loop; it only reads the playback, never the simulation.
+/// orange, labelled by initials), the ball with its arc height, the ball handler's name, screens, pass trails, the play
+/// being run and the current play-by-play line. While loaded it ticks the playback on the render loop; it only reads
+/// the playback, never the simulation.
 /// </summary>
 public sealed class CourtView : FrameworkElement
 {
@@ -37,6 +38,12 @@ public sealed class CourtView : FrameworkElement
     private static readonly Pen HolderPen = FrozenPen(Brushes.Gold, 2.5);
     private static readonly Pen EnteringPen = FrozenPen(Brushes.LimeGreen, 2.5);
     private static readonly Pen BallPen = FrozenPen(Brushes.Black, 0.8);
+    private static readonly Pen ScreenPen = FrozenPen(Brushes.White, 3.5, PenLineCap.Round);
+    private static readonly Brush LabelBrush = Frozen(Color.FromArgb(0xB0, 0x10, 0x10, 0x10));
+    private static readonly Brush BandBrush = Frozen(Color.FromRgb(0x3A, 0x3A, 0x3A));
+
+    /// <summary>Height of the text strip under the court: the play being run and the play-by-play line.</summary>
+    private const double Strip = 44;
 
     private readonly Stopwatch _clock = new();
     private int _drawn = -1;
@@ -76,14 +83,18 @@ public sealed class CourtView : FrameworkElement
         };
     }
 
+    /// <summary>The last word of a name: "Marco Belinelli" → "Belinelli".</summary>
+    public static string Surname(string? name) =>
+        (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries) is { Length: > 0 } parts ? parts[^1] : "?";
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = double.IsInfinity(availableSize.Width) ? 560 : availableSize.Width;
-        var height = (width * CourtTracker.Width / CourtTracker.Length) + 26;
+        var height = (width * CourtTracker.Width / CourtTracker.Length) + Strip;
         if (!double.IsInfinity(availableSize.Height) && height > availableSize.Height)
         {
             height = availableSize.Height;
-            width = (height - 26) * CourtTracker.Length / CourtTracker.Width;
+            width = (height - Strip) * CourtTracker.Length / CourtTracker.Width;
         }
 
         return new Size(Math.Max(0, width), Math.Max(0, height));
@@ -92,7 +103,7 @@ public sealed class CourtView : FrameworkElement
     protected override void OnRender(DrawingContext dc)
     {
         ArgumentNullException.ThrowIfNull(dc);
-        var scale = Math.Min(ActualWidth / CourtTracker.Length, (ActualHeight - 26) / CourtTracker.Width);
+        var scale = Math.Min(ActualWidth / CourtTracker.Length, (ActualHeight - Strip) / CourtTracker.Width);
         if (scale <= 0)
         {
             return;
@@ -111,15 +122,44 @@ public sealed class CourtView : FrameworkElement
 
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         var radius = Math.Max(6, 0.42 * scale);
-        foreach (var drawn in playback.Players())
+        foreach (var trail in playback.Trails())
+        {
+            var pen = new Pen(new SolidColorBrush(Color.FromArgb((byte)(trail.Opacity * 255), 255, 255, 255)), 2) { DashStyle = DashStyles.Dash };
+            dc.DrawLine(pen, P(trail.From), P(trail.To));
+        }
+
+        var players = playback.Players();
+        var holder = playback.Holder;
+        if (playback.Screener is { } screener && players.FirstOrDefault(p => p.Player.Player == screener) is { Player: not null } setter)
+        {
+            // The screen: a bar across the screener's body, facing the ball.
+            var towards = holder is { } h && players.FirstOrDefault(p => p.Player.Player == h) is { Player: not null } handler ? handler.Position : setter.Position;
+            var (dx, dy) = (towards.X - setter.Position.X, towards.Y - setter.Position.Y);
+            var length = Math.Max(1e-6, Math.Sqrt((dx * dx) + (dy * dy)));
+            var centre = P(setter.Position);
+            var (nx, ny) = (dx / length, dy / length);
+            var front = new Point(centre.X + (nx * radius * 1.35), centre.Y + (ny * radius * 1.35));
+            dc.DrawLine(ScreenPen, new Point(front.X - (ny * radius), front.Y + (nx * radius)), new Point(front.X + (ny * radius), front.Y - (nx * radius)));
+        }
+
+        foreach (var drawn in players)
         {
             var centre = P(drawn.Position);
             var pen = drawn.Entering || (frame.Action == CourtAction.Substitution && frame.Event.Player == drawn.Player.Player)
                 ? EnteringPen
-                : frame.BallHolder == drawn.Player.Player ? HolderPen : null;
+                : holder == drawn.Player.Player ? HolderPen : null;
             dc.DrawEllipse(drawn.Player.Side == TeamSide.Home ? HomeBrush : AwayBrush, pen, centre, radius, radius);
             var label = Text(Initials(Names?.GetValueOrDefault(drawn.Player.Player)), radius * 0.95, Brushes.White, dpi);
             dc.DrawText(label, new Point(centre.X - (label.Width / 2), centre.Y - (label.Height / 2)));
+        }
+
+        if (holder is { } carrier && players.FirstOrDefault(p => p.Player.Player == carrier) is { Player: not null } withBall)
+        {
+            var name = Text(Surname(Names?.GetValueOrDefault(carrier)), 11, Brushes.White, dpi);
+            var at = P(withBall.Position);
+            var box = new Rect(at.X - (name.Width / 2) - 3, at.Y - radius - name.Height - 4, name.Width + 6, name.Height + 2);
+            dc.DrawRoundedRectangle(LabelBrush, null, box, 3, 3);
+            dc.DrawText(name, new Point(box.X + 3, box.Y + 1));
         }
 
         var (ball, height) = playback.Ball();
@@ -128,11 +168,19 @@ public sealed class CourtView : FrameworkElement
         dc.DrawEllipse(ShadowBrush, null, ground, ballRadius, ballRadius * 0.5);
         dc.DrawEllipse(BallBrush, BallPen, new Point(ground.X, ground.Y - (height * scale * 0.35)), ballRadius, ballRadius);
 
+        var line = (CourtTracker.Width * scale) + 4;
+        if (CourtPlays.Describe(frame, id => Surname(Names?.GetValueOrDefault(id))) is { } play)
+        {
+            var band = Text(play, 12, Brushes.White, dpi);
+            dc.DrawRoundedRectangle(BandBrush, null, new Rect(left, line, band.Width + 10, band.Height + 2), 3, 3);
+            dc.DrawText(band, new Point(left + 5, line + 1));
+        }
+
         var caption = Text($"{frame.Event.Time}  {frame.Event.HomeScore}–{frame.Event.AwayScore}   {frame.Event.Text}", 12, TryFindResource("Brush.Text") as Brush ?? Brushes.Black, dpi);
         caption.MaxTextWidth = Math.Max(1, ActualWidth - 8);
         caption.MaxLineCount = 1;
         caption.Trimming = TextTrimming.CharacterEllipsis;
-        dc.DrawText(caption, new Point(4, (CourtTracker.Width * scale) + 5));
+        dc.DrawText(caption, new Point(left, line + 20));
     }
 
     private void OnFrame(object? sender, EventArgs e)
@@ -184,9 +232,9 @@ public sealed class CourtView : FrameworkElement
         return brush;
     }
 
-    private static Pen FrozenPen(Brush brush, double thickness)
+    private static Pen FrozenPen(Brush brush, double thickness, PenLineCap cap = PenLineCap.Flat)
     {
-        var pen = new Pen(brush, thickness);
+        var pen = new Pen(brush, thickness) { StartLineCap = cap, EndLineCap = cap };
         pen.Freeze();
         return pen;
     }
